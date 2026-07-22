@@ -9,7 +9,7 @@ read off the code.st1.cyclo counter around the cell — each cell runs wholly
 inside one process under the pool-over-cells design, so the counter is
 cell-local.
 
-Sizing (pre-registered in notes/st1-findings.md): M = 10^4 resolves a 3x
+Sizing (pre-registered in notes/results/st1-findings.md): M = 10^4 resolves a 3x
 inflation at the 1e-3 nominal level (CP CI at k ~ 10 is ~[0.5, 1.8]x10^-3).
 
 Storage: raw p-values to results/st1/raw/{stage}_{null}_{calib}.npz (gitignored

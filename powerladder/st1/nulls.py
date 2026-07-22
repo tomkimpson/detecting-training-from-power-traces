@@ -20,7 +20,7 @@ controller_ar1) deliberately violate that assumption — realised-FAR inflation
 on them is *information*, mapping the causal-attribution boundary of the
 structural null (paper Sec. 1.4), NOT a defect of the implementation and NOT
 a gate failure. Only stage-5/6 miscalibration counts against GO
-(notes/st1-findings.md, pre-registered criteria).
+(notes/results/st1-findings.md, pre-registered criteria).
 
 The controller null mimics the measured A100 power-management limit cycle
 (0.31-0.45 Hz, ~10x the iteration-line amplitude; B2Params.band_line_lo

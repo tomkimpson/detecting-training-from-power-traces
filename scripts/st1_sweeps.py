@@ -23,7 +23,7 @@ choices the plan carries explicitly (swept, not decided ex ante):
               white is where an interp effect is readable (ar1 sits at
               FAR ~ 0 for every interp; a null result there is uninformative)
 
-PRE-REGISTERED SELECTION RULE (publication-bias guard, notes/st1-findings.md):
+PRE-REGISTERED SELECTION RULE (publication-bias guard, notes/results/st1-findings.md):
 any configuration promoted from these sweeps is chosen on NULL CALIBRATION
 QUALITY ACROSS THE NULL SUITE ONLY — never on signal power. Power enters only
 afterwards, in the 19.10 bake-off, at whatever configuration the calibration

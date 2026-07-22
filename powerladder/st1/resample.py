@@ -178,7 +178,7 @@ def random_smooth_phase_path(
     sample, and the innovation std is scaled so the stationary excursion of
     f is ~``drift_hz`` (matching ko_workload._drift_sigma). Clipped at
     ``floor_hz``; default drift 0.2 Hz is the pre-registered wander-regime
-    scale (notes/st1-findings.md GO-reframe criterion).
+    scale (notes/results/st1-findings.md GO-reframe criterion).
 
     Drawn INDEPENDENTLY of any trace: under the null this is just a warp, so
     stage-2 FAR cells pair (null trace, fresh warp) per replicate and any FAR

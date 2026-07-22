@@ -214,7 +214,7 @@ def stage4_semicoherent(
 ) -> float:
     """Semi-coherent stage 4: per-block DG on the de-warped series, Fisher-combined.
 
-    Motivation (chunk-2 implementation finding, notes/st1-findings.md): the
+    Motivation (chunk-2 implementation finding, notes/results/st1-findings.md): the
     POOLED coherent DG sum needs the warp accurate to ~1/(2 pi T) Hz over the
     whole record — a few mHz at 300 s — so tracker error decoheres it for fast
     wander. Splitting the ANGLE-domain series into blocks of

@@ -2,8 +2,8 @@
 
 **Source of truth for project scope.** Do not modify without explicit approval. The
 detailed realisation (methods, staged plan, wording discipline) lives in
-[`notes/plan-for-paper-2.md`](notes/plan-for-paper-2.md) and its
-[review](notes/plan-for-paper-2-review.md); this file fixes *what the project is*.
+[`notes/plans/plan-for-paper-2.md`](notes/plans/plan-for-paper-2.md) and its
+[review](notes/plans/plan-for-paper-2-review.md); this file fixes *what the project is*.
 
 ## Thesis (the sentence the paper defends)
 
@@ -81,13 +81,22 @@ the Ko-scale modulation from the measured single-GPU cadence).
   stationary, locally smooth spectral null; needs a search correction).
 - **Rung 1 adaptive:** tracker (`f̂₀(t)`) → phase resampling (tacholess order tracking)
   → Dandawaté–Giannakis cyclostationary `Q_α` on the de-warped signal. Null validity of
-  the *complete* pipeline is the central statistical question (ST1 gate).
+  the *complete* pipeline was the ST1 gate question; **outcome: no analytic CFAR** — the
+  pipeline is an **effective score with per-trace surrogate calibration** (level-exact
+  at the tested operating points on stationary nulls). "Calibrated" in the thesis means
+  this surrogate calibration.
 - **Rung 2:** fixed interpretable feature vector; three decision rules compared
   (prespecified physics score; model-based discriminant; flexible learned reference);
   semantic falsification controls evaluated.
 - **Central result:** the **de-periodicisation frontier** — how far a prover must
-  de-periodicise useful training before the meter loses it, at what systems / learning-
-  efficiency cost.
+  de-periodicise useful training before the meter loses it, at what measured systems
+  cost. The plausible learning-efficiency penalty is stated as an open empirical
+  question (future work), not measured here.
+- **Channel requirement:** the observation channel is a first-class condition on every
+  rung — a 1 s-integrating, 1 Hz-reporting meter defeats all detectors on an
+  *unmodified* honest workload (order methods to chance). The paper reports the
+  minimum meter specification (sampling, integration window, in-band transfer
+  function) under which Rungs 1–2 are available at all.
 
 ## Explicitly out of scope / deferred
 
@@ -98,10 +107,12 @@ the Ko-scale modulation from the measured single-GPU cadence).
   Rung 4, not built).
 - Real distributed hardware (a falsifiable prediction + the single-GPU negative
   transport case only).
+- Measured learning-efficiency penalties of de-periodicisation (GPU campaign) —
+  deferred to future work (decision 2026-07-22).
 
 ## Status
 
 Phase 0 de-risking gates are **complete** (ST0 desk work; ST1 adaptive-detector null
 validity = **GO, honest reframe**; ST2 de-periodicisation frontier = **GO,
-definitive**). See `tasks.md` for the phased tracker and `notes/st1-findings.md` for the
+definitive**). See `tasks.md` for the phased tracker and `notes/results/st1-findings.md` for the
 ST1 gate record. Phase 1 (Rung 1 full) is next.

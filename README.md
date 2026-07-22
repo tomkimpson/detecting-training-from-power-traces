@@ -10,8 +10,8 @@ with the **de-periodicisation detection–utility frontier** as its central resu
 
 The paper (`paper/main.tex`) is *"What a Passive Power Meter Can Certify About AI
 Training."* Its scope is fixed by [`spec.md`](spec.md); the detailed plan lives in
-[`notes/plan-for-paper-2.md`](notes/plan-for-paper-2.md) and its
-[review](notes/plan-for-paper-2-review.md).
+[`notes/plans/plan-for-paper-2.md`](notes/plans/plan-for-paper-2.md) and its
+[review](notes/plans/plan-for-paper-2-review.md).
 
 This repo was spun out of the `analogue-sensors-for-ai-verification` monorepo (Paper 2
 of that programme). All evidence here is on a **literature-parameterized scenario

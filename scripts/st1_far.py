@@ -16,7 +16,7 @@ estimators; asymptotic chi2 tail), mtf (stage 1 only), and surrogate
 (task 19.8: full-pipeline Fourier-phase surrogate p-values; M capped at
 St1FarParams.n_null_surrogate_cells, levels meaningful at 0.05/1e-2 only).
 
-The three pre-registered deltas read off this grid (notes/st1-findings.md):
+The three pre-registered deltas read off this grid (notes/results/st1-findings.md):
 resampling-alone (stage 1->2), estimated-warp (2->3), path-selection (3->4).
 
 Usage:
@@ -71,7 +71,7 @@ STAGE_CALIBS = {
 }
 
 # Stage-2 known-warp scale: the pre-registered wander-regime drift
-# (notes/st1-findings.md GO-reframe criterion, drift >~ 0.2 Hz).
+# (notes/results/st1-findings.md GO-reframe criterion, drift >~ 0.2 Hz).
 STAGE2_DRIFT_HZ = 0.2
 
 
