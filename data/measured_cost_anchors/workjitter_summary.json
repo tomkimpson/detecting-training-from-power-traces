@@ -1,0 +1,151 @@
+{
+  "fixed_far": 0.05,
+  "negatives": "24 serving traces (signatures)",
+  "bands_hz": {
+    "full": [
+      0.3,
+      1.7
+    ],
+    "line": [
+      0.55,
+      1.7
+    ]
+  },
+  "tpr_at_far": {
+    "drift=0.2": {
+      "spectral": 1.0,
+      "viterbi": 1.0
+    },
+    "drift=0.5": {
+      "spectral": 1.0,
+      "viterbi": 1.0
+    },
+    "drift=1": {
+      "spectral": 1.0,
+      "viterbi": 1.0
+    },
+    "jitter=0.05": {
+      "spectral": 1.0,
+      "viterbi": 1.0
+    },
+    "jitter=0.1": {
+      "spectral": 1.0,
+      "viterbi": 1.0
+    },
+    "jitter=0.2": {
+      "spectral": 1.0,
+      "viterbi": 1.0
+    },
+    "jitter=0.35": {
+      "spectral": 1.0,
+      "viterbi": 1.0
+    },
+    "jitter=0.5": {
+      "spectral": 1.0,
+      "viterbi": 1.0
+    },
+    "shift=0.2": {
+      "spectral": 1.0,
+      "viterbi": 1.0
+    }
+  },
+  "tpr_at_far_line_band": {
+    "drift=0.2": {
+      "spectral": 0.4375,
+      "viterbi": 0.8125
+    },
+    "drift=0.5": {
+      "spectral": 0.25,
+      "viterbi": 0.9375
+    },
+    "drift=1": {
+      "spectral": 0.625,
+      "viterbi": 1.0
+    },
+    "jitter=0.05": {
+      "spectral": 0.5,
+      "viterbi": 1.0
+    },
+    "jitter=0.1": {
+      "spectral": 0.3125,
+      "viterbi": 0.6875
+    },
+    "jitter=0.2": {
+      "spectral": 0.25,
+      "viterbi": 0.875
+    },
+    "jitter=0.35": {
+      "spectral": 0.375,
+      "viterbi": 1.0
+    },
+    "jitter=0.5": {
+      "spectral": 0.5,
+      "viterbi": 1.0
+    },
+    "shift=0.2": {
+      "spectral": 1.0,
+      "viterbi": 1.0
+    }
+  },
+  "throughput_overhead": {
+    "drift=0.2": [
+      0.0002490215521312039,
+      0.0020200667365103454
+    ],
+    "drift=0.5": [
+      0.0004154894931374664,
+      0.0043543695994698525
+    ],
+    "drift=1": [
+      -0.0016346189169747088,
+      0.0020956276514431656
+    ],
+    "jitter=0.05": [
+      -0.0004050768013991457,
+      0.00031192331611695496
+    ],
+    "jitter=0.1": [
+      -0.0007856093058791966,
+      0.0017640364519595161
+    ],
+    "jitter=0.2": [
+      -0.0064706786176951525,
+      0.01644131048099021
+    ],
+    "jitter=0.35": [
+      -0.0010071864665016986,
+      0.001475529321169782
+    ],
+    "jitter=0.5": [
+      -0.0036274860652737717,
+      0.0013436322031357968
+    ],
+    "shift=0.2": [
+      -0.004510177713060837,
+      0.0015719165143319033
+    ]
+  },
+  "ko_model_jitter_tpr": {
+    "spectral": [
+      1.0,
+      1.0,
+      0.375,
+      0.3125,
+      0.25
+    ],
+    "viterbi": [
+      1.0,
+      1.0,
+      1.0,
+      0.75,
+      0.875
+    ]
+  },
+  "jitter_levels": [
+    0.05,
+    0.1,
+    0.2,
+    0.35,
+    0.5
+  ]
+}

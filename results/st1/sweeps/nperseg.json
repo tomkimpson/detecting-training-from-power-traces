@@ -1,0 +1,131 @@
+{
+  "axis": "nperseg",
+  "M": 5000,
+  "seed": 0,
+  "selection_rule": "configurations are promoted on null calibration quality across the null suite ONLY, never on signal power",
+  "points": [
+    {
+      "label": "stage4/ar1/nperseg0.5",
+      "stage": "stage4",
+      "null": "ar1",
+      "params_delta": {
+        "tracker_nperseg_factor": 0.5
+      },
+      "M": 5000,
+      "levels": {
+        "0.05": {
+          "k": 2,
+          "far": 0.0004,
+          "ci": [
+            4.844552711822352e-05,
+            0.0014441827958669
+          ]
+        },
+        "0.01": {
+          "k": 0,
+          "far": 0.0,
+          "ci": [
+            0.0,
+            0.000737503801108105
+          ]
+        },
+        "0.001": {
+          "k": 0,
+          "far": 0.0,
+          "ci": [
+            0.0,
+            0.000737503801108105
+          ]
+        }
+      },
+      "ks": {
+        "stat": 0.7133246798743595,
+        "pvalue": 0.0
+      },
+      "cov_failures": 0,
+      "params_hash": "b5c4bda4b0f8"
+    },
+    {
+      "label": "stage4/ar1/nperseg1",
+      "stage": "stage4",
+      "null": "ar1",
+      "params_delta": {
+        "tracker_nperseg_factor": 1.0
+      },
+      "M": 5000,
+      "levels": {
+        "0.05": {
+          "k": 1,
+          "far": 0.0002,
+          "ci": [
+            5.063548777051595e-06,
+            0.001113819380333972
+          ]
+        },
+        "0.01": {
+          "k": 0,
+          "far": 0.0,
+          "ci": [
+            0.0,
+            0.000737503801108105
+          ]
+        },
+        "0.001": {
+          "k": 0,
+          "far": 0.0,
+          "ci": [
+            0.0,
+            0.000737503801108105
+          ]
+        }
+      },
+      "ks": {
+        "stat": 0.6807484678529191,
+        "pvalue": 0.0
+      },
+      "cov_failures": 0,
+      "params_hash": "3e83265479f5"
+    },
+    {
+      "label": "stage4/ar1/nperseg2",
+      "stage": "stage4",
+      "null": "ar1",
+      "params_delta": {
+        "tracker_nperseg_factor": 2.0
+      },
+      "M": 5000,
+      "levels": {
+        "0.05": {
+          "k": 4,
+          "far": 0.0008,
+          "ci": [
+            0.00021801472424958694,
+            0.0020470395629212336
+          ]
+        },
+        "0.01": {
+          "k": 0,
+          "far": 0.0,
+          "ci": [
+            0.0,
+            0.000737503801108105
+          ]
+        },
+        "0.001": {
+          "k": 0,
+          "far": 0.0,
+          "ci": [
+            0.0,
+            0.000737503801108105
+          ]
+        }
+      },
+      "ks": {
+        "stat": 0.6624412250770364,
+        "pvalue": 0.0
+      },
+      "cov_failures": 0,
+      "params_hash": "ca7a74b096a5"
+    }
+  ]
+}

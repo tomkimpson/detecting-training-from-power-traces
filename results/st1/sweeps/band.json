@@ -1,0 +1,134 @@
+{
+  "axis": "band",
+  "M": 5000,
+  "seed": 0,
+  "selection_rule": "configurations are promoted on null calibration quality across the null suite ONLY, never on signal power",
+  "points": [
+    {
+      "label": "stage4/ar1/band_half",
+      "stage": "stage4",
+      "null": "ar1",
+      "params_delta": {
+        "band_lo": 0.65,
+        "band_hi": 1.35
+      },
+      "M": 5000,
+      "levels": {
+        "0.05": {
+          "k": 1,
+          "far": 0.0002,
+          "ci": [
+            5.063548777051595e-06,
+            0.001113819380333972
+          ]
+        },
+        "0.01": {
+          "k": 0,
+          "far": 0.0,
+          "ci": [
+            0.0,
+            0.000737503801108105
+          ]
+        },
+        "0.001": {
+          "k": 0,
+          "far": 0.0,
+          "ci": [
+            0.0,
+            0.000737503801108105
+          ]
+        }
+      },
+      "ks": {
+        "stat": 0.7792187593347693,
+        "pvalue": 0.0
+      },
+      "cov_failures": 0,
+      "params_hash": "9b981749048f"
+    },
+    {
+      "label": "stage4/ar1/band_nominal",
+      "stage": "stage4",
+      "null": "ar1",
+      "params_delta": {
+        "band_lo": 0.30000000000000004,
+        "band_hi": 1.7
+      },
+      "M": 5000,
+      "levels": {
+        "0.05": {
+          "k": 2,
+          "far": 0.0004,
+          "ci": [
+            4.844552711822352e-05,
+            0.0014441827958669
+          ]
+        },
+        "0.01": {
+          "k": 0,
+          "far": 0.0,
+          "ci": [
+            0.0,
+            0.000737503801108105
+          ]
+        },
+        "0.001": {
+          "k": 0,
+          "far": 0.0,
+          "ci": [
+            0.0,
+            0.000737503801108105
+          ]
+        }
+      },
+      "ks": {
+        "stat": 0.6785677588518739,
+        "pvalue": 0.0
+      },
+      "cov_failures": 0,
+      "params_hash": "dbdbe77340cf"
+    },
+    {
+      "label": "stage4/ar1/band_double",
+      "stage": "stage4",
+      "null": "ar1",
+      "params_delta": {
+        "band_lo": 0.1,
+        "band_hi": 2.4
+      },
+      "M": 5000,
+      "levels": {
+        "0.05": {
+          "k": 12,
+          "far": 0.0024,
+          "ci": [
+            0.0012407107696028052,
+            0.004188560186045313
+          ]
+        },
+        "0.01": {
+          "k": 0,
+          "far": 0.0,
+          "ci": [
+            0.0,
+            0.000737503801108105
+          ]
+        },
+        "0.001": {
+          "k": 0,
+          "far": 0.0,
+          "ci": [
+            0.0,
+            0.000737503801108105
+          ]
+        }
+      },
+      "ks": {
+        "stat": 0.48911216900492294,
+        "pvalue": 0.0
+      },
+      "cov_failures": 0,
+      "params_hash": "5705fbcc69d9"
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+# certifying-training-from-power
+
+*What a passive power meter can certify about AI training.*
+
+A theory-and-methods study of what a verifier can (and cannot) certify about AI
+**training** from a **time-resolved external power trace**, for compute governance.
+The work is organised as a **claim ladder** — a sequence of claims, each answering a
+strictly more governance-relevant question at a stated cost in verifier information —
+with the **de-periodicisation detection–utility frontier** as its central result.
+
+The paper (`paper/main.tex`) is *"What a Passive Power Meter Can Certify About AI
+Training."* Its scope is fixed by [`spec.md`](spec.md); the detailed plan lives in
+[`notes/plan-for-paper-2.md`](notes/plan-for-paper-2.md) and its
+[review](notes/plan-for-paper-2-review.md).
+
+This repo was spun out of the `analogue-sensors-for-ai-verification` monorepo (Paper 2
+of that programme). All evidence here is on a **literature-parameterized scenario
+model** and is **CPU-only and synthetic**; real hardware enters only as a negative
+transport case and a set of measured cost anchors (see `data/`).
+
+## Install
+
+```
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Python 3.10 recommended (versions pinned in `requirements.txt`).
+
+## Test
+
+```
+pytest -p no:debugging -m "not gpu"
+```
+
+(`-p no:debugging` is retained from the source project. `scikit-learn` is required for
+the RF bake-off baseline tests; without it those 4 tests error out and the rest pass.)
+
+## Reproduce the results and figures
+
+Everything under `results/` and `figures/` is regenerable. From the repo root:
+
+**ST2 — de-periodicisation frontier (fast, ~2 min):**
+```
+python scripts/plot_st2_sweeps.py                                    # -> results/st2/*_summary.json, figures/st2_*
+python scripts/plot_st2_frontier.py --b2-dir data/measured_cost_anchors
+    # -> results/st2/frontier_summary.json (verdict: GO, provisional=false), figures/st2_frontier.*
+```
+
+**ST1 — adaptive detector bake-off & calibration:**
+```
+python scripts/plot_st1_bakeoff.py        # -> figures/st1_bakeoff.*, results/st1/bakeoff_summary.json
+python scripts/st1_far.py                 # runs the FAR harness -> results/st1/raw/*.npz + far_summary.json
+python scripts/plot_st1_calibration.py    # consumes results/st1/raw/*.npz -> figures/st1_calibration_*
+python scripts/st1_sweeps.py              # -> results/st1/sweeps/*.json
+```
+
+`plot_st1_calibration.py` needs the per-cell `results/st1/raw/*.npz` that `st1_far.py`
+produces, so run `st1_far.py` first. The full surrogate FAR grid is the only expensive
+step (minutes locally; a slurm array on OzSTAR for the definitive S=999, M=10⁴ run).
+
+## Build the paper
+
+```
+cd paper && latexmk -pdf main.tex
+```
+
+The manuscript is a scaffold in active development: each section opens with a red TODO
+checklist that is deleted before submission.
+
+## Layout
+
+- `powerladder/` — library: `st1/` (adaptive structural detector), `typeb/` (detector
+  bank + ST2 frontier), `ko_workload.py`, `observation.py`, `config.py`.
+- `scripts/` — the six figure/experiment entry points above.
+- `results/`, `figures/` — regenerable outputs.
+- `data/measured_cost_anchors/` — measured GPU throughput anchors (static; see its README).
+- `notes/` — plan, review, ST1 findings, background memo.
+- `paper/` — the LaTeX manuscript.
+
+See [`CLAUDE.md`](CLAUDE.md) for development conventions.

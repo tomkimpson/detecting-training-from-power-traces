@@ -1,0 +1,17 @@
+# Paper-2 (certifying-training-from-power) dependencies. Pinned to the versions
+# used in the source project's conda env (Python 3.10). Reproducibility is a
+# first-class concern (see CLAUDE.md). The whole paper-2 pipeline is CPU-only and
+# synthetic end-to-end; no GPU/NVML/torch is needed here.
+numpy==2.2.6
+scipy==1.15.3
+matplotlib==3.10.5
+pytest==9.0.2
+
+# Publication figure style. Used via plt.style.use(['science','nature','no-latex'])
+# so regenerating figures needs no LaTeX install. See powerladder/plotstyle.py.
+SciencePlots==2.2.2
+
+# The RF power-only baseline (powerladder/typeb/rf_baseline.py) — a Rahman et al.
+# (arXiv 2606.19262) RandomForest replicated on the power channel, used as a
+# bake-off comparator. CPU-only; the only consumer of sklearn.
+scikit-learn==1.7.1

@@ -1,0 +1,250 @@
+{
+  "n_each": 200,
+  "seed": 20260721,
+  "drifts_hz": [
+    0.0,
+    0.1,
+    0.2,
+    0.4,
+    0.8,
+    1.5
+  ],
+  "fars": [
+    0.05,
+    0.01
+  ],
+  "structural_mix": [
+    "ar1",
+    "ar1_t",
+    "controller"
+  ],
+  "hard_case": {
+    "drift_hz": 0.4,
+    "negatives": "controller_only",
+    "tpr": {
+      "0.05": {
+        "mtf": 0.035,
+        "spectral": 0.0,
+        "viterbi": 0.0,
+        "dg_order_split": 0.875,
+        "dg_order_full": 0.94,
+        "dg_fixed_oracle": 0.065
+      },
+      "0.01": {
+        "mtf": 0.015,
+        "spectral": 0.0,
+        "viterbi": 0.0,
+        "dg_order_split": 0.805,
+        "dg_order_full": 0.905,
+        "dg_fixed_oracle": 0.0
+      }
+    }
+  },
+  "tpr": {
+    "inference": {
+      "0.05": {
+        "mtf": [
+          0.1,
+          0.08,
+          0.05,
+          0.04,
+          0.04,
+          0.04
+        ],
+        "spectral": [
+          0.985,
+          0.68,
+          0.4,
+          0.265,
+          0.37,
+          0.39
+        ],
+        "viterbi": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.995
+        ],
+        "dg_order_split": [
+          0.38,
+          0.245,
+          0.065,
+          0.025,
+          0.005,
+          0.02
+        ],
+        "dg_order_full": [
+          0.8,
+          0.705,
+          0.615,
+          0.335,
+          0.105,
+          0.015
+        ],
+        "dg_fixed_oracle": [
+          0.47,
+          0.16,
+          0.075,
+          0.03,
+          0.01,
+          0.005
+        ]
+      },
+      "0.01": {
+        "mtf": [
+          0.02,
+          0.015,
+          0.005,
+          0.015,
+          0.02,
+          0.0
+        ],
+        "spectral": [
+          0.94,
+          0.53,
+          0.32,
+          0.205,
+          0.31,
+          0.325
+        ],
+        "viterbi": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.98
+        ],
+        "dg_order_split": [
+          0.275,
+          0.17,
+          0.04,
+          0.01,
+          0.005,
+          0.015
+        ],
+        "dg_order_full": [
+          0.735,
+          0.625,
+          0.545,
+          0.23,
+          0.06,
+          0.01
+        ],
+        "dg_fixed_oracle": [
+          0.34,
+          0.07,
+          0.015,
+          0.005,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "structural": {
+      "0.05": {
+        "mtf": [
+          0.035,
+          0.04,
+          0.015,
+          0.015,
+          0.03,
+          0.0
+        ],
+        "spectral": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "viterbi": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "dg_order_split": [
+          0.46,
+          0.29,
+          0.145,
+          0.055,
+          0.01,
+          0.035
+        ],
+        "dg_order_full": [
+          0.855,
+          0.77,
+          0.71,
+          0.425,
+          0.18,
+          0.03
+        ],
+        "dg_fixed_oracle": [
+          0.585,
+          0.25,
+          0.155,
+          0.065,
+          0.06,
+          0.035
+        ]
+      },
+      "0.01": {
+        "mtf": [
+          0.0,
+          0.005,
+          0.0,
+          0.0,
+          0.005,
+          0.0
+        ],
+        "spectral": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "viterbi": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "dg_order_split": [
+          0.305,
+          0.17,
+          0.045,
+          0.01,
+          0.005,
+          0.015
+        ],
+        "dg_order_full": [
+          0.8,
+          0.705,
+          0.615,
+          0.31,
+          0.105,
+          0.015
+        ],
+        "dg_fixed_oracle": [
+          0.36,
+          0.105,
+          0.025,
+          0.005,
+          0.005,
+          0.0
+        ]
+      }
+    }
+  },
+  "notes": "TPR at empirical-FAR thresholds from each negative class's own scores (quantile method='higher', conservative); with n=200 negatives the 1e-2 threshold rests on the 2nd-highest negative score. dg_fixed_oracle is handed the true f0 per positive trace and a Ko-band draw per negative -- an oracle upper anchor, not a deployable detector."
+}

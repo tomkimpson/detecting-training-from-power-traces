@@ -1,0 +1,11 @@
+# Tooling config only — the project is run as plain scripts/modules, not an
+# installed package. `pythonpath = ["."]` puts the repo root on sys.path so
+# `import powerladder...` resolves to this repo's package. (Unlike the old
+# `code/` package this was spun out of, `powerladder` does not shadow any
+# stdlib module.)
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+    "gpu: test requires a CUDA GPU + NVML (none of the paper-2 suite needs this; kept for parity)",
+]

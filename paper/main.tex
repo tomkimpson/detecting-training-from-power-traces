@@ -1,0 +1,657 @@
+% ============================================================================
+% Paper 2: What a passive power meter can certify about training
+%
+% Structure follows notes/plan-for-paper-2.md §7 (provisional outline).
+% Each section opens with a red TODO checklist (development scaffolding —
+% delete the checklist environments before submission).
+%
+% Text marked "IMPORTED from paper-verification/main.tex" is carried over
+% from the old single-method paper and needs adaptation to the new framing
+% (claim ladder, theory/methods scope, no measured-headline claims).
+% ============================================================================
+
+\documentclass{article}
+
+\usepackage{hyperref}                 % Hyperlinks
+\hypersetup{
+	hidelinks,                        % Hide link boxes
+	colorlinks = true,
+	citecolor = cyan,
+	urlcolor = black,
+	linkcolor = magenta
+}
+\usepackage{arxiv}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{amssymb}        % math symbols
+\usepackage{amsthm}         % theorem environments (identifiability results)
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{cleveref}       % smart cross-referencing
+\usepackage{graphicx}
+\graphicspath{{../figures/}}
+\usepackage{natbib}
+\usepackage{doi}
+\usepackage{xcolor}
+\usepackage{subcaption}
+\usepackage[textsize=tiny]{todonotes} % disable before submission: [disable,textsize=tiny]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% THEOREMS (for the identifiability results, plan §10 Q2)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SECTION CHECKLISTS (development scaffolding — delete before submission)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\definecolor{checklistcol}{RGB}{150,30,30}
+\newenvironment{checklist}{%
+	\par\medskip
+	\begingroup\small\color{checklistcol}%
+	\noindent\rule{\linewidth}{0.4pt}\par
+	\noindent\textbf{Section checklist}\par
+	\begin{itemize}\setlength\itemsep{1pt}\setlength\parskip{0pt}
+}{%
+	\end{itemize}%
+	\noindent\rule{\linewidth}{0.4pt}\par
+	\endgroup\medskip
+}
+\newcommand{\cbx}{$\square$\;}
+
+\title{What a Passive Power Meter Can Certify About AI Training}
+
+\renewcommand{\shorttitle}{What a Power Meter Can Certify About Training}
+
+% Multiple affiliations variant of author block
+\usepackage{authblk}
+\renewcommand\Authfont{\bfseries}
+\setlength{\affilsep}{0em}
+% box is needed for correct spacing with authblk
+\newbox{\orcid}\sbox{\orcid}{\includegraphics[scale=0.06]{orcid.pdf}}
+
+\author[1]{%
+	\href{https://orcid.org/0000-0002-6542-6032}{\usebox{\orcid}\hspace{1mm}Tom Kimpson\thanks{Corresponding author: \texttt{tom.kimpson@unimelb.edu.au}}}%
+}
+% Author list carried over from paper-verification/main.tex; confirm for this paper.
+\author[2]{Mauricio Baker}
+\author[3]{Emlyn Graham}
+\author[2]{Anjay Friedman}
+\author[2]{Coby Joseph}
+\affil[1]{School of Mathematics and Statistics, The University of Melbourne, Parkville, VIC 3010, Australia}
+\affil[2]{RAND Corporation}
+\affil[3]{Affiliation TBD} % TODO: Emlyn Graham's affiliation
+
+%%% Add PDF metadata to help others organize their library
+%\hypersetup{
+%pdftitle={What a Passive Power Meter Can Certify About AI Training},
+%pdfsubject={AI governance, compute verification},
+%pdfauthor={Tom Kimpson},
+%pdfkeywords={AI governance, compute verification, side channels, cyclostationary detection},
+%}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\todo[inline]{Draft abstract from the plan's thesis sentence; freeze numbers
+only after Phase 0--2 results land.}
+A passive external power trace can provide calibrated structural evidence,
+and conditional evidence of efficient iteration-structured training, but not
+universal semantic identification. An adaptive prover can attack the exposed
+cadence; the empirical question is the detection--utility frontier required
+to erase it. Stronger work verification is possible only conditionally, on
+additional challenge and transcript/binding primitives. TODO: expand into a
+full abstract once results exist (claim ladder, scenario-model evidence,
+frontier headline, negative transport case).
+\end{abstract}
+
+\keywords{AI governance \and compute verification \and power side channel \and cyclostationary detection}
+
+
+% ============================================================================
+\section{Introduction}
+\label{sec:intro}
+% ============================================================================
+
+\begin{checklist}
+	\item \cbx \textbf{Thesis paragraph}: state the plan's thesis sentence up
+	front --- calibrated structural evidence + conditional classification, not
+	universal semantic identification; adaptive prover attacks the cadence; the
+	frontier is the empirical question (plan, header).
+	\item \cbx \textbf{Claim-ladder table}: polish \cref{tab:ladder} (drafted
+	below from plan \S1.3); do \emph{not} call it $\beta(I)$ --- analogous in
+	spirit to spec.md's Amount ladder, not the same object.
+	\item \cbx \textbf{Two adversary settings}: benign/non-adaptive vs
+	adaptive/hiding, run within each rung (not ``Q1/Q2'' --- collides with
+	spec.md's Amount/Type usage).
+	\item \cbx \textbf{Scope paragraph}: time-resolved power trace only; the
+	integrated-energy Amount channel is excluded by decision (plan \S1.1).
+	\item \cbx \textbf{Target population}: efficient, synchronous,
+	iteration-structured training; de-periodicisation is an adversarial action
+	with a measurable budget, not a counterexample (plan \S1.2).
+	\item \cbx \textbf{Why theory/methods, not hardware}: one paragraph of
+	honest framing --- single GPU cannot test the distributed question; evidence
+	lives on a literature-parameterized scenario model; hardware is a negative
+	transport case (plan \S1.1).
+	\item \cbx \textbf{Contributions list}: write only after ST0--ST2 gates
+	land (plan \S6); rungs 1--2 empirical spine, rungs 3--4 conditional.
+	\item \cbx \textbf{Related work}: decide placement (own section vs woven
+	into intro); run the \emph{new} novelty audit for adaptive
+	order/cyclostationary detection and challenge-synchronous power
+	authentication (ST0) --- the existing novelty-audit.md covers only the old
+	Viterbi paper. Reusable citation blocks: paper-verification/main.tex \S2
+	(compute governance, GPU side channels, line tracking, sequential
+	guarantees); all entries already in references.bib.
+	\item \cbx \textbf{Venue decision} (ST0, plan \S10 Q1): governance /
+	security / signal-processing venue; sets how much the identifiability
+	theory must carry.
+\end{checklist}
+
+% IMPORTED from paper-verification/main.tex §1 (adapted): governance
+% motivation. Needs revision for the ladder framing — the old text motivates
+% a single detector; the new paper motivates a menu of certifiable claims.
+Compute governance proposals call for evaluations, audits, and the
+registration or prohibition of training runs above specified compute
+thresholds
+\citep{shavit2023chinchilla,sastry2024computing,baker2025verifying,heim2024thresholds};
+U.S.~Executive Order 14110 briefly operationalised one such threshold,
+requiring the reporting of training runs above $10^{26}$ FLOP
+\citep{whitehouse2023eo14110}. Every such scheme presupposes that a regulator
+can tell when training occurs on monitored hardware. Detection from
+prover-owned telemetry is feasible but conditional on tamper-resistant read
+paths that do not yet exist
+\citep{rahman2026telemetry,ogara2025hardware}; active challenge-response
+protocols remove the trust anchor but require the prover's participation
+\citep{monfared2026timing}. A power meter outside the prover's control is the
+one passive channel a verifier can read today against an uncooperative
+prover. This paper asks, as a theory-and-methods question: what can such a
+meter certify, with what methods, at what cost in verifier information, and
+against an adversary who knows the detector?
+
+\todo[inline]{Frame the answer as the claim ladder: each rung is the
+principled response to the previous rung's ceiling (plan \S1.4).}
+
+\begin{table*}[t]
+	\centering
+	\small
+	\caption{The claim ladder (draft from plan \S1.3). Each rung answers a
+	strictly more governance-relevant question at a stated cost in verifier
+	information; each rung's hard ceiling motivates the next. Within each rung
+	we consider a benign (non-adaptive) and an adaptive (hiding) prover.}
+	\label{tab:ladder}
+	\begin{tabular}{@{}p{2.6cm}p{4.2cm}p{3.4cm}p{4.6cm}@{}}
+		\toprule
+		Rung & Claim & Additional requirement & Hard ceiling \\
+		\midrule
+		1. Structural evidence & Order-coherent power variation exists under a
+		specified structural null & External time-resolved trace only &
+		Periodic physical confounds; structural-null misspecification; strong
+		superposition or dilution; active power shaping; cadence moved outside
+		the searched family; die-to-meter attenuation \\
+		2. Conditional classification & The trace is more training-like than
+		the stated inference population & A representative or explicitly
+		modelled inference null & Domain shift; the semantic decoy
+		(training-shaped execution without retained training) \\
+		3. Active physical authentication & A load behind the meter responded
+		to an unpredictable verifier challenge & Prover participation; a
+		challenge-bound schedule & A challenge-aware dummy load; no semantic
+		binding by power alone \\
+		4. Work verification & The physical response is tied to declared
+		training state transitions & A sound, fresh transcript/proof and an
+		explicit binding assumption & The remote-proof / co-location gap,
+		unless the assumed primitive closes it \\
+		\bottomrule
+	\end{tabular}
+\end{table*}
+
+
+% ============================================================================
+\section{Threat model and identifiability}
+\label{sec:threat}
+% ============================================================================
+
+\begin{checklist}
+	\item \cbx \textbf{Full observation channel} (plan \S2): the two-layer
+	model in \cref{eq:meter,eq:device} with $h$ stated as an explicit LTI
+	first approximation, possibly operating-point dependent.
+	\item \cbx \textbf{Meter-model sweep list}: low-pass bandwidth and
+	integration window; sample cadence and aliasing; gains and
+	transfer-function notches near the cadence; additive coloured noise;
+	periodic controller interference; superposition of independent workloads;
+	time-varying baselines and operating points. Each becomes a synthetic
+	sensitivity axis in \cref{sec:scenario}.
+	\item \cbx \textbf{Admissible training family} (definition): efficient,
+	synchronous, iteration-structured training exposing a recoverable cadence
+	(plan \S1.2). Decide whether this is a formal definition or a scoping
+	paragraph.
+	\item \cbx \textbf{Adversary operators and budgets} (plan \S4): each
+	attack as an operator with a reported budget --- table or definition list.
+	Robustness is claimed only over specified families at specified budgets.
+	\item \cbx \textbf{Same-trace semantic counterexample}: the decoy
+	construction --- distinct workloads producing the same trace. Decide rigor
+	(theorem vs qualitative argument; plan \S10 Q2). If theorem: statement here,
+	proof in \cref{app:identifiability}.
+	\item \cbx \textbf{Maths}: identifiability of temporal structure vs
+	amplitude (the $r(\cdot)$ degeneracy, importable from
+	paper-verification \S3.3); conditions under which the structural null is
+	well-specified.
+	\item \cbx \textbf{Figure} (optional): observation-channel block diagram
+	(workload $\to$ device power $\to$ power-delivery/meter filter $\to$
+	observed trace, with confounds entering at each stage).
+\end{checklist}
+
+\subsection{The observation channel}
+\label{subsec:channel}
+
+% Plan §2: the device equation alone describes the device, not the meter.
+% Extends eq:obs/eq:forward IMPORTED from paper-verification/main.tex §3.1.
+The verifier holds one scalar time series from a meter outside the prover's
+control. The minimum model separates the device from the channel:
+\begin{align}
+	P_{\mathrm{meter}}(t) &= (h * P_{\mathrm{device}})(t) + P_{\mathrm{other}}(t) + \eta(t),
+	\label{eq:meter}\\
+	P_{\mathrm{device}}(t) &= r(t)\,F(t) + P_0(t),
+	\label{eq:device}
+\end{align}
+where $F(t)$ is the instantaneous operation rate, $r(t)$ the energy cost per
+operation, $P_0(t)$ the non-compute overhead, $h$ collects power-delivery
+dynamics, meter integration, reporting filters, and sampling,
+$P_{\mathrm{other}}(t)$ is co-resident load behind the same meter, and
+$\eta(t)$ is measurement noise the prover cannot forge. The linear
+time-invariant form of $h$ is an explicit first approximation; $h$ may be
+operating-point dependent. Until simultaneous on-device and external-meter
+measurement is performed, claims about what reaches an off-chip sensor are
+predictions (\cref{sec:reality}).
+
+\subsection{The adversary: operators and budgets}
+\label{subsec:adversary}
+
+% Plan §4: attack families as operators, each with a reported budget.
+\todo[inline]{Write each as an operator on the workload/trace with its budget
+metric (throughput, energy, learning progress).}
+The prover may apply, singly or in composition:
+\begin{itemize}
+	\item \textbf{phase attack}: jitter, drift, or randomised work per iteration;
+	\item \textbf{frequency relocation}: move the cadence toward or outside the search family;
+	\item \textbf{additive burial}: independent workload superposition / spectral-floor jamming;
+	\item \textbf{amplitude shaping}: added load flattening the compute/communication swing;
+	\item \textbf{dilution}: reduce the training duty fraction among other work;
+	\item \textbf{semantic decoy}: reproduce the physical schedule without retained training;
+	\item \textbf{challenge-aware decoy}: a correlated dummy response in the active protocol (\cref{sec:active}).
+\end{itemize}
+With unlimited superposition, dilution, shaping power, time, or freedom to
+restructure work, the prover can drive the signal-to-noise ratio arbitrarily
+low or synthesise the null; robustness claims are therefore made only over
+specified attack families at specified budgets.
+
+
+% ============================================================================
+\section{Scenario models}
+\label{sec:scenario}
+% ============================================================================
+
+\begin{checklist}
+	\item \cbx \textbf{Provenance, four layers} (plan \S1.1): (1) Ko \& Zhu's
+	training/fine-tuning waveforms and aggregate superposition; (2) \emph{our}
+	literature-motivated continuous-batching inference null (not Ko's);
+	(3) our slow frequency wander and adversary transformations; (4) our
+	observation map. State each owner explicitly.
+	\item \cbx \textbf{Suggested wording} (import verbatim from plan): ``We
+	adopt Ko and Zhu's training, fine-tuning, and aggregate workload model. We
+	construct a literature-motivated continuous-batching inference null in the
+	same power and superposition framework. Level 2 conclusions are conditional
+	on that stated null.''
+	\item \cbx \textbf{No ``calibration'' claims}: the generator is
+	literature-parameterized, not calibrated to the measured channel (the
+	${\sim}75\times$ Ko-vs-measured modulation gap,
+	development-notes/issue54-investigation.md). Use ``sensitivity analysis.''
+	\item \cbx \textbf{Inference null spec}: continuous-batching decode
+	structure, slow MoE envelope, aperiodic prefill bursts (code/ko\_workload.py);
+	the inference-dominant aggregate substituting our inference process into
+	Ko's dominant slot.
+	\item \cbx \textbf{Transfer family}: the population of hardware / meter /
+	workload parameters over which \cref{sec:classification} evaluates domain
+	shift.
+	\item \cbx \textbf{Figure}: example generator traces and spectra ---
+	training, fine-tuning, inference null, aggregate (benign setting).
+	\item \cbx \textbf{Figure}: sensitivity sweep of the observation map
+	(\cref{subsec:channel} axes) on a fixed workload.
+	\item \cbx \textbf{Code}: extend code/ko\_workload.py to the full
+	observation map; generation scripts under scripts/ with pinned configs.
+\end{checklist}
+
+\todo[inline]{Body: one subsection per layer (Ko model; our inference null;
+adversary transformations; observation map), each closing with what is
+adopted vs constructed.}
+
+
+% ============================================================================
+\section{Structural evidence (Rung 1)}
+\label{sec:structural}
+% ============================================================================
+
+\begin{checklist}
+	\item \cbx \textbf{Benign baseline} (plan \S3.1): multitaper harmonic
+	F-test (Thomson), stated as \emph{approximately pivotal under a stationary,
+	locally smooth spectral null} --- not an exact false-alarm guarantee;
+	search correction for unknown frequency/harmonic family; spectral matched
+	filter / peak-PSD as the simple comparator. Message: the benign case is
+	easy, so the paper is not about the benign case.
+	\item \cbx \textbf{Adaptive pipeline} (plan \S3.2), three components:
+	tracker $\hat f_0(t)$ (Viterbi / ridge / synchrosqueezing --- settle via
+	ST1 bake-off, plan \S10 Q3); phase resampling
+	$\hat\theta(t) = 2\pi \int \hat f_0$ (tacholess order tracking);
+	Dandawat\'e--Giannakis cyclostationary test on the de-warped signal.
+	\item \cbx \textbf{Maths}: $Q_\alpha$ statistic and its fixed-$\alpha$
+	asymptotic $\chi^2$ null, with every assumption scoped (weak dependence,
+	consistent covariance estimation, regularity). \emph{Never} write
+	``analytic CFAR'' for the full adaptive pipeline until shown.
+	\item \cbx \textbf{ST1 null-validity results} (the make-or-break gate,
+	plan \S6): the staged design (fixed $\alpha$; known warp; held-out warp;
+	fully adaptive; Gaussian/coloured/non-Gaussian/locally-stationary/
+	controller-like nulls; length/lag/bandwidth/search sweeps; full-pipeline
+	surrogate comparison). Open issues to resolve: path selection
+	(look-elsewhere over tracker paths), estimated-warp effects on the null,
+	sample splitting, covariance-estimator stability, finite-sample vs
+	asymptotic scoping, what surrogates do and do not calibrate.
+	\item \cbx \textbf{Fallback wording ready}: if calibration cannot be
+	defended, reframe as an effective score requiring empirical calibration.
+	\item \cbx \textbf{No sequential claim}: fixed-horizon only; the
+	e-process/anytime-valid extension is deferred (plan \S9) --- at most a
+	future-work sketch with its conditional-null requirements.
+	\item \cbx \textbf{Rung 1 wording discipline} (plan \S1.4): the test
+	establishes coherent repeated power structure under a stated structural
+	null; interpretation as repeated multi-phase computation additionally
+	requires the nuisance model excluding periodic physical confounds (the
+	measured A100 controller oscillation is the motivating counterexample).
+	\item \cbx \textbf{Figure}: realised false-alarm rate (with uncertainty,
+	at operationally small nominal levels --- not only $0.05$) across the ST1
+	staged nulls, per pipeline stage.
+	\item \cbx \textbf{Figure}: detection power, benign vs adaptive setting,
+	on the scenario model.
+	\item \cbx \textbf{Table}: bake-off summary (fixed harmonic F, fixed
+	matched filter, Viterbi/ridge, order-folded, cyclostationary) ---
+	pre-registered protocol in \cref{app:bakeoff}.
+	\item \cbx \textbf{Code}: pipeline implementation in code/; ST1 experiment
+	scripts; results under results/ with configs.
+\end{checklist}
+
+\subsection{Benign setting: the qualified baseline}
+\label{subsec:benign}
+\todo[inline]{Multitaper F-test + search correction; matched-filter
+comparator; why the benign case is easy.}
+
+\subsection{Adaptive setting: tracked cyclostationary detection}
+\label{subsec:tracked}
+\todo[inline]{Skeleton math below; each component has one job --- the tracker
+estimates a nuisance parameter, it is not the detector.}
+The instantaneous cycle frequency $\hat f_0(t)$ is estimated by a tracker;
+the phase estimate
+\begin{equation}
+	\hat\theta(t) \;=\; 2\pi \int_0^t \hat f_0(s)\,\mathrm{d}s
+	\label{eq:phase}
+\end{equation}
+defines a resampling of the trace at equal increments of $\hat\theta$, so a
+wandering line becomes a constant-order line; the de-warped signal is then
+tested for cyclostationarity at candidate cycle frequency $\alpha$ with the
+Dandawat\'e--Giannakis statistic
+\begin{equation}
+	Q_\alpha \;=\; N\, \hat r_\alpha^{\mathsf{H}}\, \hat\Sigma_\alpha^{-1}\, \hat r_\alpha,
+	\label{eq:dg}
+\end{equation}
+which for a \emph{fixed} $\alpha$ is asymptotically $\chi^2$ under the stated
+structural null, given weak dependence, consistent covariance estimation, and
+regularity. Those conditions do not automatically cover the complete adaptive
+pipeline; \cref{subsec:st1} reports what survives.
+
+\subsection{Null validity of the complete pipeline}
+\label{subsec:st1}
+\todo[inline]{ST1 results: staged isolation of each adaptive ingredient;
+realised FAR with uncertainty; go/no-go outcome and the honest framing that
+follows.}
+
+
+% ============================================================================
+\section{The de-periodicisation frontier}
+\label{sec:frontier}
+% ============================================================================
+
+\begin{checklist}
+	\item \cbx \textbf{Framing}: a central result, not a caveat. Do
+	\emph{not} claim de-periodicisation is necessarily inefficient --- our own
+	measurements refute the naive version: idle-insertion jitter cost
+	15--680\% throughput and made detection \emph{easier}; work-varying jitter
+	cost ${\approx}$ zero within noise (results/b2/workjitter\_summary.json)
+	while degrading line-band detection.
+	\item \cbx \textbf{Attack families on the frontier} (plan \S5):
+	per-iteration i.i.d.\ duration jitter; slowly drifting cadence; variable
+	real work / gradient accumulation; asynchronous or overlapped schedules
+	where the model permits; cadence relocation toward search-band edges;
+	power shaping and superposition as separate, clearly-labelled families.
+	\item \cbx \textbf{Metrics, per attack level}: physical
+	de-periodicisation measure (cadence CV, phase diffusion); detector power
+	for fixed line test, tracker, order/cyclostationary test, and any Rung 2
+	classifier; raw throughput; energy per processed token; optimizer updates
+	per unit time; training progress per token and per joule; ideally
+	time/energy to a target validation loss.
+	\item \cbx \textbf{Open empirical question}: the plausible but unmeasured
+	\emph{learning-efficiency} penalty (batch-size / accumulation / update-timing
+	changes preserving tokens/s while worsening progress per token or joule).
+	\item \cbx \textbf{Headline figure}: the Pareto frontier --- how far must
+	a prover de-periodicise useful training before the meter loses it, and at
+	what systems or learning-efficiency cost (ST2).
+	\item \cbx \textbf{Figure}: detector power vs attack level, per detector
+	--- establish the regime where tracking/order methods materially beat
+	fixed tests.
+	\item \cbx \textbf{Results}: ST2 sweeps (idle, real-work, drift,
+	phase-diffusion, band-edge relocation, harmonic suppression); GPU runs on
+	OzSTAR for any learning-progress measurements.
+\end{checklist}
+
+\todo[inline]{Body: one subsection per attack family; close with the frontier
+figure and its governance reading.}
+
+
+% ============================================================================
+\section{Conditional training classification (Rung 2)}
+\label{sec:classification}
+% ============================================================================
+
+\begin{checklist}
+	\item \cbx \textbf{The task, specified in advance} (plan \S3.3): fixed
+	interpretable feature vector from Rung 1 physics --- harmonic energy,
+	cyclic correlations, phase-folded waveform repeatability, tracker
+	stability.
+	\item \cbx \textbf{Three decision rules, all compared}: (i) prespecified
+	physics score; (ii) model-based likelihood/discriminant fitted to the
+	scenario generator; (iii) flexible learned reference exposing how much
+	performance comes from the chosen null rather than the structural method.
+	\item \cbx \textbf{Reporting kept separate}: Rung 1 false alarms under the
+	structural null; Rung 2 FPR/FNR under the stated workload population;
+	transfer --- performance when hardware, meter, or workload parameters
+	leave that population (domain shift evaluated, not just named).
+	\item \cbx \textbf{Semantic falsification controls, all evaluated}:
+	periodic inference / periodic request generator; gradient-only
+	computation; forward/backward/optimizer with discarded updates; a
+	training-shaped non-ML kernel loop (the semantic decoy); a
+	controller-cycle or periodic non-compute load; asynchronous /
+	de-periodicised genuine training; mixtures with unrelated co-resident
+	loads.
+	\item \cbx \textbf{Interpretation wording ready}: decoys scoring as
+	training $\Rightarrow$ Rung 2 certifies \emph{physical}
+	training-likeness, not semantic training; missed asynchronous training
+	$\Rightarrow$ scoped to the efficient iteration-structured family and the
+	measured frontier (\cref{sec:frontier}); controllers triggering Rung 1
+	$\Rightarrow$ the structural test works and causal attribution needs the
+	stated nuisance model.
+	\item \cbx \textbf{Figure}: ROC / operating points for the three decision
+	rules under the stated population.
+	\item \cbx \textbf{Figure}: transfer matrix (train population $\times$
+	test population) quantifying domain shift.
+	\item \cbx \textbf{Table}: semantic-control outcomes per decision rule.
+\end{checklist}
+
+\todo[inline]{Body: features; decision rules; population and transfer
+evaluation; semantic controls with the expected-interpretation paragraph.}
+
+
+% ============================================================================
+\section{From passive evidence to active authentication (Rungs 3--4)}
+\label{sec:active}
+% ============================================================================
+
+% Plan §3.4. Default scope: concise conditional-protocol section (moves to an
+% appendix if it distracts from Rungs 1–2); full empirical treatment only if
+% the optional ST3 pilot runs and passes.
+
+\begin{checklist}
+	\item \cbx \textbf{Scope decision honoured}: concise conditional protocol
+	by default; expand only if ST3 runs and passes (plan \S6, \S10 Q4).
+	\item \cbx \textbf{Protocol}: verifier emits unpredictable balanced
+	challenge $c_k \in \{-1,+1\}$; prover runs a committed,
+	semantically-equivalent schedule variation keyed to $c_k$; verifier
+	correlates external power against the challenge over a causal lag window
+	(lock-in / spread-spectrum style); null from re-randomising the challenge
+	--- no corpus, no matched hardware.
+	\item \cbx \textbf{Randomisation-test discipline}: the test is exact under
+	the sharp null \emph{conditional on the randomisation design}; any
+	maximisation over lags, impulse responses, or preprocessing must be
+	repeated inside every re-randomised replicate; carryover, adaptive
+	schedule choices, and balance constraints belong in the design.
+	\item \cbx \textbf{The assumed primitive (Rung 4), as an ideal
+	functionality}: sound, fresh, challenge-bound transcript/proof tying each
+	challenge bit to the prescribed semantically-equivalent variation of
+	declared training state transitions --- commitment before reveal,
+	unpredictability at commitment, sound binding to valid state transitions,
+	freshness against replay, and a stated position on co-location.
+	\item \cbx \textbf{Ceilings stated}: Rung 3 escapes the semantic decoy (a
+	passive decoy is uncorrelated with the challenge) but not the
+	challenge-aware dummy load; Rung 4's semantic work binding remains an
+	assumed/open layer; the remote-proof + dummy-load co-location gap stays
+	open unless the primitive rules it out.
+	\item \cbx \textbf{If ST3 runs}: concrete pair of semantically-equivalent
+	schedules; stated transcript/commitment interface; full search inside
+	every replicate; challenge-aware dummy-load adversary;
+	modulation-depth / overhead / observation-time curves; ideally a real
+	single-GPU pilot (feasible --- challenge modulation needs no cluster;
+	OzSTAR).
+\end{checklist}
+
+\todo[inline]{Body: protocol sketch; ideal functionality; what each rung buys
+and its ceiling. Keep short unless ST3 earns more.}
+
+
+% ============================================================================
+\section{Reality check and transfer limits}
+\label{sec:reality}
+% ============================================================================
+
+\begin{checklist}
+	\item \cbx \textbf{The negative transport case, as a result}: on a single
+	saturated A100 the adopted aggregate-model signature becomes shallow
+	(iteration ripple ${\sim}0.4\%$ of board power; issue \#54) and is
+	overtaken by a power-management controller feature --- more than a closing
+	nod. Import and adapt the measured findings from
+	paper-verification/main.tex \S6 (shallow line, $0.31$--$0.45$\,Hz limit
+	cycle, band-restriction analysis).
+	\item \cbx \textbf{Why this is the honest outcome}: one saturated card has
+	no communication phase; the generator is not calibrated to the measured
+	channel (${\sim}75\times$ modulation gap).
+	\item \cbx \textbf{Falsifiable predictions}: distributed synchronization
+	deepens the line (deep, coherent, legible cadence at cluster scale); what
+	an external (wall/rack) meter sees relative to on-board NVML --- both
+	stated as predictions, not results.
+	\item \cbx \textbf{Figure}: measured A100 trace/spectrum vs the scenario
+	model's prediction at matched nominal parameters (the transport gap made
+	visible). Existing captures live on OzSTAR.
+	\item \cbx \textbf{Decide}: how much measured material to import
+	(signatures figure b2 vs summary numbers only).
+\end{checklist}
+
+% IMPORTED from paper-verification/main.tex §6 (condensed; needs adaptation):
+On measured single-A100 traces the iteration cadence is present but shallow
+--- a saturated card has no communication phase, so the iteration structure
+modulates a ${\sim}370$\,W draw by only a few watts (${\sim}0.4\%$ of board
+power) --- and the spectra contain a $0.31$--$0.45$\,Hz component, roughly
+ten times the training line, that appears whenever the load varies in time
+but not at idle or under constant load: the signature of the card's
+power-management loop, a hardware line that says ``time-varying load,'' not
+``training.'' \todo[inline]{Recast: in the old paper this was a mixed
+headline; here it is the negative transport case and the motivating
+counterexample for Rung 1's nuisance model.}
+
+
+% ============================================================================
+\section{Discussion and conclusion}
+\label{sec:discussion}
+% ============================================================================
+
+\begin{checklist}
+	\item \cbx \textbf{The ladder, closed out}: exactly what each rung
+	certifies, its information cost, and its hard ceiling --- one summary
+	table or figure mirroring \cref{tab:ladder} with the paper's evidence
+	attached to each cell.
+	\item \cbx \textbf{Scope restated}: fixed-horizon results only
+	(anytime-valid monitoring deferred, no claim the $\chi^2$ statistic
+	repairs the e-process); Amount/energy channel excluded; Tier B unified
+	track-detect estimator parked (\#62); cryptographic binding primitive
+	assumed, not built; real distributed hardware enters only as a falsifiable
+	prediction plus the negative transport case (plan \S9).
+	\item \cbx \textbf{Limitations}: literature-parameterized (not calibrated)
+	scenario model; LTI observation map as first approximation; attack
+	families and budgets as the boundary of every robustness claim.
+	\item \cbx \textbf{Governance reading}: what a regulator can and cannot
+	buy at each rung today, and what additional primitives change that.
+\end{checklist}
+
+\todo[inline]{Write last.}
+
+
+% ============================================================================
+\appendix
+
+\section{Detector bake-off}
+\label{app:bakeoff}
+
+\begin{checklist}
+	\item \cbx \textbf{Pre-registered protocol}: fixed before results, so
+	``we present one method'' is an \emph{outcome}, not a choice.
+	\item \cbx \textbf{Detectors}: fixed harmonic F-test; fixed matched
+	filter; Viterbi/ridge tracker; order-folded statistic; cyclostationary
+	test (and tracker variants: Viterbi vs synchrosqueezing vs Vold--Kalman,
+	plan \S10 Q3).
+	\item \cbx \textbf{Conditions}: the ST1 staged nulls and the ST2 attack
+	sweeps; report realised FAR and power with uncertainty.
+	\item \cbx \textbf{Table}: full results grid.
+\end{checklist}
+
+\section{Identifiability details}
+\label{app:identifiability}
+
+\begin{checklist}
+	\item \cbx \textbf{Decoy construction}: the same-trace semantic
+	counterexample in full (rigor level per plan \S10 Q2).
+	\item \cbx \textbf{Structural-null validity conditions}: when rejecting
+	the null licenses the ``coherent repeated structure'' reading; the
+	nuisance model for periodic physical confounds.
+	\item \cbx \textbf{Proofs} deferred from \cref{sec:threat}.
+\end{checklist}
+
+
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,199 @@
+{
+  "family": "phase",
+  "generator": "ko_workload training vs hard inference null",
+  "budget_units": "phase_slip_sigma (boundary slip std, fraction of period)",
+  "cost_anchor": null,
+  "n_each": 200,
+  "target_fars": [
+    0.05,
+    0.01
+  ],
+  "seed": 0,
+  "meter": "off (exact no-op MeterParams)",
+  "detectors": [
+    "dg_order_full",
+    "dg_order_semicoh",
+    "mtf",
+    "spectral",
+    "viterbi"
+  ],
+  "levels": [
+    0.01,
+    0.02,
+    0.05,
+    0.1,
+    0.2
+  ],
+  "points": [
+    {
+      "level": 0.01,
+      "cadence_cv": 0.10475964455507317,
+      "phase_diffusion_D": 0.4564267072415694,
+      "auc": {
+        "spectral": 0.998225,
+        "viterbi": 1.0,
+        "mtf": 0.5357375,
+        "dg_order_full": 0.899525,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.99,
+          "0.01": 0.975
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.015,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.79,
+          "0.01": 0.77
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      }
+    },
+    {
+      "level": 0.02,
+      "cadence_cv": 0.10262549378766508,
+      "phase_diffusion_D": 0.3904516362022843,
+      "auc": {
+        "spectral": 0.995775,
+        "viterbi": 1.0,
+        "mtf": 0.5053,
+        "dg_order_full": 0.89625,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.98,
+          "0.01": 0.955
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.025,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.765,
+          "0.01": 0.735
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      }
+    },
+    {
+      "level": 0.05,
+      "cadence_cv": 0.11468175711618794,
+      "phase_diffusion_D": 0.47639916226993484,
+      "auc": {
+        "spectral": 0.983675,
+        "viterbi": 1.0,
+        "mtf": 0.537325,
+        "dg_order_full": 0.883475,
+        "dg_order_semicoh": 0.999975
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.935,
+          "0.01": 0.905
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.04,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.73,
+          "0.01": 0.69
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      }
+    },
+    {
+      "level": 0.1,
+      "cadence_cv": 0.1462156008254834,
+      "phase_diffusion_D": 0.8580102789045614,
+      "auc": {
+        "spectral": 0.835425,
+        "viterbi": 1.0,
+        "mtf": 0.5352375,
+        "dg_order_full": 0.83,
+        "dg_order_semicoh": 0.9898
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.655,
+          "0.01": 0.595
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.02,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.63,
+          "0.01": 0.555
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.97,
+          "0.01": 0.885
+        }
+      }
+    },
+    {
+      "level": 0.2,
+      "cadence_cv": 0.2101872664815772,
+      "phase_diffusion_D": 1.6618924111806097,
+      "auc": {
+        "spectral": 0.539475,
+        "viterbi": 1.0,
+        "mtf": 0.5446625,
+        "dg_order_full": 0.616225,
+        "dg_order_semicoh": 0.7955
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.395,
+          "0.01": 0.355
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.02,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.23,
+          "0.01": 0.155
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.385,
+          "0.01": 0.115
+        }
+      }
+    }
+  ]
+}

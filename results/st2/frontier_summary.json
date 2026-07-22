@@ -1,0 +1,2012 @@
+{
+  "provisional": false,
+  "n_each": 200,
+  "target_fars": [
+    0.05,
+    0.01
+  ],
+  "seed": 0,
+  "detector_classes": {
+    "tracking": [
+      "viterbi",
+      "dg_order_full",
+      "dg_order_semicoh"
+    ],
+    "fixed": [
+      "spectral",
+      "mtf"
+    ]
+  },
+  "cost_anchor_mapping": {
+    "jitter": "results/b2/spoof_summary.json (idle-pad realisation)",
+    "drift": "results/b2/spoof_summary.json (idle-pad realisation)",
+    "work": "results/b2/workjitter_summary.json (real-work realisation)",
+    "shape": "results/b2/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)"
+  },
+  "cells": [
+    {
+      "family": "jitter",
+      "level": 0.05,
+      "cadence_cv": 0.05021571086565184,
+      "phase_diffusion_D": 0.10369606160284704,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.571575,
+        "dg_order_full": 0.943975,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.03,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.9,
+          "0.01": 0.89
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": 15.267503887049683,
+      "cost_overhead_pct_std": 0.21035656122963195,
+      "cost_anchor_source": "results/b2/spoof_summary.json (idle-pad realisation)",
+      "learning_cost": null
+    },
+    {
+      "family": "jitter",
+      "level": 0.1,
+      "cadence_cv": 0.10562563444983904,
+      "phase_diffusion_D": 0.4680910059164862,
+      "auc": {
+        "spectral": 0.999475,
+        "viterbi": 1.0,
+        "mtf": 0.543075,
+        "dg_order_full": 0.922475,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 0.99
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.035,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.82,
+          "0.01": 0.775
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": 32.12940317751929,
+      "cost_overhead_pct_std": 1.159404094016278,
+      "cost_anchor_source": "results/b2/spoof_summary.json (idle-pad realisation)",
+      "learning_cost": null
+    },
+    {
+      "family": "jitter",
+      "level": 0.2,
+      "cadence_cv": 0.2470371077249112,
+      "phase_diffusion_D": 2.2564088562361038,
+      "auc": {
+        "spectral": 0.6061,
+        "viterbi": 1.0,
+        "mtf": 0.55185,
+        "dg_order_full": 0.70005,
+        "dg_order_semicoh": 0.955375
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.45,
+          "0.01": 0.425
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.055,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.43,
+          "0.01": 0.32
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.84,
+          "0.01": 0.745
+        }
+      },
+      "cost_overhead_pct": 66.48884409727641,
+      "cost_overhead_pct_std": 2.8870516597612013,
+      "cost_anchor_source": "results/b2/spoof_summary.json (idle-pad realisation)",
+      "learning_cost": null
+    },
+    {
+      "family": "jitter",
+      "level": 0.35,
+      "cadence_cv": 0.8410422599260274,
+      "phase_diffusion_D": 23.182570896831947,
+      "auc": {
+        "spectral": 0.3339,
+        "viterbi": 0.9734,
+        "mtf": 0.542525,
+        "dg_order_full": 0.47975,
+        "dg_order_semicoh": 0.58675
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.21,
+          "0.01": 0.185
+        },
+        "viterbi": {
+          "0.05": 0.84,
+          "0.01": 0.77
+        },
+        "mtf": {
+          "0.05": 0.02,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.16,
+          "0.01": 0.075
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.13,
+          "0.01": 0.05
+        }
+      },
+      "cost_overhead_pct": 158.89283053044113,
+      "cost_overhead_pct_std": 35.40001294847005,
+      "cost_anchor_source": "results/b2/spoof_summary.json (idle-pad realisation)",
+      "learning_cost": null
+    },
+    {
+      "family": "jitter",
+      "level": 0.5,
+      "cadence_cv": 1.6932221582479174,
+      "phase_diffusion_D": 48.87330897184404,
+      "auc": {
+        "spectral": 0.308775,
+        "viterbi": 0.969925,
+        "mtf": 0.46565,
+        "dg_order_full": 0.2644,
+        "dg_order_semicoh": 0.34215
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.18,
+          "0.01": 0.125
+        },
+        "viterbi": {
+          "0.05": 0.875,
+          "0.01": 0.795
+        },
+        "mtf": {
+          "0.05": 0.005,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.015,
+          "0.01": 0.0
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.015,
+          "0.01": 0.0
+        }
+      },
+      "cost_overhead_pct": 374.7217044216882,
+      "cost_overhead_pct_std": 98.92198459604248,
+      "cost_anchor_source": "results/b2/spoof_summary.json (idle-pad realisation)",
+      "learning_cost": null
+    },
+    {
+      "family": "jitter",
+      "level": 0.7,
+      "cadence_cv": 1.7113901599431336,
+      "phase_diffusion_D": 41.653124250093384,
+      "auc": {
+        "spectral": 0.375125,
+        "viterbi": 1.0,
+        "mtf": 0.477425,
+        "dg_order_full": 0.198925,
+        "dg_order_semicoh": 0.175975
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.14,
+          "0.01": 0.12
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.005,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.015,
+          "0.01": 0.0
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "work",
+      "level": 0.05,
+      "cadence_cv": 0.05889596925144807,
+      "phase_diffusion_D": 0.16901422569274255,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.5824875,
+        "dg_order_full": 0.9468,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.09,
+          "0.01": 0.02
+        },
+        "dg_order_full": {
+          "0.05": 0.89,
+          "0.01": 0.87
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": -0.04050768013991457,
+      "cost_overhead_pct_std": 0.031192331611695497,
+      "cost_anchor_source": "results/b2/workjitter_summary.json (real-work realisation)",
+      "learning_cost": null
+    },
+    {
+      "family": "work",
+      "level": 0.1,
+      "cadence_cv": 0.08332604588457974,
+      "phase_diffusion_D": 0.24145686390350926,
+      "auc": {
+        "spectral": 0.999925,
+        "viterbi": 1.0,
+        "mtf": 0.580225,
+        "dg_order_full": 0.92005,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 0.995
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.075,
+          "0.01": 0.02
+        },
+        "dg_order_full": {
+          "0.05": 0.83,
+          "0.01": 0.79
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": -0.07856093058791966,
+      "cost_overhead_pct_std": 0.1764036451959516,
+      "cost_anchor_source": "results/b2/workjitter_summary.json (real-work realisation)",
+      "learning_cost": null
+    },
+    {
+      "family": "work",
+      "level": 0.2,
+      "cadence_cv": 0.17150866541365584,
+      "phase_diffusion_D": 1.0250716456330144,
+      "auc": {
+        "spectral": 0.85985,
+        "viterbi": 1.0,
+        "mtf": 0.5443875,
+        "dg_order_full": 0.808175,
+        "dg_order_semicoh": 0.9973
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.66,
+          "0.01": 0.57
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.05,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.61,
+          "0.01": 0.5
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.985,
+          "0.01": 0.965
+        }
+      },
+      "cost_overhead_pct": -0.6470678617695153,
+      "cost_overhead_pct_std": 1.644131048099021,
+      "cost_anchor_source": "results/b2/workjitter_summary.json (real-work realisation)",
+      "learning_cost": null
+    },
+    {
+      "family": "work",
+      "level": 0.35,
+      "cadence_cv": 0.6667984931730486,
+      "phase_diffusion_D": 11.984998096987972,
+      "auc": {
+        "spectral": 0.4414,
+        "viterbi": 1.0,
+        "mtf": 0.5093625,
+        "dg_order_full": 0.6784,
+        "dg_order_semicoh": 0.9352
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.26,
+          "0.01": 0.23
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.05,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.36,
+          "0.01": 0.285
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.745,
+          "0.01": 0.63
+        }
+      },
+      "cost_overhead_pct": -0.10071864665016986,
+      "cost_overhead_pct_std": 0.1475529321169782,
+      "cost_anchor_source": "results/b2/workjitter_summary.json (real-work realisation)",
+      "learning_cost": null
+    },
+    {
+      "family": "work",
+      "level": 0.5,
+      "cadence_cv": 1.430636222261251,
+      "phase_diffusion_D": 52.21071433099074,
+      "auc": {
+        "spectral": 0.41105,
+        "viterbi": 0.999425,
+        "mtf": 0.511525,
+        "dg_order_full": 0.596325,
+        "dg_order_semicoh": 0.864425
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.265,
+          "0.01": 0.205
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 0.98
+        },
+        "mtf": {
+          "0.05": 0.075,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.25,
+          "0.01": 0.165
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.485,
+          "0.01": 0.34
+        }
+      },
+      "cost_overhead_pct": -0.36274860652737717,
+      "cost_overhead_pct_std": 0.13436322031357967,
+      "cost_anchor_source": "results/b2/workjitter_summary.json (real-work realisation)",
+      "learning_cost": null
+    },
+    {
+      "family": "work",
+      "level": 0.7,
+      "cadence_cv": 1.5648933624875165,
+      "phase_diffusion_D": 41.434037562841944,
+      "auc": {
+        "spectral": 0.302375,
+        "viterbi": 0.781875,
+        "mtf": 0.545275,
+        "dg_order_full": 0.5662,
+        "dg_order_semicoh": 0.7717
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.165,
+          "0.01": 0.125
+        },
+        "viterbi": {
+          "0.05": 0.59,
+          "0.01": 0.46
+        },
+        "mtf": {
+          "0.05": 0.085,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.225,
+          "0.01": 0.145
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.28,
+          "0.01": 0.11
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "drift",
+      "level": 0.0,
+      "cadence_cv": 0.10340151887566842,
+      "phase_diffusion_D": 0.381830541612915,
+      "auc": {
+        "spectral": 0.999025,
+        "viterbi": 1.0,
+        "mtf": 0.537875,
+        "dg_order_full": 0.9069,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 0.98
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.09,
+          "0.01": 0.04
+        },
+        "dg_order_full": {
+          "0.05": 0.8,
+          "0.01": 0.765
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "drift",
+      "level": 0.1,
+      "cadence_cv": 0.13163769630482333,
+      "phase_diffusion_D": 4.879068128240741,
+      "auc": {
+        "spectral": 0.899325,
+        "viterbi": 1.0,
+        "mtf": 0.465275,
+        "dg_order_full": 0.873175,
+        "dg_order_semicoh": 0.999975
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.7,
+          "0.01": 0.645
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.055,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.69,
+          "0.01": 0.63
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "drift",
+      "level": 0.2,
+      "cadence_cv": 0.3179929782785831,
+      "phase_diffusion_D": 26.32664160224149,
+      "auc": {
+        "spectral": 0.670625,
+        "viterbi": 1.0,
+        "mtf": 0.416775,
+        "dg_order_full": 0.811675,
+        "dg_order_semicoh": 0.9991
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.455,
+          "0.01": 0.35
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.05,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.55,
+          "0.01": 0.525
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 0.975
+        }
+      },
+      "cost_overhead_pct": 141.91320062321378,
+      "cost_overhead_pct_std": 129.82259886047362,
+      "cost_anchor_source": "results/b2/spoof_summary.json (idle-pad realisation)",
+      "learning_cost": null
+    },
+    {
+      "family": "drift",
+      "level": 0.4,
+      "cadence_cv": 0.6089696649264709,
+      "phase_diffusion_D": 107.3942575687856,
+      "auc": {
+        "spectral": 0.49015,
+        "viterbi": 1.0,
+        "mtf": 0.337975,
+        "dg_order_full": 0.60755,
+        "dg_order_semicoh": 0.872125
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.295,
+          "0.01": 0.26
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.035,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.27,
+          "0.01": 0.225
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.675,
+          "0.01": 0.61
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "drift",
+      "level": 0.8,
+      "cadence_cv": 1.0597972134993254,
+      "phase_diffusion_D": 153.16115695389098,
+      "auc": {
+        "spectral": 0.495625,
+        "viterbi": 0.9995,
+        "mtf": 0.3482,
+        "dg_order_full": 0.400625,
+        "dg_order_semicoh": 0.485275
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.385,
+          "0.01": 0.355
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 0.99
+        },
+        "mtf": {
+          "0.05": 0.04,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.06,
+          "0.01": 0.035
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.13,
+          "0.01": 0.065
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "drift",
+      "level": 1.5,
+      "cadence_cv": 1.0028540065176914,
+      "phase_diffusion_D": 52.95438083213054,
+      "auc": {
+        "spectral": 0.5262,
+        "viterbi": 0.997175,
+        "mtf": 0.368525,
+        "dg_order_full": 0.2759,
+        "dg_order_semicoh": 0.2709
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.425,
+          "0.01": 0.4
+        },
+        "viterbi": {
+          "0.05": 0.975,
+          "0.01": 0.975
+        },
+        "mtf": {
+          "0.05": 0.015,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.015,
+          "0.01": 0.005
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.01,
+          "0.01": 0.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "phase",
+      "level": 0.01,
+      "cadence_cv": 0.10475964455507317,
+      "phase_diffusion_D": 0.4564267072415694,
+      "auc": {
+        "spectral": 0.998225,
+        "viterbi": 1.0,
+        "mtf": 0.5357375,
+        "dg_order_full": 0.899525,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.99,
+          "0.01": 0.975
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.015,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.79,
+          "0.01": 0.77
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "phase",
+      "level": 0.02,
+      "cadence_cv": 0.10262549378766508,
+      "phase_diffusion_D": 0.3904516362022843,
+      "auc": {
+        "spectral": 0.995775,
+        "viterbi": 1.0,
+        "mtf": 0.5053,
+        "dg_order_full": 0.89625,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.98,
+          "0.01": 0.955
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.025,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.765,
+          "0.01": 0.735
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "phase",
+      "level": 0.05,
+      "cadence_cv": 0.11468175711618794,
+      "phase_diffusion_D": 0.47639916226993484,
+      "auc": {
+        "spectral": 0.983675,
+        "viterbi": 1.0,
+        "mtf": 0.537325,
+        "dg_order_full": 0.883475,
+        "dg_order_semicoh": 0.999975
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.935,
+          "0.01": 0.905
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.04,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.73,
+          "0.01": 0.69
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "phase",
+      "level": 0.1,
+      "cadence_cv": 0.1462156008254834,
+      "phase_diffusion_D": 0.8580102789045614,
+      "auc": {
+        "spectral": 0.835425,
+        "viterbi": 1.0,
+        "mtf": 0.5352375,
+        "dg_order_full": 0.83,
+        "dg_order_semicoh": 0.9898
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.655,
+          "0.01": 0.595
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.02,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.63,
+          "0.01": 0.555
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.97,
+          "0.01": 0.885
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "phase",
+      "level": 0.2,
+      "cadence_cv": 0.2101872664815772,
+      "phase_diffusion_D": 1.6618924111806097,
+      "auc": {
+        "spectral": 0.539475,
+        "viterbi": 1.0,
+        "mtf": 0.5446625,
+        "dg_order_full": 0.616225,
+        "dg_order_semicoh": 0.7955
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.395,
+          "0.01": 0.355
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.02,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.23,
+          "0.01": 0.155
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.385,
+          "0.01": 0.115
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "relocate",
+      "level": 0.35,
+      "cadence_cv": 0.10074900917068057,
+      "phase_diffusion_D": 0.13807357881302906,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.5425,
+        "dg_order_full": 0.78865,
+        "dg_order_semicoh": 0.99305
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.07,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.59,
+          "0.01": 0.515
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.97,
+          "0.01": 0.96
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "relocate",
+      "level": 0.45,
+      "cadence_cv": 0.1007018525134786,
+      "phase_diffusion_D": 0.1624629027893107,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.513625,
+        "dg_order_full": 0.856275,
+        "dg_order_semicoh": 0.999975
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.055,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.705,
+          "0.01": 0.695
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "relocate",
+      "level": 0.6,
+      "cadence_cv": 0.10095733238793317,
+      "phase_diffusion_D": 0.226170914058899,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.527575,
+        "dg_order_full": 0.9162,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.065,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.79,
+          "0.01": 0.77
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "relocate",
+      "level": 1.4,
+      "cadence_cv": 0.10464391555239419,
+      "phase_diffusion_D": 0.5617771649139092,
+      "auc": {
+        "spectral": 0.98915,
+        "viterbi": 1.0,
+        "mtf": 0.52395,
+        "dg_order_full": 0.8938,
+        "dg_order_semicoh": 0.99985
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.98,
+          "0.01": 0.665
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.07,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.775,
+          "0.01": 0.725
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 0.995
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "relocate",
+      "level": 1.6,
+      "cadence_cv": 0.10408510472916871,
+      "phase_diffusion_D": 0.5900470440810756,
+      "auc": {
+        "spectral": 0.94385,
+        "viterbi": 1.0,
+        "mtf": 0.5293,
+        "dg_order_full": 0.929125,
+        "dg_order_semicoh": 0.99995
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.705,
+          "0.01": 0.225
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.06,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.825,
+          "0.01": 0.805
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "relocate",
+      "level": 1.65,
+      "cadence_cv": 0.1016158689966087,
+      "phase_diffusion_D": 0.56139941032987,
+      "auc": {
+        "spectral": 0.921825,
+        "viterbi": 1.0,
+        "mtf": 0.524475,
+        "dg_order_full": 0.890625,
+        "dg_order_semicoh": 0.99995
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.66,
+          "0.01": 0.24
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.07,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.73,
+          "0.01": 0.69
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "harmonic",
+      "level": 0.1,
+      "cadence_cv": 0.1041533512504218,
+      "phase_diffusion_D": 0.5034311926929554,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.51865,
+        "dg_order_full": 0.90775,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.06,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.8,
+          "0.01": 0.725
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "harmonic",
+      "level": 0.25,
+      "cadence_cv": 0.1032356025092524,
+      "phase_diffusion_D": 0.41599312731555144,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.5821125,
+        "dg_order_full": 0.882275,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.1,
+          "0.01": 0.06
+        },
+        "dg_order_full": {
+          "0.05": 0.695,
+          "0.01": 0.605
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "harmonic",
+      "level": 0.5,
+      "cadence_cv": 0.10038597959618561,
+      "phase_diffusion_D": 0.4024974289788599,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.55025,
+        "dg_order_full": 0.8421,
+        "dg_order_semicoh": 0.957025
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.08,
+          "0.01": 0.02
+        },
+        "dg_order_full": {
+          "0.05": 0.655,
+          "0.01": 0.52
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.855,
+          "0.01": 0.85
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "harmonic",
+      "level": 0.75,
+      "cadence_cv": 0.10146239745140964,
+      "phase_diffusion_D": 0.318729513240618,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.5353125,
+        "dg_order_full": 0.4887,
+        "dg_order_semicoh": 0.558625
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.095,
+          "0.01": 0.045
+        },
+        "dg_order_full": {
+          "0.05": 0.3,
+          "0.01": 0.25
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.42,
+          "0.01": 0.42
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "harmonic",
+      "level": 1.0,
+      "cadence_cv": 0.10488210814107869,
+      "phase_diffusion_D": 0.354332611070483,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.548,
+        "dg_order_full": 0.373025,
+        "dg_order_semicoh": 0.372925
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.06,
+          "0.01": 0.025
+        },
+        "dg_order_full": {
+          "0.05": 0.145,
+          "0.01": 0.095
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.2,
+          "0.01": 0.185
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "shape",
+      "level": 0.0,
+      "cadence_cv": 0.1050095328250531,
+      "phase_diffusion_D": 0.46425006690670917,
+      "auc": {
+        "spectral": 0.9972,
+        "viterbi": 1.0,
+        "mtf": 0.519725,
+        "dg_order_full": 0.9207,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.98,
+          "0.01": 0.97
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.035,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.82,
+          "0.01": 0.78
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": 189.6629516730204,
+      "cost_overhead_pct_std": 55.43120728307436,
+      "cost_anchor_source": "results/b2/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
+      "learning_cost": null
+    },
+    {
+      "family": "shape",
+      "level": 0.5,
+      "cadence_cv": 0.10361133857381913,
+      "phase_diffusion_D": 0.37132691837342136,
+      "auc": {
+        "spectral": 0.994825,
+        "viterbi": 1.0,
+        "mtf": 0.490875,
+        "dg_order_full": 0.8818,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.99,
+          "0.01": 0.98
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.03,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.765,
+          "0.01": 0.685
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": 228.16930881800715,
+      "cost_overhead_pct_std": 67.89148780181002,
+      "cost_anchor_source": "results/b2/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
+      "learning_cost": null
+    },
+    {
+      "family": "shape",
+      "level": 0.8,
+      "cadence_cv": 0.10058273718127246,
+      "phase_diffusion_D": 0.3226358641744979,
+      "auc": {
+        "spectral": 0.89225,
+        "viterbi": 1.0,
+        "mtf": 0.48,
+        "dg_order_full": 0.666075,
+        "dg_order_semicoh": 0.877725
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.7,
+          "0.01": 0.63
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.03,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.425,
+          "0.01": 0.335
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.705,
+          "0.01": 0.655
+        }
+      },
+      "cost_overhead_pct": 172.15178531604838,
+      "cost_overhead_pct_std": 24.26288555565876,
+      "cost_anchor_source": "results/b2/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
+      "learning_cost": null
+    },
+    {
+      "family": "shape",
+      "level": 0.95,
+      "cadence_cv": 0.10199935251105732,
+      "phase_diffusion_D": 0.4312090669338825,
+      "auc": {
+        "spectral": 0.999075,
+        "viterbi": 1.0,
+        "mtf": 0.499675,
+        "dg_order_full": 0.246225,
+        "dg_order_semicoh": 0.22765
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.99,
+          "0.01": 0.985
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.07,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.005,
+          "0.01": 0.0
+        }
+      },
+      "cost_overhead_pct": 179.01548633673707,
+      "cost_overhead_pct_std": 39.08471928940236,
+      "cost_anchor_source": "results/b2/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
+      "learning_cost": null
+    },
+    {
+      "family": "shape",
+      "level": 1.0,
+      "cadence_cv": 0.10369684509413864,
+      "phase_diffusion_D": 0.3158728720982138,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.47935,
+        "dg_order_full": 0.189225,
+        "dg_order_semicoh": 0.228375
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.04,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.005,
+          "0.01": 0.0
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        }
+      },
+      "cost_overhead_pct": 200.78105305475913,
+      "cost_overhead_pct_std": 35.70475545114205,
+      "cost_anchor_source": "results/b2/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
+      "learning_cost": null
+    },
+    {
+      "family": "dilute",
+      "level": 0.2,
+      "cadence_cv": 0.10241118580609493,
+      "phase_diffusion_D": 0.4192579951017728,
+      "auc": {
+        "spectral": 0.92305,
+        "viterbi": 1.0,
+        "mtf": 0.525625,
+        "dg_order_full": 0.557975,
+        "dg_order_semicoh": 0.664775
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.675,
+          "0.01": 0.59
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.09,
+          "0.01": 0.03
+        },
+        "dg_order_full": {
+          "0.05": 0.085,
+          "0.01": 0.035
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.125,
+          "0.01": 0.055
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "dilute",
+      "level": 0.3,
+      "cadence_cv": 0.10411294895249842,
+      "phase_diffusion_D": 0.3073693308459794,
+      "auc": {
+        "spectral": 0.84225,
+        "viterbi": 1.0,
+        "mtf": 0.5017,
+        "dg_order_full": 0.555,
+        "dg_order_semicoh": 0.645575
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.63,
+          "0.01": 0.52
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.045,
+          "0.01": 0.025
+        },
+        "dg_order_full": {
+          "0.05": 0.125,
+          "0.01": 0.09
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.155,
+          "0.01": 0.085
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "dilute",
+      "level": 0.35,
+      "cadence_cv": 0.1004580541816665,
+      "phase_diffusion_D": 0.3669580886621043,
+      "auc": {
+        "spectral": 0.9359,
+        "viterbi": 1.0,
+        "mtf": 0.551525,
+        "dg_order_full": 0.696175,
+        "dg_order_semicoh": 0.86955
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.775,
+          "0.01": 0.68
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.055,
+          "0.01": 0.025
+        },
+        "dg_order_full": {
+          "0.05": 0.26,
+          "0.01": 0.24
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.53,
+          "0.01": 0.445
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "dilute",
+      "level": 0.4,
+      "cadence_cv": 0.10372858358185634,
+      "phase_diffusion_D": 0.3860765139996407,
+      "auc": {
+        "spectral": 0.957,
+        "viterbi": 1.0,
+        "mtf": 0.53215,
+        "dg_order_full": 0.777475,
+        "dg_order_semicoh": 0.96435
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.87,
+          "0.01": 0.75
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.075,
+          "0.01": 0.04
+        },
+        "dg_order_full": {
+          "0.05": 0.525,
+          "0.01": 0.445
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.82,
+          "0.01": 0.735
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "dilute",
+      "level": 0.5,
+      "cadence_cv": 0.10232208225042552,
+      "phase_diffusion_D": 0.32383626368984164,
+      "auc": {
+        "spectral": 0.9863,
+        "viterbi": 1.0,
+        "mtf": 0.534725,
+        "dg_order_full": 0.8642,
+        "dg_order_semicoh": 0.998175
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.94,
+          "0.01": 0.905
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.055,
+          "0.01": 0.02
+        },
+        "dg_order_full": {
+          "0.05": 0.72,
+          "0.01": 0.665
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.99,
+          "0.01": 0.985
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "dilute",
+      "level": 0.7,
+      "cadence_cv": 0.10217334570170278,
+      "phase_diffusion_D": 0.31414148861965485,
+      "auc": {
+        "spectral": 0.99735,
+        "viterbi": 1.0,
+        "mtf": 0.4867,
+        "dg_order_full": 0.86845,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.99,
+          "0.01": 0.955
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.05,
+          "0.01": 0.025
+        },
+        "dg_order_full": {
+          "0.05": 0.745,
+          "0.01": 0.69
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "dilute",
+      "level": 0.9,
+      "cadence_cv": 0.1041867302222193,
+      "phase_diffusion_D": 0.37831310317318856,
+      "auc": {
+        "spectral": 0.99865,
+        "viterbi": 1.0,
+        "mtf": 0.5315,
+        "dg_order_full": 0.9216,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 0.98
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.055,
+          "0.01": 0.02
+        },
+        "dg_order_full": {
+          "0.05": 0.8,
+          "0.01": 0.74
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "meter",
+      "level": "notch_at_cadence",
+      "cadence_cv": 0.09957134779893165,
+      "phase_diffusion_D": 0.3036780798566416,
+      "auc": {
+        "spectral": 0.281175,
+        "viterbi": 0.7781,
+        "mtf": 0.5601,
+        "dg_order_full": 0.674825,
+        "dg_order_semicoh": 0.798525
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.225,
+          "0.01": 0.215
+        },
+        "viterbi": {
+          "0.05": 0.64,
+          "0.01": 0.615
+        },
+        "mtf": {
+          "0.05": 0.105,
+          "0.01": 0.03
+        },
+        "dg_order_full": {
+          "0.05": 0.41,
+          "0.01": 0.33
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.585,
+          "0.01": 0.545
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "meter",
+      "level": "integrating_1hz",
+      "cadence_cv": 0.10134025004899859,
+      "phase_diffusion_D": 0.42164963214340817,
+      "auc": {
+        "spectral": 0.463,
+        "viterbi": 0.68405,
+        "mtf": 0.496575,
+        "dg_order_full": 0.410975,
+        "dg_order_semicoh": 0.499175
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.23,
+          "0.01": 0.185
+        },
+        "viterbi": {
+          "0.05": 0.32,
+          "0.01": 0.265
+        },
+        "mtf": {
+          "0.05": 0.085,
+          "0.01": 0.055
+        },
+        "dg_order_full": {
+          "0.05": 0.055,
+          "0.01": 0.005
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.075,
+          "0.01": 0.02
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "meter",
+      "level": "controller_on",
+      "cadence_cv": 0.10524038631022356,
+      "phase_diffusion_D": 0.41751147910975056,
+      "auc": {
+        "spectral": 0.997625,
+        "viterbi": 1.0,
+        "mtf": 0.5712,
+        "dg_order_full": 0.916175,
+        "dg_order_semicoh": 0.99975
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.98,
+          "0.01": 0.96
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.09,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.77,
+          "0.01": 0.74
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 0.995
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    },
+    {
+      "family": "meter",
+      "level": "coloured_noise_heavy",
+      "cadence_cv": 0.09955007948069744,
+      "phase_diffusion_D": 0.2917526738684072,
+      "auc": {
+        "spectral": 0.9969,
+        "viterbi": 1.0,
+        "mtf": 0.57705,
+        "dg_order_full": 0.97345,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.98,
+          "0.01": 0.94
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.065,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.935,
+          "0.01": 0.88
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      },
+      "cost_overhead_pct": null,
+      "cost_overhead_pct_std": null,
+      "cost_anchor_source": "analytic/qualitative only",
+      "learning_cost": null
+    }
+  ],
+  "verdict": {
+    "verdict": "GO",
+    "provisional": false,
+    "note": "verdict is PROVISIONAL when only the pre-ST1 pair {spectral, viterbi} is registered; definitive once the ST1 detectors are in the summaries (task 20.9)",
+    "criterion_fired": "GO: contiguous run(s) in a ~zero/modest-cost family where best tracking TPR@0.05 >= 0.8 while every fixed test <= 0.5",
+    "supporting_cells": [
+      [
+        "work",
+        [
+          "work=0.35",
+          "work=0.5"
+        ]
+      ]
+    ],
+    "detector_classes": {
+      "tracking": [
+        "viterbi",
+        "dg_order_full",
+        "dg_order_semicoh"
+      ],
+      "fixed": [
+        "spectral",
+        "mtf"
+      ]
+    },
+    "thresholds": {
+      "far": 0.05,
+      "tracking_min": 0.8,
+      "fixed_max": 0.5,
+      "cheap_pct": 20.0,
+      "erased_below": 0.5,
+      "match_margin": 0.1
+    }
+  }
+}
