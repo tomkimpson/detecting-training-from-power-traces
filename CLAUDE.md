@@ -78,7 +78,12 @@ certifying-training-from-power/
   `pip install -r requirements.txt`; run `pytest -p no:debugging -m "not gpu"`.
 - `-p no:debugging` is retained from the source project's pytest invocation.
 - Any GPU work (learning-efficiency measurements, ST3 challenge pilot) runs on
-  **OzSTAR via slurm** — this laptop has no GPU.
+  **slurm** — this laptop has no GPU. Two clusters are available:
+  - **MATS (preferred)** — use this by default; the OzSTAR queue can get busy.
+    On the MATS cluster the **`/mats-cluster`** skill is available for launching and
+    managing GPU/slurm jobs (sbatch/srun/squeue, partitions, elastic GPUs, storage) —
+    use it for cluster work.
+  - **OzSTAR** — fallback; most of our work so far has run here.
 
 ## Paper
 
