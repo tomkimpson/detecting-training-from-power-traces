@@ -1,7 +1,7 @@
 # tasks.md — certifying-training-from-power
 
 Phased task tracker for Paper 2. Phasing follows
-[`notes/plan-for-paper-2.md`](notes/plan-for-paper-2.md) §8. Mark tasks in-progress /
+[`notes/plans/plan-for-paper-2.md`](notes/plans/plan-for-paper-2.md) §8. Mark tasks in-progress /
 done and record a one-line **Result** under each as it completes. Rationale lives in
 the plan docs; status lives here.
 
@@ -12,7 +12,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` todo.
 ## Phase 0 — de-risking gates (COMPLETE)
 
 Ported from the source monorepo (branch `feat/paper2-phase0`, merged). All
-pre-registered criteria closed. Full record: `notes/st1-findings.md`, `handoff.md`.
+pre-registered criteria closed. Full record: `notes/results/st1-findings.md`, `handoff.md`.
 
 - [x] **ST0 — estimand, threat model, scope (desk work).**
   **Result:** Four rungs fixed (1–2 spine, 3–4 conditional); admissible efficient-
@@ -53,7 +53,7 @@ pre-registered criteria closed. Full record: `notes/st1-findings.md`, `handoff.m
 
 - [ ] Qualified multitaper F-test (benign) + tracked-cyclostationary (adaptive) on the
   scenario model, both adversary settings.
-- [ ] Null-validity validation section wording from `notes/st1-findings.md`.
+- [ ] Null-validity validation section wording from `notes/results/st1-findings.md`.
 - [ ] Pre-registered detector bake-off → paper §4 / Appendix A.
 - [ ] Wire the ST1 figures (calibration, bake-off, power) into `paper/main.tex`.
 

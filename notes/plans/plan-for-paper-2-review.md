@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-21  
 **Plan reviewed:** [`plan-for-paper-2.md`](plan-for-paper-2.md)  
-**Background memo:** [`power-verification-paths-forward.md`](power-verification-paths-forward.md)
+**Background memo:** [`power-verification-paths-forward.md`](../discussion/power-verification-paths-forward.md)
 
 ## Overall verdict
 
@@ -40,7 +40,7 @@ several times to a "Ko inference model." This is inaccurate:
 - The inference process in this repository---continuous-batching decode structure, a
   slow MoE envelope, and aperiodic prefill bursts---is our literature-motivated
   construction. The code states this explicitly in
-  [`code/ko_workload.py`](../code/ko_workload.py).
+  [`code/ko_workload.py`](../../powerladder/ko_workload.py).
 - The inference-dominant aggregate, which substitutes our inference process into Ko's
   dominant slot, is also our construction rather than Ko's equation 11 workload.
 
@@ -55,7 +55,7 @@ Likewise, replace **"calibrated synthetic workload model"** with
 **"literature-parameterized scenario model"** unless the paper defines the target,
 data, and procedure used for calibration. The roughly 75-fold difference between the
 Ko-scale modulation and the measured single-GPU cadence in
-[`issue54-investigation.md`](development-notes/issue54-investigation.md) is evidence
+[`issue54-investigation.md`](../results/issue54-investigation.md) is evidence
 that the present generator is not calibrated to the measured channel.
 
 The paper should distinguish four layers of model provenance:
@@ -172,7 +172,7 @@ Previous work in the repository already separates two mechanisms:
    measured implementation incurred approximately 15--680% throughput overhead and
    made detection easier.
 2. **Work-varying jitter.** Varying real gradient-accumulation work moves the cadence
-   without inserting idle. In [`workjitter_summary.json`](../results/b2/workjitter_summary.json),
+   without inserting idle. In [`workjitter_summary.json`](../../data/measured_cost_anchors/workjitter_summary.json),
    its measured hardware-throughput cost is approximately zero within noise, while
    line-band detection degrades at some levels.
 

@@ -2,8 +2,8 @@
 
 **Source of truth for project scope.** Do not modify without explicit approval. The
 detailed realisation (methods, staged plan, wording discipline) lives in
-[`notes/plan-for-paper-2.md`](notes/plan-for-paper-2.md) and its
-[review](notes/plan-for-paper-2-review.md); this file fixes *what the project is*.
+[`notes/plans/plan-for-paper-2.md`](notes/plans/plan-for-paper-2.md) and its
+[review](notes/plans/plan-for-paper-2-review.md); this file fixes *what the project is*.
 
 ## Thesis (the sentence the paper defends)
 
@@ -114,5 +114,5 @@ the Ko-scale modulation from the measured single-GPU cadence).
 
 Phase 0 de-risking gates are **complete** (ST0 desk work; ST1 adaptive-detector null
 validity = **GO, honest reframe**; ST2 de-periodicisation frontier = **GO,
-definitive**). See `tasks.md` for the phased tracker and `notes/st1-findings.md` for the
+definitive**). See `tasks.md` for the phased tracker and `notes/results/st1-findings.md` for the
 ST1 gate record. Phase 1 (Rung 1 full) is next.

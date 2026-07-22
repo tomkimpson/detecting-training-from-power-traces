@@ -867,7 +867,7 @@ class St1DetectorParams:
     sample splitting. The sampling grid and search band DELIBERATELY mirror
     TypeBParams / KoTypeBParams so ST1 detectors score the exact operating
     point the B0/B1/B2 gates used. Full design: the approved Phase 0 plan and
-    notes/power-verification-paths-forward.md Sec. 3.1-3.2.
+    notes/discussion/power-verification-paths-forward.md Sec. 3.1-3.2.
     """
 
     # sampling / window (== TypeBParams.fs / duration_s)

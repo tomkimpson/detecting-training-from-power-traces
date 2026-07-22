@@ -2,7 +2,7 @@
 
 ## What happened this session
 Plan-iteration session (no experiments): reviewed `spec.md`/`tasks.md` against the
-paper outline and `notes/plan-for-paper-2.md` + review. The pasted outline == plan §7
+paper outline and `notes/plans/plan-for-paper-2.md` + review. The pasted outline == plan §7
 == `paper/main.tex` structure, so no structural change was needed. Three scope
 decisions were made and recorded in `spec.md` (user-approved) and `tasks.md`:
 
@@ -34,7 +34,7 @@ analytic CFAR; effective score with per-trace surrogate calibration — that is 
 1. **Merge `feat/plan-iteration` → main** once pushed/reviewed.
 2. **Phase 1 (Rung 1 full)** — see `tasks.md`: F-test + tracked-cyclostationary
    sections, bake-off, wire ST1 figures into `paper/main.tex`. Mostly turning
-   `notes/st1-findings.md` into prose; figures already exist.
+   `notes/results/st1-findings.md` into prose; figures already exist.
 3. **Slurm number-freeze pass** (before freezing any paper numbers): ST1 surrogate
    grid S=999/M=10⁴ AND from-scratch ST2 sweep re-verification (esp. meter family).
    MATS preferred (`/mats-cluster` skill); env setup on cluster is part of the task.

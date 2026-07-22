@@ -1,6 +1,6 @@
 """ST1 gate (paper-2 Phase 0): adaptive structural detection and its null validity.
 
-The make-or-break question (notes/plan-for-paper-2.md Sec. 6 ST1): can the null
+The make-or-break question (notes/plans/plan-for-paper-2.md Sec. 6 ST1): can the null
 distribution of the tracker -> phase-resampling -> cyclostationary pipeline be
 derived, or defensibly calibrated, including its selection and covariance-
 estimation steps? This package builds that pipeline in stages and measures its

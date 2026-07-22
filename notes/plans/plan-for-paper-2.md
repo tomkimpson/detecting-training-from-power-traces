@@ -8,7 +8,7 @@ single-method framing of `paper-verification/main.tex` as the direction for the
 **Source of truth:** `spec.md` (the project scope — identifiability, the floor `β`,
 the attestation ladder, Amount vs Type). This plan is a realisation of that spec,
 not a replacement for it. Rationale and the full menu of options live in
-`notes/power-verification-paths-forward.md`; **status and the concrete plan live
+`notes/discussion/power-verification-paths-forward.md`; **status and the concrete plan live
 here**.
 
 **Thesis (the sentence the paper defends):**
@@ -45,7 +45,7 @@ cannot) be certified in principle from time-resolved power, with what methods, a
 against an adversary who knows the detector. All evidence is on a
 **literature-parameterized scenario model** (we do not claim "calibration" — the
 ~75× gap between the Ko-scale modulation and the measured single-GPU cadence in
-`development-notes/issue54-investigation.md` shows the generator is *not* calibrated
+`../results/issue54-investigation.md` shows the generator is *not* calibrated
 to the measured channel). Real hardware enters as a **negative transport case**
 (§4.8), not a pillar.
 

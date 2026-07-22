@@ -18,7 +18,7 @@ monorepo on 2026-07-22 as a clean, single-paper repo.
 
 - **`spec.md`** completely defines the project scope. Refer to it when uncertain.
   Never modify it without explicit user approval.
-- **`notes/plan-for-paper-2.md`** + **`plan-for-paper-2-review.md`** are the detailed
+- **`notes/plans/plan-for-paper-2.md`** + **`plan-for-paper-2-review.md`** are the detailed
   realisation of the spec (thesis, claim ladder, Phase 0–4 plan). `spec.md` cross-links
   them; rationale lives there, scope lives in `spec.md`, status lives in `tasks.md`.
 - **`handoff.md`** tracks session-to-session context. Read at start, update at end.
@@ -37,7 +37,7 @@ certifying-training-from-power/
 ├── powerladder/    # Importable library (the paper-2 detection/scenario code)
 ├── scripts/        # Standalone entry points (run directly)
 ├── data/           # Static input data (e.g. measured cost anchors)
-├── notes/          # Plan docs, findings, research notes
+├── notes/          # plans/ + results/ + discussion/ — every note in exactly one (rules: notes/CLAUDE.md)
 ├── paper/          # LaTeX manuscript (arxiv preprint style)
 ├── figures/        # Generated figures (st1_*, st2_*)
 ├── results/        # Experiment outputs (results/st1, results/st2)
