@@ -5,6 +5,32 @@ Dated narrative of work sessions, newest at top. Append-only historical record
 
 ---
 
+## 2026-07-22 (later) — Plan iteration: three scope decisions locked
+
+Reviewed `spec.md`/`tasks.md` against the intended paper outline and the plan/review
+docs. The outline matches plan §7 and `paper/main.tex` exactly — no structural change.
+Three decisions made and recorded (spec.md edits user-approved):
+
+1. **Learning-efficiency descoped** to an open empirical question / future work — no
+   GPU campaign; the frontier's utility axis is systems-cost anchors only.
+2. **Venue: arXiv-first**; submission venue chosen after results freeze.
+3. **Meter channel requirement promoted** to a named contribution ("minimum meter
+   specification"). Verified the ST2 `integrating_1hz` mechanism from code + committed
+   results: the 1 s trailing boxcar is a sinc filter with its null at 1 Hz (the
+   training-band centre, f0 ~ U(0.5, 1.5) Hz) and the 1 Hz ZOH sampler puts the whole
+   band above the 0.5 Hz Nyquist, so the cadence is attenuated ×0–0.64 and aliased to
+   |f0−1| Hz. Committed numbers (n=200/class): TPR@0.05 ≤ 0.32 all detectors, DG order
+   methods at chance; caveat — Viterbi keeps AUC 0.68 from band-edge aliasing, so the
+   claim is "defeats at the stated operating point," not absolute erasure.
+
+Also absorbed the ST1 outcome into spec.md's methods bullet (no analytic CFAR;
+effective score with per-trace surrogate calibration). New tasks: slurm re-verification
+of the ST2 sweeps (never on the dev node — user decision), and a meter-requirement
+boundary sweep (`sample_hz` × `integ_window_s` × notch) to turn the two-point contrast
+into a real specification. Session was docs-only; branch `feat/plan-iteration`.
+
+---
+
 ## 2026-07-22 — Repo spun out from the monorepo
 
 Paper 2 ("What a Passive Power Meter Can Certify About AI Training") was extracted
