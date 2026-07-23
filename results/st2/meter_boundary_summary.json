@@ -1,0 +1,1886 @@
+{
+  "sweep": "meter_boundary",
+  "generator": "ko_workload honest training vs hard inference null",
+  "n_each": 200,
+  "target_fars": [
+    0.05,
+    0.01
+  ],
+  "seed": 0,
+  "sigma_eta": 4.0,
+  "detector_classes": {
+    "tracking": [
+      "viterbi",
+      "dg_order_full",
+      "dg_order_semicoh"
+    ],
+    "fixed": [
+      "spectral",
+      "mtf"
+    ]
+  },
+  "detectors": [
+    "dg_order_full",
+    "dg_order_semicoh",
+    "mtf",
+    "spectral",
+    "viterbi"
+  ],
+  "environment": "canonical: MATS `compute` partition, single-threaded OpenBLAS. Marginal/dead-cell AUCs are BLAS-build-conditional (up to ~0.3 swing on a different OpenBLAS at the same seed); the live-region boundary (the minimum meter specification) is not.",
+  "grid": {
+    "sample_hz_grid": [
+      20.0,
+      10.0,
+      5.0,
+      2.0,
+      1.0,
+      0.5
+    ],
+    "integ_window_grid": [
+      0.0,
+      0.1,
+      0.25,
+      0.5,
+      1.0,
+      2.0
+    ],
+    "notch_hz_grid": [
+      0.6,
+      0.8,
+      1.0,
+      1.2
+    ],
+    "notch_depth_grid": [
+      0.5,
+      0.9,
+      1.0
+    ],
+    "notch_q": 1.5
+  },
+  "cells": [
+    {
+      "cell": "main_fs0.5_iw0",
+      "sample_hz": 0.5,
+      "integ_window_s": 0.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.5,
+        "viterbi": 0.5,
+        "mtf": 0.5,
+        "dg_order_full": 0.5,
+        "dg_order_semicoh": 0.5
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "viterbi": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "mtf": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        }
+      }
+    },
+    {
+      "cell": "main_fs0.5_iw0.1",
+      "sample_hz": 0.5,
+      "integ_window_s": 0.1,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.5,
+        "viterbi": 0.5,
+        "mtf": 0.5,
+        "dg_order_full": 0.5,
+        "dg_order_semicoh": 0.5
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "viterbi": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "mtf": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        }
+      }
+    },
+    {
+      "cell": "main_fs0.5_iw0.25",
+      "sample_hz": 0.5,
+      "integ_window_s": 0.25,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.5,
+        "viterbi": 0.5,
+        "mtf": 0.5,
+        "dg_order_full": 0.5,
+        "dg_order_semicoh": 0.5
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "viterbi": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "mtf": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        }
+      }
+    },
+    {
+      "cell": "main_fs0.5_iw0.5",
+      "sample_hz": 0.5,
+      "integ_window_s": 0.5,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.5,
+        "viterbi": 0.5,
+        "mtf": 0.5,
+        "dg_order_full": 0.5,
+        "dg_order_semicoh": 0.5
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "viterbi": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "mtf": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        }
+      }
+    },
+    {
+      "cell": "main_fs0.5_iw1",
+      "sample_hz": 0.5,
+      "integ_window_s": 1.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.5,
+        "viterbi": 0.5,
+        "mtf": 0.5,
+        "dg_order_full": 0.5,
+        "dg_order_semicoh": 0.5
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "viterbi": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "mtf": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        }
+      }
+    },
+    {
+      "cell": "main_fs0.5_iw2",
+      "sample_hz": 0.5,
+      "integ_window_s": 2.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.5,
+        "viterbi": 0.5,
+        "mtf": 0.5,
+        "dg_order_full": 0.5,
+        "dg_order_semicoh": 0.5
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "viterbi": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "mtf": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        }
+      }
+    },
+    {
+      "cell": "main_fs10_iw0",
+      "sample_hz": 10.0,
+      "integ_window_s": 0.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.49655,
+        "dg_order_full": 0.899275,
+        "dg_order_semicoh": 0.999925
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.045,
+          "0.01": 0.04
+        },
+        "dg_order_full": {
+          "0.05": 0.77,
+          "0.01": 0.715
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 0.995
+        }
+      }
+    },
+    {
+      "cell": "main_fs10_iw0.1",
+      "sample_hz": 10.0,
+      "integ_window_s": 0.1,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.4963875,
+        "dg_order_full": 0.92325,
+        "dg_order_semicoh": 0.99965
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.05,
+          "0.01": 0.03
+        },
+        "dg_order_full": {
+          "0.05": 0.83,
+          "0.01": 0.775
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.995,
+          "0.01": 0.995
+        }
+      }
+    },
+    {
+      "cell": "main_fs10_iw0.25",
+      "sample_hz": 10.0,
+      "integ_window_s": 0.25,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.57075,
+        "dg_order_full": 0.9071,
+        "dg_order_semicoh": 0.9997
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.105,
+          "0.01": 0.035
+        },
+        "dg_order_full": {
+          "0.05": 0.795,
+          "0.01": 0.74
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 0.99
+        }
+      }
+    },
+    {
+      "cell": "main_fs10_iw0.5",
+      "sample_hz": 10.0,
+      "integ_window_s": 0.5,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.99805,
+        "viterbi": 0.99725,
+        "mtf": 0.5592375,
+        "dg_order_full": 0.718875,
+        "dg_order_semicoh": 0.748425
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.985,
+          "0.01": 0.975
+        },
+        "viterbi": {
+          "0.05": 0.995,
+          "0.01": 0.99
+        },
+        "mtf": {
+          "0.05": 0.11,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.46,
+          "0.01": 0.41
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.585,
+          "0.01": 0.5
+        }
+      }
+    },
+    {
+      "cell": "main_fs10_iw1",
+      "sample_hz": 10.0,
+      "integ_window_s": 1.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.769225,
+        "viterbi": 0.389425,
+        "mtf": 0.5796,
+        "dg_order_full": 0.614125,
+        "dg_order_semicoh": 0.647625
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.405,
+          "0.01": 0.345
+        },
+        "viterbi": {
+          "0.05": 0.305,
+          "0.01": 0.295
+        },
+        "mtf": {
+          "0.05": 0.105,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.275,
+          "0.01": 0.135
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.295,
+          "0.01": 0.22
+        }
+      }
+    },
+    {
+      "cell": "main_fs10_iw2",
+      "sample_hz": 10.0,
+      "integ_window_s": 2.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.58435,
+        "viterbi": 0.521,
+        "mtf": 0.51755,
+        "dg_order_full": 0.4855,
+        "dg_order_semicoh": 0.432275
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.355,
+          "0.01": 0.3
+        },
+        "viterbi": {
+          "0.05": 0.36,
+          "0.01": 0.335
+        },
+        "mtf": {
+          "0.05": 0.075,
+          "0.01": 0.02
+        },
+        "dg_order_full": {
+          "0.05": 0.08,
+          "0.01": 0.015
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.075,
+          "0.01": 0.02
+        }
+      }
+    },
+    {
+      "cell": "main_fs1_iw0",
+      "sample_hz": 1.0,
+      "integ_window_s": 0.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.5743,
+        "viterbi": 0.7471,
+        "mtf": 0.551525,
+        "dg_order_full": 0.5214,
+        "dg_order_semicoh": 0.526475
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.42,
+          "0.01": 0.335
+        },
+        "viterbi": {
+          "0.05": 0.36,
+          "0.01": 0.305
+        },
+        "mtf": {
+          "0.05": 0.145,
+          "0.01": 0.035
+        },
+        "dg_order_full": {
+          "0.05": 0.12,
+          "0.01": 0.035
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.125,
+          "0.01": 0.07
+        }
+      }
+    },
+    {
+      "cell": "main_fs1_iw0.1",
+      "sample_hz": 1.0,
+      "integ_window_s": 0.1,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.557375,
+        "viterbi": 0.699225,
+        "mtf": 0.533675,
+        "dg_order_full": 0.530975,
+        "dg_order_semicoh": 0.570625
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.41,
+          "0.01": 0.365
+        },
+        "viterbi": {
+          "0.05": 0.405,
+          "0.01": 0.28
+        },
+        "mtf": {
+          "0.05": 0.095,
+          "0.01": 0.025
+        },
+        "dg_order_full": {
+          "0.05": 0.13,
+          "0.01": 0.08
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.13,
+          "0.01": 0.045
+        }
+      }
+    },
+    {
+      "cell": "main_fs1_iw0.25",
+      "sample_hz": 1.0,
+      "integ_window_s": 0.25,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.504275,
+        "viterbi": 0.7255,
+        "mtf": 0.5057375,
+        "dg_order_full": 0.5626,
+        "dg_order_semicoh": 0.50815
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.395,
+          "0.01": 0.335
+        },
+        "viterbi": {
+          "0.05": 0.36,
+          "0.01": 0.295
+        },
+        "mtf": {
+          "0.05": 0.05,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.075,
+          "0.01": 0.05
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.125,
+          "0.01": 0.065
+        }
+      }
+    },
+    {
+      "cell": "main_fs1_iw0.5",
+      "sample_hz": 1.0,
+      "integ_window_s": 0.5,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.4894,
+        "viterbi": 0.7144,
+        "mtf": 0.528025,
+        "dg_order_full": 0.474825,
+        "dg_order_semicoh": 0.498225
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.33,
+          "0.01": 0.31
+        },
+        "viterbi": {
+          "0.05": 0.375,
+          "0.01": 0.32
+        },
+        "mtf": {
+          "0.05": 0.065,
+          "0.01": 0.03
+        },
+        "dg_order_full": {
+          "0.05": 0.13,
+          "0.01": 0.015
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.125,
+          "0.01": 0.05
+        }
+      }
+    },
+    {
+      "cell": "main_fs1_iw1",
+      "sample_hz": 1.0,
+      "integ_window_s": 1.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.418225,
+        "viterbi": 0.655475,
+        "mtf": 0.483925,
+        "dg_order_full": 0.4288,
+        "dg_order_semicoh": 0.4739
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.18,
+          "0.01": 0.145
+        },
+        "viterbi": {
+          "0.05": 0.295,
+          "0.01": 0.15
+        },
+        "mtf": {
+          "0.05": 0.035,
+          "0.01": 0.02
+        },
+        "dg_order_full": {
+          "0.05": 0.05,
+          "0.01": 0.035
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.035,
+          "0.01": 0.0
+        }
+      }
+    },
+    {
+      "cell": "main_fs1_iw2",
+      "sample_hz": 1.0,
+      "integ_window_s": 2.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.378675,
+        "viterbi": 0.4259,
+        "mtf": 0.546225,
+        "dg_order_full": 0.43075,
+        "dg_order_semicoh": 0.439825
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.07,
+          "0.01": 0.03
+        },
+        "viterbi": {
+          "0.05": 0.115,
+          "0.01": 0.07
+        },
+        "mtf": {
+          "0.05": 0.05,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.01,
+          "0.01": 0.0
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.03,
+          "0.01": 0.005
+        }
+      }
+    },
+    {
+      "cell": "main_fs20_iw0",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.49305,
+        "dg_order_full": 0.896875,
+        "dg_order_semicoh": 0.99845
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.005,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.77,
+          "0.01": 0.73
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.995,
+          "0.01": 0.995
+        }
+      }
+    },
+    {
+      "cell": "main_fs20_iw0.1",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.1,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.495875,
+        "dg_order_full": 0.92355,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.04,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.83,
+          "0.01": 0.765
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      }
+    },
+    {
+      "cell": "main_fs20_iw0.25",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.25,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.51955,
+        "dg_order_full": 0.8957,
+        "dg_order_semicoh": 0.99995
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.04,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.775,
+          "0.01": 0.68
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      }
+    },
+    {
+      "cell": "main_fs20_iw0.5",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.5,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.99155,
+        "viterbi": 0.995075,
+        "mtf": 0.498725,
+        "dg_order_full": 0.661225,
+        "dg_order_semicoh": 0.6913
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.965,
+          "0.01": 0.96
+        },
+        "viterbi": {
+          "0.05": 0.99,
+          "0.01": 0.97
+        },
+        "mtf": {
+          "0.05": 0.09,
+          "0.01": 0.025
+        },
+        "dg_order_full": {
+          "0.05": 0.405,
+          "0.01": 0.255
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.48,
+          "0.01": 0.425
+        }
+      }
+    },
+    {
+      "cell": "main_fs20_iw1",
+      "sample_hz": 20.0,
+      "integ_window_s": 1.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.3847,
+        "viterbi": 0.35075,
+        "mtf": 0.539975,
+        "dg_order_full": 0.58195,
+        "dg_order_semicoh": 0.57635
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.265,
+          "0.01": 0.25
+        },
+        "viterbi": {
+          "0.05": 0.25,
+          "0.01": 0.235
+        },
+        "mtf": {
+          "0.05": 0.08,
+          "0.01": 0.025
+        },
+        "dg_order_full": {
+          "0.05": 0.225,
+          "0.01": 0.11
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.26,
+          "0.01": 0.18
+        }
+      }
+    },
+    {
+      "cell": "main_fs20_iw2",
+      "sample_hz": 20.0,
+      "integ_window_s": 2.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.35255,
+        "viterbi": 0.537475,
+        "mtf": 0.53285,
+        "dg_order_full": 0.53395,
+        "dg_order_semicoh": 0.424775
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.28,
+          "0.01": 0.22
+        },
+        "viterbi": {
+          "0.05": 0.4,
+          "0.01": 0.36
+        },
+        "mtf": {
+          "0.05": 0.08,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.11,
+          "0.01": 0.04
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.08,
+          "0.01": 0.01
+        }
+      }
+    },
+    {
+      "cell": "main_fs2_iw0",
+      "sample_hz": 2.0,
+      "integ_window_s": 0.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.55405,
+        "dg_order_full": 0.686575,
+        "dg_order_semicoh": 0.67705
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.06,
+          "0.01": 0.035
+        },
+        "dg_order_full": {
+          "0.05": 0.255,
+          "0.01": 0.19
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.315,
+          "0.01": 0.21
+        }
+      }
+    },
+    {
+      "cell": "main_fs2_iw0.1",
+      "sample_hz": 2.0,
+      "integ_window_s": 0.1,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.999675,
+        "viterbi": 1.0,
+        "mtf": 0.574375,
+        "dg_order_full": 0.63915,
+        "dg_order_semicoh": 0.59895
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.1,
+          "0.01": 0.03
+        },
+        "dg_order_full": {
+          "0.05": 0.235,
+          "0.01": 0.15
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.245,
+          "0.01": 0.225
+        }
+      }
+    },
+    {
+      "cell": "main_fs2_iw0.25",
+      "sample_hz": 2.0,
+      "integ_window_s": 0.25,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.5169,
+        "dg_order_full": 0.576975,
+        "dg_order_semicoh": 0.46355
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.045,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.165,
+          "0.01": 0.105
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.2,
+          "0.01": 0.17
+        }
+      }
+    },
+    {
+      "cell": "main_fs2_iw0.5",
+      "sample_hz": 2.0,
+      "integ_window_s": 0.5,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.991925,
+        "viterbi": 0.99995,
+        "mtf": 0.507,
+        "dg_order_full": 0.4572,
+        "dg_order_semicoh": 0.3775
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.97,
+          "0.01": 0.93
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.05,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.09,
+          "0.01": 0.045
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.05,
+          "0.01": 0.03
+        }
+      }
+    },
+    {
+      "cell": "main_fs2_iw1",
+      "sample_hz": 2.0,
+      "integ_window_s": 1.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.460075,
+        "viterbi": 0.4536,
+        "mtf": 0.5064375,
+        "dg_order_full": 0.3955,
+        "dg_order_semicoh": 0.429225
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.235,
+          "0.01": 0.21
+        },
+        "viterbi": {
+          "0.05": 0.295,
+          "0.01": 0.26
+        },
+        "mtf": {
+          "0.05": 0.08,
+          "0.01": 0.025
+        },
+        "dg_order_full": {
+          "0.05": 0.065,
+          "0.01": 0.01
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.04,
+          "0.01": 0.015
+        }
+      }
+    },
+    {
+      "cell": "main_fs2_iw2",
+      "sample_hz": 2.0,
+      "integ_window_s": 2.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.567825,
+        "viterbi": 0.527675,
+        "mtf": 0.549475,
+        "dg_order_full": 0.40065,
+        "dg_order_semicoh": 0.302875
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.24,
+          "0.01": 0.165
+        },
+        "viterbi": {
+          "0.05": 0.295,
+          "0.01": 0.26
+        },
+        "mtf": {
+          "0.05": 0.095,
+          "0.01": 0.025
+        },
+        "dg_order_full": {
+          "0.05": 0.055,
+          "0.01": 0.005
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.03,
+          "0.01": 0.01
+        }
+      }
+    },
+    {
+      "cell": "main_fs5_iw0",
+      "sample_hz": 5.0,
+      "integ_window_s": 0.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.5126125,
+        "dg_order_full": 0.9449,
+        "dg_order_semicoh": 0.9963
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.035,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.825,
+          "0.01": 0.75
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.985,
+          "0.01": 0.975
+        }
+      }
+    },
+    {
+      "cell": "main_fs5_iw0.1",
+      "sample_hz": 5.0,
+      "integ_window_s": 0.1,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.52635,
+        "dg_order_full": 0.90805,
+        "dg_order_semicoh": 0.994425
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.055,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.77,
+          "0.01": 0.685
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.975,
+          "0.01": 0.965
+        }
+      }
+    },
+    {
+      "cell": "main_fs5_iw0.25",
+      "sample_hz": 5.0,
+      "integ_window_s": 0.25,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.530075,
+        "dg_order_full": 0.850975,
+        "dg_order_semicoh": 0.907475
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.085,
+          "0.01": 0.025
+        },
+        "dg_order_full": {
+          "0.05": 0.64,
+          "0.01": 0.59
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.84,
+          "0.01": 0.81
+        }
+      }
+    },
+    {
+      "cell": "main_fs5_iw0.5",
+      "sample_hz": 5.0,
+      "integ_window_s": 0.5,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.990575,
+        "viterbi": 0.999825,
+        "mtf": 0.55845,
+        "dg_order_full": 0.588425,
+        "dg_order_semicoh": 0.5736
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.95,
+          "0.01": 0.905
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 0.995
+        },
+        "mtf": {
+          "0.05": 0.105,
+          "0.01": 0.025
+        },
+        "dg_order_full": {
+          "0.05": 0.3,
+          "0.01": 0.225
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.35,
+          "0.01": 0.315
+        }
+      }
+    },
+    {
+      "cell": "main_fs5_iw1",
+      "sample_hz": 5.0,
+      "integ_window_s": 1.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.609925,
+        "viterbi": 0.359825,
+        "mtf": 0.541325,
+        "dg_order_full": 0.555225,
+        "dg_order_semicoh": 0.597975
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.33,
+          "0.01": 0.275
+        },
+        "viterbi": {
+          "0.05": 0.25,
+          "0.01": 0.235
+        },
+        "mtf": {
+          "0.05": 0.085,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.135,
+          "0.01": 0.045
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.16,
+          "0.01": 0.085
+        }
+      }
+    },
+    {
+      "cell": "main_fs5_iw2",
+      "sample_hz": 5.0,
+      "integ_window_s": 2.0,
+      "notch_hz": null,
+      "notch_q": 5.0,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.705625,
+        "viterbi": 0.586875,
+        "mtf": 0.5312,
+        "dg_order_full": 0.505925,
+        "dg_order_semicoh": 0.406125
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.445,
+          "0.01": 0.405
+        },
+        "viterbi": {
+          "0.05": 0.455,
+          "0.01": 0.36
+        },
+        "mtf": {
+          "0.05": 0.075,
+          "0.01": 0.03
+        },
+        "dg_order_full": {
+          "0.05": 0.04,
+          "0.01": 0.01
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.03,
+          "0.01": 0.015
+        }
+      }
+    },
+    {
+      "cell": "notch_f0.6_d0.5",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.0,
+      "notch_hz": 0.6,
+      "notch_q": 1.5,
+      "notch_depth": 0.5,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.497025,
+        "dg_order_full": 0.9011,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.07,
+          "0.01": 0.035
+        },
+        "dg_order_full": {
+          "0.05": 0.79,
+          "0.01": 0.74
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      }
+    },
+    {
+      "cell": "notch_f0.6_d0.9",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.0,
+      "notch_hz": 0.6,
+      "notch_q": 1.5,
+      "notch_depth": 0.9,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.999825,
+        "viterbi": 0.999225,
+        "mtf": 0.565075,
+        "dg_order_full": 0.88505,
+        "dg_order_semicoh": 0.973125
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 0.995
+        },
+        "viterbi": {
+          "0.05": 0.995,
+          "0.01": 0.99
+        },
+        "mtf": {
+          "0.05": 0.095,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.68,
+          "0.01": 0.585
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.93,
+          "0.01": 0.83
+        }
+      }
+    },
+    {
+      "cell": "notch_f0.6_d1",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.0,
+      "notch_hz": 0.6,
+      "notch_q": 1.5,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.999825,
+        "viterbi": 0.99865,
+        "mtf": 0.55755,
+        "dg_order_full": 0.8559,
+        "dg_order_semicoh": 0.957525
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 0.995
+        },
+        "viterbi": {
+          "0.05": 0.99,
+          "0.01": 0.98
+        },
+        "mtf": {
+          "0.05": 0.065,
+          "0.01": 0.045
+        },
+        "dg_order_full": {
+          "0.05": 0.68,
+          "0.01": 0.61
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.905,
+          "0.01": 0.86
+        }
+      }
+    },
+    {
+      "cell": "notch_f0.8_d0.5",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.0,
+      "notch_hz": 0.8,
+      "notch_q": 1.5,
+      "notch_depth": 0.5,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.546025,
+        "dg_order_full": 0.88245,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.055,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.73,
+          "0.01": 0.635
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      }
+    },
+    {
+      "cell": "notch_f0.8_d0.9",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.0,
+      "notch_hz": 0.8,
+      "notch_q": 1.5,
+      "notch_depth": 0.9,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.956,
+        "viterbi": 0.9492,
+        "mtf": 0.55075,
+        "dg_order_full": 0.801875,
+        "dg_order_semicoh": 0.924475
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.89,
+          "0.01": 0.83
+        },
+        "viterbi": {
+          "0.05": 0.905,
+          "0.01": 0.865
+        },
+        "mtf": {
+          "0.05": 0.055,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.625,
+          "0.01": 0.545
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.835,
+          "0.01": 0.815
+        }
+      }
+    },
+    {
+      "cell": "notch_f0.8_d1",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.0,
+      "notch_hz": 0.8,
+      "notch_q": 1.5,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.944,
+        "viterbi": 0.95155,
+        "mtf": 0.5803,
+        "dg_order_full": 0.78535,
+        "dg_order_semicoh": 0.9004
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.845,
+          "0.01": 0.755
+        },
+        "viterbi": {
+          "0.05": 0.88,
+          "0.01": 0.79
+        },
+        "mtf": {
+          "0.05": 0.095,
+          "0.01": 0.025
+        },
+        "dg_order_full": {
+          "0.05": 0.515,
+          "0.01": 0.44
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.74,
+          "0.01": 0.725
+        }
+      }
+    },
+    {
+      "cell": "notch_f1.2_d0.5",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.0,
+      "notch_hz": 1.2,
+      "notch_q": 1.5,
+      "notch_depth": 0.5,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.50965,
+        "dg_order_full": 0.889975,
+        "dg_order_semicoh": 0.998875
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.1,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.795,
+          "0.01": 0.745
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.995,
+          "0.01": 0.985
+        }
+      }
+    },
+    {
+      "cell": "notch_f1.2_d0.9",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.0,
+      "notch_hz": 1.2,
+      "notch_q": 1.5,
+      "notch_depth": 0.9,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.5556,
+        "viterbi": 0.551625,
+        "mtf": 0.527675,
+        "dg_order_full": 0.7097,
+        "dg_order_semicoh": 0.81475
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.475,
+          "0.01": 0.47
+        },
+        "viterbi": {
+          "0.05": 0.485,
+          "0.01": 0.47
+        },
+        "mtf": {
+          "0.05": 0.07,
+          "0.01": 0.02
+        },
+        "dg_order_full": {
+          "0.05": 0.48,
+          "0.01": 0.365
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.635,
+          "0.01": 0.58
+        }
+      }
+    },
+    {
+      "cell": "notch_f1.2_d1",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.0,
+      "notch_hz": 1.2,
+      "notch_q": 1.5,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.51375,
+        "viterbi": 0.510675,
+        "mtf": 0.5392375,
+        "dg_order_full": 0.650425,
+        "dg_order_semicoh": 0.783525
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.505,
+          "0.01": 0.5
+        },
+        "viterbi": {
+          "0.05": 0.485,
+          "0.01": 0.475
+        },
+        "mtf": {
+          "0.05": 0.025,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.325,
+          "0.01": 0.24
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.48,
+          "0.01": 0.445
+        }
+      }
+    },
+    {
+      "cell": "notch_f1_d0.5",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.0,
+      "notch_hz": 1.0,
+      "notch_q": 1.5,
+      "notch_depth": 0.5,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.546725,
+        "dg_order_full": 0.872925,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.075,
+          "0.01": 0.055
+        },
+        "dg_order_full": {
+          "0.05": 0.76,
+          "0.01": 0.715
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      }
+    },
+    {
+      "cell": "notch_f1_d0.9",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.0,
+      "notch_hz": 1.0,
+      "notch_q": 1.5,
+      "notch_depth": 0.9,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.6781,
+        "viterbi": 0.6924,
+        "mtf": 0.5460375,
+        "dg_order_full": 0.7221,
+        "dg_order_semicoh": 0.816925
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.595,
+          "0.01": 0.57
+        },
+        "viterbi": {
+          "0.05": 0.615,
+          "0.01": 0.595
+        },
+        "mtf": {
+          "0.05": 0.03,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.51,
+          "0.01": 0.385
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.705,
+          "0.01": 0.655
+        }
+      }
+    },
+    {
+      "cell": "notch_f1_d1",
+      "sample_hz": 20.0,
+      "integ_window_s": 0.0,
+      "notch_hz": 1.0,
+      "notch_q": 1.5,
+      "notch_depth": 1.0,
+      "sigma_eta": 4.0,
+      "auc": {
+        "spectral": 0.632025,
+        "viterbi": 0.65725,
+        "mtf": 0.5452,
+        "dg_order_full": 0.6292,
+        "dg_order_semicoh": 0.7801
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.545,
+          "0.01": 0.525
+        },
+        "viterbi": {
+          "0.05": 0.55,
+          "0.01": 0.525
+        },
+        "mtf": {
+          "0.05": 0.055,
+          "0.01": 0.02
+        },
+        "dg_order_full": {
+          "0.05": 0.3,
+          "0.01": 0.26
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.605,
+          "0.01": 0.515
+        }
+      }
+    }
+  ]
+}
