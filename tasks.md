@@ -40,12 +40,36 @@ pre-registered criteria closed. Full record: `notes/results/st1-findings.md`, `h
   The ST1 verdict's surrogate leg currently rests on a partial (M=1000, S=199) grid.
 - [ ] **Slurm re-verification of the ST2 sweeps in this repo** (same number-freeze
   pass): regenerate `results/st2/*_summary.json` from scratch, esp. the meter family
-  behind the "integrating_1hz" claim. Do NOT run locally on the dev node (decision
-  2026-07-22) — slurm only; environment setup on the cluster is part of this task.
+  behind the "integrating_1hz" claim **and the work-jitter line-band numbers, which
+  ride the `B` component and are flagged for requalification** (`notes/results/issue54-investigation.md`).
+  Which finding leads the frontier is left open until these freeze (positioning memo,
+  2026-07-23). Do NOT run locally on the dev node (decision 2026-07-22) — slurm only;
+  environment setup on the cluster is part of this task.
 - [x] **Settle the venue** (plan §10 Q1).
   **Result (2026-07-22): arXiv-first.** Write the strongest self-contained preprint;
   choose the submission venue after results freeze. Identifiability rigor at
   proposition level unless the eventual venue demands more.
+
+### Strategic gates (resolve before Phase 1 numbers freeze)
+
+From the 2026-07-23 positioning memos (`notes/discussion/north-star-and-positioning.md`,
+`method-soundness-and-prior-art.md`). Sequenced: audit first, then the spike, then decide.
+
+- [ ] **ST0 prior-art audit (four fields).** Position the work against the four mature
+  literatures the ST0 desk work skipped: **NILM** (non-intrusive load monitoring),
+  **spectrum-sensing / LPI–LPD detection**, **power side-channel analysis** (DPA/CPA),
+  and **covert-communication / steganography** (the warden game). Cheap desk work; it
+  either hands us tools or surfaces the paper that already did this. This is the canonical
+  home for the still-unowned "novelty audit" referenced in Phase 1; it is a §1 related-work
+  prerequisite and gates the lower-bound spike below.
+- [ ] **Lower-bound feasibility spike (the kill/continue gate).** Time-boxed: is a
+  TV/KL (covertness) lower bound on hiding cost derivable for even one attack family
+  (e.g. i.i.d. phase jitter)? Anchor it in the physics (hiding synchronous all-reduce is
+  communication-bound and costly), with the TV/KL machinery as the formal wrapper — a
+  purely generator-internal bound is still conditional on the generator. **Outcome is a
+  hard fork on claim strength:** bound exists ⇒ contribution, frame as "must pay ≥ X";
+  no bound ⇒ position paper, frame as "evidence + upper bound on hideability, necessary
+  conditions only." Feeds the Phase 4 identifiability section (plan §10 Q2).
 
 ---
 
@@ -82,7 +106,8 @@ pre-registered criteria closed. Full record: `notes/results/st1-findings.md`, `h
 **Still open before Phase 1 numbers freeze / merge:** (i) slurm S=999/M=10⁴ surrogate
 confirmation incl. stage-6 non-Gaussian nulls + stage 3 (removes the provisional footnote);
 (ii) `check-refs` / `check-arxiv-llm-compliance` over the new prose + 4 new bib entries;
-(iii) novelty audit (still unowned; §1 related-work prerequisite). PDF not built locally
+(iii) the ST0 prior-art audit (four fields — see Strategic gates above; §1 related-work
+prerequisite). PDF not built locally
 (no TeX toolchain on the dev node) — verified statically (figures on disk, cite keys
 resolve, labels/refs consistent, environments balanced).
 
@@ -100,6 +125,11 @@ resolve, labels/refs consistent, environments balanced).
   nominal 20 Hz channel and the 1 Hz integrating sampler, plus notch depth/Q, honest
   training only; locate where each detector class dies. CPU-only synthetic; run as a
   slurm array.
+- [ ] **(Optional, non-blocking) NP-optimal LRT ceiling in the bake-off.** We have the
+  generator, so compute/approximate the Neyman–Pearson optimal detector between the
+  training and null generators and report the corpus-free surrogate detector as a
+  fraction of it ("X% of NP-optimal power at Y% of the information cost"). Quantifies
+  "is our detector good" — not a pre-gate (decision 2026-07-23).
 - [ ] Rung 2: stated inference null; three decision rules; semantic falsification
   controls (periodic inference, gradient-only, discarded-update decoy, training-shaped
   non-ML loop, controller cycle, async training, co-resident mixtures); transfer / domain

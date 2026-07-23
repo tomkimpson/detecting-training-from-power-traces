@@ -167,10 +167,13 @@ thesis (§1).** If a figure does not defend a clause, it is a satellite.
    training. Ceiling stated explicitly (periodic confounds, superposition, shaping,
    die-to-meter attenuation).
 2. **The de-periodicisation frontier — the money figure and the genuine novel result.**
-   Lead with the counterintuitive finding already in hand: work-varying jitter moves
-   the cadence at ≈ zero throughput cost (within noise), whereas idle-insertion jitter
-   costs 15–680% throughput and makes detection *easier*. That asymmetry is the most
-   interesting thing in the project.
+   The candidate lead is the counterintuitive finding in hand: work-varying jitter
+   *appears* to move the cadence at ≈ zero throughput cost (within noise), whereas
+   idle-insertion jitter costs 15–680% throughput and makes detection *easier*. Treat
+   that asymmetry as **provisional** — the work-jitter line-band numbers ride the `B`
+   component and must be requalified on the slurm number-freeze pass
+   (`notes/results/issue54-investigation.md`). Stay agnostic about which finding leads
+   until the frozen results are in; whatever survives requalification is the lead.
 3. **Rung 2 — conditional classification**, with the **semantic decoy** as the honest
    limit (training-shaped execution without retained training scores as training ⇒ the
    meter certifies physical training-*likeness*, not semantic training).
@@ -227,10 +230,10 @@ following, or it is only "robust to the attacks we tried," not robust:
    requires breaking synchronous gradient exchange, which is communication-bound and
    therefore costly") is worth more than one more attack in the sweep.
 
-**Recommended next strategic step:** pressure-test *this specific question* (is the
-synthetic evidence base enough, and can we get any lower bound?) adversarially — e.g.
-via `/research-strategy` or `/science-council` — before pouring Phase 1 writing effort
-in. That is the real kill/continue gate.
+**Recommended next strategic step:** resolve *this specific question* (is the
+synthetic evidence base enough, and can we get any lower bound?) before pouring Phase 1
+writing effort in — via the ST0 prior-art audit first, then a time-boxed lower-bound
+feasibility spike (§8.2). That is the real kill/continue gate.
 
 ---
 
