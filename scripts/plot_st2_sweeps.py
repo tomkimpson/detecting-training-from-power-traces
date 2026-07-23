@@ -12,6 +12,10 @@ Reproduce:
     python scripts/plot_st2_sweeps.py --smoke        # 2 levels x 8 traces
 Output:
     results/st2/<family>_summary.json ; figures/st2_<family>.png/.pdf
+
+Slurm array (one family per task): --list prints the families + count;
+--array-id N sweeps only family N (falls back to SLURM_ARRAY_TASK_ID). See
+scripts/slurm/st2_sweeps.sbatch.
 """
 
 from __future__ import annotations
@@ -20,6 +24,7 @@ import argparse
 import dataclasses
 import json
 import multiprocessing
+import os
 import pathlib
 import sys
 import time
@@ -199,7 +204,31 @@ def main() -> None:
     ap.add_argument("--detectors", choices=("base", "full"), default="full",
                     help="'base' = spectral+viterbi (pre-ST1); 'full' adds "
                          "mtf and the DG order detectors (task 20.9)")
+    ap.add_argument("--list", action="store_true",
+                    help="print the family list and count, then exit (use to "
+                         "size a Slurm --array range)")
+    ap.add_argument("--array-id", type=int, default=None,
+                    help="sweep only family index N of FAMILY_ORDER (overrides "
+                         "--families / SLURM_ARRAY_TASK_ID) — one family per task")
     args = ap.parse_args()
+
+    if args.list:
+        for i, fam in enumerate(FAMILY_ORDER):
+            print(f"{i:3d}  {fam}")
+        print(f"{len(FAMILY_ORDER)} families")
+        return
+
+    # Array mode: one family per Slurm task. Each family writes its own summary
+    # JSON independently, so concurrent array tasks never race.
+    env_id = os.environ.get("SLURM_ARRAY_TASK_ID")
+    array_id = args.array_id if args.array_id is not None else (
+        int(env_id) if env_id is not None else None)
+    if array_id is not None:
+        if not 0 <= array_id < len(FAMILY_ORDER):
+            raise SystemExit(f"array id {array_id} out of range "
+                             f"[0, {len(FAMILY_ORDER)})")
+        args.families = [FAMILY_ORDER[array_id]]
+        print(f"array family {array_id}/{len(FAMILY_ORDER)}: {args.families[0]}")
 
     p = dataclasses.replace(DEFAULT.st2, n_each=args.n_each, seed=args.seed)
     if args.smoke:
