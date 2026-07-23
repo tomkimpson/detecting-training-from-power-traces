@@ -49,13 +49,42 @@ pre-registered criteria closed. Full record: `notes/results/st1-findings.md`, `h
 
 ---
 
-## Phase 1 — Rung 1 full (NEXT)
+## Phase 1 — Rung 1 full (IN PROGRESS — prose written; number-freeze pending slurm)
 
-- [ ] Qualified multitaper F-test (benign) + tracked-cyclostationary (adaptive) on the
+- [x] Qualified multitaper F-test (benign) + tracked-cyclostationary (adaptive) on the
   scenario model, both adversary settings.
-- [ ] Null-validity validation section wording from `notes/results/st1-findings.md`.
-- [ ] Pre-registered detector bake-off → paper §4 / Appendix A.
-- [ ] Wire the ST1 figures (calibration, bake-off, power) into `paper/main.tex`.
+  **Result:** `paper/main.tex` §4 written — `subsec:benign` (Thomson multitaper F-test,
+  approx-pivotal caveat, search correction, analytic Bonferroni anti-conservative ~3.6–6×
+  ⇒ ranking-only, matched-filter comparator, foreshadows mtf's zero wander-power) and
+  `subsec:tracked` (three-component pipeline; fixed-α χ²₂ₗ scoped; open validity issues;
+  explicit non-CFAR disclaimer). §4 intro states the Rung-1 wording discipline
+  (evidence-not-identification; controller counterexample).
+- [x] Null-validity validation section wording from `notes/results/st1-findings.md`.
+  **Result:** `subsec:st1` written — staged design, level-safety everywhere (no stage-5/6
+  inflation), the three deltas (resampling ~3.4× deflation / estimated-warp nil /
+  path-selection no inflation), covariance decision axis (b=54 repairs stage 4 but breaks
+  stage-1 anchor ⇒ no end-to-end analytic calibration), surrogate calibration exact on
+  tested nulls, controller as attribution boundary, honest reframe. Surrogate numbers
+  carry a `\footnote` marking them provisional (partial M=1000/S=199 grid) pending the
+  slurm S=999/M=10⁴ confirmation.
+- [x] Pre-registered detector bake-off → paper §4 / Appendix A.
+  **Result:** `app:bakeoff` written with `tab:bakeoff` (TPR@1e-2 by detector × drift vs
+  inference and mixed-structural negatives, from `bakeoff_summary.json`) + hard-case and
+  power-boundary prose; the three findings (tracking necessary; only DG order family
+  separates the confuser; semi-coherent dominates).
+- [x] Wire the ST1 figures (calibration, bake-off, power) into `paper/main.tex`.
+  **Result:** `st1_calibration_far` + `st1_calibration_cov` wired into `subsec:st1`
+  (`fig:st1_far`, `fig:st1_cov`); `st1_bakeoff` into Appendix A (`fig:st1_bakeoff`).
+  Section-4 + App-A checklists removed for the written items. 3 references added to
+  `references.bib` (Thomson 1982, Percival & Walden 1993, Dandawaté–Giannakis 1994,
+  Bonnardot 2005 tacholess) — flagged for `check-refs` before arXiv push.
+
+**Still open before Phase 1 numbers freeze / merge:** (i) slurm S=999/M=10⁴ surrogate
+confirmation incl. stage-6 non-Gaussian nulls + stage 3 (removes the provisional footnote);
+(ii) `check-refs` / `check-arxiv-llm-compliance` over the new prose + 4 new bib entries;
+(iii) novelty audit (still unowned; §1 related-work prerequisite). PDF not built locally
+(no TeX toolchain on the dev node) — verified statically (figures on disk, cite keys
+resolve, labels/refs consistent, environments balanced).
 
 ## Phase 2 — Frontier (full) + Rung 2
 
