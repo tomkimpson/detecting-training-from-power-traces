@@ -118,12 +118,23 @@ From the 2026-07-23 positioning memos (`notes/discussion/north-star-and-position
 
 **Still open before Phase 1 numbers freeze / merge:** (i) slurm S=999/M=10⁴ surrogate
 confirmation incl. stage-6 non-Gaussian nulls + stage 3 (removes the provisional footnote);
-(ii) `check-refs` / `check-arxiv-llm-compliance` over the new prose + 4 new bib entries;
-(iii) ST0 prior-art audit — **done** (`notes/discussion/st0-prior-art-audit.md`); the §1
-related-work section (own section per the audit's recommendation) + its 8 bib entries are
-now a Phase-1 write-up follow-up rather than an open prerequisite. PDF not built locally
+(ii) `check-refs` / `check-arxiv-llm-compliance` over the new prose + the now **12** new
+bib entries (4 Rung-1 method + 8 ST0 related-work). PDF not built locally
 (no TeX toolchain on the dev node) — verified statically (figures on disk, cite keys
 resolve, labels/refs consistent, environments balanced).
+
+- [x] **ST0 related-work section written** (follow-up to the prior-art audit).
+  **Result:** `\section{Related work}` (`sec:related`) added to `paper/main.tex` between
+  §1 and the threat-model section — four `\paragraph`s (NILM; spectrum sensing / LPI–LPD;
+  power side-channel; covert-comms / steganography) framing the contribution as *the
+  question, the adversary, and the channel, not the detectors*, and cross-linking the
+  Rung-1 bake-off (`sec:structural`/`app:bakeoff`), frontier (`sec:frontier`), and
+  identifiability (`sec:threat`). 8 verified bib entries added to `references.bib`
+  (`hart1992nilm`, `zoha2012nilm`, `yucek2009spectrum`, `kocher1999dpa`, `brier2004cpa`,
+  `chari2002template`, `bash2013covert`, `cachin2004steganography`) — flagged for
+  `check-refs` before arXiv. §1 Related-work checklist item removed. Verified statically
+  (all cite keys + crefs resolve, checklist envs balanced 9/9); PDF not built (no TeX
+  toolchain on the dev node).
 
 ## Phase 2 — Frontier (full) + Rung 2
 
