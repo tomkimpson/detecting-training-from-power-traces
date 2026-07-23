@@ -26,6 +26,7 @@
     "spectral",
     "viterbi"
   ],
+  "environment": "canonical: MATS `compute` partition, single-threaded OpenBLAS. Marginal/dead-cell AUCs are BLAS-build-conditional (up to ~0.3 swing on a different OpenBLAS at the same seed); the live-region boundary (the minimum meter specification) is not.",
   "grid": {
     "sample_hz_grid": [
       20.0,

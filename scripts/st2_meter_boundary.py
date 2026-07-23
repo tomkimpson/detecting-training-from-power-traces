@@ -18,6 +18,7 @@ Usage:
     python scripts/st2_meter_boundary.py --jobs 8          # single node, full grid
     SLURM_ARRAY_TASK_ID=0 python scripts/st2_meter_boundary.py  # one cell (array)
     python scripts/st2_meter_boundary.py --smoke           # tiny end-to-end check
+                                                           # (-> meter_boundary_smoke_*)
     python scripts/st2_meter_boundary.py --list            # print cells + count
 """
 
@@ -31,6 +32,7 @@ import os
 import pathlib
 import sys
 import time
+from collections import namedtuple
 from multiprocessing import Pool
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
@@ -45,8 +47,22 @@ from powerladder.typeb.meter_boundary import (  # noqa: E402
 )
 
 RESULTS_DIR = pathlib.Path(__file__).resolve().parent.parent / "results" / "st2"
-RAW_DIR = RESULTS_DIR / "meter_boundary_raw"
-SUMMARY_PATH = RESULTS_DIR / "meter_boundary_summary.json"
+
+# Output-path bundle: the real sweep and the --smoke plumbing check write to
+# DISJOINT locations so a smoke run can never touch the tracked full-grid
+# artifact (its truncated grid shares cell names with the real grid).
+OutPaths = namedtuple("OutPaths", ["raw_dir", "summary_path", "lock_path"])
+
+REAL_PATHS = OutPaths(
+    raw_dir=RESULTS_DIR / "meter_boundary_raw",
+    summary_path=RESULTS_DIR / "meter_boundary_summary.json",
+    lock_path=RESULTS_DIR / ".meter_boundary.lock",
+)
+SMOKE_PATHS = OutPaths(
+    raw_dir=RESULTS_DIR / "meter_boundary_smoke_raw",
+    summary_path=RESULTS_DIR / "meter_boundary_smoke_summary.json",
+    lock_path=RESULTS_DIR / ".meter_boundary_smoke.lock",
+)
 
 
 def smoke_params(p: St2MeterBoundaryParams) -> St2MeterBoundaryParams:
@@ -72,6 +88,12 @@ def summary_skeleton(p: St2MeterBoundaryParams) -> dict:
         "sigma_eta": p.sigma_eta,
         "detector_classes": {"tracking": list(TRACKING), "fixed": list(FIXED)},
         "detectors": sorted(full_detector_set()),
+        "environment": (
+            "canonical: MATS `compute` partition, single-threaded OpenBLAS. "
+            "Marginal/dead-cell AUCs are BLAS-build-conditional (up to ~0.3 "
+            "swing on a different OpenBLAS at the same seed); the live-region "
+            "boundary (the minimum meter specification) is not."
+        ),
         "grid": {
             "sample_hz_grid": list(p.sample_hz_grid),
             "integ_window_grid": list(p.integ_window_grid),
@@ -83,39 +105,47 @@ def summary_skeleton(p: St2MeterBoundaryParams) -> dict:
     }
 
 
-def _merge_cell(record: dict, p: St2MeterBoundaryParams) -> None:
+def _merge_cell(record: dict, p: St2MeterBoundaryParams, paths: OutPaths) -> None:
     """flock-guarded merge of one cell record into the summary.
 
     The summary is a deterministic aggregate keyed by cell name — merging is
     idempotent (a re-run replaces the cell in place), so a crashed array leaves
     a rebuildable partial file.
+
+    Refuses to merge into a summary whose header ``n_each`` disagrees with this
+    run's: cell values are only comparable at a common ``n_each``, so a mixed-n
+    merge would silently corrupt the aggregate under an inconsistent header.
     """
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    lock_path = RESULTS_DIR / ".meter_boundary.lock"
-    with open(lock_path, "w") as lk:
+    with open(paths.lock_path, "w") as lk:
         fcntl.flock(lk, fcntl.LOCK_EX)
         try:
-            if SUMMARY_PATH.exists():
-                summary = json.loads(SUMMARY_PATH.read_text())
+            if paths.summary_path.exists():
+                summary = json.loads(paths.summary_path.read_text())
+                if summary.get("n_each") != p.n_each:
+                    raise SystemExit(
+                        f"refusing to merge into {paths.summary_path.name}: "
+                        f"existing n_each={summary.get('n_each')} != run "
+                        f"n_each={p.n_each} (mixed-n merge would corrupt it)")
             else:
                 summary = summary_skeleton(p)
             cells = [c for c in summary["cells"] if c["cell"] != record["cell"]]
             cells.append(record)
             cells.sort(key=lambda c: c["cell"])
             summary["cells"] = cells
-            SUMMARY_PATH.write_text(json.dumps(summary, indent=2))
+            paths.summary_path.write_text(json.dumps(summary, indent=2))
         finally:
             fcntl.flock(lk, fcntl.LOCK_UN)
 
 
 def _run_and_persist(spec) -> dict:
     """Worker: run one cell, persist its raw JSON + merge into the summary."""
-    cell_name, mp, p = spec
+    cell_name, mp, p, paths = spec
     t0 = time.time()
     record = run_meter_cell(cell_name, mp, p, DEFAULT.ko, DEFAULT.ko_typeb)
-    RAW_DIR.mkdir(parents=True, exist_ok=True)
-    (RAW_DIR / f"{cell_name}.json").write_text(json.dumps(record, indent=2))
-    _merge_cell(record, p)
+    paths.raw_dir.mkdir(parents=True, exist_ok=True)
+    (paths.raw_dir / f"{cell_name}.json").write_text(json.dumps(record, indent=2))
+    _merge_cell(record, p, paths)
     tpr = {det: per_far[f"{p.target_fars[0]:g}"]
            for det, per_far in record["tpr_at_far"].items()}
     print(f"  cell {cell_name}: {time.time() - t0:.1f}s  "
@@ -129,7 +159,9 @@ def main(argv=None) -> None:
     ap.add_argument("--jobs", type=int, default=1,
                     help="multiprocessing pool size over cells (single node)")
     ap.add_argument("--smoke", action="store_true",
-                    help="tiny grid (2x2 + 1 notch, n_each=8) — plumbing check")
+                    help="tiny grid (2x2 + 1 notch, n_each=8) — plumbing check; "
+                         "writes to meter_boundary_smoke_* (never the tracked "
+                         "full-grid summary)")
     ap.add_argument("--list", action="store_true",
                     help="print the cell list and count, then exit")
     ap.add_argument("--array-id", type=int, default=None,
@@ -137,8 +169,10 @@ def main(argv=None) -> None:
     args = ap.parse_args(argv)
 
     p = DEFAULT.st2_meter_boundary
+    paths = REAL_PATHS
     if args.smoke:
         p = smoke_params(p)
+        paths = SMOKE_PATHS
     cells = meter_grid(p)
 
     if args.list:
@@ -158,10 +192,10 @@ def main(argv=None) -> None:
                              f"[0, {len(cells)})")
         name, mp = cells[array_id]
         print(f"array cell {array_id}/{len(cells)}: {name}")
-        _run_and_persist((name, mp, p))
+        _run_and_persist((name, mp, p, paths))
         return
 
-    specs = [(name, mp, p) for name, mp in cells]
+    specs = [(name, mp, p, paths) for name, mp in cells]
     print(f"running {len(specs)} cells at n_each={p.n_each} "
           f"with {args.jobs} job(s)")
     t0 = time.time()
@@ -171,7 +205,7 @@ def main(argv=None) -> None:
     else:
         for s in specs:
             _run_and_persist(s)
-    print(f"grid done in {time.time() - t0:.1f}s; wrote {SUMMARY_PATH}")
+    print(f"grid done in {time.time() - t0:.1f}s; wrote {paths.summary_path}")
 
 
 if __name__ == "__main__":

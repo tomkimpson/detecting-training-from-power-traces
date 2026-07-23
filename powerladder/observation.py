@@ -75,8 +75,9 @@ def _notch(x: np.ndarray, fs: float, notch_hz: float, q: float,
 
     ``depth`` linearly interpolates between the unfiltered signal and the full
     ``iirnotch`` null: ``x + depth * (notch(x) - x)``. ``depth == 1.0`` is the
-    full null (byte-identical to a bare filtfilt); ``depth == 0.0`` is the
-    identity; intermediate values give a partial anti-resonance.
+    full null (equal up to rounding to a bare filtfilt — the blend reassociates
+    the arithmetic, so ~1e-16 off, far below any physical scale); ``depth ==
+    0.0`` is the identity; intermediate values give a partial anti-resonance.
     """
     b, a = iirnotch(notch_hz, q, fs=fs)
     notched = filtfilt(b, a, x)

@@ -78,3 +78,12 @@ one.
   attack budget. It states what the verifier must be able to observe, orthogonal
   to the de-periodicisation frontier (which holds the channel fixed and moves the
   workload).
+- **Canonical environment / cross-BLAS reproducibility.** The committed summary
+  was generated on the MATS `compute` partition with single-threaded OpenBLAS
+  (slurm array 5498; recorded in the summary's `environment` field). Regenerating
+  at the identical `seed = 0`, `n_each = 200` on a *different* OpenBLAS build can
+  shift some cells by up to ~0.3 AUC — but these swings hit only the dead /
+  marginal cells (mtf everywhere ≈ 0; dg_order_full at iw = 2). Every one of the
+  16 live tracking cells in the `fs ≥ 2 ∧ iw ≤ 0.5` box stays ≥ 0.9, so the
+  minimum-meter *specification* is environment-invariant even though individual
+  marginal/dead-cell AUCs are environment-conditional.
