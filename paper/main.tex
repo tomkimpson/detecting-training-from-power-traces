@@ -343,85 +343,204 @@ adopted vs constructed.}
 \label{sec:structural}
 % ============================================================================
 
-\begin{checklist}
-	\item \cbx \textbf{Benign baseline} (plan \S3.1): multitaper harmonic
-	F-test (Thomson), stated as \emph{approximately pivotal under a stationary,
-	locally smooth spectral null} --- not an exact false-alarm guarantee;
-	search correction for unknown frequency/harmonic family; spectral matched
-	filter / peak-PSD as the simple comparator. Message: the benign case is
-	easy, so the paper is not about the benign case.
-	\item \cbx \textbf{Adaptive pipeline} (plan \S3.2), three components:
-	tracker $\hat f_0(t)$ (Viterbi / ridge / synchrosqueezing --- settle via
-	ST1 bake-off, plan \S10 Q3); phase resampling
-	$\hat\theta(t) = 2\pi \int \hat f_0$ (tacholess order tracking);
-	Dandawat\'e--Giannakis cyclostationary test on the de-warped signal.
-	\item \cbx \textbf{Maths}: $Q_\alpha$ statistic and its fixed-$\alpha$
-	asymptotic $\chi^2$ null, with every assumption scoped (weak dependence,
-	consistent covariance estimation, regularity). \emph{Never} write
-	``analytic CFAR'' for the full adaptive pipeline until shown.
-	\item \cbx \textbf{ST1 null-validity results} (the make-or-break gate,
-	plan \S6): the staged design (fixed $\alpha$; known warp; held-out warp;
-	fully adaptive; Gaussian/coloured/non-Gaussian/locally-stationary/
-	controller-like nulls; length/lag/bandwidth/search sweeps; full-pipeline
-	surrogate comparison). Open issues to resolve: path selection
-	(look-elsewhere over tracker paths), estimated-warp effects on the null,
-	sample splitting, covariance-estimator stability, finite-sample vs
-	asymptotic scoping, what surrogates do and do not calibrate.
-	\item \cbx \textbf{Fallback wording ready}: if calibration cannot be
-	defended, reframe as an effective score requiring empirical calibration.
-	\item \cbx \textbf{No sequential claim}: fixed-horizon only; the
-	e-process/anytime-valid extension is deferred (plan \S9) --- at most a
-	future-work sketch with its conditional-null requirements.
-	\item \cbx \textbf{Rung 1 wording discipline} (plan \S1.4): the test
-	establishes coherent repeated power structure under a stated structural
-	null; interpretation as repeated multi-phase computation additionally
-	requires the nuisance model excluding periodic physical confounds (the
-	measured A100 controller oscillation is the motivating counterexample).
-	\item \cbx \textbf{Figure}: realised false-alarm rate (with uncertainty,
-	at operationally small nominal levels --- not only $0.05$) across the ST1
-	staged nulls, per pipeline stage.
-	\item \cbx \textbf{Figure}: detection power, benign vs adaptive setting,
-	on the scenario model.
-	\item \cbx \textbf{Table}: bake-off summary (fixed harmonic F, fixed
-	matched filter, Viterbi/ridge, order-folded, cyclostationary) ---
-	pre-registered protocol in \cref{app:bakeoff}.
-	\item \cbx \textbf{Code}: pipeline implementation in code/; ST1 experiment
-	scripts; results under results/ with configs.
-\end{checklist}
+Rung 1 asks the weakest question on the ladder: does the trace carry
+order-coherent power variation that a stated structural null does not produce?
+Rejecting the null establishes \emph{coherent repeated power structure}, not
+training: reading that structure as repeated multi-phase computation
+additionally requires the nuisance model of \cref{sec:threat} that excludes
+periodic physical confounds, of which the measured A100 power-controller
+oscillation (\cref{sec:reality}) is the standing counterexample. Rung 1 is
+evidence, not identification. We treat two prover settings in turn: a benign
+prover whose cadence is stationary, and an adaptive prover who lets the cadence
+wander to hide it. The benign case is easy, and the paper is not about the
+benign case; the adaptive case is the methodological heart, and the burden of
+this section is to show that its detector has a defensible null.
 
 \subsection{Benign setting: the qualified baseline}
 \label{subsec:benign}
-\todo[inline]{Multitaper F-test + search correction; matched-filter
-comparator; why the benign case is easy.}
+
+When the cadence is stationary, a repeated iteration structure appears as a
+line, or a harmonic comb, in the power spectrum, and the natural test is the
+Thomson multitaper harmonic F-test \citep{thomson1982multitaper,
+percival1993spectral}. At a fixed frequency $f$ the statistic $F(f)$ is
+distributed as $F(2, 2K-2)$ under a locally smooth Gaussian spectral null with
+$K$ tapers, so the test is \emph{approximately pivotal under a stationary,
+locally smooth spectral null}. It is not an exact false-alarm guarantee across
+arbitrary external power traces: coloured baselines, controller interference,
+and co-resident load all violate the local-smoothness premise. Because the
+prover's cadence is not known a priori, the test must search a band of
+candidate frequencies and harmonics, which requires a search correction.
+
+The analytic correction is itself unreliable. Sweeping the padded frequency
+grid and applying a Bonferroni correction over the Rayleigh-resolution cell
+count is \emph{anti-conservative by a factor of roughly $3.6$--$6\times$},
+uniformly across our null suite: the maximum of $F$ over the padded grid
+behaves like about five times more effective independent tests than the
+Rayleigh count, because the $F$ ratio fluctuates below the Rayleigh scale. The
+analytic multitaper tail is therefore usable only as a ranking statistic; its
+operative false-alarm calibration is the Monte-Carlo one supplied by the
+harness of \cref{subsec:st1}. A spectral matched filter (peak PSD at the
+searched cadence) serves as the simple comparator. Both are honest baselines
+for a stationary line, and both fail the moment the line wanders: as the
+bake-off of \cref{app:bakeoff} shows, the fixed multitaper F-test retains
+essentially no usable detection power once the cadence drifts, which is exactly
+why the adaptive setting needs a different detector.
 
 \subsection{Adaptive setting: tracked cyclostationary detection}
 \label{subsec:tracked}
-\todo[inline]{Skeleton math below; each component has one job --- the tracker
-estimates a nuisance parameter, it is not the detector.}
-The instantaneous cycle frequency $\hat f_0(t)$ is estimated by a tracker;
-the phase estimate
+
+An adaptive prover breaks the benign baselines cheaply by letting the cycle
+frequency wander, smearing the line across the searched band. We restore
+coherence by estimating the wander and undoing it before testing. The detector
+has three components, each with one job. First, a tracker estimates the
+instantaneous cycle frequency $\hat f_0(t)$ from the time--frequency plane; the
+tracker is a nuisance-parameter estimator, \emph{not} the detector. Second, the
+phase estimate
 \begin{equation}
 	\hat\theta(t) \;=\; 2\pi \int_0^t \hat f_0(s)\,\mathrm{d}s
 	\label{eq:phase}
 \end{equation}
-defines a resampling of the trace at equal increments of $\hat\theta$, so a
-wandering line becomes a constant-order line; the de-warped signal is then
-tested for cyclostationarity at candidate cycle frequency $\alpha$ with the
-Dandawat\'e--Giannakis statistic
+defines a resampling of the trace at equal increments of $\hat\theta$
+(tacholess order tracking \citep{bonnardot2005tacholess}), so a wandering line
+becomes a constant-order line. Third, the de-warped signal is tested for
+cyclostationarity at candidate cycle frequency $\alpha$ with the
+Dandawat\'e--Giannakis statistic \citep{dandawate1994cyclostationarity}
 \begin{equation}
 	Q_\alpha \;=\; N\, \hat r_\alpha^{\mathsf{H}}\, \hat\Sigma_\alpha^{-1}\, \hat r_\alpha,
 	\label{eq:dg}
 \end{equation}
-which for a \emph{fixed} $\alpha$ is asymptotically $\chi^2$ under the stated
-structural null, given weak dependence, consistent covariance estimation, and
-regularity. Those conditions do not automatically cover the complete adaptive
-pipeline; \cref{subsec:st1} reports what survives.
+where $\hat r_\alpha$ collects the estimated cyclic autocovariances at lags
+$\tau$ and $\hat\Sigma_\alpha$ is a consistent estimate of their long-run
+covariance. For a \emph{fixed} $\alpha$, $Q_\alpha$ is asymptotically
+$\chi^2_{2L}$ under the structural null, given weak dependence, consistent
+covariance estimation, and regularity.
+
+Those conditions do not automatically cover the complete adaptive pipeline. The
+tracker performs an effective search over frequency paths (a look-elsewhere
+effect); the time warp is estimated from the same record it tests; the
+covariance estimator $\hat\Sigma_\alpha$ must be chosen; and the asymptotic
+$\chi^2$ tail may be a poor guide at finite length. Whether the null survives
+these steps --- and in what form it can be claimed --- is the make-or-break
+question of \cref{subsec:st1}. We do not call the adaptive pipeline an analytic
+CFAR detector; \cref{subsec:st1} establishes what it is instead.
 
 \subsection{Null validity of the complete pipeline}
 \label{subsec:st1}
-\todo[inline]{ST1 results: staged isolation of each adaptive ingredient;
-realised FAR with uncertainty; go/no-go outcome and the honest framing that
-follows.}
+
+The question is whether the adaptive pipeline has a null we can defend. We
+answer it with a staged design that isolates each adaptive ingredient in turn,
+crossed with a graded suite of nulls, and measured by the realised false-alarm
+rate at operationally small nominal levels --- not only $0.05$. The four stages
+add one adaptive step at a time: (1) a fixed cyclic frequency $\alpha$ with no
+resampling; (2) resampling under a \emph{known} independent time warp; (3) a
+warp \emph{estimated} on held-out blocks and scored only on the complement; and
+(4) the fully adaptive full-trace Viterbi tracker. The null suite grades from
+stationary Gaussian and coloured processes (white, AR(1), a resonant AR(2)),
+through stationary non-Gaussian processes (heavy-tailed, skewed, squared
+Gaussian), to locally stationary and controller-like processes (a
+Van~der~Pol--type power-management limit cycle mimicking the measured A100
+controller). Each cell draws $M=10^4$ null traces; realised rates carry
+Clopper--Pearson $95\%$ intervals. \Cref{fig:st1_far} shows the whole grid.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\linewidth]{st1_calibration_far}
+	\caption{Realised versus nominal false-alarm rate for the adaptive
+	pipeline (Dandawat\'e--Giannakis with a Bartlett HAC covariance), one panel
+	per stage, every null in the suite, with Clopper--Pearson $95\%$ intervals;
+	nulls are coloured by stage group. No stationary null exceeds the nominal
+	rate at any stage: the two-sided miss is \emph{deflation}, never
+	inflation.}
+	\label{fig:st1_far}
+\end{figure}
+
+\paragraph{Level safety holds everywhere.} Across the entire campaign no
+stationary Gaussian, coloured, or non-Gaussian null inflates the realised rate
+at any stage or level: the failure mode the gate was built to catch ---
+adaptivity silently raising the false-alarm rate --- does not occur. On the
+white null the fixed-$\alpha$ stage is near nominal ($0.056$, $0.012$, and
+$0.0013$ at nominal $0.05$, $10^{-2}$, and $10^{-3}$); on coloured and
+non-Gaussian nulls the same stage is strongly conservative (realised rate
+$\approx 0$). Tracing the three adaptive steps on the white null, where the
+fixed-$\alpha$ stage was near nominal, isolates what each one does:
+\begin{itemize}
+	\item \textbf{Resampling alone (stage 1$\to$2)} deflates the rate by about
+	$3.4\times$ ($0.056\to0.016$ at nominal $0.05$). Interpolating onto the
+	angle grid correlates adjacent samples, the Bartlett estimator reads that
+	as extra dependence and inflates $\hat\Sigma_\alpha$, and $Q_\alpha$
+	shrinks. Resampling \emph{colours} the series.
+	\item \textbf{Estimating the warp (stage 2$\to$3)} moves the null nowhere
+	($0.016\to0.016$): the held-out design does what it promises.
+	\item \textbf{Path selection (stage 3$\to$4)} adds no significant
+	inflation ($0.016\to0.018$; every interval pair overlaps). Even on the
+	resonant AR(2) null, which the Viterbi tracker provably locks onto, the
+	fully adaptive stage fires never in $10^4$ traces: locking onto a broad
+	noise resonance does not manufacture the phase-coherent cyclic structure
+	$Q_\alpha$ requires.
+\end{itemize}
+The adaptive pipeline is therefore level-safe end to end. What fails is strict
+two-sided coverage: after resampling the pipeline is uniformly conservative,
+and the null $p$-values are not uniform (Kolmogorov--Smirnov uniformity is
+rejected at every adaptive cell).
+
+\paragraph{No analytic calibration closes the deflation.} We swept the open
+choices --- record length, lag set, taper bandwidth, search band, interpolation
+scheme, and the covariance estimator --- selecting on null-calibration quality
+across the suite, never on power. Only the covariance estimator moves the
+deflation, and it cannot be closed for the whole ladder at once
+(\cref{fig:st1_cov}). Widening the Bartlett bandwidth to $b=54$ repairs the
+adaptive stage two-sided (AR(1) realised $0.050/0.012/0.0016$ across the three
+levels) --- confirming that the deflation is an under-bandwidth artefact of the
+oscillating autocovariance of the resampled series --- but the \emph{same}
+bandwidth breaks the fixed-$\alpha$ anchor, inflating white to $0.073$ at
+nominal $0.05$. No single covariance configuration in the swept family
+calibrates the ladder end to end, and Kolmogorov--Smirnov uniformity is
+rejected at every adaptive sweep point regardless. The asymptotic $\chi^2$ tail
+survives only as a level-safe, power-costing conservative bound; it is not a
+calibration, and we do not report the adaptive pipeline as an analytic CFAR
+detector.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\linewidth]{st1_calibration_cov}
+	\caption{The covariance-estimator sweep is the fix-or-reframe axis:
+	realised rate at nominal $10^{-2}$ versus Bartlett bandwidth $b$ for each
+	shrinkage. The bandwidth that repairs the fully adaptive stage (stage 4)
+	inflates the fixed-$\alpha$ anchor (stage 1). No single configuration
+	calibrates both.}
+	\label{fig:st1_cov}
+\end{figure}
+
+\paragraph{Surrogate calibration recovers the null.} Running the entire
+pipeline --- tracker, resampling, and test --- inside a Fourier-phase surrogate
+null (which preserves the power spectrum and randomises phases, encoding the
+linear-stationary invariance) recovers exact calibration where the asymptotic
+tail was $3$--$6\times$ conservative. On the tested stationary nulls the
+realised rate covers nominal at both the fixed-$\alpha$ and the fully adaptive
+stage (white $0.047/0.009$, AR(1) $0.057/0.014$ at nominal $0.05/10^{-2}$
+fixed-$\alpha$; white $0.050/0.006$, AR(1) $0.049/0.006$ fully adaptive), and
+Kolmogorov--Smirnov uniformity is not rejected --- the property the analytic
+$p$-values never achieved.\footnote{These surrogate numbers rest on a partial
+grid ($M=1000$ null traces, $S=199$ surrogates, stages 1 and 4 only) and do not
+yet cover the stationary non-Gaussian nulls or the held-out-warp stage. A
+confirming run at $S=999$, $M=10^4$ including those cells is pending on a
+compute cluster before any surrogate-calibrated number is frozen; the level-safety
+and bake-off numbers above are already at $M=10^4$.} This is what
+``calibrated'' means throughout the paper: an effective score with per-trace
+surrogate calibration, not an analytic guarantee.
+
+\paragraph{The controller marks the attribution boundary.} The surrogate null
+encodes linear stationarity, so a genuine limit cycle --- which is itself
+cyclostationary --- must and does inflate it: on the measured-controller null
+the surrogate-calibrated rate rises to $0.17$--$0.29$ at nominal $0.05$. This is
+not a defect. The detector correctly reports coherent cyclic structure in a
+controller trace; calling that structure \emph{training} is the causal-attribution
+step that needs the nuisance model of \cref{sec:threat}. The controller is the
+periodic physical confound that Rung~1 alone cannot exclude, and its
+false-alarm behaviour is exactly the ceiling the claim ladder assigns to this
+rung. The separation that Rung~1 \emph{can} deliver --- power against this
+confuser class, not merely against inference --- is quantified by the bake-off
+of \cref{app:bakeoff}.
 
 
 % ============================================================================
@@ -626,17 +745,93 @@ counterexample for Rung 1's nuisance model.}
 \section{Detector bake-off}
 \label{app:bakeoff}
 
-\begin{checklist}
-	\item \cbx \textbf{Pre-registered protocol}: fixed before results, so
-	``we present one method'' is an \emph{outcome}, not a choice.
-	\item \cbx \textbf{Detectors}: fixed harmonic F-test; fixed matched
-	filter; Viterbi/ridge tracker; order-folded statistic; cyclostationary
-	test (and tracker variants: Viterbi vs synchrosqueezing vs Vold--Kalman,
-	plan \S10 Q3).
-	\item \cbx \textbf{Conditions}: the ST1 staged nulls and the ST2 attack
-	sweeps; report realised FAR and power with uncertainty.
-	\item \cbx \textbf{Table}: full results grid.
-\end{checklist}
+The choice of detector for Rung~1 is an \emph{outcome} of a pre-registered
+comparison, not an assumption. Before scoring any signal we fixed the detector
+set, the conditions, and the metric, so that ``we present one method'' is a
+finding rather than a choice. The detector set spans the natural alternatives:
+the fixed multitaper harmonic F-test (\texttt{mtf}); a spectral matched filter;
+the raw Viterbi tracker score; the fixed-$\alpha$ Dandawat\'e--Giannakis
+statistic given the \emph{true} $f_0$ as an oracle; and three variants of the
+tracked order pipeline --- split (held-out warp), full (fully adaptive pooled),
+and semi-coherent (a per-block Fisher combination). We score positives (Ko
+training traces) over a cadence-drift axis $f_0^{\mathrm{drift}} \in
+\{0, 0.1, 0.2, 0.4, 0.8, 1.5\}$~Hz against two negative classes, each with its
+own empirical false-alarm threshold: the modelled inference null, and a mixed
+structural population (equal parts AR(1), heavy-tailed AR(1), and the measured
+controller). With $n=200$ traces per class the $10^{-2}$ threshold rests on the
+second-highest negative score --- a granularity we state rather than hide.
+\Cref{fig:st1_bakeoff} plots the power curves; \cref{tab:bakeoff} gives the
+detection rates at nominal false-alarm rate $10^{-2}$.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\linewidth]{st1_bakeoff}
+	\caption{Detector bake-off on the cadence-drift axis: detection rate at
+	empirical false-alarm rate versus drift, for each detector and both
+	negative classes. Only the tracked order family retains power against the
+	structural negatives; the spectral-shape detectors detect the controller
+	third of the mix more strongly than the signal.}
+	\label{fig:st1_bakeoff}
+\end{figure}
+
+\begin{table}[t]
+	\centering
+	\small
+	\caption{Bake-off detection rate at nominal false-alarm rate $10^{-2}$,
+	by detector and cadence drift (Hz), against the inference null and the
+	mixed structural population ($n=200$ per class).}
+	\label{tab:bakeoff}
+	\begin{tabular}{@{}lcccccc@{}}
+		\toprule
+		Detector & $0$ & $0.1$ & $0.2$ & $0.4$ & $0.8$ & $1.5$ \\
+		\midrule
+		\multicolumn{7}{@{}l}{\emph{vs.\ inference null}}\\
+		\texttt{mtf} (fixed multitaper F) & 0.02 & 0.01 & 0.01 & 0.01 & 0.02 & 0.00 \\
+		spectral matched filter & 0.94 & 0.53 & 0.32 & 0.20 & 0.31 & 0.33 \\
+		Viterbi tracker & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 0.98 \\
+		DG order (split) & 0.28 & 0.17 & 0.04 & 0.01 & 0.01 & 0.01 \\
+		DG order (full) & 0.73 & 0.62 & 0.55 & 0.23 & 0.06 & 0.01 \\
+		DG order (semi-coherent) & 1.00 & 1.00 & 0.97 & 0.56 & 0.07 & 0.01 \\
+		DG fixed-$\alpha$ (oracle $f_0$) & 0.34 & 0.07 & 0.01 & 0.01 & 0.00 & 0.00 \\
+		\midrule
+		\multicolumn{7}{@{}l}{\emph{vs.\ mixed structural nulls}}\\
+		\texttt{mtf} & 0.00 & 0.01 & 0.00 & 0.00 & 0.01 & 0.00 \\
+		spectral matched filter & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+		Viterbi tracker & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
+		DG order (split) & 0.30 & 0.17 & 0.04 & 0.01 & 0.01 & 0.01 \\
+		DG order (full) & 0.80 & 0.70 & 0.61 & 0.31 & 0.10 & 0.01 \\
+		DG order (semi-coherent) & 1.00 & 1.00 & 0.99 & 0.69 & 0.14 & 0.03 \\
+		DG fixed-$\alpha$ (oracle $f_0$) & 0.36 & 0.10 & 0.03 & 0.01 & 0.01 & 0.00 \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+Three findings follow, and they are the reason the main text presents a single
+detector. First, \emph{tracking is necessary}: the oracle fixed-$\alpha$
+statistic, handed the true $f_0$, collapses from $0.34$ at zero drift to
+$\le 0.1$ under any wander --- even the true frequency is useless to a coherent
+fixed-$\alpha$ test once the line moves --- and the fixed multitaper F-test has
+essentially no usable power against either negative class at empirical
+thresholds. Second, \emph{only the tracked order family separates the wandering
+line from structural confounds}. Against the mixed structural negatives the
+matched filter and the raw Viterbi score have detection rate zero at every
+drift: the controller third of the mixture fires them harder than the signal
+does, because a Viterbi score happily locks onto a limit cycle. The hard case
+makes this sharp --- at drift $0.4$~Hz against controller-only negatives the
+order pipeline holds $0.8$--$1.0$ detection at $10^{-2}$ while every
+spectral-shape detector, including the fixed-$\alpha$ oracle, drops to near
+zero. Phase-coherent cyclic structure at the tracked order is the one signature
+the confuser cannot fake; this is the attribution boundary of Rung~1 drawn with
+power, not false-alarm rate. Third, the \emph{semi-coherent variant dominates}
+the pooled statistic at every drift, filling the fast-wander power hole up to
+about $0.4$~Hz while remaining level-safe.
+
+The honest boundary is fast wander. Beyond drift $0.8$~Hz every calibratable
+detector fades (the semi-coherent variant falls to $0.07$--$0.14$ at
+$10^{-2}$); only the raw Viterbi score keeps power against the inference null
+there, and it cannot tell a training run from a controller. A $300$~s record
+does not resolve fast cadence wander with an honest null. This is a scope
+statement for the paper, not a repairable defect.
 
 \section{Identifiability details}
 \label{app:identifiability}
