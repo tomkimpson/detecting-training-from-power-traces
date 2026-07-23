@@ -54,14 +54,27 @@ pre-registered criteria closed. Full record: `notes/results/st1-findings.md`, `h
 
 From the 2026-07-23 positioning memos (`notes/discussion/north-star-and-positioning.md`,
 `method-soundness-and-prior-art.md`). Sequenced: audit first, then the spike, then decide.
+**Audit done (2026-07-23, `notes/discussion/st0-prior-art-audit.md`) — the spike is next.**
 
-- [ ] **ST0 prior-art audit (four fields).** Position the work against the four mature
+- [x] **ST0 prior-art audit (four fields).** Position the work against the four mature
   literatures the ST0 desk work skipped: **NILM** (non-intrusive load monitoring),
   **spectrum-sensing / LPI–LPD detection**, **power side-channel analysis** (DPA/CPA),
   and **covert-communication / steganography** (the warden game). Cheap desk work; it
   either hands us tools or surfaces the paper that already did this. This is the canonical
   home for the still-unowned "novelty audit" referenced in Phase 1; it is a §1 related-work
   prerequisite and gates the lower-bound spike below.
+  **Result:** done (`notes/discussion/st0-prior-art-audit.md`). All four fields covered with
+  verified citations (Hart 1992 + Zoha 2012 NILM; Yücek–Arslan 2009 spectrum sensing;
+  Kocher 1999 / Brier 2004 / Chari 2002 side-channel; Bash–Goeckel–Towsley 2013 + Cachin
+  2004 covert-comms — all need `check-refs` before arXiv). **Subsumption verdict: no field
+  beats or subsumes the tracked-cyclostationary pipeline** — the novelty claim holds
+  (mature detectors applied to a new question, new adversary, new channel); spectrum sensing
+  is the one field to keep scanning for a reusable order-tracking method. **Lower-bound-spike
+  readiness: proceed** — covert-comms hands over the KL/TV machinery (Cachin relative-entropy
+  security; B–G–T square-root law) but *no* existing paper derives the hiding-cost bound for
+  a physics-constrained training schedule over a filtered low-rate meter, so the spike is not
+  pre-empted. Recommends an own `\section{Related work}` organised by the four fields and
+  lists 8 bib keys for the §1 / `references.bib` follow-up.
 - [ ] **Lower-bound feasibility spike (the kill/continue gate).** Time-boxed: is a
   TV/KL (covertness) lower bound on hiding cost derivable for even one attack family
   (e.g. i.i.d. phase jitter)? Anchor it in the physics (hiding synchronous all-reduce is
@@ -106,8 +119,9 @@ From the 2026-07-23 positioning memos (`notes/discussion/north-star-and-position
 **Still open before Phase 1 numbers freeze / merge:** (i) slurm S=999/M=10⁴ surrogate
 confirmation incl. stage-6 non-Gaussian nulls + stage 3 (removes the provisional footnote);
 (ii) `check-refs` / `check-arxiv-llm-compliance` over the new prose + 4 new bib entries;
-(iii) the ST0 prior-art audit (four fields — see Strategic gates above; §1 related-work
-prerequisite). PDF not built locally
+(iii) ST0 prior-art audit — **done** (`notes/discussion/st0-prior-art-audit.md`); the §1
+related-work section (own section per the audit's recommendation) + its 8 bib entries are
+now a Phase-1 write-up follow-up rather than an open prerequisite. PDF not built locally
 (no TeX toolchain on the dev node) — verified statically (figures on disk, cite keys
 resolve, labels/refs consistent, environments balanced).
 
