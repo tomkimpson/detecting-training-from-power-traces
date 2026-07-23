@@ -5,6 +5,40 @@ Dated narrative of work sessions, newest at top. Append-only historical record
 
 ---
 
+## 2026-07-23 — Phase 2: meter-requirement boundary sweep (minimum meter spec)
+
+Built and ran the meter-requirement boundary sweep, the first Phase 2 deliverable.
+The design insight was that this is the ST2 `meter` family with a dense 2-D grid in
+place of four named variants — so almost nothing new was needed on the scoring side:
+`meter_grid` + a crc-seeded `run_meter_cell` reuse `make_positive/negative_population`
+(family="meter"), `gate.score_population`, and `roc.{auc,tpr_at_far}`. The only
+library change was a backward-compatible `notch_depth` blend knob on `MeterParams`
+(default 1.0 = the existing full null, so the exact-no-op / zero-RNG invariant and all
+existing tests are untouched). The compute driver follows the `st1_far.py` idiom:
+one cell per Slurm-array task, crash-safe per-cell JSON + flock-merged summary.
+
+Ran it as a 48-cell array on MATS `compute` (job 5498, n_each=200, all COMPLETED in
+~6 min wall). The result is a clean, interpretable boundary and — the satisfying part
+— it *decomposes* the committed `integrating_1hz` two-point finding: sampling below
+~2 Hz **or** an integration window above ~0.5 s each independently kills the tracking
+class (Viterbi/spectral), so the original hostile variant was over-determined. fs=0.5
+Hz is total death (band above Nyquist, AUC 0.5); a deep in-band notch at the cadence
+centre only halves detection (a single notch can't remove a line that wanders across
+0.5–1.5 Hz). The DG-order methods are the fragile class (0.77 even at the reference);
+the fixed multitaper F is ~0 everywhere, its known zero-wander-power, not a boundary.
+Minimum meter spec: sample ≥ ~2 Hz AND integrate ≲ 0.5 s AND no deep in-band notch.
+
+Environment note: created the first CPU venv on the dev node (`.venv`, gitignored) to
+run tests + `--smoke`; the full sweep still went to slurm. Discovered that 5
+`ko_workload` byte-identity/prechange-digest tests fail on this fresh venv — verified
+environmental (they fail identically on base `f43aed2`), a BLAS-build float
+difference against digests baked in the monorepo. New baseline: 5 failed, 171 passed
+(the old "4 sklearn failures" are gone). Flagged for regeneration before the number
+freeze. Branch `feat/phase2-meter-boundary`, not yet merged. Paper wiring deferred to
+Phase 4; the other two Phase-2 sub-tasks (frontier full-res, Rung 2) remain.
+
+---
+
 ## 2026-07-22 (later) — Plan iteration: three scope decisions locked
 
 Reviewed `spec.md`/`tasks.md` against the intended paper outline and the plan/review

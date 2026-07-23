@@ -504,6 +504,12 @@ class MeterParams:
     # network). None = no notch; notch_q is the quality factor.
     notch_hz: float | None = None
     notch_q: float = 5.0
+    # Notch depth as a linear blend between the unfiltered and fully-notched
+    # signal: x -> x + notch_depth * (notch(x) - x). 1.0 = the full iirnotch
+    # null (the original behaviour); 0.0 = notch off; intermediate values give
+    # a partial anti-resonance. Only consulted when notch_hz is not None, so the
+    # exact-no-op invariant is untouched.
+    notch_depth: float = 1.0
     # Stable meter gain (calibration factor).
     gain: float = 1.0
 
@@ -616,6 +622,46 @@ class St2Params:
          MeterParams(sigma_eta=12.0, eta_tau_s=2.0,
                      baseline_sigma=20.0, baseline_tau_s=60.0)),
     )
+
+
+@dataclass(frozen=True)
+class St2MeterBoundaryParams:
+    """Meter-requirement boundary sweep (Phase 2; plan §2, spec.md "minimum
+    meter specification").
+
+    Generalises the ST2 ``meter`` family (four named hostile variants) to a
+    dense grid of observation channels, run on HONEST training only, to locate
+    where each detector class dies as the channel degrades between the nominal
+    20 Hz meter and the 1 Hz integrating sampler. Two orthogonal sweeps share
+    one flat cell list (see :mod:`code.typeb.meter_boundary`):
+
+    - the main 2-D grid ``sample_hz_grid`` x ``integ_window_grid`` (ZOH sample
+      cadence x trailing-boxcar integration window), no notch;
+    - a notch sub-sweep ``notch_hz_grid`` x ``notch_depth_grid`` at the nominal
+      20 Hz sampler (in-band transfer-function anti-resonance), fixed Q.
+
+    Every cell carries ``sigma_eta`` W of meter noise (noise ownership moves
+    into the meter, matching St2Params.meter_variants — otherwise the metered
+    traces would be noiseless and flatter every detector). ``n_each`` /
+    ``target_fars`` / ``seed`` mirror St2Params so the boundary sweep is scored
+    at the same operating point as the frontier.
+    """
+
+    n_each: int = 200                       # traces per class per cell
+    target_fars: tuple[float, ...] = (0.05, 0.01)
+    seed: int = 0
+    sigma_eta: float = 4.0                  # W; == KoTypeBParams.sigma_eta
+
+    # Main grid: ZOH sample cadence [Hz] x trailing boxcar window [s]. The
+    # nominal channel is fs=20, integ=0; integrating_1hz sits at fs=1, integ=1.
+    sample_hz_grid: tuple[float, ...] = (20.0, 10.0, 5.0, 2.0, 1.0, 0.5)
+    integ_window_grid: tuple[float, ...] = (0.0, 0.1, 0.25, 0.5, 1.0, 2.0)
+
+    # Notch sub-sweep (at the nominal 20 Hz sampler): notch centre across the
+    # Ko cadence band (f0 ~ U(0.5, 1.5) Hz) x blend depth, fixed Q.
+    notch_hz_grid: tuple[float, ...] = (0.6, 0.8, 1.0, 1.2)
+    notch_depth_grid: tuple[float, ...] = (0.5, 0.9, 1.0)
+    notch_q: float = 1.5                    # == St2Params notch_at_cadence Q
 
 
 @dataclass(frozen=True)
@@ -983,6 +1029,7 @@ class Config:
     st1_far: St1FarParams = St1FarParams()
     meter: MeterParams = MeterParams()
     st2: St2Params = St2Params()
+    st2_meter_boundary: St2MeterBoundaryParams = St2MeterBoundaryParams()
 
 
 DEFAULT = Config()

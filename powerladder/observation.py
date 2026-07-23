@@ -68,10 +68,20 @@ def _lowpass(x: np.ndarray, fs: float, cutoff_hz: float, order: int) -> np.ndarr
     return filtfilt(b, a, x)
 
 
-def _notch(x: np.ndarray, fs: float, notch_hz: float, q: float) -> np.ndarray:
-    """Zero-phase IIR notch at ``notch_hz`` with quality factor ``q``."""
+def _notch(x: np.ndarray, fs: float, notch_hz: float, q: float,
+           depth: float) -> np.ndarray:
+    """Zero-phase IIR notch at ``notch_hz`` with quality factor ``q``, blended
+    to ``depth``.
+
+    ``depth`` linearly interpolates between the unfiltered signal and the full
+    ``iirnotch`` null: ``x + depth * (notch(x) - x)``. ``depth == 1.0`` is the
+    full null (equal up to rounding to a bare filtfilt — the blend reassociates
+    the arithmetic, so ~1e-16 off, far below any physical scale); ``depth ==
+    0.0`` is the identity; intermediate values give a partial anti-resonance.
+    """
     b, a = iirnotch(notch_hz, q, fs=fs)
-    return filtfilt(b, a, x)
+    notched = filtfilt(b, a, x)
+    return x + depth * (notched - x)
 
 
 def _integrate_sample(
@@ -177,7 +187,7 @@ def apply_meter(
     if mp.lp_cutoff_hz is not None:
         x = _lowpass(x, fs, mp.lp_cutoff_hz, mp.lp_order)
     if mp.notch_hz is not None:
-        x = _notch(x, fs, mp.notch_hz, mp.notch_q)
+        x = _notch(x, fs, mp.notch_hz, mp.notch_q, mp.notch_depth)
     if mp.gain != 1.0:
         x = mp.gain * x
 
