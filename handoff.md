@@ -62,7 +62,12 @@ tests pass; all 171 non-digest tests pass.
      detectors already exist to build on.
 4. **Slurm number-freeze pass** (still open): ST1 surrogate S=999/M=10⁴ +
    from-scratch ST2 re-verification. Regenerate the byte-identity digests here too.
-5. **Novelty audit** (still unowned; §1 related-work prerequisite).
+5. **ST0 prior-art audit — DONE** (2026-07-23, `notes/discussion/st0-prior-art-audit.md`;
+   branch `docs/st0-prior-art-audit`). Four fields positioned with verified citations;
+   subsumption verdict = no field beats the pipeline; lower-bound spike not pre-empted, so
+   **the lower-bound feasibility spike is now the next strategic gate**. Follow-ups it
+   spawned: write the §1 related-work section (own section, four-field structure) and add
+   the 8 bib keys it lists (then `check-refs`).
 
 ## Key file locations
 - Harness: `powerladder/typeb/meter_boundary.py`, `scripts/st2_meter_boundary.py`,

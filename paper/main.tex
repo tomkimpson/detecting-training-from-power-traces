@@ -148,13 +148,6 @@ frontier headline, negative transport case).
 	transport case (plan \S1.1).
 	\item \cbx \textbf{Contributions list}: write only after ST0--ST2 gates
 	land (plan \S6); rungs 1--2 empirical spine, rungs 3--4 conditional.
-	\item \cbx \textbf{Related work}: decide placement (own section vs woven
-	into intro); run the \emph{new} novelty audit for adaptive
-	order/cyclostationary detection and challenge-synchronous power
-	authentication (ST0) --- the existing novelty-audit.md covers only the old
-	Viterbi paper. Reusable citation blocks: paper-verification/main.tex \S2
-	(compute governance, GPU side channels, line tracking, sequential
-	guarantees); all entries already in references.bib.
 	\item \cbx \textbf{Venue decision} (ST0, plan \S10 Q1): governance /
 	security / signal-processing venue; sets how much the identifiability
 	theory must carry.
@@ -216,6 +209,90 @@ principled response to the previous rung's ceiling (plan \S1.4).}
 		\bottomrule
 	\end{tabular}
 \end{table*}
+
+
+% ============================================================================
+\section{Related work}
+\label{sec:related}
+% ============================================================================
+
+% Written from notes/discussion/st0-prior-art-audit.md (four-field prior-art
+% audit). Structured by the four mature literatures the problem borrows from;
+% the contribution is the question, the adversary, and the channel, not the
+% detectors.
+Four mature literatures own pieces of this problem. We take their tools off
+the shelf; what is new here is the question (compute governance), the adversary
+(a prover who knows the detector and reshapes the trace to evade it), and the
+channel (a single, filtered, low-rate meter outside the prover's control). We
+locate the work against each in turn, and against the closest governance-specific
+detectors cited in \cref{sec:intro}.
+
+\paragraph{Non-intrusive load monitoring.}
+Inferring which devices or activities are running from a single aggregate power
+meter is the founding problem of non-intrusive load monitoring
+\citep{hart1992nilm}, with three decades of disaggregation
+technique---edge/event detection, steady-state signatures, and state-space
+models \citep{zoha2012nilm}. Certifying training from one datacenter meter is
+this problem lifted from the household scale. The load-bearing difference is the
+adversary: classical NILM assumes cooperative or indifferent appliances and
+targets their steady-state or transient-edge signatures, whereas our load
+actively hides, and the signature we exploit is a quasi-periodic,
+frequency-wandering second-order structure rather than a switching event. The
+power-side-channel malware detector of \citet{clark2013wattsupdoc} is the same
+idea one level up in bandwidth, again without an evading adversary.
+
+\paragraph{Spectrum sensing and low-probability-of-detection signals.}
+Deciding whether a source is active, and what it is doing, from noisy
+observations---explicitly against a transmitter trying to stay below the
+detection floor---is the subject of spectrum sensing in cognitive radio and of
+low-probability-of-intercept/detection work in electronic warfare. Its canonical
+detector taxonomy, the energy detector versus the matched filter versus the
+cyclostationary feature detector, and the known trade-offs between them (the
+matched filter is optimal but needs a template; cyclostationary detection is
+robust to noise-power uncertainty where the energy detector fails at low
+signal-to-noise ratio) \citep{yucek2009spectrum}, is exactly the structure of our
+Rung-1 bake-off (\cref{sec:structural,app:bakeoff}). This is the closest structural
+twin to the enterprise; the pieces it does not supply are the
+frequency-wandering line with an order-tracking front end
+\citep{dandawate1994cyclostationarity,bonnardot2005tacholess} and an adversary
+whose evasion is schedule de-periodicisation at a measurable throughput cost
+(\cref{sec:frontier}).
+
+\paragraph{Power side-channel analysis.}
+That computation is legible in power is the founding premise of hardware-security
+power analysis: differential power analysis \citep{kocher1999dpa}, its
+correlation refinement \citep{brier2004cpa}, and profiled template attacks
+\citep{chari2002template} recover secret keys from a device's consumption trace.
+We inherit the premise and invert the regime. Side-channel analysis assumes a
+proximate, high-bandwidth probe and a cooperative target running a known
+computation, and extracts a fine-grained secret; we assume a remote,
+low-bandwidth, filtered meter and an adversarial target, and extract only the
+coarse structural fact of whether efficient iteration-structured training is
+present. The template-attack idea---build a generative model of the trace and
+test against it---is the honest precedent for benchmarking a corpus-free detector
+against a generator-based optimality ceiling. A parallel corpus attacks the
+inverse problem of extraction, recovering model architecture or execution from
+GPU side channels
+\citep{maia2022magnetic,naghibijouybari2018rendered,hu2020deepsniffer,liu2016codeexecution}.
+
+\paragraph{Covert communication and steganography.}
+The de-periodicisation frontier (\cref{sec:frontier}) is, formally, the
+warden-versus-covert-transmitter game: the prover trains covertly under a
+schedule-distortion budget while the verifier plays the warden. Covert
+communication theory---the square-root law of \citet{bash2013covert} and its
+descendants---and the information-theoretic model of steganography
+\citep{cachin2004steganography}, which measures a stegosystem's security by the
+relative entropy between cover and stego distributions, study exactly the
+trade-off between how constrained a hidden activity is and how detectable it
+remains. This is the literature that would turn our empirical frontier into a
+statement about \emph{every} verifier: bounding a distributional distance between
+the training-trace and null-trace distributions as a function of the adversary's
+distortion caps any detector's power, yielding a lower bound on the cost of
+hiding rather than an upper bound on what our particular detector misses. This is
+the identifiability question of \cref{sec:threat}, and the existing results do not
+cover our object---a physics-constrained training schedule observed through a
+filtered, low-rate meter---so such a bound, if it holds, is not inherited but must
+be derived; we leave it as the central open direction.
 
 
 % ============================================================================
