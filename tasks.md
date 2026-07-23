@@ -94,12 +94,25 @@ resolve, labels/refs consistent, environments balanced).
   utility axis is the measured systems-cost anchors only; the learning-efficiency
   penalty is stated in the paper as the open empirical question / future work
   (paper §5 checklist already words it this way).
-- [ ] **Meter-requirement boundary sweep** (supports promoting the ST2 channel-
+- [x] **Meter-requirement boundary sweep** (supports promoting the ST2 channel-
   requirement finding to a named "minimum meter specification" contribution —
   pending spec.md approval): grid over `sample_hz` × `integ_window_s` between the
   nominal 20 Hz channel and the 1 Hz integrating sampler, plus notch depth/Q, honest
   training only; locate where each detector class dies. CPU-only synthetic; run as a
   slurm array.
+  **Result: done** (`results/st2/meter_boundary_summary.json`, 48 cells, n_each=200;
+  slurm array 5498 on MATS `compute`, all cells COMPLETED; full record
+  `notes/results/st2-meter-boundary-findings.md`). **Minimum meter specification:**
+  the tracking class (Viterbi, spectral) holds TPR@0.05 ≳ 0.9 iff sample rate
+  ≥ ~2 Hz **and** integration window ≲ 0.5 s **and** no deep in-band notch at the
+  cadence centre. fs=1 Hz collapses it (Nyquist crosses the band); fs=0.5 Hz is
+  totally dead; a 1 s boxcar sinc-nulls the 1 Hz band centre even at 20 Hz sampling.
+  Decomposes the committed `integrating_1hz` two-point result: sampling **or**
+  integration alone already kills tracking (over-determined). Figures:
+  `figures/st2_meter_boundary.*` (per-detector heatmaps + death contour) +
+  `figures/st2_meter_boundary_notch.*`. Harness: `powerladder/typeb/meter_boundary.py`,
+  `scripts/st2_meter_boundary.py`, `scripts/slurm/st2_meter_boundary.sbatch`.
+  **Not yet wired into `paper/main.tex` (§6/new subsection) — Phase 4 write-up.**
 - [ ] Rung 2: stated inference null; three decision rules; semantic falsification
   controls (periodic inference, gradient-only, discarded-update decoy, training-shaped
   non-ML loop, controller cycle, async training, co-resident mixtures); transfer / domain

@@ -116,8 +116,8 @@ def _run_and_persist(spec) -> dict:
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     (RAW_DIR / f"{cell_name}.json").write_text(json.dumps(record, indent=2))
     _merge_cell(record, p)
-    tpr = {k: v["tpr_at_far"][f"{p.target_fars[0]:g}"]
-           for k, v in record["tpr_at_far"].items()}
+    tpr = {det: per_far[f"{p.target_fars[0]:g}"]
+           for det, per_far in record["tpr_at_far"].items()}
     print(f"  cell {cell_name}: {time.time() - t0:.1f}s  "
           f"TPR@{p.target_fars[0]:g} " +
           ", ".join(f"{k}={tpr[k]:.2f}" for k in sorted(tpr)), flush=True)

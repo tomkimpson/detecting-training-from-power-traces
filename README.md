@@ -47,6 +47,16 @@ python scripts/plot_st2_frontier.py --b2-dir data/measured_cost_anchors
     # -> results/st2/frontier_summary.json (verdict: GO, provisional=false), figures/st2_frontier.*
 ```
 
+**ST2 — meter-requirement boundary sweep ("minimum meter specification", slurm):**
+```
+python scripts/st2_meter_boundary.py --list          # cell count for the array range
+sbatch --array=0-<N-1> scripts/slurm/st2_meter_boundary.sbatch   # compute partition
+    # -> results/st2/meter_boundary_raw/*.json + meter_boundary_summary.json
+python scripts/plot_st2_meter_boundary.py            # -> figures/st2_meter_boundary*.pdf
+```
+Single-node fallback: `python scripts/st2_meter_boundary.py --jobs 8`. This is an
+expensive sweep — run it on slurm, not the dev node (see `scripts/slurm/`).
+
 **ST1 — adaptive detector bake-off & calibration:**
 ```
 python scripts/plot_st1_bakeoff.py        # -> figures/st1_bakeoff.*, results/st1/bakeoff_summary.json

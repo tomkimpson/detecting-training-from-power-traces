@@ -21,3 +21,8 @@ venv/
 *.synctex.gz
 *.toc
 paper/main.pdf
+
+# Per-cell sweep artifacts (regenerable; only *_summary.json + figures tracked)
+results/st2/meter_boundary_raw/
+results/st2/.meter_boundary.lock
+results/st2/slurm/
