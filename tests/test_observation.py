@@ -99,6 +99,46 @@ def test_notch_kills_tone_at_notch_hz():
     assert _bin_power(t, out.P_meter, f_keep) > 0.5 * _bin_power(t, p, f_keep)
 
 
+def test_notch_depth_1_matches_full_null():
+    """notch_depth=1.0 (default) reproduces the full iirnotch null — the
+    backward-compatible default, so existing sweeps are unchanged."""
+    t = _grid(300.0, fs=20.0)
+    p = _tone(t, 1.0) + _tone(t, 0.4)
+    rng = np.random.default_rng(0)
+    default = apply_meter(t, p, MeterParams(notch_hz=1.0, notch_q=5.0), rng)
+    explicit = apply_meter(t, p, MeterParams(notch_hz=1.0, notch_q=5.0,
+                                             notch_depth=1.0), rng)
+    assert np.allclose(default.P_meter, explicit.P_meter)
+
+
+def test_notch_depth_0_is_identity():
+    """notch_depth=0.0 disables the anti-resonance even with notch_hz set: the
+    tone at the notch centre survives intact."""
+    t = _grid(300.0, fs=20.0)
+    p = _tone(t, 1.0)
+    out = apply_meter(t, p, MeterParams(notch_hz=1.0, notch_q=5.0,
+                                        notch_depth=0.0),
+                      np.random.default_rng(0))
+    assert np.allclose(out.P_meter, p)
+
+
+def test_notch_depth_partial_attenuates_between():
+    """0 < depth < 1 attenuates the notch-centre tone partially: less than the
+    full null, more than untouched (monotone in depth)."""
+    t = _grid(300.0, fs=20.0)
+    p = _tone(t, 1.0)
+    p0 = _bin_power(t, p, 1.0)
+
+    def resid(depth):
+        out = apply_meter(t, p, MeterParams(notch_hz=1.0, notch_q=5.0,
+                                            notch_depth=depth),
+                          np.random.default_rng(0))
+        return _bin_power(t, out.P_meter, 1.0)
+
+    full, half = resid(1.0), resid(0.5)
+    assert full < half < p0
+
+
 # --- integrate + sample ---------------------------------------------------------
 
 def test_decimation_without_lowpass_aliases_to_predicted_bin():
