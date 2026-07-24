@@ -288,9 +288,27 @@ resolve, labels/refs consistent, environments balanced).
 
 ## Phase 3 — Rungs 3–4 conditional protocol
 
-- [ ] Concise challenge-synchronous protocol; assumed transcript primitive as an ideal
+- [x] Concise challenge-synchronous protocol; assumed transcript primitive as an ideal
   functionality; randomisation-test discipline; ceilings stated. (Full empirical
   treatment only if ST3 is later run and passes.)
+  **Result:** prose-only scope honoured (ST3 stays unrun). `paper/main.tex` §7
+  (`sec:active`, "From passive evidence to active authentication") written — 5
+  paragraphs: (1) why go active (Rung-2 semantic-decoy ceiling, `\cref{sec:classification}`);
+  (2) the Rung-3 challenge-synchronous lock-in protocol (balanced $c_k$, committed
+  semantically-equivalent schedule variation, causal-lag correlation, re-randomisation
+  null, challenge-aware-dummy ceiling); (3) randomisation-test discipline (exact
+  conditional on the design; search repeated in every replicate; carryover/adaptivity/
+  balance in the design; the $\sqrt N$-processing-gain caveat); (4) the Rung-4 ideal
+  functionality (commitment/unpredictability/sound binding/freshness/co-location; not
+  built); (5) the two ceilings + co-location gap + future-work fold of the "if ST3 runs"
+  list, cross-linked to `sec:threat`/`sec:frontier`/`sec:discussion`. Checklist + `\todo`
+  removed (convention). **Novelty gap closed:** new `\paragraph{Challenge-response
+  authentication}` added to `sec:related` (distance-bounding, PUFs, active telemetry).
+  **5 new bib entries** (`brands1994distance`, `pappu2002puf`, `canetti2001uc`,
+  `jia2021proofoflearning`, `fisher1935design`) + reuse of `monfared2026timing` — all
+  flagged for `check-refs` before arXiv. Verified statically (checklist envs 8/8,
+  `\todo` 8, all cite keys + crefs resolve); PDF not built (no TeX toolchain on the dev
+  node).
 
 ## Phase 4 — Write-up
 
