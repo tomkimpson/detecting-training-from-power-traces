@@ -1,0 +1,538 @@
+{
+  "sweep": "rung2",
+  "generator": "ko_workload training vs hard inference null (plan \u00a73.3)",
+  "n_each": 200,
+  "target_fars": [
+    0.05,
+    0.01
+  ],
+  "seed": 0,
+  "n_folds": 5,
+  "duration_s": 300.0,
+  "band": [
+    0.3,
+    1.7
+  ],
+  "rules": [
+    "physics_score",
+    "fitted_discriminant",
+    "learned_reference"
+  ],
+  "transfer_shifts": [
+    "f_peak_lo",
+    "f_peak_hi",
+    "duration_short",
+    "band_shift_hi",
+    "meter_controller",
+    "meter_coloured"
+  ],
+  "controls": [
+    "discarded_update_decoy",
+    "gradient_only",
+    "nonml_kernel_loop",
+    "controller_cycle",
+    "periodic_inference",
+    "async_training",
+    "coresident_mixture"
+  ],
+  "environment": "canonical: MATS `compute` partition, single-threaded OpenBLAS. Marginal AUCs are BLAS-build-conditional; the qualitative verdicts (decoy scores as training; async training missed by the physics rule) are not.",
+  "cells": [
+    {
+      "kind": "control",
+      "condition": "async_training",
+      "is_training": true,
+      "expect": "not_train",
+      "note": "genuine training strongly de-periodicised (scoped-out edge)",
+      "rules": {
+        "physics_score": {
+          "auc": 0.88875,
+          "frac_training": {
+            "0.05": 0.72,
+            "0.01": 0.585
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 0.754825,
+          "frac_training": {
+            "0.05": 0.545,
+            "0.01": 0.465
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        }
+      },
+      "cell": "control__async_training"
+    },
+    {
+      "kind": "control",
+      "condition": "controller_cycle",
+      "is_training": false,
+      "expect": "train",
+      "note": "bare periodic non-compute load (power-controller limit cycle) \u2014 fires the schedule detector; attribution needs the nuisance model",
+      "rules": {
+        "physics_score": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        }
+      },
+      "cell": "control__controller_cycle"
+    },
+    {
+      "kind": "control",
+      "condition": "coresident_mixture",
+      "is_training": true,
+      "expect": "train",
+      "note": "genuine training diluted among co-resident loads",
+      "rules": {
+        "physics_score": {
+          "auc": 0.999975,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        }
+      },
+      "cell": "control__coresident_mixture"
+    },
+    {
+      "kind": "control",
+      "condition": "discarded_update_decoy",
+      "is_training": false,
+      "expect": "train",
+      "note": "full training compute, optimizer update discarded \u2014 physically identical to training",
+      "rules": {
+        "physics_score": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        }
+      },
+      "cell": "control__discarded_update_decoy"
+    },
+    {
+      "kind": "control",
+      "condition": "gradient_only",
+      "is_training": false,
+      "expect": "train",
+      "note": "forward/backward without the optimizer-step swing",
+      "rules": {
+        "physics_score": {
+          "auc": 0.9996,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 0.97
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        }
+      },
+      "cell": "control__gradient_only"
+    },
+    {
+      "kind": "control",
+      "condition": "nonml_kernel_loop",
+      "is_training": false,
+      "expect": "train",
+      "note": "training-shaped non-ML kernel loop (matched cadence)",
+      "rules": {
+        "physics_score": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        }
+      },
+      "cell": "control__nonml_kernel_loop"
+    },
+    {
+      "kind": "control",
+      "condition": "periodic_inference",
+      "is_training": false,
+      "expect": "train",
+      "note": "inference null driven by a periodic request generator \u2014 periodicity alone is not training semantics",
+      "rules": {
+        "physics_score": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "frac_training": {
+            "0.05": 1.0,
+            "0.01": 1.0
+          }
+        }
+      },
+      "cell": "control__periodic_inference"
+    },
+    {
+      "kind": "stated",
+      "condition": "stated",
+      "rules": {
+        "physics_score": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        }
+      },
+      "cell": "stated"
+    },
+    {
+      "kind": "transfer",
+      "condition": "band_shift_hi",
+      "rules": {
+        "physics_score": {
+          "auc": 0.9999,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.005
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        }
+      },
+      "cell": "transfer__band_shift_hi"
+    },
+    {
+      "kind": "transfer",
+      "condition": "duration_short",
+      "rules": {
+        "physics_score": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.065,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        }
+      },
+      "cell": "transfer__duration_short"
+    },
+    {
+      "kind": "transfer",
+      "condition": "f_peak_hi",
+      "rules": {
+        "physics_score": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.055,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        }
+      },
+      "cell": "transfer__f_peak_hi"
+    },
+    {
+      "kind": "transfer",
+      "condition": "f_peak_lo",
+      "rules": {
+        "physics_score": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.055,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        }
+      },
+      "cell": "transfer__f_peak_lo"
+    },
+    {
+      "kind": "transfer",
+      "condition": "meter_coloured",
+      "rules": {
+        "physics_score": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        }
+      },
+      "cell": "transfer__meter_coloured"
+    },
+    {
+      "kind": "transfer",
+      "condition": "meter_controller",
+      "rules": {
+        "physics_score": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        },
+        "fitted_discriminant": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.01
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        },
+        "learned_reference": {
+          "auc": 1.0,
+          "fpr": {
+            "0.05": 0.05,
+            "0.01": 0.015
+          },
+          "fnr": {
+            "0.05": 0.0,
+            "0.01": 0.0
+          }
+        }
+      },
+      "cell": "transfer__meter_controller"
+    }
+  ]
+}
