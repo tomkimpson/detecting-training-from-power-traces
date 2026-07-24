@@ -201,11 +201,32 @@ resolve, labels/refs consistent, environments balanced).
   `figures/st2_meter_boundary_notch.*`. Harness: `powerladder/typeb/meter_boundary.py`,
   `scripts/st2_meter_boundary.py`, `scripts/slurm/st2_meter_boundary.sbatch`.
   **Not yet wired into `paper/main.tex` (§6/new subsection) — Phase 4 write-up.**
-- [ ] **(Optional, non-blocking) NP-optimal LRT ceiling in the bake-off.** We have the
+- [x] **(Optional, non-blocking) NP-optimal LRT ceiling in the bake-off.** We have the
   generator, so compute/approximate the Neyman–Pearson optimal detector between the
   training and null generators and report the corpus-free surrogate detector as a
   fraction of it ("X% of NP-optimal power at Y% of the information cost"). Quantifies
   "is our detector good" — not a pre-gate (decision 2026-07-23).
+  **Result (frozen on slurm):** method = **Whittle spectral LRT** (user decision
+  2026-07-24 — the light option; no closed-form likelihood exists).
+  `powerladder/typeb/np_ceiling.py` (f₀-marginalised Bayes–Whittle LRT: per-f₀ MC training
+  template bank, drift-pooled, `logsumexp_k ℓ_tr(x|f0_k) − ℓ_neg(x)`). Driver
+  `scripts/st1_np_ceiling.py` reproduces the **exact** bake-off eval populations (parity
+  guard **max |TPR Δ vs bakeoff| = 0**), fits ceilings for the inference / structural /
+  controller-only nulls, scores ceiling + all corpus-free detectors, reports
+  `rho_auc`/`rho_tpr`. Plot `scripts/plot_st1_np_ceiling.py`, sbatch (single task ~9 min),
+  tests `tests/test_np_ceiling.py` (5, pass; suite 5 BLAS-baseline fail / 186 pass).
+  Config `NpCeilingParams`. **Frozen (slurm job 5646, MATS `compute`, n_each=200, f0_n=61,
+  n_mc=2000; `results/st1/np_ceiling_summary.json`, `figures/st1_np_ceiling.*`):** the
+  Whittle ceiling is **AUC=TPR=1.0 in every column at every drift** (the two generators
+  are perfectly separable in principle), so all difficulty is in the detector. **vs the
+  inference null the Viterbi tracker is essentially NP-optimal** (`rho_auc=1.00` across the
+  whole wander axis); the fixed matched filter collapses (ρ 1.0→0.78→0.38→−0.1). **vs
+  structural confusers / the hard controller case only the DG order family approaches the
+  ceiling** (dg_order_full ρ 0.93→…→0.10; Viterbi and spectral score AUC 0.0 on the hard
+  case), with a widening gap at high drift = the honest headroom above today's detectors.
+  **Caveat:** NP-optimal under the Whittle model only (a lower bound on the true optimum),
+  so reporting fractions against it is conservative. Full record:
+  `notes/results/st1-np-ceiling-findings.md`. **Not wired into the paper — Phase 4.**
 - [x] Rung 2: stated inference null; three decision rules; semantic falsification
   controls (periodic inference, gradient-only, discarded-update decoy, training-shaped
   non-ML loop, controller cycle, async training, co-resident mixtures); transfer / domain
@@ -253,6 +274,19 @@ resolve, labels/refs consistent, environments balanced).
 
 - [ ] Negative transport case (single-A100) as a result; identifiability theory section
   (rigor level per plan §10 Q2); discussion closing out each rung's ceiling.
+- [ ] **Cost-vs-hiding Pareto re-plot (cheap, CPU-only, no new sweeps).** Render the
+  already-frozen ST2 frontier as an explicit **adversary-cost vs hiding** Pareto curve —
+  the plan's stated deliverable (`notes/plans/plan-for-paper-2.md:370`,
+  `plan-for-paper-2-review.md:198`). The (hiding, systems-cost) pairs already exist in
+  `results/st2/frontier_summary.json`: per cell, detection loss (best-tracking &
+  best-fixed TPR@0.05, or 1−TPR) on one axis and the measured `cost_overhead_pct` on the
+  other, for the four anchored families only (jitter, drift, work, shape; others carry
+  `null`). A new plot script reading the tracked summary (no re-run) — one Pareto panel
+  per detector class so the "how much systems cost buys how much hiding from the tracker
+  vs the fixed detectors" gap is visible, with the ≈zero-cost work-variation point called
+  out. **Out of scope / still future work:** the learning-efficiency cost leg (descoped
+  2026-07-22, needs a GPU campaign — the transport trap) stays the stated open empirical
+  question; this item plots only the measured systems-cost axis.
 
 ---
 

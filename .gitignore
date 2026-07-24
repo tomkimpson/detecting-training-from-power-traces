@@ -41,4 +41,11 @@ results/rung2/rung2_smoke_raw/
 results/rung2/rung2_smoke_summary.json
 results/rung2/.rung2_smoke.lock
 results/rung2/slurm/*
+
+# NP-optimal LRT ceiling (Phase 2): only np_ceiling_summary.json + figure tracked;
+# the --smoke plumbing check (summary + figure) and slurm logs are never tracked.
+results/st1/np_ceiling_smoke_summary.json
+figures/st1_np_ceiling_smoke.*
+results/st1/slurm/*
+!results/st1/slurm/.gitkeep
 !results/rung2/slurm/.gitkeep
