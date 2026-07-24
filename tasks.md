@@ -75,7 +75,7 @@ From the 2026-07-23 positioning memos (`notes/discussion/north-star-and-position
   a physics-constrained training schedule over a filtered low-rate meter, so the spike is not
   pre-empted. Recommends an own `\section{Related work}` organised by the four fields and
   lists 8 bib keys for the §1 / `references.bib` follow-up.
-- [ ] **Lower-bound feasibility spike (the kill/continue gate).** Time-boxed: is a
+- [x] **Lower-bound feasibility spike (the kill/continue gate).** Time-boxed: is a
   TV/KL (covertness) lower bound on hiding cost derivable for even one attack family
   (e.g. i.i.d. phase jitter)? Anchor it in the physics (hiding synchronous all-reduce is
   communication-bound and costly), with the TV/KL machinery as the formal wrapper — a
@@ -83,6 +83,20 @@ From the 2026-07-23 positioning memos (`notes/discussion/north-star-and-position
   hard fork on claim strength:** bound exists ⇒ contribution, frame as "must pay ≥ X";
   no bound ⇒ position paper, frame as "evidence + upper bound on hideability, necessary
   conditions only." Feeds the Phase 4 identifiability section (plan §10 Q2).
+  **Result: bound derivable ⇒ CONTRIBUTION side of the fork**
+  (`notes/discussion/lower-bound-feasibility-spike.md`). Derivation for i.i.d. phase
+  jitter: coherent line power rolls off as `1/(1+κσ²)`, `κ≈πf₀T` (phase diffusion
+  `D≈(2π)²σ²f₀`); `detector power ≤ TV`, Pinsker → a finite covertness threshold
+  `σ*(ε)`; the physics anchor (synchronous comm barrier `T_down` fixed under work
+  variation) makes reaching `σ*(ε)` cost **throughput OR learning efficiency** — the
+  free-work-jitter escape does not evade it. Sanity check `scripts/lower_bound_spike.py`
+  → `figures/lower_bound_spike.*`, `results/spike/lower_bound_spike.json`: coherent-power
+  rolloff form R²=0.97 (fitted κ≈2950, within ~3× of πf₀T≈940); work-jitter escape
+  measurably MORE detectable at matched σ (confirms the comm-barrier residual). Caveats
+  set claim wording: bound proved vs a FIXED verifier (tracking/optimal is the Phase-4
+  analytic step); "cost" is throughput-or-learning, learning leg stated not measured;
+  generator-internal. Frame Phase-4 identifiability (plan §10 Q2) as a proposition-level
+  covertness cost bound. Open: metric choice (TV/KL/Hellinger) for the tightest form.
 
 ---
 
