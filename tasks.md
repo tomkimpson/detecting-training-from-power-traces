@@ -68,8 +68,10 @@ pre-registered criteria closed. Full record: `notes/results/st1-findings.md`, `h
   requalification lives in the measured b2 campaign (not this repo) — the synthetic
   `work` family reads only the clean `throughput_overhead` cost anchor, not the
   B-contaminated line-band detection arrays, so the frontier evidence is re-frozen; the
-  B caveat is recorded, not resolved (which finding leads the frontier stays open;
-  carried into the Phase-4 paper §6 write-up). Harness: `scripts/slurm/st2_sweeps.sbatch`,
+  B caveat is recorded, not resolved. **Which finding leads §6 now resolved
+  (2026-07-24, branch `wire-in-phase2-results`): the ≈zero-cost work-variation
+  attack leads the frontier; the meter-erasure point becomes the minimum-meter-spec
+  subsection.** Harness: `scripts/slurm/st2_sweeps.sbatch`,
   `st2_frontier.sbatch`, `plot_st2_sweeps.py --list/--array-id`. Record:
   `notes/results/number-freeze-2026-07-24.md`.
 - [x] **Settle the venue** (plan §10 Q1).
@@ -203,7 +205,9 @@ resolve, labels/refs consistent, environments balanced).
   existed). This also closes the **ST2 leg** of the Phase-0 re-verification follow-up
   above — the FAR/ST1-surrogate leg stays open (Phase 1). issue-54: the frontier reads
   only the clean `throughput_overhead` anchor field, not the B-contaminated line-band
-  detection arrays, so it is unaffected. **Not yet wired into `paper/main.tex` §6 — Phase-4.**
+  detection arrays, so it is unaffected. **WIRED into `paper/main.tex` §6
+  (`sec:frontier`; `fig:frontier`+`fig:st2_work`) on branch `wire-in-phase2-results`
+  (2026-07-24): body led by the work-variation attack; issue-54 non-impact noted.**
 - [x] **Meter-requirement boundary sweep** (supports promoting the ST2 channel-
   requirement finding to a named "minimum meter specification" contribution —
   pending spec.md approval): grid over `sample_hz` × `integ_window_s` between the
@@ -222,7 +226,10 @@ resolve, labels/refs consistent, environments balanced).
   `figures/st2_meter_boundary.*` (per-detector heatmaps + death contour) +
   `figures/st2_meter_boundary_notch.*`. Harness: `powerladder/typeb/meter_boundary.py`,
   `scripts/st2_meter_boundary.py`, `scripts/slurm/st2_meter_boundary.sbatch`.
-  **Not yet wired into `paper/main.tex` (§6/new subsection) — Phase 4 write-up.**
+  **WIRED into `paper/main.tex` §6 subsection `subsec:meter_spec`
+  (`fig:meter_boundary`+`fig:meter_boundary_notch`) on branch `wire-in-phase2-results`
+  (2026-07-24): framed as a minimum meter specification / channel requirement
+  (§6 results subsection, NOT a named contribution — spec.md untouched per decision).**
 - [x] **(Optional, non-blocking) NP-optimal LRT ceiling in the bake-off.** We have the
   generator, so compute/approximate the Neyman–Pearson optimal detector between the
   training and null generators and report the corpus-free surrogate detector as a
@@ -248,7 +255,10 @@ resolve, labels/refs consistent, environments balanced).
   case), with a widening gap at high drift = the honest headroom above today's detectors.
   **Caveat:** NP-optimal under the Whittle model only (a lower bound on the true optimum),
   so reporting fractions against it is conservative. Full record:
-  `notes/results/st1-np-ceiling-findings.md`. **Not wired into the paper — Phase 4.**
+  `notes/results/st1-np-ceiling-findings.md`. **WIRED into `paper/main.tex`
+  App A `app:bakeoff` (new paragraph + `fig:np_ceiling`) + the Related-work
+  optimality-ceiling hook (`\cref{app:bakeoff}`) + a §6 sentence, on branch
+  `wire-in-phase2-results` (2026-07-24).**
 - [x] Rung 2: stated inference null; three decision rules; semantic falsification
   controls (periodic inference, gradient-only, discarded-update decoy, training-shaped
   non-ML loop, controller cycle, async training, co-resident mixtures); transfer / domain
@@ -282,9 +292,11 @@ resolve, labels/refs consistent, environments balanced).
   ST1/ST2 tracker-robustness story: drift+phase-slip de-periodicisation does NOT
   evade tracking at these levels; the genuine scope limit is the ≈zero-cost
   work-variation attack characterised on the ST2 frontier, not this async control.
-  **Open (Phase-4 write-up decision):** report async as a robustness result, or
-  strengthen the async control with work-variation to exhibit the boundary.
-  **Not yet wired into `paper/main.tex` (§6 Rung-2 subsection) — Phase-4 write-up.**
+  **Async decision RESOLVED (2026-07-24): report as a robustness result** (tracked
+  rule catches it; genuine boundary cited from the §6 work-variation frontier; no
+  new sweep). **WIRED into `paper/main.tex` §7 `sec:classification`
+  (`fig:rung2_stated`+`fig:rung2_controls`+`tab:rung2_controls`) on branch
+  `wire-in-phase2-results`.**
 
 ## Phase 3 — Rungs 3–4 conditional protocol
 
@@ -312,8 +324,14 @@ resolve, labels/refs consistent, environments balanced).
 
 ## Phase 4 — Write-up
 
-- [ ] Negative transport case (single-A100) as a result; identifiability theory section
+- [~] Negative transport case (single-A100) as a result; identifiability theory section
   (rigor level per plan §10 Q2); discussion closing out each rung's ceiling.
+  **Partly done (2026-07-24, branch `wire-in-phase2-results`):** §9 `sec:reality`
+  (negative transport case + falsifiable predictions, from the frozen ~0.4% ripple /
+  0.31–0.45 Hz limit-cycle / ~75× gap numbers; no measured figure — captures not in this
+  repo) and §10 `sec:discussion` (ladder close-out `tab:closeout` + scope/limits/governance)
+  both written; checklists/todos removed. **Still open:** the identifiability theory
+  section (App B `app:identifiability` remains a scaffold, rigor per plan §10 Q2).
 - [ ] **Cost-vs-hiding Pareto re-plot (cheap, CPU-only, no new sweeps).** Render the
   already-frozen ST2 frontier as an explicit **adversary-cost vs hiding** Pareto curve —
   the plan's stated deliverable (`notes/plans/plan-for-paper-2.md:370`,
