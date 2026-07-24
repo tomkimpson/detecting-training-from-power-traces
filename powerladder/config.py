@@ -1106,6 +1106,61 @@ class St1FarParams:
 
 
 @dataclass(frozen=True)
+class NpCeilingParams:
+    """NP-optimal LRT ceiling for the ST1 detector bake-off (Phase 2, optional).
+
+    The strategy memo (``notes/discussion/method-soundness-and-prior-art.md`` §2.2)
+    asks: since we OWN the generators, compute the Neyman–Pearson optimal
+    likelihood-ratio detector between the training and null generators and report
+    each corpus-free detector as a *fraction* of it — "X% of NP-optimal power at
+    Y% of the information cost". This quantifies "is our detector good?".
+
+    Method (user decision 2026-07-24): the **Whittle spectral LRT**. There is no
+    closed-form likelihood (both generators are black-box samplers), so we work in
+    the frequency domain under the stationary-Gaussian (Whittle) approximation: the
+    in-band periodogram ordinates are ~independent Exponentials with mean the PSD
+    ``S(f)``, giving a per-hypothesis log-likelihood
+    ``ℓ_H(x) = −Σ_f [log S_H(f) + I_x(f)/S_H(f)]``. The class PSDs are estimated
+    from the generators by Monte-Carlo (mean periodogram over ``n_mc`` traces): one
+    ``S_neg`` per negative class, and a per-f₀ TEMPLATE BANK ``S_tr(f; f0_k)`` for
+    the training class (f₀ is the known nuisance, marginalised). The ceiling score
+    is ``logsumexp_k ℓ_tr(x|f0_k) − ℓ_neg(x)`` (uniform f₀ prior).
+
+    CAVEAT carried into every report: this is NP-optimal *under the Whittle model*.
+    It discards harmonic-phase coherence and the null's non-Gaussian burst/OU
+    structure, so the true optimum can exceed it — where a tracking detector
+    (Viterbi / DG-order) approaches or beats it at high drift, that is a finding
+    about wandering-line structure the spectral template cannot see, not a bug.
+
+    The template bank is built POOLED over the eval drift grid (drift drawn from
+    ``drift_grid``), so the ceiling — like the deployable detectors — does not know
+    the adversary's drift. Eval mirrors the bake-off (``n_each`` / ``fars`` /
+    ``drifts`` == ``scripts/plot_st1_bakeoff.py``) so "fraction of optimal" is
+    apples-to-apples. The MC corpus draws from a DISJOINT rng stream
+    (``corpus_seed_offset`` off the eval seed): the ceiling is fit once, then frozen
+    and applied to the eval populations. Heavy runs go on Slurm (repo policy); local
+    runs are ``--smoke`` sizes only.
+    """
+
+    # Monte-Carlo corpus for the class PSD estimates (traces averaged per template).
+    n_mc: int = 2000
+    # Training f₀ template bank: f0_n points across the Ko band [f0_lo, f0_hi].
+    f0_n: int = 61
+    # Drift grid the template corpus pools over (== bake-off DRIFTS_HZ).
+    drift_grid: tuple[float, ...] = (0.0, 0.1, 0.2, 0.4, 0.8, 1.5)
+    # Eval populations (mirror scripts/plot_st1_bakeoff.py).
+    n_each: int = 200
+    fars: tuple[float, ...] = (0.05, 0.01)
+    drifts: tuple[float, ...] = (0.0, 0.1, 0.2, 0.4, 0.8, 1.5)
+    eval_seed: int = 20260721                # == bake-off seed (parity)
+    corpus_seed_offset: int = 90_000_000     # disjoint MC-corpus rng stream
+    # Whittle band (defaults to the ST1 detector band at call time if None).
+    band_lo: float | None = None
+    band_hi: float | None = None
+    psd_floor: float = 1e-12                 # guard log / division against a zero PSD bin
+
+
+@dataclass(frozen=True)
 class Config:
     floor: FloorParams = FloorParams()
     channel: ChannelParams = ChannelParams()
@@ -1124,6 +1179,7 @@ class Config:
     st2: St2Params = St2Params()
     st2_meter_boundary: St2MeterBoundaryParams = St2MeterBoundaryParams()
     rung2: Rung2Params = Rung2Params()
+    np_ceiling: NpCeilingParams = NpCeilingParams()
 
 
 DEFAULT = Config()
