@@ -33,3 +33,12 @@ results/st2/.meter_boundary_smoke.lock
 # at submit time on a fresh clone.
 results/st2/slurm/*
 !results/st2/slurm/.gitkeep
+
+# Rung-2 sweep (Phase 2): same convention — only rung2_summary.json + figures tracked.
+results/rung2/rung2_raw/
+results/rung2/.rung2.lock
+results/rung2/rung2_smoke_raw/
+results/rung2/rung2_smoke_summary.json
+results/rung2/.rung2_smoke.lock
+results/rung2/slurm/*
+!results/rung2/slurm/.gitkeep
