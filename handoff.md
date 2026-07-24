@@ -49,6 +49,11 @@ Sanity check `scripts/lower_bound_spike.py` (CPU, seeded, `n_each=80`, ~seconds)
    §3 of the spike note to a **proposition-level covertness cost bound** for the
    i.i.d.-jitter family; firm up the fixed-verifier → tracking/optimal-verifier
    step (the one analytic gap flagged in the note §5); cite `lower_bound_spike.*`.
+   **When writing this, soften the related-work sentence `paper/main.tex:291–295`**
+   — it currently calls the lower bound "the central open direction", which the
+   spike has moved past (bound derivable; only the venue-ready tracking-verifier
+   theorem is still open). Update to point at the new §7 proposition.
+   (Manuscript intentionally left untouched this session — deferred to Phase 4.)
 3. **Open sub-question from the spike:** metric choice (TV vs KL vs Hellinger) for
    the tightest closed-form bound — KL/Hellinger tensorise over the many-iteration
    product law and may beat the TV-via-AUC form used here.
