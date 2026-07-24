@@ -10,6 +10,7 @@ carry sys.path shims instead) — the same idiom as tests/test_st2_sweeps.py.
 from __future__ import annotations
 
 import importlib.util
+import json
 import pathlib
 
 import pytest
@@ -77,8 +78,9 @@ def test_split_by_cost_counts_unpriced_and_keeps_them():
     assert [p["family"] for p in anchored] == ["jitter"]
     assert [p["family"] for p in unpriced] == ["work", "meter"]
     assert len(anchored) + len(unpriced) == len(cells)
-    # unpriced cells still carry a hiding value (only the x coordinate is missing)
-    assert all(p["hiding"] is not None for p in unpriced)
+    # unpriced cells keep their hiding value; only the x coordinate is missing
+    assert all(p["cost"] is None for p in unpriced)
+    assert unpriced[0]["hiding"] == pytest.approx(0.0)   # _ALL_HIGH: nothing hidden
 
 
 def test_pareto_envelope_is_monotone_and_cost_ordered():
@@ -110,7 +112,6 @@ def test_pareto_envelope_ignores_unpriced():
 
 def test_frozen_summary_reproduces_the_headline_asymmetry():
     """Regression on the real artefact: ~zero cost hides from fixed, not tracking."""
-    import json
     summary = json.loads(
         (pathlib.Path(__file__).resolve().parent.parent / "results" / "st2"
          / "frontier_summary.json").read_text())

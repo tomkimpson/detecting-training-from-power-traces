@@ -227,3 +227,46 @@ root. The inversion actually implemented and measured is
 `σ* = √((y₀/ε − 1)/κ)`, giving **σ\* ∝ ε^(−1/2)** — confirmed by the frozen
 thresholds (ε from 0.1 to 0.01 is a 10× drop and moves σ\* by 3.32×, i.e. √10,
 not 10×). The manuscript states ε^(−1/2).
+
+---
+
+## 8. Re-derivation at n=600 after the pre-merge review (2026-07-24, same day)
+
+`/check-PR` over the Phase-4 branch showed the §7 numbers, though derived from the
+corrected estimator, were **not stable**, and one further analytic error surfaced.
+The §7 figures are therefore superseded; the derivation's structure is unchanged.
+
+**The n=80 sizing was too small for the quantity being inverted.** The H0
+fluctuation of the plug-in Youden statistic is ≈0.09 at n=80 — the same scale as
+the ε being inverted. Consequences, all measured: the σ=0.5 row (J=0.100, AUC
+**0.4967**) was statistically indistinguishable from no separation yet carried
+**78%** of the fit leverage, because the fit linearises as `J0/J − 1` and diverges
+as J→0; κ_J varied **13–53** across 12 repeats; the bootstrap CI was κ_J [14, 86]
+and σ\*(0.2) [0.22, 0.53]; and **P(σ\*(0.2) > 0.35) = 0.61**, so the priced bracket
+was more likely wrong than right. The tell was internal: the *same* point fails the
+script's mask on the Gini series (2·AUC−1 = −0.007 < 0) but passes it on J, purely
+because J is bounded below by zero.
+
+**Fixes in the script:** `N_EACH = 600`; the fit mask now excludes points below an
+n-dependent H0 floor (`_ks_null_floor`, mean + 3 sd of the one-sided KS null,
+0.093 at n=600) instead of a fixed 0.02·y₀; bootstrap CIs on κ_J and every σ\*;
+R² over the fitted points only; `sigma_faithful_max` computed from the measured
+CV so thresholds beyond the realised-σ region are flagged in the artefact; and a
+faithful-only refit reported as the sensitivity. Runtime ~100 s, still CPU-local.
+
+**Superseding numbers:** κ_J = **28** [23, 37], R² 0.92, fitted on σ ∈ [0.05, 0.35];
+**σ\*(0.5) = 0.19** [0.17, 0.21] (inside the realised-σ region);
+**σ\*(0.2) = 0.38** [0.33, 0.42] (**beyond** it — flagged); σ\*(0.1) = 0.57,
+σ\*(0.05) = 0.82 extrapolated. Faithful-only refit κ = 19, i.e. σ\* = 0.23/0.46 —
+the ~20% systematic the paper now quotes. σ\*(0.2) moved up a cost bracket
+(66–159% → 159–375%), so the manuscript states the price as an order of magnitude
+rather than a bracket. The work-jitter comparison is unchanged (work more
+detectable at every σ ≥ 0.1, less below).
+
+**And a factor of π in Step 1.** `κ ≈ π f₀ T` is wrong. Carrying the algebra
+through — `D = 4π²σ²f₀` ⇒ HWHM `γ = D/4π = πσ²f₀`, bin half-width `B = 1/2T`,
+in-bin mass `(2/π)·arctan(B/γ)` with small-argument form `1/(π²f₀Tσ²)` — gives
+**κ = π²f₀T = 2961**, which the measured fit (3020) matches to **2%**. So the
+"O(1) width-convention prefactor" §3 leaves open is not open at all: the
+derivation is parameter-free and predictive. This strengthens Step 1 from
+order-of-magnitude agreement to a 2% test.

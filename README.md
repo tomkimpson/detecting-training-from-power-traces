@@ -36,28 +36,41 @@ pytest -p no:debugging -m "not gpu"
 (`-p no:debugging` is retained from the source project. `scikit-learn` is required for
 the RF bake-off baseline tests; without it those 4 tests error out and the rest pass.)
 
+**Known baseline:** a clean clone reports **5 failed / 208 passed**. The five failures are
+`ko_workload` / `deperiod` byte-identity and digest fixtures whose reference hashes were
+baked on a different BLAS build; they are environmental, not regressions, and they fail
+identically at every commit. Anything beyond those five is a real failure.
+
 ## Reproduce the results and figures
 
 Everything under `results/` and `figures/` is regenerable. From the repo root:
 
-**ST2 — de-periodicisation frontier (fast, ~2 min):**
+**ST2 — de-periodicisation frontier.** The committed numbers are a slurm freeze
+(`notes/results/st2-frontier-freeze-findings.md`). The first two commands below
+**rebuild** `results/st2/*_summary.json` and overwrite that freeze, so run them on slurm
+(see the array recipe further down), not on the dev node:
 ```
 python scripts/plot_st2_sweeps.py                                    # -> results/st2/*_summary.json, figures/st2_*
 python scripts/plot_st2_frontier.py --b2-dir data/measured_cost_anchors
     # -> results/st2/frontier_summary.json (verdict: GO, provisional=false), figures/st2_frontier.*
+```
+Only the Pareto re-plot is safe to run locally — it reads `frontier_summary.json` and
+writes no results artefact (~1 s):
+```
 python scripts/plot_st2_pareto.py    # -> figures/st2_cost_pareto.*
 ```
-`plot_st2_pareto.py` re-plots the frozen `frontier_summary.json` as cost vs hiding; it
-only reads that file (`plot_st2_frontier.py` is what writes it), so it is safe to re-run.
 
-**Identifiability — covertness cost bound (lightweight CPU check, ~20 s):**
+**Identifiability — covertness cost bound (lightweight CPU check, ~100 s):**
 ```
 python scripts/lower_bound_spike.py
     # -> results/spike/lower_bound_spike.json, figures/lower_bound_spike.*
 ```
-Sanity-checks the propositions of paper §3 / App. B: the coherent-power rolloff, the
-attained advantage `J = max(TPR-FPR) <= TV` and the covertness thresholds `sigma*(eps)`
-read off it, and the work-jitter comparison. Seeded and deterministic.
+Sanity-checks paper §3 / App. B: the parameter-free coherent-power rolloff
+(`kappa = pi^2 f0 T`), the attained advantage `J = max(TPR-FPR) <= TV`, and the
+covertness thresholds `sigma*(eps)` read off it with bootstrap intervals. Seeded and
+deterministic — it regenerates the tracked JSON and figure bit-for-bit. n=600 per class:
+smaller sizings put the H0 floor of `J` (~0.09 at n=80) on the same scale as the
+epsilons being inverted, which destabilises the fit.
 
 **ST2 — meter-requirement boundary sweep ("minimum meter specification", slurm):**
 ```

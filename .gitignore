@@ -53,3 +53,6 @@ figures/st1_np_ceiling_smoke.*
 results/st1/slurm/*
 !results/st1/slurm/.gitkeep
 !results/rung2/slurm/.gitkeep
+
+# Pre-merge review artefacts (transient; findings belong in notes/results/)
+PR_REVIEW_*.md

@@ -1,4 +1,4 @@
-# Handoff — 2026-07-24 (Phase 4 closed: identifiability theory + cost-vs-hiding Pareto)
+# Handoff — 2026-07-24 (Phase 4 closed, then hardened by /check-PR)
 
 ## What happened this session
 
@@ -13,8 +13,8 @@ New §3 `subsec:identifiability` + a fully written App B `app:identifiability`. 
 theorem environments had been sitting unused in the preamble since the scaffold; they are
 now used. Contents: `def:obseq` (observational equivalence $K_{h_0}(w_0)=K_{h_1}(w_1)$),
 `def:family`, `def:covert`, `prop:noident` (no passive semantic identification — the formal
-counterpart of the Rung-2 decoy result), `prop:rolloff`, `prop:sigmastar`, `prop:cost`,
-plus `rem:direction` and `rem:boundscope`. Proofs, the numerical check, the σ*→cost bridge
+counterpart of the Rung-2 decoy result), `prop:rolloff`, `prop:sigmastar`, `ass:cost`,
+plus `rem:direction`, `rem:costgap` and `rem:boundscope`. Proofs, the numerical check, the σ*→cost bridge
 and the coverage caveat are in App B.
 
 **Two real defects in the spike's derivation were found and fixed** (dated correction
@@ -28,21 +28,18 @@ as the historical record):
   `A(σ) > ε ⟹ not ε-covert`. Pinsker is now a remark on what is *not* proved.
 - **`2·AUC−1` is not an achieved single-trace advantage.** It is a Mann–Whitney/Gini index
   and can exceed the best threshold test's advantage. `scripts/lower_bound_spike.py` now
-  also computes **Youden J** (`max(TPR−FPR)`, the two-sample KS distance) and inverts
-  *that* rolloff. Re-run locally — legitimate, it is the designated lightweight CPU check
-  (~17 s, seeded), not one of the slurm-only grids.
+  also computes **Youden J** (`max(TPR−FPR)`, the *one-sided* two-sample KS distance) and
+  inverts *that* rolloff. Re-run locally — legitimate, it is the designated lightweight CPU
+  check (seeded; ~100 s at the final n=600), not one of the slurm-only grids.
 - **Also corrected: σ\* ∝ ε^(−1/2), not 1/ε** (the note's 1/ε followed from its alternative
   formula with ε² under the root). Confirmed against the frozen thresholds: a 10× drop in ε
   moves σ\* by 3.32× ≈ √10.
 
-**Regenerated numbers:** κ_J = 34 (R² = 0.95, J₀ = 1.0) vs the Gini κ = 23. Thresholds move
-*down*, the conservative direction for a necessary condition: **σ\*(0.5) = 0.17,
-σ\*(0.2) = 0.34** — both now *inside* the swept range and below the σ ≈ 0.35 anchor-breakdown
-point, an improvement on the old 0.21/0.41. σ\*(0.1) = 0.51, σ\*(0.05) = 0.74 extrapolated
-(flagged). **Every previously committed field is byte-identical**; only
-`covertness_thresholds` changed, and the old values are preserved under
-`covertness_thresholds_gini`. `figures/lower_bound_spike.*` — tracked but cited nowhere
-before — is now `fig:lower_bound` in App B.
+**The numbers from this first pass are SUPERSEDED** by the n=600 re-derivation forced by
+the review — see the next section for the figures now in the paper. `figures/lower_bound_spike.*`
+— tracked but cited nowhere before — is now `fig:lower_bound` in App B, and
+`covertness_thresholds_gini` retains the old Gini-based thresholds for continuity with the
+deliberation note.
 
 ### 2. Cost-vs-hiding Pareto plot
 
@@ -66,7 +63,7 @@ counted on stdout rather than dropped.
   reworded to "derived for one family against a fixed verifier; general case open" —
   they directly contradicted the new propositions.
 - `tab:closeout` gained a **cost-of-hiding row**; Rung 2's ceiling now cites `prop:noident`.
-- §6 governance reading and the §9 falsifiable-predictions cref retargeted at `prop:cost`.
+- §6 governance reading and the §9 falsifiable-predictions cref retargeted at `ass:cost`.
 - 2 new bib entries, **DOIs verified against the resolver** (`tsybakov2009nonparametric`
   10.1007/b13794; `cover2006elements` 10.1002/047174882X — the resolver reports 2005 for
   the online-first record, the entry keeps 2006 for the print 2nd edition).
@@ -74,16 +71,69 @@ counted on stdout rather than dropped.
   missing entirely).
 - Deleted the stray root-level `PR_REVIEW_feat-phase2-meter-boundary_2026-07-23.md`.
 
+## Then: /check-PR, and the fixes it forced
+
+Ran the pre-merge review over the branch (6 review agents + 2 adversarial verifiers).
+Verdict was **DO NOT MERGE**, and it was right. All findings are now fixed; the report is
+in `PR_REVIEW_phase-4_2026-07-24.md` (untracked, and `PR_REVIEW_*.md` is now gitignored).
+
+**Two blocking findings — both internal contradictions in claims stated as proved:**
+
+1. `prop:cost`'s mechanism was refuted by our own §6. It asserted a residual marker
+   "survives every reallocation of work", but §6 measures the fixed tests at AUC 0.44 —
+   *below chance* — under variable real work, so the residual is recoverable only by the
+   tracking class, which `rem:direction` explicitly excludes from the bound. Its
+   "period jitter has only two realisations" premise also fails against our own
+   additive-burial and dilution families. It is now **`ass:cost`**, an assumption, with
+   **`rem:costgap`** stating both gaps plainly.
+2. `tab:closeout`'s "no passive detector can do better" contradicted App A, which shows
+   `dg_order_full` at 0.93 of the NP ceiling on the controller case and calls the gap
+   "honest headroom above today's detectors, not a limit of the channel". Now scoped to
+   the discarded-update decoy, the one control for which `prop:noident` actually argues.
+
+**A factor-of-π error that made the paper stronger.** Carrying the Lorentzian/bin algebra
+through gives the parameter-free **κ = π²f₀T = 2961**, which the fit matches to **2%**.
+The paper had claimed only "within a factor of about three" of πf₀T = 942 and called the
+prefactor irreducible. The derivation pins it; `eq:arctan`/`eq:kappa` now show the work.
+
+**σ\* re-derived at n=600** (was 80, ~100 s). At n=80 the H0 floor of J is ~0.09, so a
+*null* point (AUC 0.4967 — the script's own mask already excluded it from the Gini fit)
+carried 78% of the fit leverage; κ_J varied 4× across seeds and P(σ\*(0.2) > 0.35) = 0.61,
+i.e. the published price bracket was more likely wrong than right. Now masked on the
+n-dependent floor with bootstrap CIs: **κ_J = 28 [23, 37]**, **σ\*(0.5) = 0.19
+[0.17, 0.21]**, **σ\*(0.2) = 0.38 [0.33, 0.42]**. σ\*(0.2) moved up a cost bracket, so the
+paper now states the price as an order of magnitude — "tens of percent", "of order 100% or
+more" — rather than two-anchor brackets. The artefact computes `sigma_faithful_max` and
+flags thresholds beyond it, and reports a faithful-only refit (κ = 19) as the sensitivity.
+
+**Also fixed:** `rem:direction` had it backwards — since J ≤ TV the bound is valid against
+*every* verifier class and merely *loose* against the tracker, so the old wording undersold
+it (§2/§6/§10 all corrected); ε^(−1/2) moved out of the proposition (it is fit
+extrapolation); one-sided vs two-sided KS wording; R² now computed over fitted points only;
+the unqualified "work is more detectable at matched σ" restricted to σ ≥ 0.1 (it is false
+at 6 of 11 σ); the §6 staircase maximum (0.82) stated; `edition = {Second}`.
+
+**Engineering:** `_youden` had zero test coverage while supplying every published
+threshold — new `tests/test_lower_bound_spike.py`, 14 tests including a scipy KS oracle and
+a polarity guard. Figure PDFs were carrying a wall-clock `/CreationDate`, so
+"every figure is regenerable" could not be checked by regenerate-and-diff —
+`plotstyle.save` now suppresses it and figures are byte-reproducible. README's ST2 block
+read as three safe local commands, two of which overwrite the slurm freeze. Agent E's
+simplifications applied (dead `--stem`, loop-carried `n_unpriced`, dead `label=`, hoisted
+set, `_invert` → module-level `_covertness_thresholds`, shared `FAMILY_COLOR` in
+`plotstyle`, vacuous test assertion). `log.md` back-filled.
+
 ## Current status
 
 - Branch `phase-4`, committed locally, **not pushed**; no PR opened.
-- **Verification done:** full suite **5 failed / 194 passed** (the 5 are the known BLAS
-  byte-identity digests — environmental, unchanged); new `tests/test_st2_pareto.py` 7/7;
-  `git diff results/st2/` empty (frontier summary only read); static LaTeX check —
-  `checklist` envs **4→2**, all theorem/figure/equation envs balanced, all `\cref` targets
-  resolve, all cite keys in bib, all 12 `\includegraphics` stems on disk; and a **28-point
-  numeric audit** re-deriving every figure quoted in the new prose from the two source
-  JSONs (all pass).
+- **Verification done:** full suite **5 failed / 208 passed** (the 5 are the known BLAS
+  byte-identity digests — environmental, unchanged; count is now recorded in README);
+  new pareto tests 7/7 and spike tests 14/14; `git diff results/st2/` empty (frontier
+  summary only read); spike JSON and both figure PNGs regenerate byte-identically;
+  static LaTeX check — `checklist` envs **4→2**, all envs balanced, all `\cref` targets
+  resolve, all cite keys in bib, all 12 graphics stems on disk, zero stale `prop:cost`
+  refs; and a **28-point numeric re-audit** against the regenerated artefacts, which
+  caught one last rounding slip (coherent $R^2$ 0.96 → 0.95).
 - **No PDF has ever been built** — no TeX toolchain on the dev node.
 
 ## Next steps

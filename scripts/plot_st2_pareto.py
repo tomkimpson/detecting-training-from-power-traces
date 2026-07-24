@@ -31,7 +31,7 @@ stated open empirical question; this figure plots the measured systems-cost axis
 only.
 
 Reproduce:
-    python scripts/plot_st2_pareto.py [--summary PATH] [--stem NAME]
+    python scripts/plot_st2_pareto.py [--summary PATH]
 Outputs:
     figures/st2_cost_pareto.{pdf,png}
 """
@@ -51,7 +51,8 @@ from matplotlib.lines import Line2D  # noqa: E402
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from powerladder.plotstyle import C, WIDTH_WIDE, apply_house_style, save  # noqa: E402
+from powerladder.plotstyle import (C, FAMILY_COLOR, WIDTH_WIDE,  # noqa: E402
+                                   apply_house_style, save)
 from powerladder.typeb.meter_boundary import FIXED, TRACKING  # noqa: E402
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -59,13 +60,11 @@ _SUMMARY = _ROOT / "results" / "st2" / "frontier_summary.json"
 
 _FAR_KEY = "0.05"     # the operational FAR the frontier's verdict is stated at
 
-# Family colours mirror scripts/plot_st2_frontier.py so the two §6 figures read
-# as one system. Only the cost-anchored families can appear here.
-_FAMILY_COLOR = {
-    "jitter": C["orange"], "work": C["blue"], "drift": C["green"],
-    "shape": C["skyblue"],
-}
+# Only the cost-anchored families can appear on a cost axis; the marker map
+# enumerates them, and the colours come from the shared house map so this figure
+# and the frontier figure cannot drift apart.
 _FAMILY_MARKER = {"jitter": "o", "work": "s", "drift": "^", "shape": "D"}
+_FAMILY_COLOR = {f: FAMILY_COLOR[f] for f in _FAMILY_MARKER}
 
 # Attack levels that hide less than this are left unlabelled in the figure: they
 # sit on the hiding=0 floor where per-point labels overprint. Nothing is dropped
@@ -112,6 +111,14 @@ def split_by_cost(cells: list[dict], dets: tuple[str, ...],
         pt = {"family": c["family"], "level": c["level"],
               "cost": c["cost_overhead_pct"], "hiding": hiding(c, dets, far)}
         (anchored if pt["cost"] is not None else unpriced).append(pt)
+    # An anchored family with no marker would move the Pareto staircase while its
+    # own points went undrawn -- the staircase IS the figure's claim, so fail loudly
+    # rather than show a curve nothing accounts for.
+    unknown = {p["family"] for p in anchored} - set(_FAMILY_MARKER)
+    if unknown:
+        raise SystemExit(
+            f"cost-anchored families {sorted(unknown)} have no marker/colour; "
+            "add them to _FAMILY_MARKER or they will silently skew the staircase")
     return anchored, unpriced
 
 
@@ -129,7 +136,7 @@ def pareto_envelope(points: list[dict]) -> list[tuple[float, float]]:
     return out
 
 
-def plot(summary: dict, stem: str = "st2_cost_pareto") -> pathlib.Path:
+def plot(summary: dict) -> pathlib.Path:
     """Two panels: hiding vs measured cost, against each detector class."""
     apply_house_style()
     classes = detector_classes(summary)
@@ -146,16 +153,17 @@ def plot(summary: dict, stem: str = "st2_cost_pareto") -> pathlib.Path:
     x_hi = max(costs)
     strip_lo, strip_hi = x_hi * 1.06, x_hi * 1.26
 
-    n_unpriced = 0
+    # unpriced-ness is a property of the cost anchor alone, not of the detector
+    # class, so it is the same in both panels -- count it once, outside the loop
+    n_unpriced = sum(1 for c in cells if c["cost_overhead_pct"] is None)
+
     for ax, key in zip(axes, ("tracking", "fixed")):
         dets = classes[key]
         anchored, unpriced = split_by_cost(cells, dets)
-        n_unpriced = len(unpriced)
 
         env = pareto_envelope(anchored)
         ax.step([p[0] for p in env], [p[1] for p in env], where="post",
-                color=C["grey"], lw=1.0, ls="-", zorder=1,
-                label="Pareto staircase")
+                color=C["grey"], lw=1.0, ls="-", zorder=1)
 
         for fam, col in _FAMILY_COLOR.items():
             # order the family polyline by ATTACK LEVEL (the adversary's dial),
@@ -184,9 +192,9 @@ def plot(summary: dict, stem: str = "st2_cost_pareto") -> pathlib.Path:
         ax.axvspan(strip_lo, strip_hi, facecolor="none", edgecolor=C["grey"],
                    hatch="////", lw=0.4, alpha=0.6, zorder=0)
         span = strip_hi - strip_lo
-        for i, fam in enumerate(sorted({p["family"] for p in unpriced})):
-            xs = strip_lo + span * (i + 0.5) / max(
-                len({p["family"] for p in unpriced}), 1)
+        fams = sorted({p["family"] for p in unpriced})
+        for i, fam in enumerate(fams):
+            xs = strip_lo + span * (i + 0.5) / len(fams)
             pts = [p for p in unpriced if p["family"] == fam]
             ax.plot([xs] * len(pts), [p["hiding"] for p in pts], ls="none",
                     marker="_", ms=3.5, color=_FAMILY_COLOR.get(fam, C["grey"]),
@@ -210,15 +218,13 @@ def plot(summary: dict, stem: str = "st2_cost_pareto") -> pathlib.Path:
     fig.suptitle("Cost of hiding: what measured adversary cost buys against "
                  "each detector class", fontsize=7)
     fig.tight_layout(rect=(0, 0, 1, 0.93))
-    return save(fig, stem)
+    return save(fig, "st2_cost_pareto")
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--summary", type=pathlib.Path, default=_SUMMARY,
                     help="path to the frozen frontier_summary.json (read only)")
-    ap.add_argument("--stem", default="st2_cost_pareto",
-                    help="output figure stem under figures/")
     args = ap.parse_args()
 
     if not args.summary.exists():
@@ -233,14 +239,13 @@ def main() -> None:
         for p in sorted(anchored, key=lambda q: q["cost"]):
             print(f"  {p['family']:7s} {p['level']:<5g} "
                   f"cost={p['cost']:+8.2f}%  hiding={p['hiding']:.2f}")
-        notable = ", ".join(
-            "{}={}".format(p["family"], p["level"])
-            for p in unpriced if p["hiding"] > 0.3)
+        notable = ", ".join(f"{p['family']}={p['level']}"
+                            for p in unpriced if p["hiding"] > 0.3)
         print(f"  ({len(unpriced)} of {len(summary['cells'])} cells carry no "
               "measured cost anchor and are drawn in the hatched strip; those "
               f"hiding > 0.3 from this class: {notable or 'none'})")
 
-    out = plot(summary, args.stem)
+    out = plot(summary)
     print(f"-> {out.with_suffix('')}.*")
 
 

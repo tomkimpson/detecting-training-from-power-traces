@@ -56,6 +56,17 @@ C = {
     "grey": "#9a9a9a",
 }
 
+# ST2 attack-family colours, so the Sec.-6 frontier and Pareto figures read as one
+# system. Single source of truth for new call sites; scripts/plot_st2_frontier.py
+# still carries its own identical copy (same hex values) and should import this
+# instead next time that file is touched -- re-running it rewrites the frozen
+# frontier_summary.json, so it is deliberately left alone here.
+FAMILY_COLOR = {
+    "jitter": C["orange"], "work": C["blue"], "drift": C["green"],
+    "phase": C["vermillion"], "relocate": C["purple"], "harmonic": C["yellow"],
+    "shape": C["skyblue"], "dilute": C["black"], "meter": C["grey"],
+}
+
 # Native figure widths [inches] matched to the single-column (6.5 in) manuscript so
 # the \includegraphics widths render at ~1:1 (no text rescaling):
 #   WIDTH_WIDE   ~ 0.78 * 6.5 in  (Figs 3, 4)
@@ -154,7 +165,11 @@ def save(fig, stem: str, subdir: str | None = None) -> pathlib.Path:
     out_dir = _FIG_DIR / subdir if subdir else _FIG_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
     pdf = out_dir / f"{stem}.pdf"
-    fig.savefig(pdf)
+    # Suppress the wall-clock /CreationDate matplotlib would otherwise stamp into
+    # the PDF: with it, a tracked figure is byte-different on every regeneration
+    # even when the plot is identical, so "every figure is regenerable" cannot be
+    # checked by regenerate-and-diff and the figures churn in git for no reason.
+    fig.savefig(pdf, metadata={"CreationDate": None})
     fig.savefig(out_dir / f"{stem}.png")
     return pdf
 

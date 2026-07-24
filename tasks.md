@@ -348,6 +348,30 @@ resolve, labels/refs consistent, environments balanced).
   previously committed number unchanged). Also corrected: σ* ∝ ε^(−1/2), not 1/ε.
   2 new bib entries (`tsybakov2009nonparametric`, `cover2006elements`) — flagged for
   `check-refs`.
+  **Hardened after `/check-PR` (same day, 8 agents incl. 2 adversarial verifiers).** Two
+  blocking findings were genuine internal contradictions: (i) `prop:cost`'s residual-marker
+  mechanism is refuted by our own §6 (fixed tests fall to AUC 0.44, *below chance*, under
+  variable real work — so the residual is visible only to the tracking class the bound
+  excludes) and its "only two realisations" premise is contradicted by our own
+  additive-burial/dilution families ⇒ demoted to **`ass:cost`** + `rem:costgap` stating both
+  gaps; (ii) the `tab:closeout` "no passive detector can do better" claim contradicted App A
+  (`dg_order_full` at 0.93 of the NP ceiling on the controller case) ⇒ scoped to the
+  discarded-update decoy. **A factor-of-π error found and fixed, which strengthens the
+  result:** carrying the Lorentzian/bin algebra through gives the parameter-free
+  **κ = π²f₀T = 2961**, which the fit matches to **2%** — the paper had claimed only "within
+  a factor of three" of πf₀T and called the prefactor irreducible. **σ\* re-derived at
+  n=600** (was 80): the H0 floor of J is ~0.09 at n=80, so a null point carried 78% of the
+  fit leverage (its AUC was 0.4967 — the script's own mask already excluded it from the
+  *Gini* fit) and κ_J varied 4× across seeds with P(σ\*(0.2)>0.35)=0.61. Now masked on the
+  n-dependent floor with bootstrap CIs: **κ_J=28 [23,37]**, **σ\*(0.5)=0.19 [0.17,0.21]**,
+  **σ\*(0.2)=0.38 [0.33,0.42]** (flagged beyond the realised-σ region, which the artefact
+  now computes), faithful-only refit κ=19 reported as the sensitivity. The price is stated
+  as an order of magnitude, not brackets. Also: `rem:direction` corrected — the bound is
+  valid against *every* class (J≤TV), merely loose against the tracker, so the old wording
+  undersold it; ε^(−1/2) moved out of the proposition (it is fit extrapolation); one-sided
+  vs two-sided KS wording; R² now over fitted points only. New `tests/test_lower_bound_spike.py`
+  (14 tests incl. a scipy KS oracle and a polarity guard) closes the zero-coverage gap on
+  `_youden`. Full record: `PR_REVIEW_phase-4_2026-07-24.md` (untracked).
 - [x] **Cost-vs-hiding Pareto re-plot (cheap, CPU-only, no new sweeps).** Render the
   already-frozen ST2 frontier as an explicit **adversary-cost vs hiding** Pareto curve —
   the plan's stated deliverable (`notes/plans/plan-for-paper-2.md:370`,

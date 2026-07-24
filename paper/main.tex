@@ -295,8 +295,9 @@ schedule observed through a filtered, low-rate meter---so the bound is not
 inherited but has to be derived. We derive it for one attack family against a
 fixed verifier in \cref{subsec:identifiability}, which also explains why the
 familiar route through Pinsker's inequality proves the converse of what a
-cost-of-hiding claim needs; extending it to the order-tracking class remains
-open.
+cost-of-hiding claim needs. Its distortion half is a result; the step from
+distortion to cost is an assumption (\cref{ass:cost}), and tightening the
+threshold against the order-tracking class remains open.
 
 \paragraph{Challenge-response authentication.}
 Authenticating a physical device by its response to an unpredictable query is the
@@ -390,12 +391,15 @@ power-delivery path, and $K_h(w)$ for the law of the observed trace that
 	\label{prop:noident}
 	For $(h_0,w_0)$ and $(h_1,w_1)$ equivalent in the sense of
 	\cref{def:obseq}, every detector $\phi(P_{\mathrm{obs}})$ declares training
-	with the same probability under both. Consequently no passive scalar-power detector can certify the semantic
-	content of a computation against an unrestricted adversary: a guarantee
-	requires restricting at least one of the admissible non-training workload
-	class, the adversary's freedom to add or restructure computation, the
-	hardware and power-transfer family, the physical property being detected, or
-	the protocol.
+	with the same probability under both. Consequently no passive scalar-power
+	detector can certify the semantic content of a computation against an
+	unrestricted adversary: a non-vacuous guarantee has to put the observationally
+	equivalent pairs out of scope. Four restrictions do that --- on the admissible
+	non-training workload class, on the adversary's freedom to add or restructure
+	computation, on the hardware and power-transfer family, or on the physical
+	property claimed --- while a fifth route, changing the protocol, leaves the
+	passive channel altogether (\cref{sec:active}). We do not claim the list is
+	exhaustive.
 \end{proposition}
 
 The construction behind it is nearly available on the prover's own hardware: a
@@ -455,9 +459,10 @@ jitter \emph{accumulates}: the iteration-boundary phase performs a random walk.
 	$J(\sigma) > \varepsilon$ is not $\varepsilon$-covert. Hence
 	$\varepsilon$-covertness requires
 	$\sigma \geq \sigma^*(\varepsilon)$, where $\sigma^*$ solves
-	$J(\sigma^*) = \varepsilon$ and diverges as
-	$\varepsilon^{-1/2}$ when $\varepsilon \to 0$. Enlarging the verifier class can
-	only raise $\sigma^*(\varepsilon)$.
+	$J(\sigma^*) = \varepsilon$; it is strictly positive and increases as
+	$\varepsilon$ falls. Enlarging the verifier class can only raise
+	$\sigma^*(\varepsilon)$, so the bound obtained from any one exhibited verifier
+	is valid but not necessarily tight.
 \end{proposition}
 
 \begin{remark}[Which inequality is doing the work]
@@ -469,31 +474,52 @@ jitter \emph{accumulates}: the iteration-boundary phase performs a random walk.
 	from above, so forcing that bound below $\varepsilon$ would establish that some
 	distortion \emph{suffices} for covertness, not that any is
 	\emph{necessary}. Only a verifier that demonstrably attains advantage
-	$J$ certifies that smaller distortions fail. The price is that the guarantee
-	is stated against the verifier class we exhibit: we prove it for the
-	fixed-bin test, and we do \emph{not} prove it against the order-tracking
-	class of \cref{sec:structural}, which our own experiments show to be
-	strictly stronger.
+	$J$ certifies that smaller distortions fail. Note what this does and does not
+	cost us. Because $J \leq \mathrm{TV}$, a $\sigma$ ruled out by the fixed-bin
+	test is ruled out against \emph{every} verifier class, the order tracker of
+	\cref{sec:structural} included: the bound is universally valid. What it is not
+	is tight. A stronger verifier attains a larger advantage at each $\sigma$ and
+	so yields a larger $\sigma^*$, and since our own experiments show the tracking
+	class to be the stronger one, the threshold we report is a loose reading of the
+	true requirement rather than a limit on where it applies.
 \end{remark}
 
 Distortion is not yet cost. The bridge is a physical property of the admissible
-family in \cref{def:family}.
+family in \cref{def:family}, and we state it as an assumption rather than a
+result, because two steps in its justification are not closed
+(\cref{app:identifiability}).
 
-\begin{proposition}[Cost of hiding]
-	\label{prop:cost}
-	Within \cref{def:family}, reaching $\sigma^*(\varepsilon)$ costs throughput or
-	learning efficiency; it cannot be free in both. Period jitter has
-	only two realisations. Inserting idle time inflates the mean period and pays
-	in throughput. Varying the real work per iteration avoids idling, but the
-	down-phase duration is fixed by \cref{def:family} and the accumulated work is
-	quantised, so a residual marker survives at the exchange cadence; removing it
-	requires either idling or desynchronising the exchange, and the latter
-	changes the optimisation that is being performed.
-\end{proposition}
+\begin{assumption}[Cost of hiding]
+	\label{ass:cost}
+	Within \cref{def:family} and at fixed total useful work, reaching
+	$\sigma^*(\varepsilon)$ costs throughput or learning efficiency; it cannot be
+	free in both. Period jitter then has only two realisations. Inserting idle time
+	inflates the mean period and pays in throughput. Varying the real work per
+	iteration avoids idling, but the down-phase duration does not scale with the
+	accumulated work and that work is quantised, so a component at the exchange
+	cadence survives; removing it requires either idling or desynchronising the
+	exchange, and the latter changes the optimisation being performed.
+\end{assumption}
+
+\begin{remark}[Why this is an assumption]
+	\label{rem:costgap}
+	The surviving exchange-cadence component is recovered by the order-tracking
+	class, not by the fixed-bin verifier of \cref{prop:sigmastar}: under variable
+	real work \cref{sec:frontier} measures the fixed tests below chance. So the
+	argument establishes that a work-varying prover stays visible to a
+	\emph{tracker}, not that it must pay to become $\varepsilon$-covert against the
+	verifier whose $\sigma^*$ we computed. And fixing total useful work is a real
+	restriction: substituting useful non-training work (the additive-burial and
+	dilution families of \cref{subsec:adversary}) modulates the period while
+	idling nothing and degrading no optimisation. The disjunction is therefore
+	asserted over timing attacks at fixed work, and the measured support for it is
+	the comparative one --- work variation is the more detectable of the two at
+	matched distortion (\cref{fig:lower_bound}).
+\end{remark}
 
 \begin{remark}[Scope of the bound]
 	\label{rem:boundscope}
-	Three limits fix the wording. The cost in \cref{prop:cost} is a disjunction,
+	Three limits fix the wording. The cost in \cref{ass:cost} is a disjunction,
 	not a figure: its throughput leg is anchored to measurement
 	(\cref{sec:frontier}), while its learning-efficiency leg is argued and
 	remains this paper's central open empirical question. The advantage
@@ -862,8 +888,8 @@ the schedule, not a deficiency of a particular detector.
 \paragraph{The trade-off itself.} Plotting hiding directly against measured cost
 (\cref{fig:st2_cost_pareto}) separates the two detector classes sharply. Against
 the fixed class the Pareto staircase reaches hiding $0.74$ at essentially zero
-overhead and never improves much on that however much the prover spends: the
-cheapest attack is also close to the best one. Against the tracking class the
+overhead and climbs only to $0.79$ at $159\%$ and $0.82$ at $375\%$ however much
+the prover spends: the cheapest attack is within $0.08$ of the best one. Against the tracking class the
 staircase never leaves the floor, rising only to $0.16$ and doing so at $159\%$
 overhead, so no attack in the anchored set buys meaningful concealment from the
 tracker at any price we can measure. Reading the two panels together is the
@@ -900,8 +926,11 @@ necessary conditions and an upper bound on hideability rather than a proof of
 training: they bound what a prover can hide from a fixed detector cheaply. The
 complementary direction --- a lower bound on what hiding must cost, which no
 detection sweep can supply --- is available for one attack family against a fixed
-verifier (\cref{prop:sigmastar,prop:cost}), and the distortion it requires can be
-priced against the same anchors used here. Closing it for the tracking class
+verifier (\cref{prop:sigmastar}) under the cost assumption of \cref{ass:cost},
+and the distortion it requires can be priced against the same anchors used here.
+Because any single verifier's advantage is bounded by the total variation, that
+threshold is valid against the tracking class too --- but it is read off the weaker
+detector, so it understates what a tracker would require. Tightening it there
 remains open.
 
 \subsection{A minimum meter specification}
@@ -1198,7 +1227,7 @@ scoped to the stated generator and its stated nulls throughout.
 test here but state as falsifiable. Distributed synchronisation should deepen the
 line: at cluster scale the periodic all-reduce barrier produces a deep, coherent,
 legible cadence rather than the shallow single-card ripple, which is precisely the
-physics \cref{prop:cost} leans on. And an
+physics \cref{ass:cost} leans on. And an
 external wall or rack meter should see a different, lower-passed trace than
 on-board NVML telemetry, shifting where the minimum meter specification of
 \cref{subsec:meter_spec} binds. Both are predictions, not results.
@@ -1234,18 +1263,20 @@ the paper's evidence attached to each rung.
 		2. Conditional classification & The trace is more training-like than the
 		stated inference null (area under the curve $1.00$, stable across domain
 		shift) & \cref{sec:classification} & The semantic decoy: non-training
-		loads with a training-shaped schedule score as training --- and
-		\cref{prop:noident} says no passive detector can do better \\
+		loads with a training-shaped schedule score as training; for the
+		discarded-update decoy \cref{prop:noident} shows no passive detector can
+		do better \\
 		Frontier & Fixed tests collapse under ${\approx}$zero-cost variable real
 		work while the tracker holds; costly de-periodicisations buy no
 		concealment & \cref{sec:frontier} & The tracker's far end, at a systems
 		and learning cost we could not measure \\
-		Cost of hiding & Hiding from a fixed verifier to detectability
-		$\varepsilon$ requires distortion $\sigma^*(\varepsilon)$, which costs
-		throughput or learning efficiency and cannot cost neither (i.i.d.\ period
-		jitter) & \cref{subsec:identifiability}, \cref{app:identifiability} &
-		Proved against a fixed verifier only, for one attack family, and
-		internal to the stated generator \\
+		Cost of hiding & Hiding to detectability $\varepsilon$ requires a
+		distortion $\sigma^*(\varepsilon)$ that the measured anchors price at tens
+		of percent of throughput, rising above $100\%$ (i.i.d.\ period jitter) &
+		\cref{subsec:identifiability}, \cref{app:identifiability} & Read off a
+		fixed-bin verifier, so valid everywhere but loose; one attack family;
+		internal to the stated generator; the throughput-or-learning disjunction is
+		\cref{ass:cost}, not a result \\
 		3--4. Active authentication & A challenge-synchronous protocol and an
 		assumed binding primitive, specified but not run & \cref{sec:active} &
 		Challenge-aware dummy load; the co-location gap \\
@@ -1269,10 +1300,12 @@ linear time-invariant first approximation. The optimality ceiling of
 \cref{app:bakeoff} is optimal only under the Whittle model, hence a lower bound on
 the true optimum. Every robustness claim is bounded by the attack families and
 budgets we specified; a family we did not model is outside it. The cost bound of
-\cref{subsec:identifiability} shares that limit: it covers i.i.d.\ period jitter
-and is proved against a fixed-bin verifier, not against the order tracker that
-our own experiments show to be stronger, so it does not yet close the frontier's
-far end. And the learning-efficiency leg of that bound --- the axis that would
+\cref{subsec:identifiability} shares that limit: it covers i.i.d.\ period jitter,
+and while it holds against every verifier class, it is obtained from a fixed-bin
+test and so reads loose against the order tracker our own experiments show to be
+stronger --- it does not yet close the frontier's far end. Its cost leg is an
+assumption (\cref{ass:cost}), not a result, for the reasons in
+\cref{rem:costgap}. And the learning-efficiency leg of that bound --- the axis that would
 turn it into a single priced statement rather than a disjunction --- is argued,
 not measured, and remains the central open empirical question.
 
@@ -1457,126 +1490,215 @@ loads, or actively power-shaped, so the equivalence classes are populated from
 both sides.
 
 \paragraph{Proof of \cref{prop:rolloff}.}
-Fractional period jitter perturbs each iteration boundary relative to its
-predecessor, so the boundary phase $\theta_i = 2\pi i$ accumulates independent
-increments and its residual against a uniform clock is a random walk with
-$\mathrm{Var}[\theta(t)] \approx D t$, $D \approx (2\pi)^2\sigma^2 f_0$. For a
-Brownian phase the periodic component's autocorrelation decays as
-$\exp(-D|\tau|/2)$, so its spectrum is a Lorentzian of half-width proportional to
-$D$ rather than a line. A record of length $T$ resolves frequency only to $1/T$,
-so the coherent power a fixed-bin verifier collects is the fraction of that
-Lorentzian falling inside one bin, which for a half-width small compared with the
-band is $(1+\kappa\sigma^2)^{-1}$ with $\kappa \propto D T / \sigma^2 \propto
-f_0 T$. The constant of proportionality depends on the width convention
-(half-width at half-maximum versus equivalent noise bandwidth) and on the taper,
-so the derivation fixes $\kappa$ only up to an $O(1)$ factor; the numerical check
-below supplies it.
+Boundary $i$ nominally carries phase $2\pi i$; fractional period jitter perturbs
+each boundary relative to its predecessor, so the \emph{residual} of the boundary
+phase against a uniform clock accumulates independent increments and performs a
+random walk with $\mathrm{Var}[\theta(t)] \approx D t$ and
+$D \approx (2\pi)^2\sigma^2 f_0$. For a Brownian phase the periodic component's
+autocorrelation decays as $\exp(-D|\tau|/2)$, so its spectrum is a Lorentzian
+rather than a line, with half-width at half-maximum
+$\gamma = D/4\pi = \pi\sigma^2 f_0$ in Hz. A record of length $T$ resolves
+frequency only to $1/T$, so the coherent power a fixed-bin verifier collects is
+the Lorentzian mass within a half-width $B = 1/2T$ of the centre,
+\begin{equation}
+	\frac{P_c(\sigma)}{P_c(0)}
+	\;=\; \frac{2}{\pi}\arctan\!\left(\frac{B}{\gamma}\right)
+	\;=\; \frac{2}{\pi}\arctan\!\left(\frac{1}{2\pi f_0 T \sigma^2}\right),
+	\label{eq:arctan}
+\end{equation}
+whose small-argument form is $1/(\pi^2 f_0 T\sigma^2)$. Matching that tail to
+$(1+\kappa\sigma^2)^{-1}$ gives
+\begin{equation}
+	\kappa \;=\; \pi^2 f_0 T,
+	\label{eq:kappa}
+\end{equation}
+a parameter-free prediction rather than a fitted scale --- the width and bandwidth
+conventions cancel once \cref{eq:arctan} is carried through explicitly. The
+Lorentzian form of \cref{eq:rolloff} is itself an approximation to
+\cref{eq:arctan}, accurate to better than $1\%$ over the range swept below.
 
 \paragraph{Proof of \cref{prop:sigmastar}.}
 Let $S$ be the fixed-bin statistic and consider the threshold tests
 $\{S \geq c\}$. The advantage of the best such test is
 $J = \sup_c \left(\Pr_{\mathrm{train}}[S \geq c] - \Pr_{\mathrm{null}}[S \geq
-c]\right)$, the two-sample Kolmogorov--Smirnov distance of the score laws. Each
-threshold test is a measurable function of the trace, so by data processing
+c]\right)$, the \emph{one-sided} Kolmogorov--Smirnov distance of the score laws
+(one-sided because training traces score high, so only that direction is a
+detection advantage; one-sided $\leq$ two-sided $\leq \mathrm{TV}$, so the
+inequality we need still runs the right way). These are probabilities under the
+two laws, so $J$ is a population quantity, and each $\{S \geq c\}$ is a
+deterministic single-trace test that attains its own difference --- existence is
+all \cref{def:covert} needs. Each such test is a measurable function of the trace,
+so by data processing
 $J \leq \mathrm{TV}(P_{\mathrm{train}},P_{\mathrm{null}})$. If
 $J(\sigma) > \varepsilon$ then total variation exceeds $\varepsilon$ and the
 attack is not $\varepsilon$-covert by \cref{def:covert}; equivalently,
-$\varepsilon$-covertness requires $J(\sigma) \leq \varepsilon$. The statistic is
-monotone in the coherent power it measures, which decays in $\sigma$ by
-\cref{prop:rolloff}, so $J$ decays too and the requirement is a lower bound
-$\sigma \geq \sigma^*(\varepsilon)$. Fitting the same functional form to $J$,
-$J(\sigma) = J_0/(1+\kappa_J\sigma^2)$, and inverting gives
+$\varepsilon$-covertness requires $J(\sigma) \leq \varepsilon$. Empirically $J$
+decreases in $\sigma$ over the swept range, so the requirement becomes a lower
+bound $\sigma \geq \sigma^*(\varepsilon)$; we do not prove that monotonicity,
+which would need a stochastic-ordering argument for the score laws rather than
+merely the decay of the coherent power that drives them. Fitting the functional
+form of \cref{eq:rolloff} to $J$, $J(\sigma) = J_0/(1+\kappa_J\sigma^2)$, and
+inverting gives
 \begin{equation}
 	\sigma^*(\varepsilon)
-	\;=\; \kappa_J^{-1/2}\,\sqrt{J_0/\varepsilon - 1}
-	\;\sim\; \left(\kappa_J\,\varepsilon/J_0\right)^{-1/2}
-	\quad (\varepsilon \to 0).
+	\;=\; \kappa_J^{-1/2}\,\sqrt{J_0/\varepsilon - 1},
 	\label{eq:sigmastar}
 \end{equation}
-Enlarging the verifier class can only increase the attainable advantage at each
-$\sigma$, hence only raise $\sigma^*$.
+which grows like $\varepsilon^{-1/2}$ for small $\varepsilon$. That asymptotic
+form is a property of the \emph{fitted} rolloff extrapolated beyond the swept
+range, not a derived law, which is why \cref{prop:sigmastar} claims only that
+$\sigma^*$ is positive and increases as $\varepsilon$ falls. Enlarging the
+verifier class can only increase the attainable advantage at each $\sigma$, hence
+only raise the class-indexed $\sigma^*_{\mathcal{C}}(\varepsilon) =
+\inf\{\sigma : \sup_{\phi \in \mathcal{C}} J_\phi(\sigma) \leq \varepsilon\}$;
+$\sigma^*$ above is that quantity for the singleton fixed-bin class.
 
-Two points of bookkeeping. The rolloff constant $\kappa_J$ of the
+Two points of bookkeeping. First, the rolloff constant $\kappa_J$ of the
 \emph{advantage} is not the $\kappa$ of the \emph{coherent power} in
 \cref{eq:rolloff}: the advantage saturates near one while any excess at $f_0$
-remains separable from a line-free null, so it decays far more slowly, and using
-it is the conservative choice --- it yields the smaller, and therefore safely
-necessary, $\sigma^*$. And $J$ is not interchangeable with the rank-based Gini
+remains separable from a line-free null, so it decays far more slowly. The two are
+not interchangeable in either direction --- coherent power is not a detection
+advantage at all, so it can never be substituted into \cref{eq:sigmastar},
+whatever its rolloff. Second, $J$ is not interchangeable with the rank-based Gini
 index $2\,\mathrm{AUC}-1$: the latter can exceed $J$, so it is not the advantage
 of any single-trace test and cannot appear in \cref{eq:sigmastar}. Both are
 reported in the summary artefact; only $J$ carries the bound.
 
-\paragraph{Argument for \cref{prop:cost}.}
-The two realisations of period jitter are exhaustive, because a period is
-occupied either by useful work or by idling. Padding the period with idle time
-holds the real work per iteration fixed, so every period must be at least as long
-as the compute it contains and the mean period inflates with $\sigma$; throughput
-falls, and \cref{sec:frontier} measures the penalty at $15$--$375\%$ over the
-swept range. Varying the real work per iteration avoids idling and is measured at
-essentially zero throughput cost, but it cannot drive the cadence marker to zero
-within \cref{def:family}. The accumulated work is an integer number of
-micro-steps, so the up-phase is quantised rather than continuously tunable, and
-the exchange down-phase keeps its duration whatever that count. A component at
-the exchange cadence therefore survives every reallocation of work between
-iterations. Removing it requires either inserting idle time, which returns to the
-first realisation and its throughput cost, or desynchronising the exchange, which
-alters the optimisation actually performed and so is paid for in learning
-efficiency. The numerical check supports this rather than assuming it: at matched
-$\sigma$ the work-varying attack is \emph{more} detectable than idle-padded
-jitter, so the cheap-throughput route does not evade the bound for free --- it
-trades throughput cost for detectability.
+\paragraph{Discussion of \cref{ass:cost}, and why it is an assumption.}
+Hold the prover's total useful work fixed. Then a period is occupied either by
+training work or by idling, and period jitter has two realisations. Padding with
+idle time holds the real work per iteration fixed, so every period must be at
+least as long as the compute it contains and the mean period inflates with
+$\sigma$; throughput falls, and \cref{sec:frontier} measures the penalty at
+$15$--$375\%$ over the swept range. Varying the real work per iteration avoids
+idling and is measured at essentially zero throughput cost, but within
+\cref{def:family} it cannot make the schedule aperiodic: the accumulated work is
+an integer number of micro-steps, so the up-phase is quantised rather than
+continuously tunable, and the exchange down-phase keeps its duration whatever that
+count, leaving a component at the exchange cadence. Removing \emph{that} requires
+either inserting idle time, which returns to the first realisation and its
+throughput cost, or desynchronising the exchange, which alters the optimisation
+actually performed and is therefore paid for in learning efficiency.
+
+Two gaps stop this being a proof, and both matter.
+
+The first is that the surviving component is not one the fixed-bin verifier can
+use. \Cref{sec:frontier} measures the fixed tests under variable real work falling
+to detection rate $0.26$ with area under the curve $0.44$ --- below chance --- and
+the multitaper F-test at its floor. So the residual at the exchange cadence is
+recovered only by the order-tracking class, which is precisely the class
+\cref{prop:sigmastar} does \emph{not} instantiate. Read strictly, then, the
+argument shows that a work-varying prover remains detectable \emph{by a tracker},
+not that it must pay to become $\varepsilon$-covert against the fixed-bin verifier
+whose $\sigma^*$ we computed. Closing that gap needs $\sigma^*$ for the tracking
+class, which we do not have.
+
+The second is that fixing total useful work is a real restriction. A prover free
+to substitute useful \emph{non-training} work --- the additive-burial and dilution
+families of \cref{subsec:adversary} --- can modulate the period while idling
+neither the device nor the training job, and pays in neither training throughput
+nor learning efficiency. Frequency scaling is a further route the two-realisation
+dichotomy does not cover. So the disjunction holds over timing attacks at fixed
+work, not over the adversary's full repertoire.
+
+What the numerical check does support is the weaker comparative claim: at matched
+$\sigma$ and for every $\sigma \geq 0.1$ the work-varying attack is \emph{more}
+detectable than idle-padded jitter, so substituting real-work variation does not
+buy covertness for free relative to the priced attack --- it trades throughput
+cost for detectability. That comparison is measured; the cost disjunction itself
+is assumed, and \cref{ass:cost} is labelled accordingly.
 
 \paragraph{Numerical check.}
 \Cref{fig:lower_bound} tests every load-bearing step against the generator and
 meter of \cref{sec:scenario} rather than an idealised channel. Training and
-inference-null populations ($n=80$ per class, $f_0 = 1$~Hz, $T = 300$~s,
+inference-null populations ($n=600$ per class, $f_0 = 1$~Hz, $T = 300$~s,
 $f_s = 20$~Hz, seeded) are pushed through the full observation map and scored with
-the fixed-bin statistic. The coherent power follows the form of
-\cref{eq:rolloff} with $R^2 = 0.97$; the fitted $\kappa = 2948$ sits within a
-factor of about three of the parameter-free $\pi f_0 T = 942$, which confirms the
-functional form and fixes the $O(1)$ prefactor the derivation leaves open. The
-attained advantage rolls off with $\kappa_J = 34$ at $R^2 = 0.95$ from
-$J_0 = 1.0$, giving $\sigma^*(0.5) = 0.17$ and $\sigma^*(0.2) = 0.34$ inside the
-swept range, and $\sigma^*(0.1) = 0.51$, $\sigma^*(0.05) = 0.74$ by
-extrapolation. The generator's de-periodicisation anchors hold where the
-in-range thresholds live: measured cadence coefficient of variation tracks
-$\sigma$ and measured $D$ tracks $(2\pi)^2\sigma^2 f_0$ up to
-$\sigma \approx 0.2$. Both break down by $\sigma \approx 0.35$, where a period
-clamp in the generator takes over, so the extrapolated thresholds lie outside the
-regime in which the jitter model itself is faithful and should be read as
-indicative only. Finally, the work-varying series attains a higher advantage than
-period jitter at every $\sigma \geq 0.1$, the comparison
-\cref{prop:cost} rests on.
+the fixed-bin statistic. The coherent power follows \cref{eq:rolloff} with
+$R^2 = 0.95$ and a fitted $\kappa = 3020$ against the parameter-free
+$\pi^2 f_0 T = 2961$ of \cref{eq:kappa} --- agreement to $2\%$ with nothing
+fitted, which is the strongest single confirmation of the physical picture here.
+
+The attained advantage requires more care, because it is estimated. Our plug-in
+$\hat J$ maximises over thresholds on the same sample it evaluates, so it is
+upward-biased; under $H_0$ at $n=600$ its fluctuation reaches $0.093$, and a
+measured $\hat J$ below that carries no evidence of separation. Because the fit
+linearises as $J_0/J-1$, which diverges as $J \to 0$, such points would otherwise
+dominate it --- at the $n=80$ sizing we first used, two washed-out points carried
+$97\%$ of the fit and $\kappa_J$ varied fourfold across seeds. We therefore
+exclude points below the $H_0$ floor and report intervals. On the surviving window
+$\sigma \in [0.05, 0.35]$ the advantage rolls off with $\kappa_J = 28$
+($95\%$ bootstrap interval $[23, 37]$, $R^2 = 0.92$, $J_0 = 1.0$), giving
+\begin{equation*}
+	\sigma^*(0.5) = 0.19\ [0.17, 0.21], \qquad
+	\sigma^*(0.2) = 0.38\ [0.33, 0.42],
+\end{equation*}
+and, by extrapolation beyond the swept range, $\sigma^*(0.1) = 0.57$ and
+$\sigma^*(0.05) = 0.82$.
+
+Two caveats bound how far these numbers travel. First, the generator realises the
+nominal distortion only up to $\sigma \approx 0.2$: beyond it the reciprocal
+Gaussian period draw and a clamp take over, and the measured cadence coefficient
+of variation runs high ($0.50$ at $\sigma = 0.35$, $1.48$ at $\sigma = 0.5$),
+as does $D$ against $(2\pi)^2\sigma^2 f_0$. Only $\sigma^*(0.5)$ falls inside that
+faithful region; $\sigma^*(0.2)$ and everything beyond it do not, and the artefact
+flags them. Second, the fit window necessarily reaches past $\sigma = 0.2$, since
+the advantage is still saturated below it; restricting the fit to the faithful
+region alone gives $\kappa_J = 19$ and hence larger thresholds, $\sigma^*(0.5) =
+0.23$ and $\sigma^*(0.2) = 0.46$. The thresholds are therefore good to about
+$20\%$, not to two significant figures, and the direction of that residual
+uncertainty is towards \emph{more} required distortion, not less. Finally, the
+work-varying series attains a higher advantage than period jitter at every
+$\sigma \geq 0.1$ --- and a lower one below that --- which is the comparison
+\cref{ass:cost} appeals to.
 
 \begin{figure}[t]
 	\centering
 	\includegraphics[width=\linewidth]{lower_bound_spike}
 	\caption{Numerical check on the covertness cost bound, through the full
-	generator and meter. \textbf{Left:} coherent power at the nominal cadence
-	against jitter scale, with the analytic and fitted rolloffs of
-	\cref{eq:rolloff}. \textbf{Right:} the advantage attained by the fixed-bin
-	threshold test, $J \leq \mathrm{TV}$, for idle-padded period jitter and for
-	the near-free work-varying attack; dotted lines mark
+	generator and meter ($n=600$ per class). \textbf{Left:} coherent power at the
+	nominal cadence against jitter scale. The fitted and the parameter-free
+	analytic rolloffs of \cref{eq:rolloff,eq:kappa} are indistinguishable at this
+	scale, agreeing to $2\%$. \textbf{Right:} the advantage attained by the
+	fixed-bin threshold test, $J \leq \mathrm{TV}$, for idle-padded period jitter
+	and for the near-free work-varying attack; dotted lines mark
 	$\varepsilon \in \{0.1, 0.5\}$, whose crossings give
-	$\sigma^*(\varepsilon)$. The work-varying attack is the more detectable of
-	the two at matched distortion, which is the residual
-	\cref{prop:cost} relies on. The verifier here is fixed at the known cadence,
-	not the order tracker of \cref{sec:structural}.}
+	$\sigma^*(\varepsilon)$ (the $\varepsilon = 0.1$ crossing lies beyond the
+	swept range and is reached by extrapolation). The dash-dotted line is the
+	$H_0$ fluctuation of the estimator: the $\sigma = 0.5$ point falls below it
+	and is excluded from the fit. For $\sigma \geq 0.1$ the work-varying attack is
+	the more detectable of the two at matched distortion, the comparison
+	\cref{ass:cost} appeals to; below that it is the less detectable. The verifier
+	here is fixed at the known cadence, not the order tracker of
+	\cref{sec:structural}.}
 	\label{fig:lower_bound}
 \end{figure}
 
 \paragraph{From distortion to a price.}
 The distortion thresholds can be read against the measured cost anchors of
-\cref{sec:frontier}, which price the idle-padded realisation at the same
+\cref{sec:frontier}, which price the idle-padded realisation on the same nominal
 $\sigma$ grid. Hiding from the fixed-bin verifier to $\varepsilon = 0.5$ needs
-$\sigma^* = 0.17$, between the measured levels $\sigma = 0.1$ and $\sigma = 0.2$
-and so between $32\%$ and $66\%$ throughput overhead; to $\varepsilon = 0.2$ it
-needs $\sigma^* = 0.34$, between $66\%$ and $159\%$. This is the sense in which
-the bound has a price, and \cref{fig:st2_cost_pareto} is its empirical
-counterpart. The two must not be conflated: the thresholds come from a fixed-bin
-verifier at the known cadence on $80$ traces per class, whereas the frontier
-scores a five-detector bank on $200$, so they are read side by side rather than
-plotted on shared axes.
+$\sigma^* = 0.19$, which falls between the measured levels $\sigma = 0.1$ and
+$\sigma = 0.2$ and so between $32\%$ and $66\%$ throughput overhead; to
+$\varepsilon = 0.2$ it needs $\sigma^* = 0.38$, between $159\%$ and $375\%$.
+Given the roughly $20\%$ uncertainty on $\sigma^*$ established above, and the
+scope limits of \cref{rem:boundscope,rem:costgap}, the robust
+form of the statement is the order of magnitude rather than the bracket: driving a
+fixed-bin verifier to $\varepsilon = 0.5$ costs \emph{tens of percent} of
+throughput, and to $\varepsilon = 0.2$ costs \emph{of order $100\%$ or more}. Both
+readings survive the fit-window sensitivity; the individual brackets do not, and
+the $\varepsilon = 0.5$ one in particular moves up a level under the
+faithful-region fit.
+
+This is the sense in which the bound has a price, and \cref{fig:st2_cost_pareto}
+is its empirical counterpart. Three things keep the two from being conflated. The
+thresholds come from a fixed-bin verifier at the known cadence on $600$ traces per
+class, whereas the frontier scores a five-detector bank on $200$. The pairing is
+by nominal $\sigma$, but the two campaigns realise the same nominal setting
+somewhat differently once past the faithful region --- cadence coefficient of
+variation $0.50$ here against $0.84$ there at $\sigma = 0.35$ --- so the mapping is
+exact only for $\sigma \lesssim 0.2$. And the frontier prices attacks against a
+detector bank that includes the tracker, whose $\sigma^*$ we never computed. They
+are read side by side, not on shared axes.
 
 \paragraph{What the bound does not cover.}
 The propositions above concern one attack family. Making the measured frontier a
