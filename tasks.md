@@ -182,31 +182,42 @@ resolve, labels/refs consistent, environments balanced).
   training and null generators and report the corpus-free surrogate detector as a
   fraction of it ("X% of NP-optimal power at Y% of the information cost"). Quantifies
   "is our detector good" — not a pre-gate (decision 2026-07-23).
-- [~] Rung 2: stated inference null; three decision rules; semantic falsification
+- [x] Rung 2: stated inference null; three decision rules; semantic falsification
   controls (periodic inference, gradient-only, discarded-update decoy, training-shaped
   non-ML loop, controller cycle, async training, co-resident mixtures); transfer / domain
   shift evaluated.
-  **Result (harness built, smoke-verified; numbers freeze on slurm):** full
-  pipeline landed on `feat/phase2-rung2`. `powerladder/typeb/rung2_features.py`
-  (8-feature physics vector, **estimated-from-trace only** — mtf/comb/spectral/
-  viterbi/dg_fixed/dg_order_full + estimated path-stability & phase-fold
-  repeatability from the Viterbi path); `rung2.py` (three decision rules —
-  prespecified physics score with the fixed-cadence comparator pre-registered
-  out, fitted logistic discriminant OOF, RF learned reference; AUC + FPR/FNR;
-  transfer via fit-nominal/zero-shot-predict); `rung2_scenarios.py` (the seven
-  semantic controls with `is_training`/`expect` annotations). Driver
-  `scripts/rung2_eval.py` (crc-seeded 14-cell grid = stated ∪ 6 transfer shifts ∪
-  7 controls, flock-merged `results/rung2/rung2_summary.json`, `--list/--array-id/
-  --smoke`), slurm array `scripts/slurm/rung2_eval.sbatch`, plotter
-  `scripts/plot_rung2.py` (`figures/rung2_stated_transfer`, `rung2_controls`).
-  Tests `tests/test_rung2.py` (10, all pass; suite still 5 fail/181 pass = known
-  BLAS baseline + 10). **Smoke findings (n=6, provisional):** stated population
-  perfectly separable by all three rules; the discarded-update decoy and the
-  other non-ML loads score AS training (meter certifies *physical* schedule, not
-  semantics); async (de-periodicised) genuine training is MISSED by the physics
-  rule (frac→0) but caught by RF; controller/periodic-inference fire (periodicity
-  alone reads as training). **Full n_each=200 run pending slurm** (do NOT run the
-  grid locally); findings note + paper wiring (Phase 4) follow the freeze.
+  **Result (harness built + n=200 numbers frozen on slurm):** full pipeline on
+  `feat/phase2-rung2`. `powerladder/typeb/rung2_features.py` (8-feature physics
+  vector, **estimated-from-trace only** — mtf/comb/spectral/viterbi/dg_fixed/
+  dg_order_full + estimated path-stability & phase-fold repeatability from the
+  Viterbi path); `rung2.py` (three rules — prespecified physics score with the
+  fixed-cadence comparator pre-registered out, fitted logistic discriminant OOF,
+  RF learned reference; AUC + FPR/FNR; transfer via fit-nominal/zero-shot-predict);
+  `rung2_scenarios.py` (seven controls, `is_training`/`expect` annotations). Driver
+  `scripts/rung2_eval.py` (crc-seeded 14-cell grid = stated ∪ 6 transfer ∪ 7
+  controls, flock-merged `results/rung2/rung2_summary.json`), slurm
+  `scripts/slurm/rung2_eval.sbatch`, plotter `scripts/plot_rung2.py`
+  (`figures/rung2_stated_transfer`, `rung2_controls`). Tests `tests/test_rung2.py`
+  (10, pass; suite 5 fail/181 pass = known BLAS baseline + 10).
+  **Frozen findings (n_each=200, 300 s, band 0.3–1.7, FAR 0.05; slurm array 5612
+  on MATS `compute`, all 14 cells COMPLETED ~100 s each):**
+  (1) STATED — all three rules separate training from the hard inference null
+  perfectly (AUC 1.00, FNR 0 at FPR 0.05). (2) TRANSFER — AUC stays 1.00 across
+  every shift (f_peak lo/hi, short duration, band shift, hostile controller meter,
+  heavy coloured noise): robust off the stated population. (3) CONTROLS — the five
+  NON-training loads (discarded-update decoy, gradient-only, non-ML loop,
+  controller cycle, periodic inference) all score AS training (frac 1.00 all
+  rules): **the meter certifies the physical schedule, not training semantics.**
+  Co-resident (diluted genuine) training caught (1.00). **Divergence from the
+  pre-registration:** async (de-periodicised) genuine training was expected to be
+  MISSED, but the tracked physics rule still catches it (AUC 0.89, frac 0.72; RF
+  1.00) — the fitted LINEAR rule is the weakest (0.75/0.55). Consistent with the
+  ST1/ST2 tracker-robustness story: drift+phase-slip de-periodicisation does NOT
+  evade tracking at these levels; the genuine scope limit is the ≈zero-cost
+  work-variation attack characterised on the ST2 frontier, not this async control.
+  **Open (Phase-4 write-up decision):** report async as a robustness result, or
+  strengthen the async control with work-variation to exhibit the boundary.
+  **Not yet wired into `paper/main.tex` (§6 Rung-2 subsection) — Phase-4 write-up.**
 
 ## Phase 3 — Rungs 3–4 conditional protocol
 
