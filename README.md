@@ -45,7 +45,19 @@ Everything under `results/` and `figures/` is regenerable. From the repo root:
 python scripts/plot_st2_sweeps.py                                    # -> results/st2/*_summary.json, figures/st2_*
 python scripts/plot_st2_frontier.py --b2-dir data/measured_cost_anchors
     # -> results/st2/frontier_summary.json (verdict: GO, provisional=false), figures/st2_frontier.*
+python scripts/plot_st2_pareto.py    # -> figures/st2_cost_pareto.*
 ```
+`plot_st2_pareto.py` re-plots the frozen `frontier_summary.json` as cost vs hiding; it
+only reads that file (`plot_st2_frontier.py` is what writes it), so it is safe to re-run.
+
+**Identifiability — covertness cost bound (lightweight CPU check, ~20 s):**
+```
+python scripts/lower_bound_spike.py
+    # -> results/spike/lower_bound_spike.json, figures/lower_bound_spike.*
+```
+Sanity-checks the propositions of paper §3 / App. B: the coherent-power rolloff, the
+attained advantage `J = max(TPR-FPR) <= TV` and the covertness thresholds `sigma*(eps)`
+read off it, and the work-jitter comparison. Seeded and deterministic.
 
 **ST2 — meter-requirement boundary sweep ("minimum meter specification", slurm):**
 ```

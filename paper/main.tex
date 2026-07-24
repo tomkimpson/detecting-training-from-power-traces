@@ -285,15 +285,18 @@ descendants---and the information-theoretic model of steganography
 \citep{cachin2004steganography}, which measures a stegosystem's security by the
 relative entropy between cover and stego distributions, study exactly the
 trade-off between how constrained a hidden activity is and how detectable it
-remains. This is the literature that would turn our empirical frontier into a
+remains. This is the literature that turns an empirical frontier into a
 statement about \emph{every} verifier: bounding a distributional distance between
 the training-trace and null-trace distributions as a function of the adversary's
 distortion caps any detector's power, yielding a lower bound on the cost of
-hiding rather than an upper bound on what our particular detector misses. This is
-the identifiability question of \cref{sec:threat}, and the existing results do not
-cover our object---a physics-constrained training schedule observed through a
-filtered, low-rate meter---so such a bound, if it holds, is not inherited but must
-be derived; we leave it as the central open direction.
+hiding rather than an upper bound on what our particular detector misses. Its
+existing results do not cover our object---a physics-constrained training
+schedule observed through a filtered, low-rate meter---so the bound is not
+inherited but has to be derived. We derive it for one attack family against a
+fixed verifier in \cref{subsec:identifiability}, which also explains why the
+familiar route through Pinsker's inequality proves the converse of what a
+cost-of-hiding claim needs; extending it to the order-tracking class remains
+open.
 
 \paragraph{Challenge-response authentication.}
 Authenticating a physical device by its response to an unpredictable query is the
@@ -315,36 +318,6 @@ functionality (\cref{sec:active}) and leave its construction open.
 \section{Threat model and identifiability}
 \label{sec:threat}
 % ============================================================================
-
-\begin{checklist}
-	\item \cbx \textbf{Full observation channel} (plan \S2): the two-layer
-	model in \cref{eq:meter,eq:device} with $h$ stated as an explicit LTI
-	first approximation, possibly operating-point dependent.
-	\item \cbx \textbf{Meter-model sweep list}: low-pass bandwidth and
-	integration window; sample cadence and aliasing; gains and
-	transfer-function notches near the cadence; additive coloured noise;
-	periodic controller interference; superposition of independent workloads;
-	time-varying baselines and operating points. Each becomes a synthetic
-	sensitivity axis in \cref{sec:scenario}.
-	\item \cbx \textbf{Admissible training family} (definition): efficient,
-	synchronous, iteration-structured training exposing a recoverable cadence
-	(plan \S1.2). Decide whether this is a formal definition or a scoping
-	paragraph.
-	\item \cbx \textbf{Adversary operators and budgets} (plan \S4): each
-	attack as an operator with a reported budget --- table or definition list.
-	Robustness is claimed only over specified families at specified budgets.
-	\item \cbx \textbf{Same-trace semantic counterexample}: the decoy
-	construction --- distinct workloads producing the same trace. Decide rigor
-	(theorem vs qualitative argument; plan \S10 Q2). If theorem: statement here,
-	proof in \cref{app:identifiability}.
-	\item \cbx \textbf{Maths}: identifiability of temporal structure vs
-	amplitude (the $r(\cdot)$ degeneracy, importable from
-	paper-verification \S3.3); conditions under which the structural null is
-	well-specified.
-	\item \cbx \textbf{Figure} (optional): observation-channel block diagram
-	(workload $\to$ device power $\to$ power-delivery/meter filter $\to$
-	observed trace, with confounds entering at each stage).
-\end{checklist}
 
 \subsection{The observation channel}
 \label{subsec:channel}
@@ -373,8 +346,6 @@ predictions (\cref{sec:reality}).
 \label{subsec:adversary}
 
 % Plan §4: attack families as operators, each with a reported budget.
-\todo[inline]{Write each as an operator on the workload/trace with its budget
-metric (throughput, energy, learning progress).}
 The prover may apply, singly or in composition:
 \begin{itemize}
 	\item \textbf{phase attack}: jitter, drift, or randomised work per iteration;
@@ -389,6 +360,150 @@ With unlimited superposition, dilution, shaping power, time, or freedom to
 restructure work, the prover can drive the signal-to-noise ratio arbitrarily
 low or synthesise the null; robustness claims are therefore made only over
 specified attack families at specified budgets.
+
+\subsection{Identifiability and the cost of hiding}
+\label{subsec:identifiability}
+
+Two questions have to be kept apart. \emph{Detection} asks whether this trace is
+training rather than the null, and its tools are likelihood-ratio and
+cyclostationary tests. \emph{Cost of hiding} asks how far the prover must distort
+its schedule before the training-trace \emph{distribution} becomes
+indistinguishable from the null \emph{distribution}, and its tools are
+distributional distances. The distinction matters because our empirical results
+bound the wrong direction for a governance claim: a detection sweep says how much
+can be hidden from \emph{our} detector, which a better detector moves. This
+subsection states what we can prove in the other direction. Proofs are in
+\cref{app:identifiability}.
+
+The first result is negative and sets the ceiling for the whole passive channel.
+Write $w$ for a computational execution, $h$ for the hardware and
+power-delivery path, and $K_h(w)$ for the law of the observed trace that
+\cref{eq:meter,eq:device} induce.
+
+\begin{definition}[Observational equivalence]
+	\label{def:obseq}
+	Two executions are observationally equivalent when
+	$K_{h_0}(w_0) = K_{h_1}(w_1)$.
+\end{definition}
+
+\begin{proposition}[No passive semantic identification]
+	\label{prop:noident}
+	For $(h_0,w_0)$ and $(h_1,w_1)$ equivalent in the sense of
+	\cref{def:obseq}, every detector $\phi(P_{\mathrm{obs}})$ declares training
+	with the same probability under both. Consequently no passive scalar-power detector can certify the semantic
+	content of a computation against an unrestricted adversary: a guarantee
+	requires restricting at least one of the admissible non-training workload
+	class, the adversary's freedom to add or restructure computation, the
+	hardware and power-transfer family, the physical property being detected, or
+	the protocol.
+\end{proposition}
+
+The construction behind it is nearly available on the prover's own hardware: a
+program can execute the same forward, backward, and optimiser kernels as training
+and discard each updated state, making its trace arbitrarily close to genuine
+training while its semantic classification differs. This is not a hypothetical
+weakness. It is what \cref{sec:classification} measures: five non-training loads,
+the discarded-update decoy among them, score as training under all three decision
+rules. \Cref{prop:noident} says that outcome is a property of the channel rather
+than of our classifier, which is why Rung~2's ceiling cannot be removed by a
+better detector and why Rung~3 has to add a challenge.
+
+What remains provable is quantitative and concerns the \emph{cost} of hiding. It
+is stated over the target population the paper scopes itself to, realised by the
+generator of \cref{sec:scenario}:
+
+\begin{definition}[Admissible training family]
+	\label{def:family}
+	Efficient, synchronous, iteration-structured training whose
+	compute/communication alternation exposes a recoverable cadence $f_0$. Within
+	it, the synchronous exchange occupies a down-phase whose duration does not
+	scale with the work accumulated in the preceding up-phase.
+\end{definition}
+
+\begin{definition}[$\varepsilon$-covertness]
+	\label{def:covert}
+	An attack is $\varepsilon$-covert against a class of verifiers if no test in
+	the class attains detection advantage (true-positive minus false-positive
+	rate) above $\varepsilon$. Since any single test's advantage is at most the
+	total variation $\mathrm{TV}(P_{\mathrm{train}},P_{\mathrm{null}})$ between
+	the two laws \citep{tsybakov2009nonparametric}, covertness against \emph{every}
+	verifier requires that total variation to be at most $\varepsilon$.
+\end{definition}
+
+Consider the concrete attack the frontier prices: i.i.d.\ fractional period
+jitter of scale $\sigma$, so iteration $i$ has period
+$1/\!\left(f_0(1+\xi_i)\right)$ with $\xi_i \sim \mathcal{N}(0,\sigma^2)$. Such
+jitter \emph{accumulates}: the iteration-boundary phase performs a random walk.
+
+\begin{proposition}[Line attenuation under phase diffusion]
+	\label{prop:rolloff}
+	Under i.i.d.\ fractional period jitter of scale $\sigma$ the boundary phase
+	diffuses with coefficient $D \approx (2\pi)^2\sigma^2 f_0$, and the coherent
+	power retained in one frequency bin of a record of length $T$ obeys
+	\begin{equation}
+		\frac{P_c(\sigma)}{P_c(0)} \;\approx\; \frac{1}{1+\kappa\sigma^2},
+		\qquad \kappa = O(\pi f_0 T).
+		\label{eq:rolloff}
+	\end{equation}
+\end{proposition}
+
+\begin{proposition}[Necessary distortion for covertness]
+	\label{prop:sigmastar}
+	Let $J(\sigma)$ be the advantage attained by the fixed-bin threshold test at
+	the nominal cadence, which decreases in $\sigma$ through
+	\cref{eq:rolloff}. Because $J \leq \mathrm{TV}$, any $\sigma$ with
+	$J(\sigma) > \varepsilon$ is not $\varepsilon$-covert. Hence
+	$\varepsilon$-covertness requires
+	$\sigma \geq \sigma^*(\varepsilon)$, where $\sigma^*$ solves
+	$J(\sigma^*) = \varepsilon$ and diverges as
+	$\varepsilon^{-1/2}$ when $\varepsilon \to 0$. Enlarging the verifier class can
+	only raise $\sigma^*(\varepsilon)$.
+\end{proposition}
+
+\begin{remark}[Which inequality is doing the work]
+	\label{rem:direction}
+	\Cref{prop:sigmastar} runs through an \emph{explicit} verifier, and that is
+	essential. The familiar covert-communication route --- Pinsker's
+	$\mathrm{TV} \leq \sqrt{\mathrm{KL}/2}$
+	\citep{tsybakov2009nonparametric,cover2006elements} --- bounds total variation
+	from above, so forcing that bound below $\varepsilon$ would establish that some
+	distortion \emph{suffices} for covertness, not that any is
+	\emph{necessary}. Only a verifier that demonstrably attains advantage
+	$J$ certifies that smaller distortions fail. The price is that the guarantee
+	is stated against the verifier class we exhibit: we prove it for the
+	fixed-bin test, and we do \emph{not} prove it against the order-tracking
+	class of \cref{sec:structural}, which our own experiments show to be
+	strictly stronger.
+\end{remark}
+
+Distortion is not yet cost. The bridge is a physical property of the admissible
+family in \cref{def:family}.
+
+\begin{proposition}[Cost of hiding]
+	\label{prop:cost}
+	Within \cref{def:family}, reaching $\sigma^*(\varepsilon)$ costs throughput or
+	learning efficiency; it cannot be free in both. Period jitter has
+	only two realisations. Inserting idle time inflates the mean period and pays
+	in throughput. Varying the real work per iteration avoids idling, but the
+	down-phase duration is fixed by \cref{def:family} and the accumulated work is
+	quantised, so a residual marker survives at the exchange cadence; removing it
+	requires either idling or desynchronising the exchange, and the latter
+	changes the optimisation that is being performed.
+\end{proposition}
+
+\begin{remark}[Scope of the bound]
+	\label{rem:boundscope}
+	Three limits fix the wording. The cost in \cref{prop:cost} is a disjunction,
+	not a figure: its throughput leg is anchored to measurement
+	(\cref{sec:frontier}), while its learning-efficiency leg is argued and
+	remains this paper's central open empirical question. The advantage
+	$J$ of \cref{prop:sigmastar} is measured between the two laws of our own
+	generator, so the bound is conditional on that generator standing in for the
+	workloads it models. And the claim is that hiding \emph{to a stated
+	$\varepsilon$} must be paid for --- expressly not that de-periodicisation is
+	inefficient in general, which \cref{sec:frontier} refutes by exhibiting a
+	near-free attack that defeats every fixed test.
+\end{remark}
 
 
 % ============================================================================
@@ -744,15 +859,50 @@ inference null the Viterbi tracker is essentially Neyman--Pearson optimal, so th
 fixed tests' collapse under variable work is a genuine loss of information from
 the schedule, not a deficiency of a particular detector.
 
+\paragraph{The trade-off itself.} Plotting hiding directly against measured cost
+(\cref{fig:st2_cost_pareto}) separates the two detector classes sharply. Against
+the fixed class the Pareto staircase reaches hiding $0.74$ at essentially zero
+overhead and never improves much on that however much the prover spends: the
+cheapest attack is also close to the best one. Against the tracking class the
+staircase never leaves the floor, rising only to $0.16$ and doing so at $159\%$
+overhead, so no attack in the anchored set buys meaningful concealment from the
+tracker at any price we can measure. Reading the two panels together is the
+paper's central empirical claim in one figure: what the fixed tests lose for free,
+the tracker keeps at every measured cost. The figure also shows the boundary of
+that claim honestly. Only $16$ of the $50$ swept cells have a measured hardware
+cost anchor, and the rest --- including work-variation level $0.7$, where the
+tracker finally bends --- carry no price at all, so they appear in a separate
+unpriced strip rather than being dropped.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\linewidth]{st2_cost_pareto}
+	\caption{Cost of hiding: measured throughput overhead against hiding
+	($1-$ detection rate at false-alarm rate $0.05$) for the four cost-anchored
+	attack families, with the Pareto staircase --- the best hiding available at or
+	below a given cost. Against the tracking class (left) the staircase stays on
+	the floor across the whole measured cost axis; against the fixed class (right)
+	the variable-real-work family reaches hiding ${\sim}0.74$ at zero cost. Cells
+	whose attack level has no hardware cost anchor cannot be placed on the cost
+	axis and are shown in the hatched strip, among them the level at which the
+	tracker itself begins to fail. Attack levels are labelled where they hide
+	something; the rest sit on the floor.}
+	\label{fig:st2_cost_pareto}
+\end{figure}
+
 \paragraph{Governance reading.} A passive meter certifies efficient
 iteration-structured training against cheap, fixed tests only within a bounded
 de-periodicisation budget; a prover free to vary real work escapes those tests
 for nothing. Defeating the order tracker on top of that requires either a systems
 and learning cost we could not measure or a degradation of the meter channel
-itself (\cref{subsec:meter_spec}). This is the sense in which the passive results
-are necessary conditions and an upper bound on hideability, not a proof of
-training: they bound what a prover can hide from a fixed detector cheaply, and
-they locate --- but do not close --- the cost of hiding from the tracker.
+itself (\cref{subsec:meter_spec}). The results of this section are therefore
+necessary conditions and an upper bound on hideability rather than a proof of
+training: they bound what a prover can hide from a fixed detector cheaply. The
+complementary direction --- a lower bound on what hiding must cost, which no
+detection sweep can supply --- is available for one attack family against a fixed
+verifier (\cref{prop:sigmastar,prop:cost}), and the distortion it requires can be
+priced against the same anchors used here. Closing it for the tracking class
+remains open.
 
 \subsection{A minimum meter specification}
 \label{subsec:meter_spec}
@@ -1009,9 +1159,9 @@ modulation is legible on a single card. A full Rung-3 study would fix a concrete
 pair of semantically-equivalent schedules, run the complete search inside every
 re-randomised replicate, pit the detector against a challenge-aware dummy-load
 adversary, and trace detection against modulation depth, throughput overhead, and
-observation time. We leave it, with the identifiability question of
-\cref{sec:threat} and the cost-of-hiding frontier of \cref{sec:frontier}, as the
-active-verification direction the passive results here motivate but cannot reach
+observation time. We leave it as the active-verification direction the passive
+results here motivate but cannot reach --- the response to the ceiling that
+\cref{prop:noident} makes unavoidable for any passive detector
 (\cref{sec:discussion}).
 
 
@@ -1048,7 +1198,7 @@ scoped to the stated generator and its stated nulls throughout.
 test here but state as falsifiable. Distributed synchronisation should deepen the
 line: at cluster scale the periodic all-reduce barrier produces a deep, coherent,
 legible cadence rather than the shallow single-card ripple, which is precisely the
-physics the cost-of-hiding argument of \cref{sec:frontier} leans on. And an
+physics \cref{prop:cost} leans on. And an
 external wall or rack meter should see a different, lower-passed trace than
 on-board NVML telemetry, shifting where the minimum meter specification of
 \cref{subsec:meter_spec} binds. Both are predictions, not results.
@@ -1084,11 +1234,18 @@ the paper's evidence attached to each rung.
 		2. Conditional classification & The trace is more training-like than the
 		stated inference null (area under the curve $1.00$, stable across domain
 		shift) & \cref{sec:classification} & The semantic decoy: non-training
-		loads with a training-shaped schedule score as training \\
+		loads with a training-shaped schedule score as training --- and
+		\cref{prop:noident} says no passive detector can do better \\
 		Frontier & Fixed tests collapse under ${\approx}$zero-cost variable real
 		work while the tracker holds; costly de-periodicisations buy no
 		concealment & \cref{sec:frontier} & The tracker's far end, at a systems
 		and learning cost we could not measure \\
+		Cost of hiding & Hiding from a fixed verifier to detectability
+		$\varepsilon$ requires distortion $\sigma^*(\varepsilon)$, which costs
+		throughput or learning efficiency and cannot cost neither (i.i.d.\ period
+		jitter) & \cref{subsec:identifiability}, \cref{app:identifiability} &
+		Proved against a fixed verifier only, for one attack family, and
+		internal to the stated generator \\
 		3--4. Active authentication & A challenge-synchronous protocol and an
 		assumed binding primitive, specified but not run & \cref{sec:active} &
 		Challenge-aware dummy load; the co-location gap \\
@@ -1111,10 +1268,13 @@ analysis over a stated parameter family; the ${\sim}75\times$ modulation gap of
 linear time-invariant first approximation. The optimality ceiling of
 \cref{app:bakeoff} is optimal only under the Whittle model, hence a lower bound on
 the true optimum. Every robustness claim is bounded by the attack families and
-budgets we specified; a family we did not model is outside it. And the
-learning-efficiency cost of de-periodicisation --- the axis that would turn the
-frontier into a full cost-of-hiding statement --- is stated, not measured, and
-remains the central open empirical question.
+budgets we specified; a family we did not model is outside it. The cost bound of
+\cref{subsec:identifiability} shares that limit: it covers i.i.d.\ period jitter
+and is proved against a fixed-bin verifier, not against the order tracker that
+our own experiments show to be stronger, so it does not yet close the frontier's
+far end. And the learning-efficiency leg of that bound --- the axis that would
+turn it into a single priced statement rather than a disjunction --- is argued,
+not measured, and remains the central open empirical question.
 
 \paragraph{Governance reading.} What a regulator can buy today is graded. Rung~1
 buys physical evidence of an efficient iteration-structured compute schedule from
@@ -1272,14 +1432,163 @@ conservative in the right direction.
 \section{Identifiability details}
 \label{app:identifiability}
 
-\begin{checklist}
-	\item \cbx \textbf{Decoy construction}: the same-trace semantic
-	counterexample in full (rigor level per plan \S10 Q2).
-	\item \cbx \textbf{Structural-null validity conditions}: when rejecting
-	the null licenses the ``coherent repeated structure'' reading; the
-	nuisance model for periodic physical confounds.
-	\item \cbx \textbf{Proofs} deferred from \cref{sec:threat}.
-\end{checklist}
+This appendix proves the results stated in \cref{subsec:identifiability} and
+reports the numerical check that fixes their constants.
+
+\paragraph{Proof of \cref{prop:noident}.}
+A passive verifier observes only $P_{\mathrm{obs}}$, so its decision is a
+measurable function $\phi$ of that trace and its rejection probability is
+$\mathbb{E}_{K_h(w)}[\phi]$. If $K_{h_0}(w_0) = K_{h_1}(w_1)$ the two
+expectations coincide for every $\phi$, so no test separates the pair, and no
+post-processing of the trace can (data processing cannot create distinguishability
+that the laws do not contain). The claim about restrictions follows by
+contraposition: a non-vacuous guarantee must exclude the equivalent pairs, and
+each listed lever excludes some of them. The amplitude degeneracy of
+\cref{eq:device} shows the pairs are not exotic. The meter constrains only the
+product $r(t)F(t)$, so a workload with a different operation rate and a
+compensating energy cost per operation is already observationally equivalent, and
+temporal structure --- not amplitude --- is what the trace identifies. The
+near-constructive same-hardware case is the discarded-update decoy: forward,
+backward, and optimiser kernels executed on the declared schedule with each
+updated state discarded reproduces the compute/communication alternation, hence
+the trace, without retaining a model. The converse direction is equally open to
+the prover: genuine training can be run asynchronously, diluted among other
+loads, or actively power-shaped, so the equivalence classes are populated from
+both sides.
+
+\paragraph{Proof of \cref{prop:rolloff}.}
+Fractional period jitter perturbs each iteration boundary relative to its
+predecessor, so the boundary phase $\theta_i = 2\pi i$ accumulates independent
+increments and its residual against a uniform clock is a random walk with
+$\mathrm{Var}[\theta(t)] \approx D t$, $D \approx (2\pi)^2\sigma^2 f_0$. For a
+Brownian phase the periodic component's autocorrelation decays as
+$\exp(-D|\tau|/2)$, so its spectrum is a Lorentzian of half-width proportional to
+$D$ rather than a line. A record of length $T$ resolves frequency only to $1/T$,
+so the coherent power a fixed-bin verifier collects is the fraction of that
+Lorentzian falling inside one bin, which for a half-width small compared with the
+band is $(1+\kappa\sigma^2)^{-1}$ with $\kappa \propto D T / \sigma^2 \propto
+f_0 T$. The constant of proportionality depends on the width convention
+(half-width at half-maximum versus equivalent noise bandwidth) and on the taper,
+so the derivation fixes $\kappa$ only up to an $O(1)$ factor; the numerical check
+below supplies it.
+
+\paragraph{Proof of \cref{prop:sigmastar}.}
+Let $S$ be the fixed-bin statistic and consider the threshold tests
+$\{S \geq c\}$. The advantage of the best such test is
+$J = \sup_c \left(\Pr_{\mathrm{train}}[S \geq c] - \Pr_{\mathrm{null}}[S \geq
+c]\right)$, the two-sample Kolmogorov--Smirnov distance of the score laws. Each
+threshold test is a measurable function of the trace, so by data processing
+$J \leq \mathrm{TV}(P_{\mathrm{train}},P_{\mathrm{null}})$. If
+$J(\sigma) > \varepsilon$ then total variation exceeds $\varepsilon$ and the
+attack is not $\varepsilon$-covert by \cref{def:covert}; equivalently,
+$\varepsilon$-covertness requires $J(\sigma) \leq \varepsilon$. The statistic is
+monotone in the coherent power it measures, which decays in $\sigma$ by
+\cref{prop:rolloff}, so $J$ decays too and the requirement is a lower bound
+$\sigma \geq \sigma^*(\varepsilon)$. Fitting the same functional form to $J$,
+$J(\sigma) = J_0/(1+\kappa_J\sigma^2)$, and inverting gives
+\begin{equation}
+	\sigma^*(\varepsilon)
+	\;=\; \kappa_J^{-1/2}\,\sqrt{J_0/\varepsilon - 1}
+	\;\sim\; \left(\kappa_J\,\varepsilon/J_0\right)^{-1/2}
+	\quad (\varepsilon \to 0).
+	\label{eq:sigmastar}
+\end{equation}
+Enlarging the verifier class can only increase the attainable advantage at each
+$\sigma$, hence only raise $\sigma^*$.
+
+Two points of bookkeeping. The rolloff constant $\kappa_J$ of the
+\emph{advantage} is not the $\kappa$ of the \emph{coherent power} in
+\cref{eq:rolloff}: the advantage saturates near one while any excess at $f_0$
+remains separable from a line-free null, so it decays far more slowly, and using
+it is the conservative choice --- it yields the smaller, and therefore safely
+necessary, $\sigma^*$. And $J$ is not interchangeable with the rank-based Gini
+index $2\,\mathrm{AUC}-1$: the latter can exceed $J$, so it is not the advantage
+of any single-trace test and cannot appear in \cref{eq:sigmastar}. Both are
+reported in the summary artefact; only $J$ carries the bound.
+
+\paragraph{Argument for \cref{prop:cost}.}
+The two realisations of period jitter are exhaustive, because a period is
+occupied either by useful work or by idling. Padding the period with idle time
+holds the real work per iteration fixed, so every period must be at least as long
+as the compute it contains and the mean period inflates with $\sigma$; throughput
+falls, and \cref{sec:frontier} measures the penalty at $15$--$375\%$ over the
+swept range. Varying the real work per iteration avoids idling and is measured at
+essentially zero throughput cost, but it cannot drive the cadence marker to zero
+within \cref{def:family}. The accumulated work is an integer number of
+micro-steps, so the up-phase is quantised rather than continuously tunable, and
+the exchange down-phase keeps its duration whatever that count. A component at
+the exchange cadence therefore survives every reallocation of work between
+iterations. Removing it requires either inserting idle time, which returns to the
+first realisation and its throughput cost, or desynchronising the exchange, which
+alters the optimisation actually performed and so is paid for in learning
+efficiency. The numerical check supports this rather than assuming it: at matched
+$\sigma$ the work-varying attack is \emph{more} detectable than idle-padded
+jitter, so the cheap-throughput route does not evade the bound for free --- it
+trades throughput cost for detectability.
+
+\paragraph{Numerical check.}
+\Cref{fig:lower_bound} tests every load-bearing step against the generator and
+meter of \cref{sec:scenario} rather than an idealised channel. Training and
+inference-null populations ($n=80$ per class, $f_0 = 1$~Hz, $T = 300$~s,
+$f_s = 20$~Hz, seeded) are pushed through the full observation map and scored with
+the fixed-bin statistic. The coherent power follows the form of
+\cref{eq:rolloff} with $R^2 = 0.97$; the fitted $\kappa = 2948$ sits within a
+factor of about three of the parameter-free $\pi f_0 T = 942$, which confirms the
+functional form and fixes the $O(1)$ prefactor the derivation leaves open. The
+attained advantage rolls off with $\kappa_J = 34$ at $R^2 = 0.95$ from
+$J_0 = 1.0$, giving $\sigma^*(0.5) = 0.17$ and $\sigma^*(0.2) = 0.34$ inside the
+swept range, and $\sigma^*(0.1) = 0.51$, $\sigma^*(0.05) = 0.74$ by
+extrapolation. The generator's de-periodicisation anchors hold where the
+in-range thresholds live: measured cadence coefficient of variation tracks
+$\sigma$ and measured $D$ tracks $(2\pi)^2\sigma^2 f_0$ up to
+$\sigma \approx 0.2$. Both break down by $\sigma \approx 0.35$, where a period
+clamp in the generator takes over, so the extrapolated thresholds lie outside the
+regime in which the jitter model itself is faithful and should be read as
+indicative only. Finally, the work-varying series attains a higher advantage than
+period jitter at every $\sigma \geq 0.1$, the comparison
+\cref{prop:cost} rests on.
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=\linewidth]{lower_bound_spike}
+	\caption{Numerical check on the covertness cost bound, through the full
+	generator and meter. \textbf{Left:} coherent power at the nominal cadence
+	against jitter scale, with the analytic and fitted rolloffs of
+	\cref{eq:rolloff}. \textbf{Right:} the advantage attained by the fixed-bin
+	threshold test, $J \leq \mathrm{TV}$, for idle-padded period jitter and for
+	the near-free work-varying attack; dotted lines mark
+	$\varepsilon \in \{0.1, 0.5\}$, whose crossings give
+	$\sigma^*(\varepsilon)$. The work-varying attack is the more detectable of
+	the two at matched distortion, which is the residual
+	\cref{prop:cost} relies on. The verifier here is fixed at the known cadence,
+	not the order tracker of \cref{sec:structural}.}
+	\label{fig:lower_bound}
+\end{figure}
+
+\paragraph{From distortion to a price.}
+The distortion thresholds can be read against the measured cost anchors of
+\cref{sec:frontier}, which price the idle-padded realisation at the same
+$\sigma$ grid. Hiding from the fixed-bin verifier to $\varepsilon = 0.5$ needs
+$\sigma^* = 0.17$, between the measured levels $\sigma = 0.1$ and $\sigma = 0.2$
+and so between $32\%$ and $66\%$ throughput overhead; to $\varepsilon = 0.2$ it
+needs $\sigma^* = 0.34$, between $66\%$ and $159\%$. This is the sense in which
+the bound has a price, and \cref{fig:st2_cost_pareto} is its empirical
+counterpart. The two must not be conflated: the thresholds come from a fixed-bin
+verifier at the known cadence on $80$ traces per class, whereas the frontier
+scores a five-detector bank on $200$, so they are read side by side rather than
+plotted on shared axes.
+
+\paragraph{What the bound does not cover.}
+The propositions above concern one attack family. Making the measured frontier a
+statement about hiding in general would need one of two further arguments: that
+the swept families span what a hiding adversary can do, or a bound of the kind
+above for each of them. We have the second for i.i.d.\ period jitter and make no
+claim of the first, so \cref{sec:frontier} should be read as a sample of the
+attack space rather than its boundary. The choice of distributional distance is
+also not settled. We use total variation, reached through an attained advantage;
+Kullback--Leibler and Hellinger distances tensorise more conveniently over the
+many-iteration product law and may give a tighter closed form, which we leave
+open.
 
 
 \bibliographystyle{unsrt}

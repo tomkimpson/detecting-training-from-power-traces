@@ -16,6 +16,11 @@
     "kappa_fitted": 2947.9453391128313,
     "r2": 0.9719540777646324
   },
+  "detectability_youden": {
+    "kappa_fitted": 34.45543229105797,
+    "r2": 0.9473607212646108,
+    "j0": 1.0
+  },
   "detectability_tv": {
     "kappa_fitted": 23.43163284998693,
     "r2": 0.9440035145197351,
@@ -27,6 +32,8 @@
       "sigma": 0.0,
       "auc_jitter": 1.0,
       "auc_work": 0.96828125,
+      "youden_jitter": 1.0,
+      "youden_work": 0.8500000000000001,
       "coherent_power_jitter": 140727545293.7581,
       "cadence_cv": 0.0,
       "phase_diffusion_D": 0.0,
@@ -36,6 +43,8 @@
       "sigma": 0.01,
       "auc_jitter": 1.0,
       "auc_work": 0.9946875,
+      "youden_jitter": 1.0,
+      "youden_work": 0.9625,
       "coherent_power_jitter": 129654141816.9502,
       "cadence_cv": 0.010180303489549031,
       "phase_diffusion_D": 0.003047777153414381,
@@ -45,6 +54,8 @@
       "sigma": 0.02,
       "auc_jitter": 1.0,
       "auc_work": 0.995,
+      "youden_jitter": 1.0,
+      "youden_work": 0.9625,
       "coherent_power_jitter": 80045266094.16862,
       "cadence_cv": 0.021699216945001255,
       "phase_diffusion_D": 0.022031368126036982,
@@ -54,6 +65,8 @@
       "sigma": 0.03,
       "auc_jitter": 1.0,
       "auc_work": 0.98796875,
+      "youden_jitter": 1.0,
+      "youden_work": 0.9625,
       "coherent_power_jitter": 49394790197.16558,
       "cadence_cv": 0.03034567444486138,
       "phase_diffusion_D": 0.020104748796961634,
@@ -63,6 +76,8 @@
       "sigma": 0.05,
       "auc_jitter": 0.9946875,
       "auc_work": 0.98875,
+      "youden_jitter": 0.975,
+      "youden_work": 0.9625,
       "coherent_power_jitter": 18215141189.951363,
       "cadence_cv": 0.04974001923606732,
       "phase_diffusion_D": 0.09900677255652764,
@@ -72,6 +87,8 @@
       "sigma": 0.07,
       "auc_jitter": 0.9896875,
       "auc_work": 0.981875,
+      "youden_jitter": 0.9500000000000001,
+      "youden_work": 0.9375,
       "coherent_power_jitter": 10383062261.157421,
       "cadence_cv": 0.07191628011891876,
       "phase_diffusion_D": 0.1361546927355633,
@@ -81,6 +98,8 @@
       "sigma": 0.1,
       "auc_jitter": 0.94421875,
       "auc_work": 0.97296875,
+      "youden_jitter": 0.8375,
+      "youden_work": 0.925,
       "coherent_power_jitter": 4445169788.8017,
       "cadence_cv": 0.10814607679346756,
       "phase_diffusion_D": 0.3657723636132991,
@@ -90,6 +109,8 @@
       "sigma": 0.15,
       "auc_jitter": 0.90421875,
       "auc_work": 0.91609375,
+      "youden_jitter": 0.6875,
+      "youden_work": 0.75,
       "coherent_power_jitter": 2348495447.001348,
       "cadence_cv": 0.15910463751249299,
       "phase_diffusion_D": 0.7040350816780205,
@@ -99,6 +120,8 @@
       "sigma": 0.2,
       "auc_jitter": 0.7975,
       "auc_work": 0.9196875,
+      "youden_jitter": 0.5625,
+      "youden_work": 0.7,
       "coherent_power_jitter": 1225810665.2604904,
       "cadence_cv": 0.22693300111480683,
       "phase_diffusion_D": 1.8574317876434618,
@@ -108,6 +131,8 @@
       "sigma": 0.35,
       "auc_jitter": 0.624375,
       "auc_work": 0.715625,
+      "youden_jitter": 0.21250000000000002,
+      "youden_work": 0.3875,
       "coherent_power_jitter": 543620104.1842527,
       "cadence_cv": 1.1870916295273763,
       "phase_diffusion_D": 41.57632936653352,
@@ -117,6 +142,8 @@
       "sigma": 0.5,
       "auc_jitter": 0.49671875,
       "auc_work": 0.66265625,
+      "youden_jitter": 0.09999999999999998,
+      "youden_work": 0.25,
       "coherent_power_jitter": 215035913.48721442,
       "cadence_cv": 1.9143080412714184,
       "phase_diffusion_D": 94.75021236944978,
@@ -124,6 +151,38 @@
     }
   ],
   "covertness_thresholds": [
+    {
+      "epsilon": 0.5,
+      "sigma_star": 0.17036137963053805,
+      "extrapolated": false
+    },
+    {
+      "epsilon": 0.2,
+      "sigma_star": 0.3407227592610761,
+      "extrapolated": false
+    },
+    {
+      "epsilon": 0.1,
+      "sigma_star": 0.5110841388916141,
+      "extrapolated": true
+    },
+    {
+      "epsilon": 0.05,
+      "sigma_star": 0.7425880376916838,
+      "extrapolated": true
+    },
+    {
+      "epsilon": 0.02,
+      "sigma_star": 1.1925296574137663,
+      "extrapolated": true
+    },
+    {
+      "epsilon": 0.01,
+      "sigma_star": 1.6950743250053697,
+      "extrapolated": true
+    }
+  ],
+  "covertness_thresholds_gini": [
     {
       "epsilon": 0.5,
       "sigma_star": 0.2065849708031311,
@@ -155,5 +214,5 @@
       "extrapolated": true
     }
   ],
-  "analytic_form": "coherent f0 power ~ 1/(1 + kappa sigma^2), kappa_analytic = pi f0 T_obs (accumulating i.i.d. jitter, Lorentzian rolloff). Detectability TV = 2 AUC - 1 follows the same shape with a much smaller effective kappa because AUC saturates while any f0 excess stays separable from the line-free null; thresholds use that (conservative) detectability rolloff."
+  "analytic_form": "coherent f0 power ~ 1/(1 + kappa sigma^2), kappa_analytic = pi f0 T_obs (accumulating i.i.d. jitter, Lorentzian rolloff). The ACHIEVED advantage of the explicit fixed-bin threshold test, J = max_thr (TPR - FPR), follows the same shape with a much smaller effective kappa because J saturates while any f0 excess stays separable from the line-free null. Since J <= TV, J(sigma) > eps certifies non-eps-covertness, so covertness_thresholds inverts the (conservative) J rolloff: eps-covertness REQUIRES sigma >= sigma*(eps). covertness_thresholds_gini repeats the inversion on 2 AUC - 1 for continuity with the deliberation note; that index can exceed J and is not an achieved single-trace advantage, so it does not carry the bound."
 }

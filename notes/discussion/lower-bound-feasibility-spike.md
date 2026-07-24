@@ -183,3 +183,47 @@ metric — TV, KL, or Hellinger — gives the cleanest distortion→detectabilit
 This spike used TV via `2·AUC−1` and KL via Pinsker in the Gaussian regime; the
 tensorisation properties of KL/Hellinger over the many-iteration product law may
 give a tighter closed form for the Phase 4 proposition.
+
+---
+
+## 7. Corrections applied when this was promoted to the paper (2026-07-24)
+
+Writing §3/App B (Phase 4) surfaced two mathematical defects in §3 above. The
+verdict — bound derivable, contribution side of the fork — **stands**; the
+derivation as written did not. Both are fixed in the manuscript
+(`paper/main.tex` `subsec:identifiability`, `app:identifiability`); §3 above is
+left as the historical record.
+
+1. **Step 2 proved the converse of what is needed.** `power ≤ TV ≤ √(KL/2)`
+   (Pinsker) bounds TV from *above*, so driving that bound below ε shows some
+   distortion **suffices** for covertness — an upper bound on the σ the adversary
+   needs, not the lower bound the governance claim requires. The direction that
+   works runs through an **explicit** verifier: a single-trace test with achieved
+   advantage `A(σ)` has `A ≤ TV`, so `A(σ) > ε ⟹ not ε-covert`, and since `A`
+   decays in σ, ε-covertness *requires* `σ ≥ σ*(ε)`. Pinsker is now stated as the
+   complementary converse (a remark on what is *not* proved), not the
+   load-bearing step.
+2. **`2·AUC−1` is not an achieved single-trace advantage.** It is the
+   Mann–Whitney/Gini index and can *exceed* the best threshold test's advantage
+   (Youden `J = max_thr(TPR−FPR)`, the two-sample KS distance), so it cannot
+   certify that smaller distortions fail. `scripts/lower_bound_spike.py` now also
+   computes **J** per σ and inverts the **J** rolloff for the thresholds; AUC and
+   the Gini-based thresholds are retained in the summary
+   (`detectability_tv`, `covertness_thresholds_gini`) for continuity with §4
+   above. Every previously committed number is unchanged — only
+   `covertness_thresholds` now reads off J.
+
+**Consequences for the numbers.** J-rolloff `κ_J = 34` (R² = 0.95, J₀ = 1.0)
+against the Gini `κ = 23`. Thresholds move *down*, which is the conservative
+direction for a necessary condition: **σ\*(0.5) = 0.17, σ\*(0.2) = 0.34** (both
+now *inside* the swept range, and below the σ ≈ 0.35 anchor-breakdown point where
+§4's caveat bites — an improvement on the old 0.21/0.41), σ\*(0.1) = 0.51 and
+σ\*(0.05) = 0.74 extrapolated. The work-jitter escape is still more detectable at
+matched σ under J (every σ ≥ 0.1), so Step 4 is unaffected.
+
+**Also corrected: the small-ε scaling.** §3 Step 3 says σ\* "grows like 1/ε".
+That follows from its formula `σ* = (1/√κ)·√(SNR₀/(2ε²) − 1)`, with ε² inside the
+root. The inversion actually implemented and measured is
+`σ* = √((y₀/ε − 1)/κ)`, giving **σ\* ∝ ε^(−1/2)** — confirmed by the frozen
+thresholds (ε from 0.1 to 0.01 is a 10× drop and moves σ\* by 3.32×, i.e. √10,
+not 10×). The manuscript states ε^(−1/2).

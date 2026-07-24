@@ -324,15 +324,31 @@ resolve, labels/refs consistent, environments balanced).
 
 ## Phase 4 — Write-up
 
-- [~] Negative transport case (single-A100) as a result; identifiability theory section
+- [x] Negative transport case (single-A100) as a result; identifiability theory section
   (rigor level per plan §10 Q2); discussion closing out each rung's ceiling.
-  **Partly done (2026-07-24, branch `wire-in-phase2-results`):** §9 `sec:reality`
-  (negative transport case + falsifiable predictions, from the frozen ~0.4% ripple /
-  0.31–0.45 Hz limit-cycle / ~75× gap numbers; no measured figure — captures not in this
-  repo) and §10 `sec:discussion` (ladder close-out `tab:closeout` + scope/limits/governance)
-  both written; checklists/todos removed. **Still open:** the identifiability theory
-  section (App B `app:identifiability` remains a scaffold, rigor per plan §10 Q2).
-- [ ] **Cost-vs-hiding Pareto re-plot (cheap, CPU-only, no new sweeps).** Render the
+  **Done in two passes.** (a) 2026-07-24, branch `wire-in-phase2-results`: §9
+  `sec:reality` (negative transport case + falsifiable predictions, from the frozen ~0.4%
+  ripple / 0.31–0.45 Hz limit-cycle / ~75× gap numbers; no measured figure — captures not
+  in this repo) and §10 `sec:discussion` (ladder close-out `tab:closeout` +
+  scope/limits/governance). (b) 2026-07-24, branch `phase-4`: the **identifiability
+  theory** at proposition level (plan §10 Q2) — new §3 `subsec:identifiability` (2
+  definitions + `def:covert`, `prop:noident` no-passive-semantic-identification from the
+  `K_h(w)` observational-equivalence formalism, `prop:rolloff`, `prop:sigmastar`,
+  `prop:cost`, + `rem:direction`/`rem:boundscope`) with proofs, the numerical check
+  (`fig:lower_bound`, previously orphaned) and the σ*→cost bridge in App B
+  `app:identifiability`. §3 checklist + `\todo` removed; `tab:closeout` gained a
+  cost-of-hiding row; the three "we leave the bound open" passages (§2/§8/§10) reworded.
+  **Two defects in the spike's derivation found and fixed** (recorded as a dated
+  correction in `notes/discussion/lower-bound-feasibility-spike.md` §7): (i) the Pinsker
+  chain proved the *converse* (sufficient, not necessary, distortion) — the bound now runs
+  through an explicit verifier's achieved advantage; (ii) `2·AUC−1` is a Gini index that
+  can exceed the best threshold test's advantage, so `scripts/lower_bound_spike.py` now
+  computes **Youden J** and inverts *that* rolloff (κ_J=34, R²=0.95; σ*(0.5)=0.17,
+  σ*(0.2)=0.34 both now inside the swept range; AUC/Gini retained in the summary, every
+  previously committed number unchanged). Also corrected: σ* ∝ ε^(−1/2), not 1/ε.
+  2 new bib entries (`tsybakov2009nonparametric`, `cover2006elements`) — flagged for
+  `check-refs`.
+- [x] **Cost-vs-hiding Pareto re-plot (cheap, CPU-only, no new sweeps).** Render the
   already-frozen ST2 frontier as an explicit **adversary-cost vs hiding** Pareto curve —
   the plan's stated deliverable (`notes/plans/plan-for-paper-2.md:370`,
   `plan-for-paper-2-review.md:198`). The (hiding, systems-cost) pairs already exist in
@@ -345,6 +361,46 @@ resolve, labels/refs consistent, environments balanced).
   out. **Out of scope / still future work:** the learning-efficiency cost leg (descoped
   2026-07-22, needs a GPU campaign — the transport trap) stays the stated open empirical
   question; this item plots only the measured systems-cost axis.
+  **Result (2026-07-24, branch `phase-4`): done.** `scripts/plot_st2_pareto.py` — a
+  **pure reader** of the tracked `frontier_summary.json` (never writes it; no `--smoke`
+  path that could corrupt it), reusing `plotstyle` + the summary's own `detector_classes`
+  field cross-checked against `powerladder/typeb/meter_boundary.TRACKING/FIXED`.
+  `figures/st2_cost_pareto.*`: two panels (hiding = 1−TPR@0.05 vs measured overhead, one
+  per detector class) with the Pareto staircase. **The asymmetry is the headline:** against
+  the fixed class the staircase reaches hiding **0.74 at ≈0% cost** (work=0.35/0.5) and
+  barely improves thereafter; against the tracking class it never leaves the floor,
+  peaking at **0.16 at 159%** (jitter=0.35). Only **16 of 50** cells carry a measured
+  anchor (jitter 5, work 5, shape 5, drift 1); the 34 unpriced — incl. **work=0.7, where
+  the tracker itself bends** — are drawn in a hatched "cost not measured" strip and counted
+  on stdout rather than dropped. Tests `tests/test_st2_pareto.py` (7, pass; suite 5 known
+  BLAS-digest fail / 194 pass). **WIRED into §6 `sec:frontier`** as `fig:st2_cost_pareto`
+  + a "The trade-off itself" paragraph; README repro line added.
+- [ ] **Finish the remaining manuscript scaffolds** (the last write-up block; surfaced
+  2026-07-24 when the two items above closed). After this session only **2 of the
+  original 6** section checklists remain, but they are load-bearing:
+  - **Abstract** — still placeholder prose + `\todo` (`main.tex:109`).
+  - **§1 `sec:intro`** — has the governance-motivation paragraph and a drafted
+    `tab:ladder`, but no thesis paragraph, no **contributions list**, no scope /
+    target-population / why-theory-not-hardware paragraphs (`main.tex:129`, `:177`).
+    **Decision needed:** whether the covertness cost bound
+    (`subsec:identifiability`) is named as a contribution here. It is currently a §3/App-B
+    result only; promoting it would be a **scope change requiring `spec.md` approval**,
+    whose "Methods at a glance" names the frontier as the central result and lists no
+    identifiability theory (same precedent as the minimum meter spec, 2026-07-24).
+  - **§4 `sec:scenario`** — a **pure scaffold, zero body prose** (`main.tex:513`, `:543`):
+    four-layer Ko/ours provenance, the inference-null spec, the transfer family, and
+    **two figures that do not exist yet** (example generator traces + spectra; an
+    observation-map sensitivity sweep) ⇒ two new plot scripts. Cheapest remaining
+    experimental work in the repo, CPU-only. Note §3's `def:family` and
+    `subsec:identifiability` already forward-`\cref` this section.
+- [ ] **`check-refs` + `check-arxiv-llm-compliance` over the whole manuscript** (owed and
+  accumulating): 12 Rung-1/related-work entries, 5 Rung-3/4 entries, and 2 new
+  identifiability entries (`tsybakov2009nonparametric`, `cover2006elements`) have never
+  been verified; the compliance pass is owed over all prose written 2026-07-24 (§6/§7/§9/§10
+  wiring, §3, App B). Both are pre-arXiv blockers. **No PDF has ever been built** — there
+  is no TeX toolchain on the dev node, so every section has been verified statically only
+  (env balance, `\cref`/cite-key resolution, figure stems on disk). A real `latexmk` build
+  is required before submission.
 
 ---
 

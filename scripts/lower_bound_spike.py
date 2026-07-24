@@ -16,14 +16,23 @@ What it checks, end to end, against the existing generator + meter:
      kappa ~ pi f0 T_obs. We confirm the form (R^2) and that the fitted kappa is
      within an O(1) width-convention factor of the parameter-free pi f0 T_obs.
 
-  2. The covert-comms inequality is computable on a concrete verifier (panel B).
-     Building training vs inference-null populations (code.ko_workload ->
-     code.forward -> code.observation, exactly the code.typeb.ko_synth path) and
-     scoring a fixed-bin statistic at f0, TV = 2*AUC - 1 is the standard
-     hypothesis-testing cap: any such verifier's detection advantage <= TV. It
-     decays with sigma with the same functional form but a much smaller effective
-     kappa (AUC saturates while any f0 excess stays separable), so covertness
-     thresholds sigma*(epsilon) are read off this CONSERVATIVE rolloff.
+  2. A concrete verifier's ACHIEVED advantage decays with sigma (panel B), which
+     is the direction a necessary-distortion claim needs. Building training vs
+     inference-null populations (code.ko_workload -> code.forward ->
+     code.observation, exactly the code.typeb.ko_synth path) and scoring a
+     fixed-bin statistic at f0, the achieved advantage of the best threshold test
+     on that statistic is the Youden index J = max_thr (TPR - FPR), i.e. the
+     two-sample KS distance of the score populations. By data processing
+     J <= TV(P_train, P_null), so J(sigma) > epsilon CERTIFIES that sigma is not
+     epsilon-covert: epsilon-covertness REQUIRES sigma >= sigma*(epsilon), read
+     off the J rolloff. Enlarging the verifier class can only raise sigma*.
+
+     Note the direction carefully. Pinsker (TV <= sqrt(KL/2)) runs the other way
+     and would give a SUFFICIENT distortion, not a necessary one, so it is not
+     what the threshold is computed from. The Gini index 2*AUC - 1 is also
+     retained in the summary (it is what the deliberation note quotes), but it is
+     a paired/rank statistic that can EXCEED J, so it is not itself an achieved
+     single-trace advantage and does not carry the bound.
 
   3. The honest caveat (see the note): the demonstrated verifier is FIXED at the
      known cadence; the work-jitter series (also plotted) is the measured
@@ -128,6 +137,23 @@ def _auc(pos: np.ndarray, neg: np.ndarray) -> float:
     return float(u / (pos.size * neg.size))
 
 
+def _youden(pos: np.ndarray, neg: np.ndarray) -> float:
+    """Youden index J = max_thr (TPR - FPR): the ACHIEVED advantage of the best
+    threshold test on this statistic (equivalently the two-sample KS distance of
+    the score populations).
+
+    This is the quantity the necessary-distortion argument runs on: a threshold
+    test is an explicit single-trace verifier, and by data processing
+    J <= TV(P_train, P_null). So J > epsilon certifies non-epsilon-covertness.
+    Contrast :func:`_auc`, whose Gini index 2*AUC-1 can exceed J and is therefore
+    not an achieved single-trace advantage.
+    """
+    thr = np.unique(np.concatenate([pos, neg]))
+    tpr = (pos[:, None] >= thr[None, :]).mean(axis=0)
+    fpr = (neg[:, None] >= thr[None, :]).mean(axis=0)
+    return float(np.max(tpr - fpr))
+
+
 def _train_scores(sigma: float, work: bool,
                   rng: np.random.Generator) -> tuple[np.ndarray, float]:
     """(SNR scores, mean coherent f0 power) for N_EACH training traces.
@@ -224,6 +250,8 @@ def compute() -> dict:
             "sigma": sigma,
             "auc_jitter": _auc(jit_snr, infer),
             "auc_work": _auc(wrk_snr, infer),
+            "youden_jitter": _youden(jit_snr, infer),
+            "youden_work": _youden(wrk_snr, infer),
             "coherent_power_jitter": jit_coh,
             "cadence_cv": cv,
             "phase_diffusion_D": d,
@@ -236,23 +264,37 @@ def compute() -> dict:
     coh_ratio = coh / (coh[0] + 1e-30)
     kappa_coh = _fit_kappa(sig, coh_ratio, 1.0)     # vs analytic pi f0 T
     r2_coh = _r2(coh_ratio, 1.0 / (1.0 + kappa_coh * sig ** 2))
-    # (b) DETECTABILITY: TV cap = 2 AUC - 1 (saturates while any f0 excess
-    #     remains detectable, so its effective rolloff kappa is << the
-    #     coherent-power kappa -- reported, not conflated).
+    # (b) ACHIEVED ADVANTAGE of the explicit fixed-bin threshold test: the Youden
+    #     index J <= TV. This is what the necessary-distortion claim runs on.
+    j_jit = np.array([r["youden_jitter"] for r in rows])
+    j0 = float(j_jit[0])
+    kappa_j = _fit_kappa(sig, j_jit, j0)
+    r2_j = _r2(j_jit, j0 / (1.0 + kappa_j * sig ** 2))
+    # (c) The Gini index 2 AUC - 1, retained for continuity with the
+    #     deliberation note. NOT an achieved single-trace advantage (it can
+    #     exceed J), so it is reported alongside and does not set the threshold.
     tv_jit = np.array([2.0 * r["auc_jitter"] - 1.0 for r in rows])
     tv0 = float(tv_jit[0])
     kappa_tv = _fit_kappa(sig, tv_jit, tv0)
     r2_tv = _r2(tv_jit, tv0 / (1.0 + kappa_tv * sig ** 2))
 
-    # covertness threshold sigma*(eps) from the DETECTABILITY rolloff
-    # TV0 / (1 + kappa_tv sigma^2) = eps. Flag extrapolation beyond the sweep.
+    # covertness threshold sigma*(eps): invert the ACHIEVED-advantage rolloff
+    # J0 / (1 + kappa_j sigma^2) = eps. Flag extrapolation beyond the sweep --
+    # and note the generator's linear jitter anchors break by sigma ~ 0.35 (the
+    # ko_workload period clamp), so extrapolated rows sit outside the model.
     sig_max = float(sig.max())
-    thresholds = []
-    for eps in EPSILONS:
-        arg = tv0 / eps - 1.0
-        s = float(np.sqrt(arg / kappa_tv)) if arg > 0 else 0.0
-        thresholds.append({"epsilon": eps, "sigma_star": s,
-                           "extrapolated": s > sig_max})
+
+    def _invert(k: float, y0: float) -> list[dict]:
+        out = []
+        for eps in EPSILONS:
+            arg = y0 / eps - 1.0
+            s = float(np.sqrt(arg / k)) if arg > 0 else 0.0
+            out.append({"epsilon": eps, "sigma_star": s,
+                        "extrapolated": s > sig_max})
+        return out
+
+    thresholds = _invert(kappa_j, j0)
+    thresholds_gini = _invert(kappa_tv, tv0)
 
     return {
         "seed": SEED, "n_each": N_EACH, "f0_hz": F0_HZ,
@@ -261,17 +303,25 @@ def compute() -> dict:
         "meter": {"sigma_eta": METER.sigma_eta},
         "kappa_analytic": kappa_analytic,
         "coherent_power": {"kappa_fitted": kappa_coh, "r2": r2_coh},
+        "detectability_youden": {"kappa_fitted": kappa_j, "r2": r2_j, "j0": j0},
         "detectability_tv": {"kappa_fitted": kappa_tv, "r2": r2_tv, "tv0": tv0},
         "sigma_max_swept": sig_max,
         "rows": rows,
         "covertness_thresholds": thresholds,
+        "covertness_thresholds_gini": thresholds_gini,
         "analytic_form": (
             "coherent f0 power ~ 1/(1 + kappa sigma^2), kappa_analytic = "
             "pi f0 T_obs (accumulating i.i.d. jitter, Lorentzian rolloff). "
-            "Detectability TV = 2 AUC - 1 follows the same shape with a much "
-            "smaller effective kappa because AUC saturates while any f0 excess "
-            "stays separable from the line-free null; thresholds use that "
-            "(conservative) detectability rolloff."),
+            "The ACHIEVED advantage of the explicit fixed-bin threshold test, "
+            "J = max_thr (TPR - FPR), follows the same shape with a much smaller "
+            "effective kappa because J saturates while any f0 excess stays "
+            "separable from the line-free null. Since J <= TV, J(sigma) > eps "
+            "certifies non-eps-covertness, so covertness_thresholds inverts the "
+            "(conservative) J rolloff: eps-covertness REQUIRES sigma >= "
+            "sigma*(eps). covertness_thresholds_gini repeats the inversion on "
+            "2 AUC - 1 for continuity with the deliberation note; that index can "
+            "exceed J and is not an achieved single-trace advantage, so it does "
+            "not carry the bound."),
     }
 
 
@@ -305,25 +355,26 @@ def plot(summary: dict) -> pathlib.Path:
     axA.set_ylim(1e-3, 2.0)
     axA.legend(frameon=False, loc="lower left")
 
-    # --- panel B: detectability cap + covertness thresholds + escape ----------
-    tv_jit = np.array([2.0 * r["auc_jitter"] - 1.0 for r in rows])
-    tv_wrk = np.array([2.0 * r["auc_work"] - 1.0 for r in rows])
-    tv0 = summary["detectability_tv"]["tv0"]
-    k_tv = summary["detectability_tv"]["kappa_fitted"]
-    axB.plot(grid, tv0 / (1.0 + k_tv * grid ** 2), color=C["grey"], lw=1.0,
+    # --- panel B: achieved advantage + covertness thresholds + escape ---------
+    j_jit = np.array([r["youden_jitter"] for r in rows])
+    j_wrk = np.array([r["youden_work"] for r in rows])
+    j0 = summary["detectability_youden"]["j0"]
+    k_j = summary["detectability_youden"]["kappa_fitted"]
+    axB.plot(grid, j0 / (1.0 + k_j * grid ** 2), color=C["grey"], lw=1.0,
              ls="-", zorder=0,
-             label=rf"fit ($R^2$={summary['detectability_tv']['r2']:.2f})")
-    axB.plot(sig, tv_jit, color=C["vermillion"], marker="o", ms=3, lw=1.1,
+             label=rf"fit $\kappa={k_j:.0f}$ "
+                   f"($R^2$={summary['detectability_youden']['r2']:.2f})")
+    axB.plot(sig, j_jit, color=C["vermillion"], marker="o", ms=3, lw=1.1,
              label="i.i.d. period jitter")
-    axB.plot(sig, tv_wrk, color=C["blue"], marker="s", ms=3, lw=1.1, ls="--",
+    axB.plot(sig, j_wrk, color=C["blue"], marker="s", ms=3, lw=1.1, ls="--",
              label="real-work jitter (escape)")
     for th in summary["covertness_thresholds"]:
         if th["epsilon"] in (0.1, 0.5):
             axB.axhline(th["epsilon"], color=C["grey"], lw=0.5, ls=":", zorder=0)
     axB.set_xlabel(r"fractional period jitter $\sigma$")
-    axB.set_ylabel(r"detectability cap  $TV \approx 2\,\mathrm{AUC}-1$")
+    axB.set_ylabel(r"achieved advantage  $J \leq \mathrm{TV}$")
     axB.set_ylim(-0.05, 1.02)
-    axB.legend(frameon=False, loc="upper right")
+    axB.legend(frameon=False, loc="lower left")
 
     fig.suptitle("Lower-bound spike: covertness of i.i.d. phase jitter "
                  f"(fixed-bin verifier, $f_0$={F0_HZ:g} Hz, "
@@ -340,17 +391,21 @@ def main() -> None:
 
     print("i.i.d. period jitter (fixed-bin verifier):")
     for r in summary["rows"]:
-        print(f"  sigma={r['sigma']:.2f}  TV_jit={2*r['auc_jitter']-1:+.3f}  "
-              f"TV_work={2*r['auc_work']-1:+.3f}  "
+        print(f"  sigma={r['sigma']:.2f}  J_jit={r['youden_jitter']:.3f}  "
+              f"J_work={r['youden_work']:.3f}  "
+              f"Gini_jit={2*r['auc_jitter']-1:+.3f}  "
               f"CV={r['cadence_cv']:.3f} (~sigma)  "
               f"D={r['phase_diffusion_D']:.2f} vs {r['D_analytic']:.2f} analytic")
-    cp, tv = summary["coherent_power"], summary["detectability_tv"]
+    cp = summary["coherent_power"]
+    jd, tv = summary["detectability_youden"], summary["detectability_tv"]
     print(f"coherent-power rolloff: kappa={cp['kappa_fitted']:.0f} "
           f"(analytic pi f0 T = {summary['kappa_analytic']:.0f}), "
           f"R^2={cp['r2']:.3f}")
-    print(f"detectability rolloff:  kappa={tv['kappa_fitted']:.0f}, "
-          f"R^2={tv['r2']:.3f}, TV0={tv['tv0']:.3f}")
-    print("covertness thresholds sigma*(eps):")
+    print(f"achieved-advantage (J) rolloff: kappa={jd['kappa_fitted']:.0f}, "
+          f"R^2={jd['r2']:.3f}, J0={jd['j0']:.3f}   <- carries the bound")
+    print(f"Gini (2 AUC - 1) rolloff:       kappa={tv['kappa_fitted']:.0f}, "
+          f"R^2={tv['r2']:.3f}, TV0={tv['tv0']:.3f}   (reference only)")
+    print("covertness thresholds sigma*(eps) from J:")
     for t in summary["covertness_thresholds"]:
         flag = " [extrapolated]" if t["extrapolated"] else ""
         print(f"  eps={t['epsilon']:.2f} -> sigma*={t['sigma_star']:.3f}{flag}")
