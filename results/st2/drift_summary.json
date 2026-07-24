@@ -29,7 +29,7 @@
     {
       "level": 0.0,
       "cadence_cv": 0.10340151887566842,
-      "phase_diffusion_D": 0.381830541612915,
+      "phase_diffusion_D": 0.3818305416129142,
       "auc": {
         "spectral": 0.999025,
         "viterbi": 1.0,
@@ -63,7 +63,7 @@
     {
       "level": 0.1,
       "cadence_cv": 0.13163769630482333,
-      "phase_diffusion_D": 4.879068128240741,
+      "phase_diffusion_D": 4.879068128240732,
       "auc": {
         "spectral": 0.899325,
         "viterbi": 1.0,
@@ -97,7 +97,7 @@
     {
       "level": 0.2,
       "cadence_cv": 0.3179929782785831,
-      "phase_diffusion_D": 26.32664160224149,
+      "phase_diffusion_D": 26.326641602241487,
       "auc": {
         "spectral": 0.670625,
         "viterbi": 1.0,
@@ -165,7 +165,7 @@
     {
       "level": 0.8,
       "cadence_cv": 1.0597972134993254,
-      "phase_diffusion_D": 153.16115695389098,
+      "phase_diffusion_D": 153.161156953891,
       "auc": {
         "spectral": 0.495625,
         "viterbi": 0.9995,
@@ -199,7 +199,7 @@
     {
       "level": 1.5,
       "cadence_cv": 1.0028540065176914,
-      "phase_diffusion_D": 52.95438083213054,
+      "phase_diffusion_D": 52.9543808321305,
       "auc": {
         "spectral": 0.5262,
         "viterbi": 0.997175,

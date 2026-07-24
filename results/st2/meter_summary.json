@@ -27,7 +27,7 @@
     {
       "level": "notch_at_cadence",
       "cadence_cv": 0.09957134779893165,
-      "phase_diffusion_D": 0.3036780798566416,
+      "phase_diffusion_D": 0.30367807985663964,
       "auc": {
         "spectral": 0.281175,
         "viterbi": 0.7781,
@@ -61,7 +61,7 @@
     {
       "level": "integrating_1hz",
       "cadence_cv": 0.10134025004899859,
-      "phase_diffusion_D": 0.42164963214340817,
+      "phase_diffusion_D": 0.42164963214340695,
       "auc": {
         "spectral": 0.463,
         "viterbi": 0.68405,
@@ -95,7 +95,7 @@
     {
       "level": "controller_on",
       "cadence_cv": 0.10524038631022356,
-      "phase_diffusion_D": 0.41751147910975056,
+      "phase_diffusion_D": 0.4175114791097513,
       "auc": {
         "spectral": 0.997625,
         "viterbi": 1.0,
@@ -129,7 +129,7 @@
     {
       "level": "coloured_noise_heavy",
       "cadence_cv": 0.09955007948069744,
-      "phase_diffusion_D": 0.2917526738684072,
+      "phase_diffusion_D": 0.29175267386840636,
       "auc": {
         "spectral": 0.9969,
         "viterbi": 1.0,
