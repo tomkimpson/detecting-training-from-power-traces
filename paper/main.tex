@@ -294,6 +294,21 @@ cover our object---a physics-constrained training schedule observed through a
 filtered, low-rate meter---so such a bound, if it holds, is not inherited but must
 be derived; we leave it as the central open direction.
 
+\paragraph{Challenge-response authentication.}
+Authenticating a physical device by its response to an unpredictable query is the
+premise of distance-bounding protocols \citep{brands1994distance} and physical
+unclonable functions \citep{pappu2002puf}, and, in compute governance
+specifically, of the active challenge-response telemetry that trades the passive
+channel for prover participation \citep{monfared2026timing}. Rung~3
+(\cref{sec:active}) is this idea applied to the training-verification question over
+a filtered, low-rate power meter: the verifier correlates external power against a
+fresh challenge, and the null comes from re-randomising it rather than from a
+matched-hardware corpus. What we add to the pattern is the channel and the
+adversary---a remote meter and a prover free to answer with a challenge-aware dummy
+load---and, unlike device authentication, we do not build the cryptographic binding
+that would tie the response to declared work; we state it as an assumed ideal
+functionality (\cref{sec:active}) and leave its construction open.
+
 
 % ============================================================================
 \section{Threat model and identifiability}
@@ -721,41 +736,73 @@ evaluation; semantic controls with the expected-interpretation paragraph.}
 % appendix if it distracts from Rungs 1–2); full empirical treatment only if
 % the optional ST3 pilot runs and passes.
 
-\begin{checklist}
-	\item \cbx \textbf{Scope decision honoured}: concise conditional protocol
-	by default; expand only if ST3 runs and passes (plan \S6, \S10 Q4).
-	\item \cbx \textbf{Protocol}: verifier emits unpredictable balanced
-	challenge $c_k \in \{-1,+1\}$; prover runs a committed,
-	semantically-equivalent schedule variation keyed to $c_k$; verifier
-	correlates external power against the challenge over a causal lag window
-	(lock-in / spread-spectrum style); null from re-randomising the challenge
-	--- no corpus, no matched hardware.
-	\item \cbx \textbf{Randomisation-test discipline}: the test is exact under
-	the sharp null \emph{conditional on the randomisation design}; any
-	maximisation over lags, impulse responses, or preprocessing must be
-	repeated inside every re-randomised replicate; carryover, adaptive
-	schedule choices, and balance constraints belong in the design.
-	\item \cbx \textbf{The assumed primitive (Rung 4), as an ideal
-	functionality}: sound, fresh, challenge-bound transcript/proof tying each
-	challenge bit to the prescribed semantically-equivalent variation of
-	declared training state transitions --- commitment before reveal,
-	unpredictability at commitment, sound binding to valid state transitions,
-	freshness against replay, and a stated position on co-location.
-	\item \cbx \textbf{Ceilings stated}: Rung 3 escapes the semantic decoy (a
-	passive decoy is uncorrelated with the challenge) but not the
-	challenge-aware dummy load; Rung 4's semantic work binding remains an
-	assumed/open layer; the remote-proof + dummy-load co-location gap stays
-	open unless the primitive rules it out.
-	\item \cbx \textbf{If ST3 runs}: concrete pair of semantically-equivalent
-	schedules; stated transcript/commitment interface; full search inside
-	every replicate; challenge-aware dummy-load adversary;
-	modulation-depth / overhead / observation-time curves; ideally a real
-	single-GPU pilot (feasible --- challenge modulation needs no cluster;
-	OzSTAR).
-\end{checklist}
+Rung 2 certifies the physical schedule, not training semantics. Its ceiling is
+the semantic decoy: a load that reproduces the compute--communication cadence of
+training without retaining a trained model scores as training under every passive
+rule (\cref{sec:classification}). No passive test can separate the two, because
+the meter sees only the schedule and the decoy copies the schedule. The way past
+a passive ceiling is to stop watching and start asking. If the verifier perturbs
+the machine and the machine must react, a decoy that merely replays a recording
+cannot follow: it does not know what it was asked.
 
-\todo[inline]{Body: protocol sketch; ideal functionality; what each rung buys
-and its ceiling. Keep short unless ST3 earns more.}
+Rung 3 makes this concrete with a challenge-synchronous protocol. The verifier
+emits an unpredictable balanced challenge sequence $c_k \in \{-1,+1\}$; the prover
+runs a committed, semantically-equivalent variation of its training schedule keyed
+to $c_k$ --- for instance a small pre-agreed shift in the boundary between two
+iterations that leaves the computation performed unchanged. The verifier
+correlates the external power trace against $c_k$ over a causal lag window, in the
+manner of a lock-in amplifier or a spread-spectrum receiver recovering a known
+code from noise. The null needs no corpus and no matched hardware: it comes from
+re-randomising the challenge and recomputing the statistic. A positive result
+authenticates a physical fact --- a load behind the meter responded to a signal it
+could not have predicted. This escapes the semantic decoy, whose passive schedule
+is by construction uncorrelated with the fresh challenge (\cref{subsec:adversary}).
+Its own ceiling is the challenge-aware dummy load: a device that receives the
+challenge and mimics the prescribed response without training.
+
+The correlation test is exact under the sharp null that the challenge has no
+effect on the measured process --- but only conditional on the randomisation
+design, and the guarantee is fragile to the usual abuses
+\citep{fisher1935design}. Any maximisation the verifier performs, over causal
+lags, candidate impulse responses, or preprocessing choices, must be repeated
+inside every re-randomised replicate, or the reported level is optimistic.
+Carryover between challenge periods, any adaptivity in the prover's schedule
+choices, and balance constraints on the challenge sequence all belong in the
+design that the re-randomisation samples from. We also flag the weaker reading a
+careless protocol invites: over a long enough record a correlation detector
+accrues the $\sqrt{N}$ processing gain of any matched receiver, so a positive
+result must be shown to certify the challenge binding and not merely that the
+verifier integrated for long enough.
+
+Rung 3 authenticates a physical response; it does not tie that response to
+training. Rung 4 adds that binding, and it is the rung this paper does not build.
+Rather than gesture at ``a proof of training,'' we state the missing piece as an
+ideal functionality \citep{canetti2001uc}: a sound, fresh, challenge-bound
+transcript or proof that ties each challenge bit to the prescribed
+semantically-equivalent variation of declared training state transitions. Such a
+primitive must provide commitment before the challenge is revealed,
+unpredictability at commitment time, sound binding of the response to valid
+declared state transitions, freshness against replay, and an explicit position on
+whether the responding load and the declared computation are co-located.
+Proof-of-learning constructions \citep{jia2021proofoflearning} are the closest
+existing candidate, but they assume access to the training trace rather than an
+external meter. Conditional on such a primitive, challenge-synchronous power
+supplies physical evidence for the declared response; without it, the semantic
+work binding remains an assumed, open layer.
+
+Two ceilings therefore remain. Rung 3's is the challenge-aware dummy load;
+Rung 4's is co-location: a genuine remote proof combined with a local
+challenge-correlated dummy still satisfies both the correlation test and the
+transcript unless the assumed primitive explicitly rules the separation out.
+Closing them empirically is future work, and it needs no cluster --- challenge
+modulation is legible on a single card. A full Rung-3 study would fix a concrete
+pair of semantically-equivalent schedules, run the complete search inside every
+re-randomised replicate, pit the detector against a challenge-aware dummy-load
+adversary, and trace detection against modulation depth, throughput overhead, and
+observation time. We leave it, with the identifiability question of
+\cref{sec:threat} and the cost-of-hiding bound of \cref{sec:frontier}, as the
+active-verification direction the passive results here motivate but cannot reach
+(\cref{sec:discussion}).
 
 
 % ============================================================================
