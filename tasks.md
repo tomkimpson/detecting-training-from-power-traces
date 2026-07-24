@@ -274,6 +274,19 @@ resolve, labels/refs consistent, environments balanced).
 
 - [ ] Negative transport case (single-A100) as a result; identifiability theory section
   (rigor level per plan §10 Q2); discussion closing out each rung's ceiling.
+- [ ] **Cost-vs-hiding Pareto re-plot (cheap, CPU-only, no new sweeps).** Render the
+  already-frozen ST2 frontier as an explicit **adversary-cost vs hiding** Pareto curve —
+  the plan's stated deliverable (`notes/plans/plan-for-paper-2.md:370`,
+  `plan-for-paper-2-review.md:198`). The (hiding, systems-cost) pairs already exist in
+  `results/st2/frontier_summary.json`: per cell, detection loss (best-tracking &
+  best-fixed TPR@0.05, or 1−TPR) on one axis and the measured `cost_overhead_pct` on the
+  other, for the four anchored families only (jitter, drift, work, shape; others carry
+  `null`). A new plot script reading the tracked summary (no re-run) — one Pareto panel
+  per detector class so the "how much systems cost buys how much hiding from the tracker
+  vs the fixed detectors" gap is visible, with the ≈zero-cost work-variation point called
+  out. **Out of scope / still future work:** the learning-efficiency cost leg (descoped
+  2026-07-22, needs a GPU campaign — the transport trap) stays the stated open empirical
+  question; this item plots only the measured systems-cost axis.
 
 ---
 
