@@ -17,7 +17,9 @@ knobs; CPU-only; single-GPU cost anchors are the only measured input).
 ## Bottom line
 
 Power-only detection of a training **schedule** works well — and, per the ceiling leg,
-close to the theoretical optimum — and it survives a *mildly* adaptive adversary. It is
+close to the theoretical optimum — and (with a *tracker*) it survives the whole tested
+de-periodicisation frontier wherever the attack is cheap, including the ≈zero-cost
+work-variation attack that fools every fixed/cheap detector. It is
 **not** an adversarially-robust *identification* of training. Read it as **strong physical
 evidence and necessary conditions, plus an upper bound on hideability — not proof.** The
 work is deliberately a **claim ladder**: the answer is different at each rung, and each
@@ -55,15 +57,26 @@ rung's ceiling motivates the next.
 
 ## The three boundaries (what it can't do / can't claim)
 
-1. **A near-free work-variation attack defeats schedule detection (ST2 frontier — the
-   definitive result).** Varying the *real work per iteration* (`work_σ → 0.5`) moves the
-   cadence **without leaving a coherent line to track**, and collapses *every* detector —
-   fixed and tracking — at **≈zero measured throughput cost**. This is the genuine scope
-   limit. The counterweight is a **theoretical** floor (the lower-bound spike): hiding the
-   synchronous all-reduce is communication-bound, so reaching true statistical covertness
-   must cost **throughput or learning efficiency** — the free escape is bounded by physics.
-   But the learning-efficiency leg is **argued, not measured** (GPU campaign descoped), so
-   "the adversary can't hide for free" is currently a proposition, not a closed experiment.
+1. **The near-free work-variation attack is what forces a tracker — and marks the open
+   edge — but does NOT defeat detection in the confirmed-free regime (ST2 frontier).**
+   Varying the *real work per iteration* (`work_σ`) scrambles the cadence coherence itself
+   — qualitatively harder than drift/jitter/phase-slip, which only move or broaden a
+   still-coherent line (the tracker's home turf). At ≈zero measured throughput cost it
+   **collapses the fixed matched filter and the DG order statistics** (spectral TPR@0.05
+   1.0→0.27, mtf dead by work=0.35), **but the Viterbi tracker holds at TPR 1.0 through
+   work=0.5** — the whole confirmed-≈zero-cost band. It only bends at **work=0.7**
+   (TPR 0.59), a level whose throughput cost is *unmeasured* and beyond the free regime.
+   Across the entire frontier (jitter/work/drift/phase/relocate/harmonic/shape/dilute)
+   best-tracking TPR stays ≥ 0.84 at every level; the attacks that stress the tracker are
+   either expensive (jitter costs 150–375%) or of unmeasured cost (work=0.7). So this is
+   **not** "robust to every attack except one": the tracker survives the whole tested
+   de-periodicisation family at cheap cost, work-variation included. Its role is (a) the
+   sharpest proof that a *tracker* is necessary (a cheap/fixed detector is fooled for free)
+   and (b) the axis pointing at the eventual edge — where the lower-bound spike argues
+   reaching true covertness must cost **throughput or learning efficiency** (the all-reduce
+   barrier is communication-bound). That learning leg is **argued, not measured** (GPU
+   campaign descoped), so "the adversary can't hide for free" past that edge is a
+   proposition, not a closed experiment.
    (`st2-frontier-freeze-findings.md`; lower bound: `../discussion/lower-bound-feasibility-spike.md`.)
 
 2. **It needs a fast-enough meter (minimum meter specification).** "Just power" is not
@@ -86,7 +99,7 @@ rung's ceiling motivates the next.
 |---|---|
 | Detect an honest training schedule from power? | **Yes** — reliably, near-optimally |
 | Survive mild obfuscation (jitter / drift / phase-slip)? | **Yes** — tracking holds |
-| Survive a determined adversary (work-variation)? | **No** at the schedule level — but hiding provably costs throughput/learning (floor argued, not measured) |
+| Survive near-free de-periodicisation (incl. work-variation)? | **Yes** — the Viterbi tracker holds across the whole frontier at confirmed ≈zero cost (work ≤ 0.5 → TPR 1.0); it fools only the *fixed/cheap* detectors. It bends only at work=0.7, whose cost is unmeasured; past that edge the lower-bound argues hiding costs throughput/learning (argued, not measured) |
 | Work with any power meter? | **No** — needs ≥ ~2 Hz sampling, integration ≲ 0.5 s |
 | Prove it is *actually training* (not a mimic)? | **No** at Rungs 1–2 — certifies the schedule, not semantics; needs the (unrun) challenge protocol |
 
