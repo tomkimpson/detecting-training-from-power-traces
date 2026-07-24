@@ -67,7 +67,17 @@ python scripts/st1_sweeps.py              # -> results/st1/sweeps/*.json
 
 `plot_st1_calibration.py` needs the per-cell `results/st1/raw/*.npz` that `st1_far.py`
 produces, so run `st1_far.py` first. The full surrogate FAR grid is the only expensive
-step (minutes locally; a slurm array on OzSTAR for the definitive S=999, M=10⁴ run).
+step (minutes locally). The frozen surrogate confirmation ran as a slurm array on the
+MATS `compute` partition at the surrogate sizing M=2000 × S=999 (the analytic /
+level-safety / bake-off cells are at M=10⁴); see `notes/results/number-freeze-2026-07-24.md`:
+```
+python scripts/st1_far.py --calibs surrogate --stages stage1,stage3,stage4 \
+    --nulls white,ar1,ar2_resonant,ar1_t,lognormal,sq_gauss,tvar,controller --list  # -> "24 cells"
+sbatch --array=0-23 scripts/slurm/st1_far_surrogate.sbatch
+python scripts/plot_st2_sweeps.py --list                  # -> "9 families"
+sw=$(sbatch --parsable --array=0-8 scripts/slurm/st2_sweeps.sbatch)
+sbatch --dependency=afterok:$sw scripts/slurm/st2_frontier.sbatch
+```
 
 ## Build the paper
 

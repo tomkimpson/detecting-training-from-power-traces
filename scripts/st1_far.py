@@ -36,7 +36,6 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import fcntl
-import os
 import pathlib
 import sys
 import time
@@ -57,6 +56,7 @@ from powerladder.st1.pipeline import (KO_NOMINAL_F0_HZ, stage1_fixed_alpha,  # n
                                stage4_full_adaptive, stage4_semicoherent)
 from powerladder.st1.resample import random_smooth_phase_path  # noqa: E402
 from powerladder.st1.surrogates import surrogate_pvalue  # noqa: E402
+from powerladder.slurm import resolve_array_id  # noqa: E402
 
 RESULTS_DIR = pathlib.Path(__file__).resolve().parent.parent / "results" / "st1"
 
@@ -283,13 +283,8 @@ def main(argv=None) -> None:
     # Array mode: run exactly one cell selected by --array-id or the Slurm env.
     # Each cell persists its own raw npz + flock-merges far_summary.json, so
     # concurrent array tasks are safe (no shared write races).
-    env_id = os.environ.get("SLURM_ARRAY_TASK_ID")
-    array_id = args.array_id if args.array_id is not None else (
-        int(env_id) if env_id is not None else None)
+    array_id = resolve_array_id(args.array_id, len(specs))
     if array_id is not None:
-        if not 0 <= array_id < len(specs):
-            raise SystemExit(f"array id {array_id} out of range "
-                             f"[0, {len(specs)})")
         spec = specs[array_id]
         print(f"array cell {array_id}/{len(specs)}: "
               f"{spec[0]}/{spec[1]}/{spec[2]}  M={spec[3]}")

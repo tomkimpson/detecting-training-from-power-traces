@@ -24,7 +24,6 @@ import argparse
 import dataclasses
 import json
 import multiprocessing
-import os
 import pathlib
 import sys
 import time
@@ -40,6 +39,7 @@ from powerladder.config import DEFAULT, MeterParams, St2Params  # noqa: E402
 from powerladder.plotstyle import C, WIDTH_WIDE, apply_house_style  # noqa: E402
 from powerladder.typeb.st2 import run_family  # noqa: E402
 from powerladder.typeb.st2_attacks import FAMILY_ORDER, attack_families  # noqa: E402
+from powerladder.slurm import resolve_array_id  # noqa: E402
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _RESULTS = _ROOT / "results" / "st2"
@@ -220,13 +220,8 @@ def main() -> None:
 
     # Array mode: one family per Slurm task. Each family writes its own summary
     # JSON independently, so concurrent array tasks never race.
-    env_id = os.environ.get("SLURM_ARRAY_TASK_ID")
-    array_id = args.array_id if args.array_id is not None else (
-        int(env_id) if env_id is not None else None)
+    array_id = resolve_array_id(args.array_id, len(FAMILY_ORDER))
     if array_id is not None:
-        if not 0 <= array_id < len(FAMILY_ORDER):
-            raise SystemExit(f"array id {array_id} out of range "
-                             f"[0, {len(FAMILY_ORDER)})")
         args.families = [FAMILY_ORDER[array_id]]
         print(f"array family {array_id}/{len(FAMILY_ORDER)}: {args.families[0]}")
 
