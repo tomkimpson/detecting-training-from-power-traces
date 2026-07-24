@@ -9,9 +9,17 @@ measures (cadence CV, phase diffusion D) the frontier plots on (task 20.8).
 Reproduce:
     python scripts/plot_st2_sweeps.py                # all families, n_each=200
     python scripts/plot_st2_sweeps.py --jobs 8       # parallel over families
+    python scripts/plot_st2_sweeps.py --list         # print families + indices
+    SLURM_ARRAY_TASK_ID=0 python scripts/plot_st2_sweeps.py  # one family (array)
     python scripts/plot_st2_sweeps.py --smoke        # 2 levels x 8 traces
+                                                     # (-> frontier_smoke/, never
+                                                     #  the tracked full-res files)
 Output:
     results/st2/<family>_summary.json ; figures/st2_<family>.png/.pdf
+
+Canonical full-resolution numbers are frozen on Slurm (one family per array
+task, `scripts/slurm/st2_frontier.sbatch`), NOT locally — see the ST2
+re-verification follow-up in tasks.md. --smoke is a local plumbing check only.
 """
 
 from __future__ import annotations
@@ -20,6 +28,7 @@ import argparse
 import dataclasses
 import json
 import multiprocessing
+import os
 import pathlib
 import sys
 import time
@@ -39,6 +48,12 @@ from powerladder.typeb.st2_attacks import FAMILY_ORDER, attack_families  # noqa:
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _RESULTS = _ROOT / "results" / "st2"
 _FIGURES = _ROOT / "figures"
+
+# --smoke writes to DISJOINT locations so a plumbing check can never overwrite
+# the tracked full-resolution <family>_summary.json (the truncated smoke grid
+# shares family names with the real grid). Mirrors st2_meter_boundary.py.
+_SMOKE_RESULTS = _RESULTS / "frontier_smoke"
+_SMOKE_FIGURES = _FIGURES / "frontier_smoke"
 
 # detector -> (colour, FAR-0.05 linestyle, label); the second FAR is drawn
 # dashed in the same colour.
@@ -180,8 +195,8 @@ def run_and_write(family: str, p: St2Params,
 
 
 def _worker(args_tuple):
-    family, p, detectors = args_tuple
-    return run_and_write(family, p, detectors=detectors)
+    family, p, detectors, results_dir, fig_dir = args_tuple
+    return run_and_write(family, p, results_dir, fig_dir, detectors=detectors)
 
 
 def main() -> None:
@@ -195,18 +210,49 @@ def main() -> None:
     ap.add_argument("--jobs", type=int, default=1,
                     help="parallel worker processes (over families)")
     ap.add_argument("--smoke", action="store_true",
-                    help="2 levels x 8 traces per family (timing/schema run)")
+                    help="2 levels x 8 traces per family (timing/schema run); "
+                         "writes to frontier_smoke/ (never the tracked "
+                         "full-res <family>_summary.json)")
     ap.add_argument("--detectors", choices=("base", "full"), default="full",
                     help="'base' = spectral+viterbi (pre-ST1); 'full' adds "
                          "mtf and the DG order detectors (task 20.9)")
+    ap.add_argument("--list", action="store_true",
+                    help="print the family list and count, then exit "
+                         "(the Slurm-array range helper)")
+    ap.add_argument("--array-id", type=int, default=None,
+                    help="run only family index N (overrides "
+                         "SLURM_ARRAY_TASK_ID); the Slurm-array entry point")
     args = ap.parse_args()
+
+    if args.list:
+        for i, fam in enumerate(FAMILY_ORDER):
+            print(f"{i:3d}  {fam}")
+        print(f"{len(FAMILY_ORDER)} families")
+        return
 
     p = dataclasses.replace(DEFAULT.st2, n_each=args.n_each, seed=args.seed)
     if args.smoke:
         p = smoke_params(p)
+    results_dir = _SMOKE_RESULTS if args.smoke else _RESULTS
+    fig_dir = _SMOKE_FIGURES if args.smoke else _FIGURES
+
+    # Array mode: run exactly one family selected by --array-id or the Slurm
+    # env. Each family writes a disjoint <family>_summary.json, so concurrent
+    # array tasks never race (no flock needed, unlike the meter-boundary sweep).
+    env_id = os.environ.get("SLURM_ARRAY_TASK_ID")
+    array_id = args.array_id if args.array_id is not None else (
+        int(env_id) if env_id is not None else None)
+    if array_id is not None:
+        if not 0 <= array_id < len(FAMILY_ORDER):
+            raise SystemExit(f"array id {array_id} out of range "
+                             f"[0, {len(FAMILY_ORDER)})")
+        family = FAMILY_ORDER[array_id]
+        print(f"array family {array_id}/{len(FAMILY_ORDER)}: {family}")
+        run_and_write(family, p, results_dir, fig_dir, detectors=args.detectors)
+        return
 
     t0 = time.time()
-    work = [(f, p, args.detectors) for f in args.families]
+    work = [(f, p, args.detectors, results_dir, fig_dir) for f in args.families]
     if args.jobs > 1:
         with multiprocessing.Pool(args.jobs) as pool:
             summaries = pool.map(_worker, work)
@@ -219,7 +265,7 @@ def main() -> None:
                  for d in s["detectors"]}
         print(f"{s['family']:<9} min TPR@{far0}: "
               + "  ".join(f"{d}={v:.2f}" for d, v in worst.items()))
-    print(f"total {time.time() - t0:.1f}s -> {_RESULTS} ; {_FIGURES}/st2_*")
+    print(f"total {time.time() - t0:.1f}s -> {results_dir} ; {fig_dir}/st2_*")
 
 
 if __name__ == "__main__":

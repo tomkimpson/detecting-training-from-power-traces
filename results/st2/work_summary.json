@@ -2,7 +2,7 @@
   "family": "work",
   "generator": "ko_workload training vs hard inference null",
   "budget_units": "work_sigma (fractional micro-step-count jitter)",
-  "cost_anchor": "results/b2/workjitter_summary.json",
+  "cost_anchor": "data/measured_cost_anchors/workjitter_summary.json",
   "n_each": 200,
   "target_fars": [
     0.05,
@@ -29,7 +29,7 @@
     {
       "level": 0.05,
       "cadence_cv": 0.05889596925144807,
-      "phase_diffusion_D": 0.16901422569274255,
+      "phase_diffusion_D": 0.1690142256927394,
       "auc": {
         "spectral": 1.0,
         "viterbi": 1.0,
@@ -63,7 +63,7 @@
     {
       "level": 0.1,
       "cadence_cv": 0.08332604588457974,
-      "phase_diffusion_D": 0.24145686390350926,
+      "phase_diffusion_D": 0.2414568639035103,
       "auc": {
         "spectral": 0.999925,
         "viterbi": 1.0,
@@ -97,7 +97,7 @@
     {
       "level": 0.2,
       "cadence_cv": 0.17150866541365584,
-      "phase_diffusion_D": 1.0250716456330144,
+      "phase_diffusion_D": 1.025071645633013,
       "auc": {
         "spectral": 0.85985,
         "viterbi": 1.0,
@@ -131,7 +131,7 @@
     {
       "level": 0.35,
       "cadence_cv": 0.6667984931730486,
-      "phase_diffusion_D": 11.984998096987972,
+      "phase_diffusion_D": 11.984998096987974,
       "auc": {
         "spectral": 0.4414,
         "viterbi": 1.0,
@@ -165,7 +165,7 @@
     {
       "level": 0.5,
       "cadence_cv": 1.430636222261251,
-      "phase_diffusion_D": 52.21071433099074,
+      "phase_diffusion_D": 52.21071433099071,
       "auc": {
         "spectral": 0.41105,
         "viterbi": 0.999425,
@@ -199,7 +199,7 @@
     {
       "level": 0.7,
       "cadence_cv": 1.5648933624875165,
-      "phase_diffusion_D": 41.434037562841944,
+      "phase_diffusion_D": 41.43403756284194,
       "auc": {
         "spectral": 0.302375,
         "viterbi": 0.781875,

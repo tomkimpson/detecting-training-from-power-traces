@@ -38,13 +38,22 @@ pre-registered criteria closed. Full record: `notes/results/st1-findings.md`, `h
   incl. stage 3 and stage-6 nulls (ar1_t, lognormal, sq_gauss). Slurm array over cells
   (`st1_far.py --calibs surrogate`, one cell per task) on MATS (preferred) or OzSTAR.
   The ST1 verdict's surrogate leg currently rests on a partial (M=1000, S=199) grid.
-- [ ] **Slurm re-verification of the ST2 sweeps in this repo** (same number-freeze
+- [x] **Slurm re-verification of the ST2 sweeps in this repo** (same number-freeze
   pass): regenerate `results/st2/*_summary.json` from scratch, esp. the meter family
   behind the "integrating_1hz" claim **and the work-jitter line-band numbers, which
   ride the `B` component and are flagged for requalification** (`notes/results/issue54-investigation.md`).
   Which finding leads the frontier is left open until these freeze (positioning memo,
   2026-07-23). Do NOT run locally on the dev node (decision 2026-07-22) — slurm only;
   environment setup on the cluster is part of this task.
+  **Result: done for the synthetic ST2 sweeps** (slurm array 5635 on MATS `compute`;
+  all `results/st2/*_summary.json` incl. the meter family regenerated from scratch;
+  the `integrating_1hz` decomposition was already frozen by the meter-boundary sweep,
+  job 5498). Numbers reproduce the prior local run byte-identically (see the frontier
+  task in Phase 2). The **work-jitter "line-band numbers riding B"** flag is an
+  issue-54 **measured-data** (b2) prose concern — the synthetic frontier reads only the
+  clean measured `throughput_overhead` cost field, not the B-contaminated line-band
+  detection arrays, so it is not part of this synthetic re-freeze (carried into the
+  Phase-4 paper §6 write-up instead).
 - [x] **Settle the venue** (plan §10 Q1).
   **Result (2026-07-22): arXiv-first.** Write the strongest self-contained preprint;
   choose the submission venue after results freeze. Identifiability rigor at
@@ -152,12 +161,27 @@ resolve, labels/refs consistent, environments balanced).
 
 ## Phase 2 — Frontier (full) + Rung 2
 
-- [ ] Frontier at full resolution with the systems-cost anchors. **Learning-efficiency
+- [x] Frontier at full resolution with the systems-cost anchors. **Learning-efficiency
   metric descoped (decision 2026-07-22):** no GPU measurement campaign — keeps the
   paper theory/methods and avoids the single-GPU/NVML transport trap. The frontier's
   utility axis is the measured systems-cost anchors only; the learning-efficiency
   penalty is stated in the paper as the open empirical question / future work
   (paper §5 checklist already words it this way).
+  **Result: frozen on slurm** (`results/st2/frontier_summary.json`, provisional=false,
+  n_each=200, 50 cells, full 5-detector set; slurm array **5635** on MATS `compute`,
+  all 9 families COMPLETED; full record `notes/results/st2-frontier-freeze-findings.md`).
+  Built the missing slurm harness — `plot_st2_sweeps.py --array-id` (one family per
+  task, disjoint per-family summaries, no race) + `scripts/slurm/st2_frontier.sbatch`
+  + smoke-path split so `--smoke` can't clobber the tracked full-res files. **Verdict
+  GO (definitive):** the ≈zero-cost real-work-variation attack `work=0.35/0.5` collapses
+  every fixed test (≤0.5) while tracking holds (≥0.8) — the genuine scope boundary.
+  New numbers are **byte-identical to the prior local run** (max |AUC/TPR Δ| = 0.0000;
+  only `phase_diffusion_D` wobbles at the last ULP), confirming determinism. **Cost-anchor
+  provenance fixed** (`data/measured_cost_anchors/` everywhere; `results/b2/` never
+  existed). This also closes the **ST2 leg** of the Phase-0 re-verification follow-up
+  above — the FAR/ST1-surrogate leg stays open (Phase 1). issue-54: the frontier reads
+  only the clean `throughput_overhead` anchor field, not the B-contaminated line-band
+  detection arrays, so it is unaffected. **Not yet wired into `paper/main.tex` §6 — Phase-4.**
 - [x] **Meter-requirement boundary sweep** (supports promoting the ST2 channel-
   requirement finding to a named "minimum meter specification" contribution —
   pending spec.md approval): grid over `sample_hz` × `integ_window_s` between the

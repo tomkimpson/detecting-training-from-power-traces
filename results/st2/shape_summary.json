@@ -2,7 +2,7 @@
   "family": "shape",
   "generator": "ko_workload training vs hard inference null",
   "budget_units": "shape_fill_frac (phi, down-level fill fraction)",
-  "cost_anchor": "results/b2/shaped_summary.json",
+  "cost_anchor": "data/measured_cost_anchors/shaped_summary.json",
   "n_each": 200,
   "target_fars": [
     0.05,
@@ -28,7 +28,7 @@
     {
       "level": 0.0,
       "cadence_cv": 0.1050095328250531,
-      "phase_diffusion_D": 0.46425006690670917,
+      "phase_diffusion_D": 0.4642500669067076,
       "auc": {
         "spectral": 0.9972,
         "viterbi": 1.0,
@@ -62,7 +62,7 @@
     {
       "level": 0.5,
       "cadence_cv": 0.10361133857381913,
-      "phase_diffusion_D": 0.37132691837342136,
+      "phase_diffusion_D": 0.3713269183734222,
       "auc": {
         "spectral": 0.994825,
         "viterbi": 1.0,
@@ -96,7 +96,7 @@
     {
       "level": 0.8,
       "cadence_cv": 0.10058273718127246,
-      "phase_diffusion_D": 0.3226358641744979,
+      "phase_diffusion_D": 0.32263586417449847,
       "auc": {
         "spectral": 0.89225,
         "viterbi": 1.0,
@@ -130,7 +130,7 @@
     {
       "level": 0.95,
       "cadence_cv": 0.10199935251105732,
-      "phase_diffusion_D": 0.4312090669338825,
+      "phase_diffusion_D": 0.43120906693388283,
       "auc": {
         "spectral": 0.999075,
         "viterbi": 1.0,
@@ -164,7 +164,7 @@
     {
       "level": 1.0,
       "cadence_cv": 0.10369684509413864,
-      "phase_diffusion_D": 0.3158728720982138,
+      "phase_diffusion_D": 0.31587287209821413,
       "auc": {
         "spectral": 1.0,
         "viterbi": 1.0,

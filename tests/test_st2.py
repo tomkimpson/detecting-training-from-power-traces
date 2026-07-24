@@ -49,8 +49,9 @@ def test_registry_covers_all_families_and_grids():
     assert tuple(fams) == FAMILY_ORDER
     assert fams["jitter"].levels == SMALL.jitter_levels
     assert fams["meter"].levels == ("notch_at_cadence", "integrating_1hz")
-    # anchored families point at the b2 measured summaries; the rest are None
-    assert fams["work"].cost_anchor == "results/b2/workjitter_summary.json"
+    # anchored families point at the measured cost anchors; the rest are None
+    assert (fams["work"].cost_anchor
+            == "data/measured_cost_anchors/workjitter_summary.json")
     for f in ("phase", "relocate", "harmonic", "dilute", "meter"):
         assert fams[f].cost_anchor is None
     # module-level registry uses the default grids
