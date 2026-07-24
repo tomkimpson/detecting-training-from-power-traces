@@ -32,7 +32,7 @@ def test_summary_schema_smoke(tmp_path):
                 "levels", "points"):
         assert key in d, key
     assert d["family"] == "work"
-    assert d["cost_anchor"] == "results/b2/workjitter_summary.json"
+    assert d["cost_anchor"] == "data/measured_cost_anchors/workjitter_summary.json"
     assert d["n_each"] == 8 and d["target_fars"] == [0.05, 0.01]
     # default detector set is "full" since task 20.9 (ST1 detectors registered)
     assert d["detectors"] == ["dg_order_full", "dg_order_semicoh", "mtf",

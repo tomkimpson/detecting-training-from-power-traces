@@ -86,13 +86,13 @@ def attack_families(p: St2Params) -> dict[str, AttackFamily]:
     fams = {
         "jitter": AttackFamily(
             "jitter", "sigma_jitter (fractional i.i.d. period jitter)",
-            p.jitter_levels, "results/b2/spoof_summary.json"),
+            p.jitter_levels, "data/measured_cost_anchors/spoof_summary.json"),
         "work": AttackFamily(
             "work", "work_sigma (fractional micro-step-count jitter)",
-            p.work_levels, "results/b2/workjitter_summary.json"),
+            p.work_levels, "data/measured_cost_anchors/workjitter_summary.json"),
         "drift": AttackFamily(
             "drift", "f0_drift_hz (OU centre-frequency excursion, Hz)",
-            p.drift_levels, "results/b2/spoof_summary.json"),
+            p.drift_levels, "data/measured_cost_anchors/spoof_summary.json"),
         "phase": AttackFamily(
             "phase", "phase_slip_sigma (boundary slip std, fraction of period)",
             p.phase_levels, None),
@@ -104,7 +104,7 @@ def attack_families(p: St2Params) -> dict[str, AttackFamily]:
             p.harmonic_levels, None),
         "shape": AttackFamily(
             "shape", "shape_fill_frac (phi, down-level fill fraction)",
-            p.shape_levels, "results/b2/shaped_summary.json"),
+            p.shape_levels, "data/measured_cost_anchors/shaped_summary.json"),
         "dilute": AttackFamily(
             "dilute", "dominant training share of the aggregate",
             p.dilute_shares, None),
