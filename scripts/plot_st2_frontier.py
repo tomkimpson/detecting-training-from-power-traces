@@ -38,8 +38,9 @@ The verdict is PROVISIONAL only when the inputs carry just {spectral, viterbi}
 detectors (mtf, dg_order_*) are present in the per-family summaries — which is
 the full-resolution freeze this assembles.
 
-Reproduce (full-resolution numbers frozen on Slurm — see
-scripts/slurm/st2_frontier.sbatch; assembly below is cheap and local):
+Reproduce (full-resolution numbers frozen on Slurm — the per-family sweeps run
+as an array via scripts/slurm/st2_sweeps.sbatch, then this assembly step runs
+via scripts/slurm/st2_frontier.sbatch, chained afterok):
     python scripts/plot_st2_sweeps.py   # (inputs; on Slurm for the freeze)
     python scripts/plot_st2_frontier.py
 Output:

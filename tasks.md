@@ -34,10 +34,22 @@ pre-registered criteria closed. Full record: `notes/results/st1-findings.md`, `h
   stay a conditional-protocol section).
 
 ### Phase 0 follow-ups (carried, not blocking)
-- [ ] **Slurm surrogate confirmation before any paper number freezes:** S=999, M=10⁴,
+- [x] **Slurm surrogate confirmation before any paper number freezes:** S=999,
   incl. stage 3 and stage-6 nulls (ar1_t, lognormal, sq_gauss). Slurm array over cells
   (`st1_far.py --calibs surrogate`, one cell per task) on MATS (preferred) or OzSTAR.
-  The ST1 verdict's surrogate leg currently rests on a partial (M=1000, S=199) grid.
+  **Result (2026-07-24): DONE — GO stands (confirmed-with-caveat).** MATS `compute`
+  slurm array 5567 (24 cells, stages 1/3/4 × 8 nulls) at the surrogate sizing
+  **M=2000 × S=999** (the `n_null_surrogate_cells` cap; the task's "M=10⁴" is the
+  analytic-cell figure). Stationary Gaussian nulls exact at **all three stages**
+  incl. fully-adaptive (white 0.051/0.009 fixed-α, 0.052/0.013 adaptive; ar1,
+  ar2_resonant likewise; KS not rejected); linear non-Gaussian (ar1_t, lognormal)
+  conservative. **One stage-6 exception:** `sq_gauss`/stage4 over-rejects at
+  0.087/0.018 (≈1.7×, below the 3× NO-GO) — nonlinear null vs linear-stationary
+  surrogate, the mild sibling of the controller inflation. Level-safety claim scoped
+  to linear-stationary nulls; §4 footnote reworded (provisional footnote removed).
+  Full record: `notes/results/number-freeze-2026-07-24.md`, `st1-findings.md`
+  (2026-07-24 section). Harness: `scripts/slurm/st1_far_surrogate.sbatch`,
+  `st1_far.py --list/--array-id`.
 - [x] **Slurm re-verification of the ST2 sweeps in this repo** (same number-freeze
   pass): regenerate `results/st2/*_summary.json` from scratch, esp. the meter family
   behind the "integrating_1hz" claim **and the work-jitter line-band numbers, which
@@ -45,15 +57,21 @@ pre-registered criteria closed. Full record: `notes/results/st1-findings.md`, `h
   Which finding leads the frontier is left open until these freeze (positioning memo,
   2026-07-23). Do NOT run locally on the dev node (decision 2026-07-22) — slurm only;
   environment setup on the cluster is part of this task.
-  **Result: done for the synthetic ST2 sweeps** (slurm array 5635 on MATS `compute`;
-  all `results/st2/*_summary.json` incl. the meter family regenerated from scratch;
-  the `integrating_1hz` decomposition was already frozen by the meter-boundary sweep,
-  job 5498). Numbers reproduce the prior local run byte-identically (see the frontier
-  task in Phase 2). The **work-jitter "line-band numbers riding B"** flag is an
-  issue-54 **measured-data** (b2) prose concern — the synthetic frontier reads only the
-  clean measured `throughput_overhead` cost field, not the B-contaminated line-band
-  detection arrays, so it is not part of this synthetic re-freeze (carried into the
-  Phase-4 paper §6 write-up instead).
+  **Result (2026-07-24): DONE — verdict reproduces exactly.** MATS `compute` slurm
+  arrays 5565 (9 per-family sweeps, one/task via `scripts/slurm/st2_sweeps.sbatch`)
+  + 5566 (frontier assembly via `scripts/slurm/st2_frontier.sbatch`, `--b2-dir
+  data/measured_cost_anchors`). `frontier_summary.json`: `provisional=false`, **GO**,
+  supporting `work=0.35/0.5`; `meter/integrating_1hz`=0.320 and `work` collapse
+  identical to the committed claim (seed=0 deterministic; per-family diffs are
+  last-digit AUC float churn). The `integrating_1hz` decomposition was already frozen
+  by the meter-boundary sweep (job 5498, not re-run). The **B / work-jitter line-band**
+  requalification lives in the measured b2 campaign (not this repo) — the synthetic
+  `work` family reads only the clean `throughput_overhead` cost anchor, not the
+  B-contaminated line-band detection arrays, so the frontier evidence is re-frozen; the
+  B caveat is recorded, not resolved (which finding leads the frontier stays open;
+  carried into the Phase-4 paper §6 write-up). Harness: `scripts/slurm/st2_sweeps.sbatch`,
+  `st2_frontier.sbatch`, `plot_st2_sweeps.py --list/--array-id`. Record:
+  `notes/results/number-freeze-2026-07-24.md`.
 - [x] **Settle the venue** (plan §10 Q1).
   **Result (2026-07-22): arXiv-first.** Write the strongest self-contained preprint;
   choose the submission venue after results freeze. Identifiability rigor at
@@ -139,10 +157,13 @@ From the 2026-07-23 positioning memos (`notes/discussion/north-star-and-position
   `references.bib` (Thomson 1982, Percival & Walden 1993, Dandawaté–Giannakis 1994,
   Bonnardot 2005 tacholess) — flagged for `check-refs` before arXiv push.
 
-**Still open before Phase 1 numbers freeze / merge:** (i) slurm S=999/M=10⁴ surrogate
-confirmation incl. stage-6 non-Gaussian nulls + stage 3 (removes the provisional footnote);
-(ii) `check-refs` / `check-arxiv-llm-compliance` over the new prose + the now **12** new
-bib entries (4 Rung-1 method + 8 ST0 related-work). PDF not built locally
+**Still open before Phase 1 numbers freeze / merge:** ~~(i) slurm S=999 surrogate
+confirmation~~ **DONE 2026-07-24** (Phase-0 follow-up above; provisional footnote removed,
+level-safety claim scoped to linear-stationary nulls after the `sq_gauss`/stage4 sub-3×
+exception surfaced); ~~(iii) the ST0 prior-art audit (four fields)~~ **DONE 2026-07-23**
+(Strategic gates above); (ii) `check-refs` / `check-arxiv-llm-compliance` over the new
+prose + the now **12** new bib entries (4 Rung-1 method + 8 ST0 related-work) remains.
+PDF not built locally
 (no TeX toolchain on the dev node) — verified statically (figures on disk, cite keys
 resolve, labels/refs consistent, environments balanced).
 
@@ -171,7 +192,8 @@ resolve, labels/refs consistent, environments balanced).
   n_each=200, 50 cells, full 5-detector set; slurm array **5635** on MATS `compute`,
   all 9 families COMPLETED; full record `notes/results/st2-frontier-freeze-findings.md`).
   Built the missing slurm harness — `plot_st2_sweeps.py --array-id` (one family per
-  task, disjoint per-family summaries, no race) + `scripts/slurm/st2_frontier.sbatch`
+  task, disjoint per-family summaries, no race) via `scripts/slurm/st2_sweeps.sbatch`
+  (array) + `scripts/slurm/st2_frontier.sbatch` (assembly)
   + smoke-path split so `--smoke` can't clobber the tracked full-res files. **Verdict
   GO (definitive):** the ≈zero-cost real-work-variation attack `work=0.35/0.5` collapses
   every fixed test (≤0.5) while tracking holds (≥0.8) — the genuine scope boundary.

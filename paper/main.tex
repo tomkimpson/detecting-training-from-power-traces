@@ -592,24 +592,32 @@ detector.
 pipeline --- tracker, resampling, and test --- inside a Fourier-phase surrogate
 null (which preserves the power spectrum and randomises phases, encoding the
 linear-stationary invariance) recovers exact calibration where the asymptotic
-tail was $3$--$6\times$ conservative. On the tested stationary nulls the
-realised rate covers nominal at both the fixed-$\alpha$ and the fully adaptive
-stage (white $0.047/0.009$, AR(1) $0.057/0.014$ at nominal $0.05/10^{-2}$
-fixed-$\alpha$; white $0.050/0.006$, AR(1) $0.049/0.006$ fully adaptive), and
-Kolmogorov--Smirnov uniformity is not rejected --- the property the analytic
-$p$-values never achieved.\footnote{These surrogate numbers rest on a partial
-grid ($M=1000$ null traces, $S=199$ surrogates, stages 1 and 4 only) and do not
-yet cover the stationary non-Gaussian nulls or the held-out-warp stage. A
-confirming run at $S=999$, $M=10^4$ including those cells is pending on a
-compute cluster before any surrogate-calibrated number is frozen; the level-safety
-and bake-off numbers above are already at $M=10^4$.} This is what
-``calibrated'' means throughout the paper: an effective score with per-trace
-surrogate calibration, not an analytic guarantee.
+tail was $3$--$6\times$ conservative. On the stationary Gaussian nulls the
+realised rate covers nominal across all three pipeline stages --- fixed-$\alpha$,
+held-out-warp, and fully adaptive (at nominal $0.05/10^{-2}$: white
+$0.051/0.009$, AR(1) $0.050/0.013$ fixed-$\alpha$; white $0.052/0.013$, AR(1)
+$0.054/0.010$ fully adaptive; the resonant-AR(2) and held-out-warp cells likewise)
+--- and Kolmogorov--Smirnov uniformity is not rejected, the property the analytic
+$p$-values never achieved.\footnote{Frozen on the MATS compute cluster over
+stages 1/3/4 $\times$ eight nulls at the surrogate sizing $M=2000$ null traces
+$\times$ $S=999$ surrogates (the level-safety and bake-off numbers above are at
+$M=10^4$; surrogate cells are capped lower because each carries $S$ inner
+resamples). This supersedes the earlier partial $M=1000$/$S=199$ grid. The
+heavy-tailed but \emph{linear} non-Gaussian nulls stay level-safe (conservative:
+$t$-innovation AR(1) $0.037/0.005$, log-normal $0.035/0.006$ fully adaptive); the
+one exception is the \emph{nonlinear} squared-Gaussian null, which the fully
+adaptive stage over-rejects mildly ($0.087/0.018$, ${\approx}1.7\times$, below the
+pre-registered $3\times$ threshold). Its cause is the same linear-stationarity
+assumption analysed next for the controller: a Fourier-phase surrogate cannot
+reproduce the quadratic phase structure of a squared process and so under-spreads
+the null. The level-safety claim is thus scoped to linear-stationary nulls.} This
+is what ``calibrated'' means throughout the paper: an effective score with
+per-trace surrogate calibration, not an analytic guarantee.
 
 \paragraph{The controller marks the attribution boundary.} The surrogate null
 encodes linear stationarity, so a genuine limit cycle --- which is itself
 cyclostationary --- must and does inflate it: on the measured-controller null
-the surrogate-calibrated rate rises to $0.17$--$0.29$ at nominal $0.05$. This is
+the surrogate-calibrated rate rises to $0.17$--$0.30$ at nominal $0.05$. This is
 not a defect. The detector correctly reports coherent cyclic structure in a
 controller trace; calling that structure \emph{training} is the causal-attribution
 step that needs the nuisance model of \cref{sec:threat}. The controller is the

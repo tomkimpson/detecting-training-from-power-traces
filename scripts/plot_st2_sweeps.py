@@ -18,8 +18,11 @@ Output:
     results/st2/<family>_summary.json ; figures/st2_<family>.png/.pdf
 
 Canonical full-resolution numbers are frozen on Slurm (one family per array
-task, `scripts/slurm/st2_frontier.sbatch`), NOT locally — see the ST2
-re-verification follow-up in tasks.md. --smoke is a local plumbing check only.
+task, `scripts/slurm/st2_sweeps.sbatch`; the frontier is then assembled by
+`scripts/slurm/st2_frontier.sbatch`), NOT locally — see the ST2 re-verification
+follow-up in tasks.md. --list prints the families + count to size the array
+range; --array-id N sweeps only family N (falls back to SLURM_ARRAY_TASK_ID).
+--smoke is a local plumbing check only.
 """
 
 from __future__ import annotations
@@ -28,7 +31,6 @@ import argparse
 import dataclasses
 import json
 import multiprocessing
-import os
 import pathlib
 import sys
 import time
@@ -44,6 +46,7 @@ from powerladder.config import DEFAULT, MeterParams, St2Params  # noqa: E402
 from powerladder.plotstyle import C, WIDTH_WIDE, apply_house_style  # noqa: E402
 from powerladder.typeb.st2 import run_family  # noqa: E402
 from powerladder.typeb.st2_attacks import FAMILY_ORDER, attack_families  # noqa: E402
+from powerladder.slurm import resolve_array_id  # noqa: E402
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _RESULTS = _ROOT / "results" / "st2"
@@ -217,11 +220,11 @@ def main() -> None:
                     help="'base' = spectral+viterbi (pre-ST1); 'full' adds "
                          "mtf and the DG order detectors (task 20.9)")
     ap.add_argument("--list", action="store_true",
-                    help="print the family list and count, then exit "
-                         "(the Slurm-array range helper)")
+                    help="print the family list and count, then exit (use to "
+                         "size a Slurm --array range)")
     ap.add_argument("--array-id", type=int, default=None,
-                    help="run only family index N (overrides "
-                         "SLURM_ARRAY_TASK_ID); the Slurm-array entry point")
+                    help="sweep only family index N of FAMILY_ORDER (overrides "
+                         "--families / SLURM_ARRAY_TASK_ID) — one family per task")
     args = ap.parse_args()
 
     if args.list:
@@ -239,13 +242,8 @@ def main() -> None:
     # Array mode: run exactly one family selected by --array-id or the Slurm
     # env. Each family writes a disjoint <family>_summary.json, so concurrent
     # array tasks never race (no flock needed, unlike the meter-boundary sweep).
-    env_id = os.environ.get("SLURM_ARRAY_TASK_ID")
-    array_id = args.array_id if args.array_id is not None else (
-        int(env_id) if env_id is not None else None)
+    array_id = resolve_array_id(args.array_id, len(FAMILY_ORDER))
     if array_id is not None:
-        if not 0 <= array_id < len(FAMILY_ORDER):
-            raise SystemExit(f"array id {array_id} out of range "
-                             f"[0, {len(FAMILY_ORDER)})")
         family = FAMILY_ORDER[array_id]
         print(f"array family {array_id}/{len(FAMILY_ORDER)}: {family}")
         run_and_write(family, p, results_dir, fig_dir, detectors=args.detectors)

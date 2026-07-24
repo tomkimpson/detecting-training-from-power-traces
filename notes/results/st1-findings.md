@@ -573,3 +573,27 @@ OzSTAR S = 999/M = 10⁴ surrogate confirmation incl. stage 6 and stage 3;
 (task 20.9) to definitise the frontier verdict; (3) the semi-coherent
 variant's block length and the stage-dependent-bandwidth observation are
 stage-8 axes to revisit in Phase 1, not silent defaults.
+
+### 2026-07-24 — surrogate arm frozen at full sizing (follow-up (1) closed)
+
+The S = 999 surrogate confirmation ran as a MATS `compute` slurm array (job
+5567, 24 cells: stages 1/3/4 × {white, ar1, ar2_resonant, ar1_t, lognormal,
+sq_gauss, tvar, controller}) at the surrogate sizing **M = 2000 × S = 999**
+(the config `n_null_surrogate_cells` cap; the analytic/level-safety/bake-off
+numbers stay at M = 10⁴). Full frozen table + provenance:
+`notes/results/number-freeze-2026-07-24.md`.
+
+**Leg (b) resolution.** Confirmed on the stationary Gaussian nulls at **all
+three stages** including the held-out-warp stage and the fully-adaptive stage
+(white 0.051/0.009 fixed-α, 0.052/0.013 adaptive; ar1, ar2_resonant likewise;
+KS-uniformity not rejected). The heavy-tailed *linear* non-Gaussian nulls
+(ar1_t, lognormal) stay level-safe (conservative). **One stage-6 cell fails:**
+`sq_gauss` at the fully-adaptive stage over-rejects at **0.087/0.018 (≈1.7×)** —
+below the pre-registered 3× NO-GO threshold, which additionally requires
+inflation under *both* calibrations (the analytic arm never inflates). Cause is
+the linear-stationarity assumption the surrogate encodes: a squared-Gaussian is
+*nonlinear*, so Fourier-phase surrogates under-spread it (the mild sibling of the
+`controller` cyclostationary inflation). **GO stands (confirmed-with-caveat,
+2026-07-24):** the level-safety claim is scoped to **linear-stationary** nulls,
+and the §4 footnote now states the exception. Candidate follow-up if ever needed:
+amplitude-preserving (IAAFT) surrogates.

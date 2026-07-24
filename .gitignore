@@ -23,6 +23,8 @@ venv/
 paper/main.pdf
 
 # Per-cell sweep artifacts (regenerable; only *_summary.json + figures tracked)
+results/st1/raw/
+results/st1/.far_summary.lock
 results/st2/meter_boundary_raw/
 results/st2/.meter_boundary.lock
 # --smoke plumbing check writes here — never tracked
@@ -31,6 +33,8 @@ results/st2/meter_boundary_smoke_summary.json
 results/st2/.meter_boundary_smoke.lock
 # Slurm logs are regenerable; keep the dir itself so #SBATCH --output resolves
 # at submit time on a fresh clone.
+results/st1/slurm/*
+!results/st1/slurm/.gitkeep
 results/st2/slurm/*
 !results/st2/slurm/.gitkeep
 

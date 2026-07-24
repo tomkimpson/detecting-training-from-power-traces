@@ -25,6 +25,10 @@ Usage:
     python scripts/st1_far.py --stages stage2,stage3,stage4 --calibs dg_bartlett \
         --M 10000 --jobs 8
     python scripts/st1_far.py --smoke        # tiny end-to-end check
+
+Slurm array (one cell per task): --list prints the grid + count; --array-id N
+runs only cell N (falls back to SLURM_ARRAY_TASK_ID). See
+scripts/slurm/st1_far_surrogate.sbatch.
 """
 
 from __future__ import annotations
@@ -52,6 +56,7 @@ from powerladder.st1.pipeline import (KO_NOMINAL_F0_HZ, stage1_fixed_alpha,  # n
                                stage4_full_adaptive, stage4_semicoherent)
 from powerladder.st1.resample import random_smooth_phase_path  # noqa: E402
 from powerladder.st1.surrogates import surrogate_pvalue  # noqa: E402
+from powerladder.slurm import resolve_array_id  # noqa: E402
 
 RESULTS_DIR = pathlib.Path(__file__).resolve().parent.parent / "results" / "st1"
 
@@ -224,6 +229,12 @@ def main(argv=None) -> None:
     ap.add_argument("--tag", default="",
                     help="suffix recorded as calib+tag so an overridden "
                          "configuration never overwrites the default table")
+    ap.add_argument("--list", action="store_true",
+                    help="print the (stage/null/calib) cell list and count, "
+                         "then exit (use to size a Slurm --array range)")
+    ap.add_argument("--array-id", type=int, default=None,
+                    help="run only cell index N of the built grid (overrides "
+                         "SLURM_ARRAY_TASK_ID) — one cell per Slurm array task")
     args = ap.parse_args(argv)
 
     det_overrides = {}
@@ -261,6 +272,24 @@ def main(argv=None) -> None:
                     calib = f"{calib}+{args.tag}"
                 specs.append((stage, null_name, calib, m_cell, args.seed,
                               n_surr, det_overrides))
+
+    if args.list:
+        for i, spec in enumerate(specs):
+            stage, null_name, calib, m_cell = spec[0], spec[1], spec[2], spec[3]
+            print(f"{i:3d}  {stage}/{null_name}/{calib}  M={m_cell}")
+        print(f"{len(specs)} cells")
+        return
+
+    # Array mode: run exactly one cell selected by --array-id or the Slurm env.
+    # Each cell persists its own raw npz + flock-merges far_summary.json, so
+    # concurrent array tasks are safe (no shared write races).
+    array_id = resolve_array_id(args.array_id, len(specs))
+    if array_id is not None:
+        spec = specs[array_id]
+        print(f"array cell {array_id}/{len(specs)}: "
+              f"{spec[0]}/{spec[1]}/{spec[2]}  M={spec[3]}")
+        specs = [spec]
+
     print(f"running {len(specs)} cells at M={M} with {args.jobs} job(s)")
 
     t0 = time.time()

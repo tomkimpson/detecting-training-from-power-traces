@@ -28,7 +28,6 @@ import argparse
 import dataclasses
 import fcntl
 import json
-import os
 import pathlib
 import sys
 import time
@@ -45,6 +44,7 @@ from powerladder.typeb.meter_boundary import (  # noqa: E402
     meter_grid,
     run_meter_cell,
 )
+from powerladder.slurm import resolve_array_id  # noqa: E402
 
 RESULTS_DIR = pathlib.Path(__file__).resolve().parent.parent / "results" / "st2"
 
@@ -182,14 +182,8 @@ def main(argv=None) -> None:
         return
 
     # Array mode: run exactly one cell selected by --array-id or the Slurm env.
-    env_id = os.environ.get("SLURM_ARRAY_TASK_ID")
-    array_id = args.array_id if args.array_id is not None else (
-        int(env_id) if env_id is not None else None)
-
+    array_id = resolve_array_id(args.array_id, len(cells))
     if array_id is not None:
-        if not 0 <= array_id < len(cells):
-            raise SystemExit(f"array id {array_id} out of range "
-                             f"[0, {len(cells)})")
         name, mp = cells[array_id]
         print(f"array cell {array_id}/{len(cells)}: {name}")
         _run_and_persist((name, mp, p, paths))

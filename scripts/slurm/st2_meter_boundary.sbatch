@@ -32,7 +32,7 @@ cd "$REPO"
 mkdir -p results/st2/slurm
 
 # Activate the CPU venv created for this repo (see handoff / README).
-source venv/bin/activate
+source .venv/bin/activate
 
 echo "cell ${SLURM_ARRAY_TASK_ID} on $(hostname) at $(date)"
 python scripts/st2_meter_boundary.py --array-id "${SLURM_ARRAY_TASK_ID}"
