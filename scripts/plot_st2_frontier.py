@@ -9,25 +9,39 @@ mechanically.
 
 Cost-anchor mapping (families without an entry are analytic/qualitative only):
 
-    jitter  -> results/b2/spoof_summary.json      throughput_overhead["jitter=L"]
+    jitter  -> data/measured_cost_anchors/spoof_summary.json
+               throughput_overhead["jitter=L"]
                (idle-PAD realisation of timing jitter: the expensive way)
-    drift   -> results/b2/spoof_summary.json      throughput_overhead["drift=L"]
+    drift   -> data/measured_cost_anchors/spoof_summary.json
+               throughput_overhead["drift=L"]
                (pad realisation; measured grid 0.2/0.5/1 Hz, so only shared
                levels get an anchor)
-    work    -> results/b2/workjitter_summary.json throughput_overhead["jitter=L"]
+    work    -> data/measured_cost_anchors/workjitter_summary.json
+               throughput_overhead["jitter=L"]
                (REAL-WORK realisation of the same sigma grid: ~zero cost)
-    shape   -> results/b2/shaped_summary.json     levels["shaped-jitter=L"]
+    shape   -> data/measured_cost_anchors/shaped_summary.json
+               levels["shaped-jitter=L"]
                (phi grid matches; NOTE the measured anchor was captured on a
                sigma=0.35 timing-spoof base, so it UPPER-bounds shaping-only)
 
-Anchors are fractional throughput overheads (mean, std) from
-code.b2.analysis.throughput_overhead; reported here as percent.
+The anchors are the MEASURED single-A100 B2-campaign throughput overheads,
+carried in as static, non-regenerable input data (see
+data/measured_cost_anchors/README.md). Fractional overheads (mean, std),
+reported here as percent. Only the CLEAN cost-side field (throughput_overhead)
+is consumed; the detection-side line-band fields in those same files ride the
+signature-B side channel and carry the issue #54 requalification — but the
+frontier's own detection numbers come from results/st2/*_summary.json, so the
+cost axis is unaffected.
 
-VERDICT IS PROVISIONAL: with only {spectral, viterbi} registered, "tracking"
-= viterbi and "fixed" = spectral; re-run after ST1 detectors land (task 20.9).
+The verdict is PROVISIONAL only when the inputs carry just {spectral, viterbi}
+(then "tracking" = viterbi, "fixed" = spectral); it is definitive once the ST1
+detectors (mtf, dg_order_*) are present in the per-family summaries — which is
+the full-resolution freeze this assembles.
 
-Reproduce:
-    python scripts/plot_st2_sweeps.py   # (inputs)
+Reproduce (full-resolution numbers frozen on Slurm — the per-family sweeps run
+as an array via scripts/slurm/st2_sweeps.sbatch, then this assembly step runs
+via scripts/slurm/st2_frontier.sbatch, chained afterok):
+    python scripts/plot_st2_sweeps.py   # (inputs; on Slurm for the freeze)
     python scripts/plot_st2_frontier.py
 Output:
     results/st2/frontier_summary.json ; figures/st2_frontier.png/.pdf
@@ -53,7 +67,10 @@ from powerladder.typeb.st2_attacks import FAMILY_ORDER  # noqa: E402
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _ST2 = _ROOT / "results" / "st2"
-_B2 = _ROOT / "results" / "b2"
+# The measured cost anchors are committed static input (NOT under results/;
+# this repo is CPU-only and cannot regenerate them). See the module docstring
+# and data/measured_cost_anchors/README.md.
+_B2 = _ROOT / "data" / "measured_cost_anchors"
 
 # --- pre-registered gate constants (plan we-are-working-on §"ST2 go/no-go") --
 _FAR_KEY = "0.05"            # the operational FAR the criteria are stated at
@@ -141,10 +158,10 @@ def _cost_anchors(b2_dir: pathlib.Path) -> dict[str, dict[float, tuple]]:
 
 
 _ANCHOR_SOURCE = {
-    "jitter": "results/b2/spoof_summary.json (idle-pad realisation)",
-    "drift": "results/b2/spoof_summary.json (idle-pad realisation)",
-    "work": "results/b2/workjitter_summary.json (real-work realisation)",
-    "shape": ("results/b2/shaped_summary.json (shaped-jitter basis, "
+    "jitter": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
+    "drift": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
+    "work": "data/measured_cost_anchors/workjitter_summary.json (real-work realisation)",
+    "shape": ("data/measured_cost_anchors/shaped_summary.json (shaped-jitter basis, "
               "sigma=0.35 timing base -> upper bound on shaping-only cost)"),
 }
 

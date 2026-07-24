@@ -58,15 +58,18 @@ pre-registered criteria closed. Full record: `notes/results/st1-findings.md`, `h
   2026-07-23). Do NOT run locally on the dev node (decision 2026-07-22) — slurm only;
   environment setup on the cluster is part of this task.
   **Result (2026-07-24): DONE — verdict reproduces exactly.** MATS `compute` slurm
-  arrays 5565 (9 per-family sweeps, one/task) + 5566 (frontier assembly, `--b2-dir
+  arrays 5565 (9 per-family sweeps, one/task via `scripts/slurm/st2_sweeps.sbatch`)
+  + 5566 (frontier assembly via `scripts/slurm/st2_frontier.sbatch`, `--b2-dir
   data/measured_cost_anchors`). `frontier_summary.json`: `provisional=false`, **GO**,
   supporting `work=0.35/0.5`; `meter/integrating_1hz`=0.320 and `work` collapse
   identical to the committed claim (seed=0 deterministic; per-family diffs are
-  last-digit AUC float churn). The **B / work-jitter line-band** requalification lives
-  in the measured b2 campaign (not this repo) — the synthetic `work` family reads only
-  the cost anchor, so the frontier evidence is re-frozen; the B caveat is recorded,
-  not resolved (which finding leads the frontier stays open). `meter_boundary` sweep
-  (job 5498) not re-run. Harness: `scripts/slurm/st2_sweeps.sbatch`,
+  last-digit AUC float churn). The `integrating_1hz` decomposition was already frozen
+  by the meter-boundary sweep (job 5498, not re-run). The **B / work-jitter line-band**
+  requalification lives in the measured b2 campaign (not this repo) — the synthetic
+  `work` family reads only the clean `throughput_overhead` cost anchor, not the
+  B-contaminated line-band detection arrays, so the frontier evidence is re-frozen; the
+  B caveat is recorded, not resolved (which finding leads the frontier stays open;
+  carried into the Phase-4 paper §6 write-up). Harness: `scripts/slurm/st2_sweeps.sbatch`,
   `st2_frontier.sbatch`, `plot_st2_sweeps.py --list/--array-id`. Record:
   `notes/results/number-freeze-2026-07-24.md`.
 - [x] **Settle the venue** (plan §10 Q1).
@@ -78,15 +81,28 @@ pre-registered criteria closed. Full record: `notes/results/st1-findings.md`, `h
 
 From the 2026-07-23 positioning memos (`notes/discussion/north-star-and-positioning.md`,
 `method-soundness-and-prior-art.md`). Sequenced: audit first, then the spike, then decide.
+**Audit done (2026-07-23, `notes/discussion/st0-prior-art-audit.md`) — the spike is next.**
 
-- [ ] **ST0 prior-art audit (four fields).** Position the work against the four mature
+- [x] **ST0 prior-art audit (four fields).** Position the work against the four mature
   literatures the ST0 desk work skipped: **NILM** (non-intrusive load monitoring),
   **spectrum-sensing / LPI–LPD detection**, **power side-channel analysis** (DPA/CPA),
   and **covert-communication / steganography** (the warden game). Cheap desk work; it
   either hands us tools or surfaces the paper that already did this. This is the canonical
   home for the still-unowned "novelty audit" referenced in Phase 1; it is a §1 related-work
   prerequisite and gates the lower-bound spike below.
-- [ ] **Lower-bound feasibility spike (the kill/continue gate).** Time-boxed: is a
+  **Result:** done (`notes/discussion/st0-prior-art-audit.md`). All four fields covered with
+  verified citations (Hart 1992 + Zoha 2012 NILM; Yücek–Arslan 2009 spectrum sensing;
+  Kocher 1999 / Brier 2004 / Chari 2002 side-channel; Bash–Goeckel–Towsley 2013 + Cachin
+  2004 covert-comms — all need `check-refs` before arXiv). **Subsumption verdict: no field
+  beats or subsumes the tracked-cyclostationary pipeline** — the novelty claim holds
+  (mature detectors applied to a new question, new adversary, new channel); spectrum sensing
+  is the one field to keep scanning for a reusable order-tracking method. **Lower-bound-spike
+  readiness: proceed** — covert-comms hands over the KL/TV machinery (Cachin relative-entropy
+  security; B–G–T square-root law) but *no* existing paper derives the hiding-cost bound for
+  a physics-constrained training schedule over a filtered low-rate meter, so the spike is not
+  pre-empted. Recommends an own `\section{Related work}` organised by the four fields and
+  lists 8 bib keys for the §1 / `references.bib` follow-up.
+- [x] **Lower-bound feasibility spike (the kill/continue gate).** Time-boxed: is a
   TV/KL (covertness) lower bound on hiding cost derivable for even one attack family
   (e.g. i.i.d. phase jitter)? Anchor it in the physics (hiding synchronous all-reduce is
   communication-bound and costly), with the TV/KL machinery as the formal wrapper — a
@@ -94,6 +110,20 @@ From the 2026-07-23 positioning memos (`notes/discussion/north-star-and-position
   hard fork on claim strength:** bound exists ⇒ contribution, frame as "must pay ≥ X";
   no bound ⇒ position paper, frame as "evidence + upper bound on hideability, necessary
   conditions only." Feeds the Phase 4 identifiability section (plan §10 Q2).
+  **Result: bound derivable ⇒ CONTRIBUTION side of the fork**
+  (`notes/discussion/lower-bound-feasibility-spike.md`). Derivation for i.i.d. phase
+  jitter: coherent line power rolls off as `1/(1+κσ²)`, `κ≈πf₀T` (phase diffusion
+  `D≈(2π)²σ²f₀`); `detector power ≤ TV`, Pinsker → a finite covertness threshold
+  `σ*(ε)`; the physics anchor (synchronous comm barrier `T_down` fixed under work
+  variation) makes reaching `σ*(ε)` cost **throughput OR learning efficiency** — the
+  free-work-jitter escape does not evade it. Sanity check `scripts/lower_bound_spike.py`
+  → `figures/lower_bound_spike.*`, `results/spike/lower_bound_spike.json`: coherent-power
+  rolloff form R²=0.97 (fitted κ≈2950, within ~3× of πf₀T≈940); work-jitter escape
+  measurably MORE detectable at matched σ (confirms the comm-barrier residual). Caveats
+  set claim wording: bound proved vs a FIXED verifier (tracking/optimal is the Phase-4
+  analytic step); "cost" is throughput-or-learning, learning leg stated not measured;
+  generator-internal. Frame Phase-4 identifiability (plan §10 Q2) as a proposition-level
+  covertness cost bound. Open: metric choice (TV/KL/Hellinger) for the tightest form.
 
 ---
 
@@ -130,21 +160,50 @@ From the 2026-07-23 positioning memos (`notes/discussion/north-star-and-position
 **Still open before Phase 1 numbers freeze / merge:** ~~(i) slurm S=999 surrogate
 confirmation~~ **DONE 2026-07-24** (Phase-0 follow-up above; provisional footnote removed,
 level-safety claim scoped to linear-stationary nulls after the `sq_gauss`/stage4 sub-3×
-exception surfaced);
-(ii) `check-refs` / `check-arxiv-llm-compliance` over the new prose + 4 new bib entries;
-(iii) the ST0 prior-art audit (four fields — see Strategic gates above; §1 related-work
-prerequisite). PDF not built locally
+exception surfaced); ~~(iii) the ST0 prior-art audit (four fields)~~ **DONE 2026-07-23**
+(Strategic gates above); (ii) `check-refs` / `check-arxiv-llm-compliance` over the new
+prose + the now **12** new bib entries (4 Rung-1 method + 8 ST0 related-work) remains.
+PDF not built locally
 (no TeX toolchain on the dev node) — verified statically (figures on disk, cite keys
 resolve, labels/refs consistent, environments balanced).
 
+- [x] **ST0 related-work section written** (follow-up to the prior-art audit).
+  **Result:** `\section{Related work}` (`sec:related`) added to `paper/main.tex` between
+  §1 and the threat-model section — four `\paragraph`s (NILM; spectrum sensing / LPI–LPD;
+  power side-channel; covert-comms / steganography) framing the contribution as *the
+  question, the adversary, and the channel, not the detectors*, and cross-linking the
+  Rung-1 bake-off (`sec:structural`/`app:bakeoff`), frontier (`sec:frontier`), and
+  identifiability (`sec:threat`). 8 verified bib entries added to `references.bib`
+  (`hart1992nilm`, `zoha2012nilm`, `yucek2009spectrum`, `kocher1999dpa`, `brier2004cpa`,
+  `chari2002template`, `bash2013covert`, `cachin2004steganography`) — flagged for
+  `check-refs` before arXiv. §1 Related-work checklist item removed. Verified statically
+  (all cite keys + crefs resolve, checklist envs balanced 9/9); PDF not built (no TeX
+  toolchain on the dev node).
+
 ## Phase 2 — Frontier (full) + Rung 2
 
-- [ ] Frontier at full resolution with the systems-cost anchors. **Learning-efficiency
+- [x] Frontier at full resolution with the systems-cost anchors. **Learning-efficiency
   metric descoped (decision 2026-07-22):** no GPU measurement campaign — keeps the
   paper theory/methods and avoids the single-GPU/NVML transport trap. The frontier's
   utility axis is the measured systems-cost anchors only; the learning-efficiency
   penalty is stated in the paper as the open empirical question / future work
   (paper §5 checklist already words it this way).
+  **Result: frozen on slurm** (`results/st2/frontier_summary.json`, provisional=false,
+  n_each=200, 50 cells, full 5-detector set; slurm array **5635** on MATS `compute`,
+  all 9 families COMPLETED; full record `notes/results/st2-frontier-freeze-findings.md`).
+  Built the missing slurm harness — `plot_st2_sweeps.py --array-id` (one family per
+  task, disjoint per-family summaries, no race) via `scripts/slurm/st2_sweeps.sbatch`
+  (array) + `scripts/slurm/st2_frontier.sbatch` (assembly)
+  + smoke-path split so `--smoke` can't clobber the tracked full-res files. **Verdict
+  GO (definitive):** the ≈zero-cost real-work-variation attack `work=0.35/0.5` collapses
+  every fixed test (≤0.5) while tracking holds (≥0.8) — the genuine scope boundary.
+  New numbers are **byte-identical to the prior local run** (max |AUC/TPR Δ| = 0.0000;
+  only `phase_diffusion_D` wobbles at the last ULP), confirming determinism. **Cost-anchor
+  provenance fixed** (`data/measured_cost_anchors/` everywhere; `results/b2/` never
+  existed). This also closes the **ST2 leg** of the Phase-0 re-verification follow-up
+  above — the FAR/ST1-surrogate leg stays open (Phase 1). issue-54: the frontier reads
+  only the clean `throughput_overhead` anchor field, not the B-contaminated line-band
+  detection arrays, so it is unaffected. **Not yet wired into `paper/main.tex` §6 — Phase-4.**
 - [x] **Meter-requirement boundary sweep** (supports promoting the ST2 channel-
   requirement finding to a named "minimum meter specification" contribution —
   pending spec.md approval): grid over `sample_hz` × `integ_window_s` between the
@@ -164,15 +223,68 @@ resolve, labels/refs consistent, environments balanced).
   `figures/st2_meter_boundary_notch.*`. Harness: `powerladder/typeb/meter_boundary.py`,
   `scripts/st2_meter_boundary.py`, `scripts/slurm/st2_meter_boundary.sbatch`.
   **Not yet wired into `paper/main.tex` (§6/new subsection) — Phase 4 write-up.**
-- [ ] **(Optional, non-blocking) NP-optimal LRT ceiling in the bake-off.** We have the
+- [x] **(Optional, non-blocking) NP-optimal LRT ceiling in the bake-off.** We have the
   generator, so compute/approximate the Neyman–Pearson optimal detector between the
   training and null generators and report the corpus-free surrogate detector as a
   fraction of it ("X% of NP-optimal power at Y% of the information cost"). Quantifies
   "is our detector good" — not a pre-gate (decision 2026-07-23).
-- [ ] Rung 2: stated inference null; three decision rules; semantic falsification
+  **Result (frozen on slurm):** method = **Whittle spectral LRT** (user decision
+  2026-07-24 — the light option; no closed-form likelihood exists).
+  `powerladder/typeb/np_ceiling.py` (f₀-marginalised Bayes–Whittle LRT: per-f₀ MC training
+  template bank, drift-pooled, `logsumexp_k ℓ_tr(x|f0_k) − ℓ_neg(x)`). Driver
+  `scripts/st1_np_ceiling.py` reproduces the **exact** bake-off eval populations (parity
+  guard **max |TPR Δ vs bakeoff| = 0**), fits ceilings for the inference / structural /
+  controller-only nulls, scores ceiling + all corpus-free detectors, reports
+  `rho_auc`/`rho_tpr`. Plot `scripts/plot_st1_np_ceiling.py`, sbatch (single task ~9 min),
+  tests `tests/test_np_ceiling.py` (5, pass; suite 5 BLAS-baseline fail / 186 pass).
+  Config `NpCeilingParams`. **Frozen (slurm job 5646, MATS `compute`, n_each=200, f0_n=61,
+  n_mc=2000; `results/st1/np_ceiling_summary.json`, `figures/st1_np_ceiling.*`):** the
+  Whittle ceiling is **AUC=TPR=1.0 in every column at every drift** (the two generators
+  are perfectly separable in principle), so all difficulty is in the detector. **vs the
+  inference null the Viterbi tracker is essentially NP-optimal** (`rho_auc=1.00` across the
+  whole wander axis); the fixed matched filter collapses (ρ 1.0→0.78→0.38→−0.1). **vs
+  structural confusers / the hard controller case only the DG order family approaches the
+  ceiling** (dg_order_full ρ 0.93→…→0.10; Viterbi and spectral score AUC 0.0 on the hard
+  case), with a widening gap at high drift = the honest headroom above today's detectors.
+  **Caveat:** NP-optimal under the Whittle model only (a lower bound on the true optimum),
+  so reporting fractions against it is conservative. Full record:
+  `notes/results/st1-np-ceiling-findings.md`. **Not wired into the paper — Phase 4.**
+- [x] Rung 2: stated inference null; three decision rules; semantic falsification
   controls (periodic inference, gradient-only, discarded-update decoy, training-shaped
   non-ML loop, controller cycle, async training, co-resident mixtures); transfer / domain
   shift evaluated.
+  **Result (harness built + n=200 numbers frozen on slurm):** full pipeline on
+  `feat/phase2-rung2`. `powerladder/typeb/rung2_features.py` (8-feature physics
+  vector, **estimated-from-trace only** — mtf/comb/spectral/viterbi/dg_fixed/
+  dg_order_full + estimated path-stability & phase-fold repeatability from the
+  Viterbi path); `rung2.py` (three rules — prespecified physics score with the
+  fixed-cadence comparator pre-registered out, fitted logistic discriminant OOF,
+  RF learned reference; AUC + FPR/FNR; transfer via fit-nominal/zero-shot-predict);
+  `rung2_scenarios.py` (seven controls, `is_training`/`expect` annotations). Driver
+  `scripts/rung2_eval.py` (crc-seeded 14-cell grid = stated ∪ 6 transfer ∪ 7
+  controls, flock-merged `results/rung2/rung2_summary.json`), slurm
+  `scripts/slurm/rung2_eval.sbatch`, plotter `scripts/plot_rung2.py`
+  (`figures/rung2_stated_transfer`, `rung2_controls`). Tests `tests/test_rung2.py`
+  (10, pass; suite 5 fail/181 pass = known BLAS baseline + 10).
+  **Frozen findings (n_each=200, 300 s, band 0.3–1.7, FAR 0.05; slurm array 5612
+  on MATS `compute`, all 14 cells COMPLETED ~100 s each):**
+  (1) STATED — all three rules separate training from the hard inference null
+  perfectly (AUC 1.00, FNR 0 at FPR 0.05). (2) TRANSFER — AUC stays 1.00 across
+  every shift (f_peak lo/hi, short duration, band shift, hostile controller meter,
+  heavy coloured noise): robust off the stated population. (3) CONTROLS — the five
+  NON-training loads (discarded-update decoy, gradient-only, non-ML loop,
+  controller cycle, periodic inference) all score AS training (frac 1.00 all
+  rules): **the meter certifies the physical schedule, not training semantics.**
+  Co-resident (diluted genuine) training caught (1.00). **Divergence from the
+  pre-registration:** async (de-periodicised) genuine training was expected to be
+  MISSED, but the tracked physics rule still catches it (AUC 0.89, frac 0.72; RF
+  1.00) — the fitted LINEAR rule is the weakest (0.75/0.55). Consistent with the
+  ST1/ST2 tracker-robustness story: drift+phase-slip de-periodicisation does NOT
+  evade tracking at these levels; the genuine scope limit is the ≈zero-cost
+  work-variation attack characterised on the ST2 frontier, not this async control.
+  **Open (Phase-4 write-up decision):** report async as a robustness result, or
+  strengthen the async control with work-variation to exhibit the boundary.
+  **Not yet wired into `paper/main.tex` (§6 Rung-2 subsection) — Phase-4 write-up.**
 
 ## Phase 3 — Rungs 3–4 conditional protocol
 
@@ -184,6 +296,19 @@ resolve, labels/refs consistent, environments balanced).
 
 - [ ] Negative transport case (single-A100) as a result; identifiability theory section
   (rigor level per plan §10 Q2); discussion closing out each rung's ceiling.
+- [ ] **Cost-vs-hiding Pareto re-plot (cheap, CPU-only, no new sweeps).** Render the
+  already-frozen ST2 frontier as an explicit **adversary-cost vs hiding** Pareto curve —
+  the plan's stated deliverable (`notes/plans/plan-for-paper-2.md:370`,
+  `plan-for-paper-2-review.md:198`). The (hiding, systems-cost) pairs already exist in
+  `results/st2/frontier_summary.json`: per cell, detection loss (best-tracking &
+  best-fixed TPR@0.05, or 1−TPR) on one axis and the measured `cost_overhead_pct` on the
+  other, for the four anchored families only (jitter, drift, work, shape; others carry
+  `null`). A new plot script reading the tracked summary (no re-run) — one Pareto panel
+  per detector class so the "how much systems cost buys how much hiding from the tracker
+  vs the fixed detectors" gap is visible, with the ≈zero-cost work-variation point called
+  out. **Out of scope / still future work:** the learning-efficiency cost leg (descoped
+  2026-07-22, needs a GPU campaign — the transport trap) stays the stated open empirical
+  question; this item plots only the measured systems-cost axis.
 
 ---
 

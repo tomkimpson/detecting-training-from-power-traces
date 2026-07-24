@@ -2,7 +2,7 @@
   "family": "shape",
   "generator": "ko_workload training vs hard inference null",
   "budget_units": "shape_fill_frac (phi, down-level fill fraction)",
-  "cost_anchor": "results/b2/shaped_summary.json",
+  "cost_anchor": "data/measured_cost_anchors/shaped_summary.json",
   "n_each": 200,
   "target_fars": [
     0.05,

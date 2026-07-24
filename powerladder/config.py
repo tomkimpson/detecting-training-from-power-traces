@@ -665,6 +665,99 @@ class St2MeterBoundaryParams:
 
 
 @dataclass(frozen=True)
+class Rung2Params:
+    """Rung 2 training-vs-inference classification (Phase 2; plan §3.3).
+
+    Rung 1 asks "is there iteration-structured cyclicity?"; Rung 2 asks the
+    conditional-classification question "is this trace more training-like than
+    the STATED inference population?" — a specified statistical task at the cost
+    of an explicit inference null (:func:`code.ko_workload.inference_F`). Three
+    decision rules are compared on ONE fixed interpretable physics feature vector
+    (:mod:`code.typeb.rung2_features`, the Rung-1 quantities), so the reader sees
+    where power comes from:
+
+      (i)  a prespecified physics score (no label fitting: each feature oriented
+           larger = more training-like, standardised by the stated inference
+           null's robust spread, summed with ``physics_weights``);
+      (ii) a model-based discriminant FITTED to the scenario generator (LDA /
+           logistic on the physics vector; StratifiedKFold OOF scores — one
+           feature vector per trace, so no window-leakage concern);
+      (iii)a flexible LEARNED reference (:mod:`code.typeb.rf_baseline`, the
+           Rahman RandomForest on its own statistical-shape features) — exposes
+           how much comes from the null choice rather than the physics method.
+
+    Reporting is kept separate (plan §3.3): Rung-2 FPR/FNR under the stated
+    workload population (train vs inference null through ``meter``); TRANSFER —
+    fit on the nominal population, evaluate zero-shot when hardware / meter /
+    workload parameters leave it (``transfer_shifts``); and the SEMANTIC
+    falsification controls (:mod:`code.typeb.rung2_scenarios`), the paper's
+    central question of what the meter can vs cannot certify.
+
+    ``n_each`` / ``target_fars`` / ``seed`` / ``meter`` mirror St2Params so Rung 2
+    is scored at the same operating point as the frontier. The heavy sweep runs
+    on Slurm (crc-seeded cells, code.scripts.rung2_eval); local runs are smoke
+    sizes only (repo policy).
+    """
+
+    n_each: int = 200                       # traces per class (train / infer)
+    target_fars: tuple[float, ...] = (0.05, 0.01)
+    seed: int = 0
+    n_folds: int = 5                        # StratifiedKFold folds for rule (ii)/(iii)
+
+    # Observation channel for the stated population (default: exact no-op ==
+    # the b0/b1-comparable meter-off path). Transfer meter shifts swap in a
+    # hostile St2Params.meter_variant by name.
+    meter: MeterParams = MeterParams()
+
+    # Rule (i) per-feature weights in the prespecified physics score (in
+    # code.typeb.rung2_features.FEATURE_NAMES order). None == unit weights (all
+    # features oriented so larger = more training-like, so +1 each).
+    physics_weights: tuple[float, ...] | None = None
+
+    # --- transfer / domain-shift grid -----------------------------------------
+    # Each shift is (name, ((param, value), ...)). The harness interprets:
+    #   f_peak_frac / duration_s / eta_scale -> override the KoTypeBParams glue;
+    #   f0_lo / f0_hi                         -> override the KoWorkloadParams band;
+    #   meter_variant                         -> pick that St2Params.meter_variant.
+    # Fitted rules train on the nominal population, then score the shifted
+    # population zero-shot; the prespecified rule is simply re-evaluated.
+    transfer_shifts: tuple[tuple[str, tuple[tuple[str, float | str], ...]], ...] = (
+        ("f_peak_lo",        (("f_peak_frac", 0.70),)),
+        ("f_peak_hi",        (("f_peak_frac", 0.95),)),
+        ("duration_short",   (("duration_s", 150.0),)),
+        ("band_shift_hi",    (("f0_lo", 0.8), ("f0_hi", 1.8))),
+        ("meter_controller", (("meter_variant", "controller_on"),)),
+        ("meter_coloured",   (("meter_variant", "coloured_noise_heavy"),)),
+    )
+
+    # --- semantic falsification control knobs (plan §3.3) ---------------------
+    # gradient_only: forward/backward WITHOUT the optimizer-step swing -> the
+    # per-phase level deltas collapse toward flat (attenuated mu/sigma_delta_tr).
+    grad_only_mu_delta: float = 0.05
+    grad_only_sigma_delta: float = 0.02
+    # nonml_kernel_loop: a training-SHAPED non-ML kernel with the same cadence
+    # but a rounded (comb-suppressed) waveform (training_F harmonic_smooth_s).
+    nonml_harmonic_smooth_s: float = 0.5
+    # controller_cycle: a bare periodic NON-COMPUTE load (F built directly:
+    # base + square limit cycle, no training/inference structure). Amplitudes
+    # are fractions of f_peak (the KoWorkloadParams convention).
+    controller_hz: float = 0.4
+    controller_amp: float = 0.3
+    controller_duty: float = 0.4
+    controller_base: float = 0.5
+    # async_training: genuine training strongly de-periodicised (OU centre-freq
+    # drift + Brownian boundary slip) — the scoped-OUT efficient-family edge.
+    async_f0_drift_hz: float = 1.2
+    async_phase_slip_sigma: float = 0.15
+    # periodic_inference: the inference null modulated by a PERIODIC request
+    # envelope (a periodic request generator), req rate [Hz] and depth (rel.).
+    periodic_inf_req_hz: float = 0.9
+    periodic_inf_amp: float = 0.5
+    # coresident_mixture: dominant training share of the co-resident aggregate.
+    coresident_share: float = 0.5
+
+
+@dataclass(frozen=True)
 class B2Params:
     """B2 hardware campaign (task 5): measured Type signatures on the A100.
 
@@ -1013,6 +1106,59 @@ class St1FarParams:
 
 
 @dataclass(frozen=True)
+class NpCeilingParams:
+    """NP-optimal LRT ceiling for the ST1 detector bake-off (Phase 2, optional).
+
+    The strategy memo (``notes/discussion/method-soundness-and-prior-art.md`` §2.2)
+    asks: since we OWN the generators, compute the Neyman–Pearson optimal
+    likelihood-ratio detector between the training and null generators and report
+    each corpus-free detector as a *fraction* of it — "X% of NP-optimal power at
+    Y% of the information cost". This quantifies "is our detector good?".
+
+    Method (user decision 2026-07-24): the **Whittle spectral LRT**. There is no
+    closed-form likelihood (both generators are black-box samplers), so we work in
+    the frequency domain under the stationary-Gaussian (Whittle) approximation: the
+    in-band periodogram ordinates are ~independent Exponentials with mean the PSD
+    ``S(f)``, giving a per-hypothesis log-likelihood
+    ``ℓ_H(x) = −Σ_f [log S_H(f) + I_x(f)/S_H(f)]``. The class PSDs are estimated
+    from the generators by Monte-Carlo (mean periodogram over ``n_mc`` traces): one
+    ``S_neg`` per negative class, and a per-f₀ TEMPLATE BANK ``S_tr(f; f0_k)`` for
+    the training class (f₀ is the known nuisance, marginalised). The ceiling score
+    is ``logsumexp_k ℓ_tr(x|f0_k) − ℓ_neg(x)`` (uniform f₀ prior).
+
+    CAVEAT carried into every report: this is NP-optimal *under the Whittle model*.
+    It discards harmonic-phase coherence and the null's non-Gaussian burst/OU
+    structure, so the true optimum can exceed it — where a tracking detector
+    (Viterbi / DG-order) approaches or beats it at high drift, that is a finding
+    about wandering-line structure the spectral template cannot see, not a bug.
+
+    The template bank is built POOLED over the eval drift grid (drift drawn from
+    ``drift_grid``), so the ceiling — like the deployable detectors — does not know
+    the adversary's drift. Eval mirrors the bake-off (``n_each`` / ``fars`` /
+    ``drifts`` == ``scripts/plot_st1_bakeoff.py``) so "fraction of optimal" is
+    apples-to-apples. The MC corpus draws from a DISJOINT rng stream
+    (``corpus_seed_offset`` off the eval seed): the ceiling is fit once, then frozen
+    and applied to the eval populations. Heavy runs go on Slurm (repo policy); local
+    runs are ``--smoke`` sizes only.
+    """
+
+    # Monte-Carlo corpus for the class PSD estimates (traces averaged per template).
+    n_mc: int = 2000
+    # Training f₀ template bank: f0_n points across the Ko band [f0_lo, f0_hi].
+    f0_n: int = 61
+    # Drift grid the template corpus pools over (== bake-off DRIFTS_HZ).
+    drift_grid: tuple[float, ...] = (0.0, 0.1, 0.2, 0.4, 0.8, 1.5)
+    # Eval populations (mirror scripts/plot_st1_bakeoff.py).
+    n_each: int = 200
+    fars: tuple[float, ...] = (0.05, 0.01)
+    drifts: tuple[float, ...] = (0.0, 0.1, 0.2, 0.4, 0.8, 1.5)
+    eval_seed: int = 20260721                # == bake-off seed (parity)
+    corpus_seed_offset: int = 90_000_000     # disjoint MC-corpus rng stream
+    # Whittle band == the ST1 detector band (DEFAULT.st1.band_lo/hi) at call time.
+    psd_floor: float = 1e-12                 # guard log / division against a zero PSD bin
+
+
+@dataclass(frozen=True)
 class Config:
     floor: FloorParams = FloorParams()
     channel: ChannelParams = ChannelParams()
@@ -1030,6 +1176,8 @@ class Config:
     meter: MeterParams = MeterParams()
     st2: St2Params = St2Params()
     st2_meter_boundary: St2MeterBoundaryParams = St2MeterBoundaryParams()
+    rung2: Rung2Params = Rung2Params()
+    np_ceiling: NpCeilingParams = NpCeilingParams()
 
 
 DEFAULT = Config()

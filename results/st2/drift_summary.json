@@ -2,7 +2,7 @@
   "family": "drift",
   "generator": "ko_workload training vs hard inference null",
   "budget_units": "f0_drift_hz (OU centre-frequency excursion, Hz)",
-  "cost_anchor": "results/b2/spoof_summary.json",
+  "cost_anchor": "data/measured_cost_anchors/spoof_summary.json",
   "n_each": 200,
   "target_fars": [
     0.05,

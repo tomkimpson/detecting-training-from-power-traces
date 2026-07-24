@@ -2,7 +2,7 @@
   "family": "work",
   "generator": "ko_workload training vs hard inference null",
   "budget_units": "work_sigma (fractional micro-step-count jitter)",
-  "cost_anchor": "results/b2/workjitter_summary.json",
+  "cost_anchor": "data/measured_cost_anchors/workjitter_summary.json",
   "n_each": 200,
   "target_fars": [
     0.05,

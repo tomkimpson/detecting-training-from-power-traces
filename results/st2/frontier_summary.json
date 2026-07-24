@@ -18,10 +18,10 @@
     ]
   },
   "cost_anchor_mapping": {
-    "jitter": "results/b2/spoof_summary.json (idle-pad realisation)",
-    "drift": "results/b2/spoof_summary.json (idle-pad realisation)",
-    "work": "results/b2/workjitter_summary.json (real-work realisation)",
-    "shape": "results/b2/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)"
+    "jitter": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
+    "drift": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
+    "work": "data/measured_cost_anchors/workjitter_summary.json (real-work realisation)",
+    "shape": "data/measured_cost_anchors/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)"
   },
   "cells": [
     {
@@ -60,7 +60,7 @@
       },
       "cost_overhead_pct": 15.267503887049683,
       "cost_overhead_pct_std": 0.21035656122963195,
-      "cost_anchor_source": "results/b2/spoof_summary.json (idle-pad realisation)",
+      "cost_anchor_source": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
       "learning_cost": null
     },
     {
@@ -99,7 +99,7 @@
       },
       "cost_overhead_pct": 32.12940317751929,
       "cost_overhead_pct_std": 1.159404094016278,
-      "cost_anchor_source": "results/b2/spoof_summary.json (idle-pad realisation)",
+      "cost_anchor_source": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
       "learning_cost": null
     },
     {
@@ -138,7 +138,7 @@
       },
       "cost_overhead_pct": 66.48884409727641,
       "cost_overhead_pct_std": 2.8870516597612013,
-      "cost_anchor_source": "results/b2/spoof_summary.json (idle-pad realisation)",
+      "cost_anchor_source": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
       "learning_cost": null
     },
     {
@@ -177,7 +177,7 @@
       },
       "cost_overhead_pct": 158.89283053044113,
       "cost_overhead_pct_std": 35.40001294847005,
-      "cost_anchor_source": "results/b2/spoof_summary.json (idle-pad realisation)",
+      "cost_anchor_source": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
       "learning_cost": null
     },
     {
@@ -216,7 +216,7 @@
       },
       "cost_overhead_pct": 374.7217044216882,
       "cost_overhead_pct_std": 98.92198459604248,
-      "cost_anchor_source": "results/b2/spoof_summary.json (idle-pad realisation)",
+      "cost_anchor_source": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
       "learning_cost": null
     },
     {
@@ -294,7 +294,7 @@
       },
       "cost_overhead_pct": -0.04050768013991457,
       "cost_overhead_pct_std": 0.031192331611695497,
-      "cost_anchor_source": "results/b2/workjitter_summary.json (real-work realisation)",
+      "cost_anchor_source": "data/measured_cost_anchors/workjitter_summary.json (real-work realisation)",
       "learning_cost": null
     },
     {
@@ -333,7 +333,7 @@
       },
       "cost_overhead_pct": -0.07856093058791966,
       "cost_overhead_pct_std": 0.1764036451959516,
-      "cost_anchor_source": "results/b2/workjitter_summary.json (real-work realisation)",
+      "cost_anchor_source": "data/measured_cost_anchors/workjitter_summary.json (real-work realisation)",
       "learning_cost": null
     },
     {
@@ -372,7 +372,7 @@
       },
       "cost_overhead_pct": -0.6470678617695153,
       "cost_overhead_pct_std": 1.644131048099021,
-      "cost_anchor_source": "results/b2/workjitter_summary.json (real-work realisation)",
+      "cost_anchor_source": "data/measured_cost_anchors/workjitter_summary.json (real-work realisation)",
       "learning_cost": null
     },
     {
@@ -411,7 +411,7 @@
       },
       "cost_overhead_pct": -0.10071864665016986,
       "cost_overhead_pct_std": 0.1475529321169782,
-      "cost_anchor_source": "results/b2/workjitter_summary.json (real-work realisation)",
+      "cost_anchor_source": "data/measured_cost_anchors/workjitter_summary.json (real-work realisation)",
       "learning_cost": null
     },
     {
@@ -450,7 +450,7 @@
       },
       "cost_overhead_pct": -0.36274860652737717,
       "cost_overhead_pct_std": 0.13436322031357967,
-      "cost_anchor_source": "results/b2/workjitter_summary.json (real-work realisation)",
+      "cost_anchor_source": "data/measured_cost_anchors/workjitter_summary.json (real-work realisation)",
       "learning_cost": null
     },
     {
@@ -606,7 +606,7 @@
       },
       "cost_overhead_pct": 141.91320062321378,
       "cost_overhead_pct_std": 129.82259886047362,
-      "cost_anchor_source": "results/b2/spoof_summary.json (idle-pad realisation)",
+      "cost_anchor_source": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
       "learning_cost": null
     },
     {
@@ -1386,7 +1386,7 @@
       },
       "cost_overhead_pct": 189.6629516730204,
       "cost_overhead_pct_std": 55.43120728307436,
-      "cost_anchor_source": "results/b2/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
+      "cost_anchor_source": "data/measured_cost_anchors/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
       "learning_cost": null
     },
     {
@@ -1425,7 +1425,7 @@
       },
       "cost_overhead_pct": 228.16930881800715,
       "cost_overhead_pct_std": 67.89148780181002,
-      "cost_anchor_source": "results/b2/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
+      "cost_anchor_source": "data/measured_cost_anchors/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
       "learning_cost": null
     },
     {
@@ -1464,7 +1464,7 @@
       },
       "cost_overhead_pct": 172.15178531604838,
       "cost_overhead_pct_std": 24.26288555565876,
-      "cost_anchor_source": "results/b2/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
+      "cost_anchor_source": "data/measured_cost_anchors/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
       "learning_cost": null
     },
     {
@@ -1503,7 +1503,7 @@
       },
       "cost_overhead_pct": 179.01548633673707,
       "cost_overhead_pct_std": 39.08471928940236,
-      "cost_anchor_source": "results/b2/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
+      "cost_anchor_source": "data/measured_cost_anchors/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
       "learning_cost": null
     },
     {
@@ -1542,7 +1542,7 @@
       },
       "cost_overhead_pct": 200.78105305475913,
       "cost_overhead_pct_std": 35.70475545114205,
-      "cost_anchor_source": "results/b2/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
+      "cost_anchor_source": "data/measured_cost_anchors/shaped_summary.json (shaped-jitter basis, sigma=0.35 timing base -> upper bound on shaping-only cost)",
       "learning_cost": null
     },
     {
