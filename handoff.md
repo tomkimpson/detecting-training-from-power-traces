@@ -1,9 +1,10 @@
-# Handoff — 2026-07-24 (Phase 2: NP-optimal LRT ceiling harness built)
+# Handoff — 2026-07-24 (Phase 2: NP-optimal LRT ceiling built + frozen)
 
 ## What happened this session
-Built the **NP-optimal LRT ceiling for the ST1 bake-off** — the last open Phase-2
-item (optional, non-blocking; `tasks.md` §Phase 2). Branch
-**`feat/phase2-np-ceiling`** (not merged / pushed).
+Built AND **froze** the **NP-optimal LRT ceiling for the ST1 bake-off** — the last open
+Phase-2 item (optional, non-blocking; `tasks.md` §Phase 2), now ticked `[x]`. Branch
+**`feat/phase2-np-ceiling`** (not merged / pushed). Also added a cross-cutting
+"does it work?" synthesis note (`notes/results/overall-findings-does-it-work.md`).
 
 Method chosen with the user: the **Whittle spectral LRT** (the light option; there is
 no closed-form likelihood — both generators are black-box samplers). The ceiling is the
@@ -19,41 +20,37 @@ fraction of it (`rho_auc`, `rho_tpr`).
   `scripts/plot_st1_np_ceiling.py` (figure), `scripts/slurm/st1_np_ceiling.sbatch`
   (single task, ~10–15 min), `tests/test_np_ceiling.py` (5, pass). `NpCeilingParams`
   added to `powerladder/config.py`. `.gitignore` + `results/st1/slurm/.gitkeep` added.
-- **Validation (local, reduced corpus — NOT frozen numbers):** parity guard
-  **max |TPR Δ vs bakeoff| = 0** (eval pops byte-identical to
-  `results/st1/bakeoff_summary.json`); qualitatively the ceiling holds AUC≈1.0 vs the
-  inference null across drift, Viterbi tracks it, the fixed matched filter collapses.
+- **Frozen (slurm job 5646, MATS `compute`, ~9 min):** parity guard **max |TPR Δ vs
+  bakeoff| = 0** at full n=200 (eval pops byte-identical to `bakeoff_summary.json`).
+  Ceiling = AUC=TPR=1.0 in every column/drift (generators perfectly separable in
+  principle). **vs inference null Viterbi is NP-optimal** (ρ_auc=1.00 across drift);
+  **vs structural confusers / hard case only the DG order family approaches it**
+  (dg_order_full ρ up to 0.93–0.96; Viterbi/spectral AUC 0.0 on the hard case), with a
+  widening gap at high drift = the headroom above today's detectors.
 - **Tests:** `pytest -p no:debugging -m "not gpu"` → **5 failed, 186 passed** = the known
   BLAS byte-identity baseline (`byte-identity-fixtures-blas-sensitive`) + 5 new; no new
   failures (no generator code was touched).
-- Full record: `notes/results/st1-np-ceiling-findings.md`.
+- Full record: `notes/results/st1-np-ceiling-findings.md`; synthesis:
+  `notes/results/overall-findings-does-it-work.md`.
 
 ## Current status
-- Branch `feat/phase2-np-ceiling` — **uncommitted at time of writing / then committed
-  locally; not merged / pushed.** Contains: 1 config edit, 1 new lib, 3 new scripts, 1
-  sbatch, 1 test, 1 findings note, `.gitignore`, `tasks.md` + this handoff.
-- `tasks.md`: the NP-ceiling item is `[~]` (harness built; freeze pending). All other
-  Phase-2 items are `[x]`.
-- **No tracked results/figure yet** — `results/st1/np_ceiling_summary.json` and
-  `figures/st1_np_ceiling.*` are produced only by the slurm freeze (repo policy: no
-  expensive runs on the dev node; the reduced-corpus local runs were deleted).
+- Branch `feat/phase2-np-ceiling` — **committed locally; not merged / pushed.** Contains:
+  1 config edit, 1 new lib, 3 new scripts, 1 sbatch, 2 new notes (ceiling findings +
+  overall synthesis), 1 test, `.gitignore`, tracked `results/st1/np_ceiling_summary.json`
+  + `figures/st1_np_ceiling.*`, `tasks.md` + this handoff.
+- `tasks.md`: the NP-ceiling item is now `[x]`. **All Phase-2 items are `[x]`.**
 
 ## Next steps
-1. **Freeze on Slurm:** `sbatch scripts/slurm/st1_np_ceiling.sbatch` on MATS `compute`
-   (`n_mc=2000`, `f0_n=61`). Verify via `results/st1/slurm/*.out` (sacct may be down —
-   gotcha carried from last session). It runs the driver **and** the plotter, so it
-   writes both `results/st1/np_ceiling_summary.json` and `figures/st1_np_ceiling.*`.
-2. **Record frozen numbers** in `notes/results/st1-np-ceiling-findings.md` (the ρ values;
-   the drift where tracking detectors approach/beat the Whittle ceiling) and tick
-   `tasks.md` `[x]`.
-3. **`check-PR` + merge `feat/phase2-np-ceiling` → main.** No paper prose / bib touched,
+1. **`check-PR` + merge `feat/phase2-np-ceiling` → main.** No paper prose / bib touched,
    so `check-refs`/`check-arxiv` not needed for this branch.
-4. **Phase 4 write-up** now has every Phase-2 number frozen (frontier, meter-boundary,
+2. **Phase 4 write-up** now has every Phase-2 number frozen (frontier, meter-boundary,
    Rung 2) plus this ceiling: wire `paper/main.tex` §6 + the Related-Work "optimality
    ceiling" hook (`paper/main.tex:271-273`) to the NP-ceiling result; Rung-2 subsection;
    minimum-meter-spec subsection; frontier §6.
-5. **Still-open Phase 1 number-freeze (separate, blocking a paper freeze):** the ST1
-   surrogate S=999/M=10⁴ slurm leg (check job status; do NOT run sweeps on the dev node).
+3. **Still-open Phase 1 number-freeze (separate, blocking a paper freeze):** the ST1
+   surrogate S=999/M=10⁴ slurm leg — an `st1surr` **array 5567** was observed RUNNING on
+   `compute` this session (shared the worker with the ceiling freeze); check whether it is
+   the S=999/M=10⁴ confirmation and whether it completed. Do NOT run sweeps on the dev node.
 
 ## Key file locations
 - Library: `powerladder/typeb/np_ceiling.py` (`band_periodogram`, `mean_periodogram`,

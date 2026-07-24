@@ -1,8 +1,8 @@
 # NP-optimal LRT ceiling in the ST1 bake-off — findings
 
-**Date:** 2026-07-24 · **Status:** harness built + validated locally; **full
-number-freeze pending Slurm** (single task, `scripts/slurm/st1_np_ceiling.sbatch`).
-**Scope:** the optional/non-blocking Phase-2 item (`tasks.md` §Phase 2). **Origin:**
+**Date:** 2026-07-24 · **Status:** **frozen** (slurm job **5646**, MATS `compute`,
+single task ~9 min: bank 392 s + negs 86 s + eval/scoring). **Scope:** the
+optional/non-blocking Phase-2 item (`tasks.md` §Phase 2). **Origin:**
 `notes/discussion/method-soundness-and-prior-art.md` §2.2. **Regenerate:**
 `scripts/st1_np_ceiling.py` → `results/st1/np_ceiling_summary.json` →
 `scripts/plot_st1_np_ceiling.py` → `figures/st1_np_ceiling.*`.
@@ -55,30 +55,65 @@ structure a stationary spectral template cannot see — a finding, not a bug. A 
 learned/HGB Bayes-optimal ceiling with a saturation study is the noted future
 strengthening if a reviewer disputes the Whittle model.
 
-## Validation this session (local, reduced corpus — NOT the frozen numbers)
+## Frozen results (n_each=200, f0_n=61, n_mc=2000, drifts 0→1.5 Hz)
 
-- **Parity guard: `max |TPR delta vs bakeoff| = 0`** across both negative columns, all
-  detectors, all drifts, both FARs — the reproduced eval populations are byte-identical
-  to the frozen `results/st1/bakeoff_summary.json`. So the "fraction of optimal" divides
-  the *same* populations the bake-off already reports.
-- **Qualitative pattern** (reduced-corpus smoke; direction only, magnitudes not frozen):
-  against the inference null the Whittle ceiling holds AUC ≈ TPR@0.05 ≈ 1.0 across the
-  whole drift axis — the optimal spectral test separates the training comb from the
-  power-matched-but-smooth null regardless of drift. The **Viterbi tracker tracks the
-  ceiling** (ρ_auc ≈ 1); the **fixed matched filter collapses** under drift (AUC falls
-  below chance as the wandering line smears, so ρ_auc goes negative). This is the same
-  "tracking is necessary" story as the bake-off, now quantified against the optimum: the
-  achievable power stays high across drift, and only a tracking detector realises it.
-- Unit tests (`tests/test_np_ceiling.py`, 5, pass): periodogram contract; Whittle-LR
-  ordering on a controlled tone; corpus/eval seed disjointness; eval-pop determinism;
-  ceiling ≥ spectral at drift 0. Full suite: 5 failed / 186 passed = the known BLAS
-  byte-identity baseline (`byte-identity-fixtures-blas-sensitive`) + these 5; no new
-  failures (no generator code was touched).
+**Parity guard: `max |TPR delta vs bakeoff| = 0`** — the reproduced eval populations are
+byte-identical to `results/st1/bakeoff_summary.json`, so "fraction of optimal" divides the
+*same* populations the bake-off reports.
 
-## Next step
+**The ceiling is AUC = TPR@0.05 = TPR@0.01 = 1.0 in every column and at every drift**
+(inference null, structural mix, and the controller-only hard case). Under the Whittle
+model the training comb and the (line-free) nulls are *perfectly separable* given a
+300 s / 20 Hz trace, at every drift — so the intrinsic information is always present; the
+only question is whether a deployable detector extracts it. (With a perfect ceiling
+`rho_tpr = tpr_det`, redundant with the bake-off table, so **`rho_auc` is the informative
+fraction**; `rho_auc = (auc_det − 0.5)/(auc_ceil − 0.5)`, negative when a detector is
+below chance.)
 
-Freeze on Slurm (`sbatch scripts/slurm/st1_np_ceiling.sbatch`, MATS `compute`,
-`n_mc=2000`, `f0_n=61`; ~10–15 min single-threaded). Then record the frozen ρ numbers
-and the drift where tracking detectors approach/beat the Whittle ceiling here, and tick
-`tasks.md`. Paper wiring (`tab:bakeoff` / `app:bakeoff` / the Related-Work "optimality
-ceiling" hook at `paper/main.tex:271-273`) is Phase 4.
+**vs the inference null — the Viterbi tracker is essentially NP-optimal.**
+`rho_auc[viterbi] = 1.00` at *every* drift (AUC 1.00 throughout). Everything else leaves
+power on the table and collapses under drift: spectral matched filter `1.00 → 0.78 → 0.38
+→ −0.10` (drift 0/0.1/0.2/0.4), dg_order_full `0.83 → 0.68 → 0.58 → 0.28`, mtf and
+dg_fixed_oracle near/below chance beyond drift 0. So against the stated null the tracker
+recovers 100% of the achievable power across the whole wander axis.
+
+**vs structural confusers (ar1 / ar1_t / controller) — the tracker is NOT enough; the DG
+order family carries it, with a real gap at high drift.** Here `rho_auc[viterbi]` is only
+0.34 at low drift and goes negative by drift 0.4. The best deployable detector is
+**dg_order_full**: `rho_auc = 0.93 → 0.85 → 0.79 → 0.67 → 0.30 → 0.10` over the six drifts
+— it approaches the ceiling at low drift but still surrenders most of the power by 0.8 Hz.
+
+**Hard case (drift 0.4 vs controller-only) — only the DG order family separates the
+wandering line from a limit cycle.** Viterbi and the spectral filter score **AUC 0.0**
+(actively fooled — the controller cycle out-lines the smeared training line);
+dg_order_full reaches `rho_auc = 0.96` (AUC 0.978) and dg_order_split 0.92. The f₀-oracle
+manages only 0.36 — confirming the missing ingredient is *order-tracking structure*, not
+knowledge of the line frequency.
+
+**Reading.** The ceiling turns the three qualitative bake-off findings into numbers: (i)
+tracking is necessary (the fixed matched filter falls below chance under drift, ρ<0); (ii)
+against confusers only the DG order family approaches the optimum; (iii) even the best
+deployable detector leaves a widening fraction of the achievable power unclaimed as drift
+grows — the honest headroom above today's detectors. Against the plain inference null,
+though, there is essentially no headroom left: the tracker is optimal.
+
+Unit tests (`tests/test_np_ceiling.py`, 5, pass); full suite 5 failed / 186 passed = the
+known BLAS byte-identity baseline (`byte-identity-fixtures-blas-sensitive`) + these 5, no
+new failures.
+
+## Caveat on the perfect ceiling
+
+AUC/TPR = 1.0 everywhere is a property of the Whittle model, not a bug: the class-mean
+periodograms (comb vs smooth/broadband) are linearly separable by the log-LR given this
+trace length, so the rank separation is perfect. It is a *lower bound on the true
+optimum* (the true NP test can only do at least as well), so reporting deployable
+detectors as a fraction of it is conservative in the right direction. The value is
+diagnostic: it localises all remaining difficulty in the detector, and — via the
+confuser/hard-case gaps — shows exactly where headroom remains.
+
+## Next step (Phase 4)
+
+Paper wiring only: add the ceiling row/fraction to `tab:bakeoff`, extend `app:bakeoff`
+prose, and connect the Related-Work "optimality ceiling" hook (`paper/main.tex:271-273`).
+Optional future strengthening if a reviewer disputes the Whittle model: a learned/HGB
+Bayes-optimal ceiling with a saturation study.

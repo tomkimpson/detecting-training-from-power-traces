@@ -201,28 +201,32 @@ resolve, labels/refs consistent, environments balanced).
   `figures/st2_meter_boundary_notch.*`. Harness: `powerladder/typeb/meter_boundary.py`,
   `scripts/st2_meter_boundary.py`, `scripts/slurm/st2_meter_boundary.sbatch`.
   **Not yet wired into `paper/main.tex` (§6/new subsection) — Phase 4 write-up.**
-- [~] **(Optional, non-blocking) NP-optimal LRT ceiling in the bake-off.** We have the
+- [x] **(Optional, non-blocking) NP-optimal LRT ceiling in the bake-off.** We have the
   generator, so compute/approximate the Neyman–Pearson optimal detector between the
   training and null generators and report the corpus-free surrogate detector as a
   fraction of it ("X% of NP-optimal power at Y% of the information cost"). Quantifies
   "is our detector good" — not a pre-gate (decision 2026-07-23).
-  **Result (harness built + validated; number-freeze pending slurm):** method =
-  **Whittle spectral LRT** (user decision 2026-07-24 — the light option; no closed-form
-  likelihood exists). `powerladder/typeb/np_ceiling.py` (f₀-marginalised Bayes–Whittle
-  LRT: per-f₀ MC training template bank, drift-pooled, `logsumexp_k ℓ_tr(x|f0_k) −
-  ℓ_neg(x)`). Driver `scripts/st1_np_ceiling.py` reproduces the **exact** bake-off eval
-  populations (parity guard **max |TPR Δ vs bakeoff| = 0**), fits ceilings for the
-  inference / structural / controller-only nulls, scores ceiling + all corpus-free
-  detectors, and reports `rho_auc`/`rho_tpr`. Plot `scripts/plot_st1_np_ceiling.py`,
-  sbatch `scripts/slurm/st1_np_ceiling.sbatch` (single task, ~10–15 min), tests
-  `tests/test_np_ceiling.py` (5, pass; suite 5 BLAS-baseline fail / 186 pass).
-  Config `NpCeilingParams`. **Caveat (recorded everywhere):** NP-optimal under the
-  Whittle model only — discards harmonic-phase / non-Gaussian structure, so a tracking
-  detector approaching/beating it at high drift is a finding, not a bug. Qualitative
-  (reduced-corpus smoke): ceiling holds ≈1.0 vs the inference null across drift; Viterbi
-  tracks it, the fixed matched filter collapses — "tracking is necessary", now quantified
-  against the optimum. Full record: `notes/results/st1-np-ceiling-findings.md`.
-  **Not yet frozen (slurm) and not wired into the paper — Phase 4.**
+  **Result (frozen on slurm):** method = **Whittle spectral LRT** (user decision
+  2026-07-24 — the light option; no closed-form likelihood exists).
+  `powerladder/typeb/np_ceiling.py` (f₀-marginalised Bayes–Whittle LRT: per-f₀ MC training
+  template bank, drift-pooled, `logsumexp_k ℓ_tr(x|f0_k) − ℓ_neg(x)`). Driver
+  `scripts/st1_np_ceiling.py` reproduces the **exact** bake-off eval populations (parity
+  guard **max |TPR Δ vs bakeoff| = 0**), fits ceilings for the inference / structural /
+  controller-only nulls, scores ceiling + all corpus-free detectors, reports
+  `rho_auc`/`rho_tpr`. Plot `scripts/plot_st1_np_ceiling.py`, sbatch (single task ~9 min),
+  tests `tests/test_np_ceiling.py` (5, pass; suite 5 BLAS-baseline fail / 186 pass).
+  Config `NpCeilingParams`. **Frozen (slurm job 5646, MATS `compute`, n_each=200, f0_n=61,
+  n_mc=2000; `results/st1/np_ceiling_summary.json`, `figures/st1_np_ceiling.*`):** the
+  Whittle ceiling is **AUC=TPR=1.0 in every column at every drift** (the two generators
+  are perfectly separable in principle), so all difficulty is in the detector. **vs the
+  inference null the Viterbi tracker is essentially NP-optimal** (`rho_auc=1.00` across the
+  whole wander axis); the fixed matched filter collapses (ρ 1.0→0.78→0.38→−0.1). **vs
+  structural confusers / the hard controller case only the DG order family approaches the
+  ceiling** (dg_order_full ρ 0.93→…→0.10; Viterbi and spectral score AUC 0.0 on the hard
+  case), with a widening gap at high drift = the honest headroom above today's detectors.
+  **Caveat:** NP-optimal under the Whittle model only (a lower bound on the true optimum),
+  so reporting fractions against it is conservative. Full record:
+  `notes/results/st1-np-ceiling-findings.md`. **Not wired into the paper — Phase 4.**
 - [x] Rung 2: stated inference null; three decision rules; semantic falsification
   controls (periodic inference, gradient-only, discarded-update decoy, training-shaped
   non-ML loop, controller cycle, async training, co-resident mixtures); transfer / domain

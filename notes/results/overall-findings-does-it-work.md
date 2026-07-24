@@ -38,14 +38,19 @@ rung's ceiling motivates the next.
    a hostile controller-cycle meter, heavy coloured noise — AUC stays 1.00.
    (`rung2-findings.md`.)
 
-3. **Robust to mild de-periodicisation — the key "survives obfuscation" result.** An
+3. **Robust to mild de-periodicisation, and near-optimal on the stated problem.** An
    adversary who *smears* the line (frequency drift, Brownian phase slip) does **not**
    evade detection: async/de-periodicised genuine training is still caught (AUC 0.89),
    because the tracker was built to follow a wandering line. The NP-optimal **Whittle
-   ceiling** (freezing now) makes this quantitative: the *achievable* detection power stays
-   ≈1.0 across the whole drift axis; a fixed matched filter throws almost all of it away
-   under drift, while the tracker recovers essentially all of it. So the method is not just
-   working — it is close to optimal on the honest-schedule problem.
+   ceiling** (frozen, slurm 5646) makes this precise: the *achievable* power is AUC=TPR=1.0
+   in every column at every drift (the two generators are perfectly separable in principle),
+   so all difficulty is in the detector. **Against the stated inference null the Viterbi
+   tracker is essentially NP-optimal** — it recovers 100% of the achievable power across the
+   whole wander axis, while the fixed matched filter throws almost all of it away under
+   drift. **Against structural confusers and the hard controller case the tracker is not
+   enough** — only the DG order-tracking family approaches the ceiling (up to ~0.93–0.96 of
+   it), and even it surrenders a widening fraction as drift grows. So: near-optimal on the
+   honest null, with real (and honestly quantified) headroom against confusers.
    (`st1-np-ceiling-findings.md`.)
 
 ## The three boundaries (what it can't do / can't claim)
