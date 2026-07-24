@@ -111,6 +111,25 @@ detectors as a fraction of it is conservative in the right direction. The value 
 diagnostic: it localises all remaining difficulty in the detector, and — via the
 confuser/hard-case gaps — shows exactly where headroom remains.
 
+## Addendum 2026-07-24 — structural negative-PSD sampler fix (numerically inert)
+
+Pre-merge review caught that the `structural` ceiling's Monte-Carlo negative PSD was
+sampled via `_make_structural_negatives(1, r)`, whose round-robin allocator puts the
+single trace in the first class — so `S_neg["structural"]` was estimated from **ar1
+traces only**, not the ar1/ar1_t/controller mixture the eval population and bake-off
+column use. Fixed (`scripts/st1_np_ceiling.py::_structural_mix_sampler`): the null type
+is now drawn uniformly from the mix per MC draw, with a regression test
+(`test_structural_neg_sampler_covers_the_full_mix`).
+
+This does **not** change any frozen number above: the ceiling saturates at
+AUC = TPR = 1.0 in every column and drift (the comb template separates the training
+class from *any* smooth null, whatever feeds `S_neg`), so every ceiling entry stays 1.0
+and every `rho = det/ceiling` is unchanged; the detector metrics derive from the
+independent eval seed and never touched the fixed sampler. The frozen
+`np_ceiling_summary.json` therefore remains valid as published; the fix matters only if
+the ceiling is ever run in a non-saturated regime (shorter traces / harder null / tighter
+band), where the structural fractions would otherwise divide by an ar1-only ceiling.
+
 ## Next step (Phase 4)
 
 Paper wiring only: add the ceiling row/fraction to `tab:bakeoff`, extend `app:bakeoff`

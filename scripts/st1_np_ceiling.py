@@ -63,10 +63,25 @@ NEG_BUILDERS = {
     "controller_only": lambda n, rng: bakeoff._make_structural_negatives(
         n, rng, names=("controller",)),
 }
+
+
+def _structural_mix_sampler(r):
+    """One structural-null trace, null type drawn UNIFORMLY from the mix.
+
+    ``_make_structural_negatives(1, r)`` would return an ar1 trace every time — its
+    round-robin allocator puts the single trace in the first class — so an MC S_neg
+    built from it would see ar1 only. Draw the null name uniformly instead, so the
+    estimated PSD reflects the true equal-parts ar1/ar1_t/controller mixture that
+    the eval ``structural`` population (and the bake-off column) actually use.
+    """
+    name = bakeoff.STRUCTURAL_MIX[int(r.integers(len(bakeoff.STRUCTURAL_MIX)))]
+    return _tp(bakeoff._make_structural_negatives(1, r, names=(name,))[0])
+
+
 # MC samplers for the negative-class PSDs (drawn from the disjoint corpus stream).
 NEG_SAMPLERS = {
     "inference": lambda r: _tp(ko_make_trace("infer", DEFAULT.ko, DEFAULT.ko_typeb, r)),
-    "structural": lambda r: _tp(bakeoff._make_structural_negatives(1, r)[0]),
+    "structural": _structural_mix_sampler,
     "controller_only": lambda r: _tp(
         bakeoff._make_structural_negatives(1, r, names=("controller",))[0]),
 }
@@ -143,8 +158,7 @@ def main() -> None:
                     help="skip the bake-off TPR cross-check")
     args = ap.parse_args()
 
-    lo = DEFAULT.st1.band_lo if p.band_lo is None else p.band_lo
-    hi = DEFAULT.st1.band_hi if p.band_hi is None else p.band_hi
+    lo, hi = DEFAULT.st1.band_lo, DEFAULT.st1.band_hi
     drifts = list(bakeoff.DRIFTS_HZ)
     fars = list(bakeoff.FARS)
 

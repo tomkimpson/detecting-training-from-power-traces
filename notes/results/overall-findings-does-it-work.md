@@ -68,7 +68,7 @@ rung's ceiling motivates the next.
    (TPR 0.59), a level whose throughput cost is *unmeasured* and beyond the free regime.
    Across the entire frontier (jitter/work/drift/phase/relocate/harmonic/shape/dilute)
    best-tracking TPR stays ≥ 0.84 at every level; the attacks that stress the tracker are
-   either expensive (jitter costs 150–375%) or of unmeasured cost (work=0.7). So this is
+   either expensive (jitter costs 15–375%) or of unmeasured cost (work=0.7). So this is
    **not** "robust to every attack except one": the tracker survives the whole tested
    de-periodicisation family at cheap cost, work-variation included. Its role is (a) the
    sharpest proof that a *tracker* is necessary (a cheap/fixed detector is fooled for free)

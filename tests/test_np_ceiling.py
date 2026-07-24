@@ -109,6 +109,25 @@ def test_eval_population_reproduction_is_deterministic():
         assert np.array_equal(a_pos[d][0].P_obs, b_pos[d][0].P_obs)
 
 
+def test_structural_neg_sampler_covers_the_full_mix(monkeypatch):
+    """The structural negative-PSD sampler must draw ALL of ar1/ar1_t/controller
+    over many MC draws, not just ar1 -- guards the round-robin n=1 -> [1,0,0] trap
+    that would silently fit the 'structural' ceiling against an ar1-only null."""
+    seen = []
+    orig = driver.bakeoff._make_structural_negatives
+
+    def spy(n, r, names=driver.bakeoff.STRUCTURAL_MIX):
+        seen.append(tuple(names))
+        return orig(n, r, names=names)
+
+    monkeypatch.setattr(driver.bakeoff, "_make_structural_negatives", spy)
+    rng = np.random.default_rng(0)
+    for _ in range(200):
+        driver.NEG_SAMPLERS["structural"](rng)
+    drawn = {nm for names in seen for nm in names}
+    assert drawn == set(driver.bakeoff.STRUCTURAL_MIX)
+
+
 # ---------------------------------------------------------------------------
 # headline sanity: the ceiling dominates the spectral matched filter at drift 0
 # ---------------------------------------------------------------------------

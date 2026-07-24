@@ -69,6 +69,15 @@ python scripts/st1_sweeps.py              # -> results/st1/sweeps/*.json
 produces, so run `st1_far.py` first. The full surrogate FAR grid is the only expensive
 step (minutes locally; a slurm array on OzSTAR for the definitive S=999, M=10⁴ run).
 
+**ST1 — NP-optimal Whittle-LRT ceiling (Phase 2, optional; slurm):**
+```
+sbatch scripts/slurm/st1_np_ceiling.sbatch   # -> results/st1/np_ceiling_summary.json + figures/st1_np_ceiling.*
+python scripts/plot_st1_np_ceiling.py         # re-draw the figure from the summary
+```
+The single ~10–15 min task builds the shared Whittle template bank, fits the three
+ceilings, and reports each bake-off detector as a fraction of the NP-optimal power. Local
+use is `python scripts/st1_np_ceiling.py --smoke` only (repo policy: freezes on slurm).
+
 ## Build the paper
 
 ```

@@ -1154,9 +1154,7 @@ class NpCeilingParams:
     drifts: tuple[float, ...] = (0.0, 0.1, 0.2, 0.4, 0.8, 1.5)
     eval_seed: int = 20260721                # == bake-off seed (parity)
     corpus_seed_offset: int = 90_000_000     # disjoint MC-corpus rng stream
-    # Whittle band (defaults to the ST1 detector band at call time if None).
-    band_lo: float | None = None
-    band_hi: float | None = None
+    # Whittle band == the ST1 detector band (DEFAULT.st1.band_lo/hi) at call time.
     psd_floor: float = 1e-12                 # guard log / division against a zero PSD bin
 
 

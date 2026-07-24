@@ -44,10 +44,11 @@ arrays, so any sampler can feed them.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable
 
 import numpy as np
+from scipy.special import logsumexp
 
 from ..config import DEFAULT, KoTypeBParams, KoWorkloadParams
 from ..forward import TraceSpec, make_time_grid, simulate
@@ -123,8 +124,6 @@ def train_obs_at_f0(
     ko_p: KoWorkloadParams,
     glue: KoTypeBParams,
     rng: np.random.Generator,
-    *,
-    f_max: float | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """One observed TRAINING power trace with the line frequency pinned to ``f0``.
 
@@ -133,7 +132,7 @@ def train_obs_at_f0(
     ``η`` owned by the glue) EXACTLY, except it fixes ``f0`` instead of drawing it —
     the template bank needs the class-conditional periodogram at a known ``f0``.
     """
-    f_max = DEFAULT.floor.F_max if f_max is None else f_max
+    f_max = DEFAULT.floor.F_max
     f_peak = glue.f_peak_frac * f_max
     t = make_time_grid(glue.duration_s, 1.0 / glue.fs)
     F = training_F(
@@ -169,22 +168,15 @@ class WhittleCeiling:
     c_bank: np.ndarray                # Σ_f log S_tr(·; f0_k)   (K,)
     inv_S_neg: np.ndarray             # 1/S_neg(f)   (F,)
     c_neg: float                      # Σ_f log S_neg(f)
-    S_bank: np.ndarray = field(repr=False)   # raw templates (K, F) — kept for I/O
-    S_neg: np.ndarray = field(repr=False)    # raw negative PSD (F,)
 
     def score(self, t: np.ndarray, p_obs: np.ndarray) -> float:
         """NP-ceiling log-LR for one trace (larger ⇒ more training-like)."""
         ordinates, _ = band_periodogram(t, p_obs, self.band_lo, self.band_hi)
         # ℓ_tr(x | f0_k) = −(c_k + Σ_f I(f)/S_k(f)); marginalise f₀ by logsumexp.
         loglik_tr = -(self.c_bank + self.inv_S_bank @ ordinates)     # (K,)
-        marg_tr = _logsumexp(loglik_tr)
+        marg_tr = float(logsumexp(loglik_tr))
         loglik_neg = -(self.c_neg + float(self.inv_S_neg @ ordinates))
         return float(marg_tr - loglik_neg)
-
-
-def _logsumexp(v: np.ndarray) -> float:
-    m = float(np.max(v))
-    return m + float(np.log(np.sum(np.exp(v - m))))
 
 
 def score_ceiling(ceiling: WhittleCeiling, traces) -> np.ndarray:
@@ -215,8 +207,6 @@ def _bank_from_psds(
         c_bank=np.sum(np.log(S_bank), axis=1),
         inv_S_neg=1.0 / S_neg,
         c_neg=float(np.sum(np.log(S_neg))),
-        S_bank=S_bank,
-        S_neg=S_neg,
     )
 
 
