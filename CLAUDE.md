@@ -88,7 +88,10 @@ certifying-training-from-power/
 ## Paper
 
 - `paper/main.tex`, arXiv preprint style (`arxiv.sty`). Figures via `\graphicspath{{../figures/}}`.
-- Build: `cd paper && latexmk -pdf main.tex`. Bibliography: `paper/references.bib`.
+- Build: `cd paper && SOURCE_DATE_EPOCH=0 FORCE_SOURCE_DATE=1 latexmk -f -pdf main.tex`.
+  The env vars pin the embedded `/CreationDate` so the build is byte-reproducible;
+  `paper/main.pdf` is **tracked**, so rebuild and commit it whenever `main.tex` changes.
+  Bibliography: `paper/references.bib`.
 - The manuscript is currently a **scaffold**: each section opens with a red TODO
   checklist and prose is filled in as Phase 1–4 land. Delete the `checklist`/`todo`
   environments before submission.

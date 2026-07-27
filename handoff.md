@@ -2,7 +2,7 @@
 
 ## What happened this session
 
-Closed **both remaining Phase-4 items** on branch **`phase-4`** (committed, not pushed).
+Closed **both remaining Phase-4 items** on branch **`phase-4`** (pushed; PR #16 open).
 Note the request's framing was slightly off: the negative transport case (§9) and the
 per-rung ceiling discussion (§10) were already written and merged on 2026-07-24 (`aff8f7b`).
 What actually remained was the identifiability theory section, plus the Pareto re-plot.
@@ -75,7 +75,8 @@ counted on stdout rather than dropped.
 
 Ran the pre-merge review over the branch (6 review agents + 2 adversarial verifiers).
 Verdict was **DO NOT MERGE**, and it was right. All findings are now fixed; the report is
-in `PR_REVIEW_phase-4_2026-07-24.md` (untracked, and `PR_REVIEW_*.md` is now gitignored).
+was untracked and `PR_REVIEW_*.md` is now gitignored, so the record lives in this file,
+`tasks.md` and `log.md` rather than in a report committed to the repo.
 
 **Two blocking findings — both internal contradictions in claims stated as proved:**
 
@@ -92,26 +93,29 @@ in `PR_REVIEW_phase-4_2026-07-24.md` (untracked, and `PR_REVIEW_*.md` is now git
    the discarded-update decoy, the one control for which `prop:noident` actually argues.
 
 **A factor-of-π error that made the paper stronger.** Carrying the Lorentzian/bin algebra
-through gives the parameter-free **κ = π²f₀T = 2961**, which the fit matches to **2%**.
+through gives the parameter-free **κ = π²f₀T = 2961**, which the fit matches to **4%**
+(3068; 2812, i.e. 5%, restricted to the faithful σ ≤ 0.1 regime).
 The paper had claimed only "within a factor of about three" of πf₀T = 942 and called the
 prefactor irreducible. The derivation pins it; `eq:arctan`/`eq:kappa` now show the work.
 
-**σ\* re-derived at n=600** (was 80, ~100 s). At n=80 the H0 floor of J is ~0.09, so a
+**σ\* re-derived at n=600** (was 80, ~30 s). At n=80 the H0 floor of J is 0.25 (against
+0.093 at n=600; ~0.09 is the *mean* of the n=80 null, not the floor), so a
 *null* point (AUC 0.4967 — the script's own mask already excluded it from the Gini fit)
 carried 78% of the fit leverage; κ_J varied 4× across seeds and P(σ\*(0.2) > 0.35) = 0.61,
 i.e. the published price bracket was more likely wrong than right. Now masked on the
-n-dependent floor with bootstrap CIs: **κ_J = 28 [23, 37]**, **σ\*(0.5) = 0.19
-[0.17, 0.21]**, **σ\*(0.2) = 0.38 [0.33, 0.42]**. σ\*(0.2) moved up a cost bracket, so the
+n-dependent floor with bootstrap CIs: **κ_J = 32 [24, 40]**, **σ\*(0.5) = 0.18
+[0.16, 0.20]**, **σ\*(0.2) = 0.36 [0.32, 0.41]**. σ\*(0.2) moved up a cost bracket, so the
 paper now states the price as an order of magnitude — "tens of percent", "of order 100% or
 more" — rather than two-anchor brackets. The artefact computes `sigma_faithful_max` and
-flags thresholds beyond it, and reports a faithful-only refit (κ = 19) as the sensitivity.
+flags thresholds beyond it, and reports a faithful-only refit (κ = 22) as the sensitivity.
 
 **Also fixed:** `rem:direction` had it backwards — since J ≤ TV the bound is valid against
-*every* verifier class and merely *loose* against the tracker, so the old wording undersold
-it (§2/§6/§10 all corrected); ε^(−1/2) moved out of the proposition (it is fit
-extrapolation); one-sided vs two-sided KS wording; R² now computed over fitted points only;
-the unqualified "work is more detectable at matched σ" restricted to σ ≥ 0.1 (it is false
-at 6 of 11 σ); the §6 staircase maximum (0.82) stated; `edition = {Second}`.
+any class *containing* the exhibited test and merely *loose* against the tracker, so the
+old wording undersold it (§2/§6/§10 all corrected); ε^(−1/2) moved out of the proposition
+(it is fit extrapolation); one-sided vs two-sided KS wording; R² now computed over fitted
+points only; the "work is more detectable at matched σ" claim now holds at every σ ≥ 0.05
+(see the 2026-07-27 arms fix below); the §6 staircase maximum (0.82) stated;
+`edition = {Second}`.
 
 **Engineering:** `_youden` had zero test coverage while supplying every published
 threshold — new `tests/test_lower_bound_spike.py`, 14 tests including a scipy KS oracle and
@@ -123,18 +127,63 @@ simplifications applied (dead `--stem`, loop-carried `n_unpriced`, dead `label=`
 set, `_invert` → module-level `_covertness_thresholds`, shared `FAMILY_COLOR` in
 `plotstyle`, vacuous test assertion). `log.md` back-filled.
 
+## 2026-07-27: second /check-PR pass over `b6d9eb8`, and the arms fix
+
+Re-reviewed the fix commit itself (6 agents + 10 adversarial verifiers). **No CRITICAL
+survived**: the one raised (`prop:sigmastar` monotonicity) was downgraded because the
+commit had *replaced a bogus derivation with an honest disclaimer*, and three separate
+verifiers found b6d9eb8 removed defective reasoning rather than adding it. Three MAJORs
+were refuted outright (bootstrap-untested; σ\*-bias-direction; bootstrap-CI-mixture).
+
+**The one real scientific defect — the "matched distortion" comparison was not matched.**
+Found independently by two agents. `_train_scores(work=True)` passed `KO` unmodified, so
+`KoWorkloadParams.sigma_jitter` kept its **0.1** default *and* added `work_sigma`, while
+the jitter arm set `sigma_jitter=σ` with no work variation. Signature: J_work(σ=0) = 0.862
+≈ J_jitter(σ=0.1) = 0.885. This is what produced the sub-0.1 "work is less detectable"
+reversals — a parameterisation artefact reported as a physical finding.
+
+**Fixed and re-run** (work arm now zeroes `sigma_jitter` before applying `work_sigma`).
+The result is *cleaner*: work ≥ jitter at every σ ≥ 0.05, an exact tie at σ = 0, and the
+sub-0.05 gaps ≤ 0.005 (inside sampling error). Superseding numbers, all inside the old
+CIs — **κ_J = 32 [24, 40]** (was 28 [23, 37]), R² 0.90; **σ\*(0.5) = 0.18 [0.16, 0.20]**,
+**σ\*(0.2) = 0.36 [0.32, 0.41]**, σ\*(0.1) = 0.53, σ\*(0.05) = 0.78; faithful-only refit
+κ_J = 22. Coherent κ = 3068 (4% off analytic; 2812, i.e. 5%, over σ ≤ 0.1).
+**The cost brackets are unchanged** — 32–66% and 159–375% — so every pricing conclusion
+and `tab:closeout` row stands.
+
+**Also fixed:** `rem:direction`'s quantifier (J ≤ TV licenses "any class *containing* the
+exhibited test", not "every verifier class" — the tracking class is disjoint from the
+fixed class, not a superset) at 4 sites; the "better than 1%" Lorentzian-vs-arctan claim
+(actually 22% at σ=0.02); README's fictitious "5 failed / 208 passed" baseline (it is
+**213/0** in the pinned venv) and its unconditional bit-for-bit claim; the 0.09-at-n=80
+floor error in 4 files (the n=80 floor is **0.25**; 0.09 is the n=600 value).
+
+**`plotstyle` now pins DejaVu Sans first** (was Helvetica-first). Every tracked figure was
+rendered with DejaVu; Helvetica resolves only on some machines and the silent fallback
+changes text metrics and therefore figure bytes. This is what makes regenerate-and-diff
+usable.
+
+**Reproducibility, measured properly this time.** In a venv built from `requirements.txt`
+verbatim the spike is byte-identical run-to-run. *Across* machines it is not, and cannot
+be: pinning numpy does not pin the BLAS (ULP drift, worst 5e-14, no published value moves),
+PNG bytes embed the matplotlib version and a zlib-build-dependent stream, and PDF metrics
+follow the system fonts. README now says this.
+
 ## Current status
 
-- Branch `phase-4`, committed locally, **not pushed**; no PR opened.
-- **Verification done:** full suite **5 failed / 208 passed** (the 5 are the known BLAS
-  byte-identity digests — environmental, unchanged; count is now recorded in README);
-  new pareto tests 7/7 and spike tests 14/14; `git diff results/st2/` empty (frontier
-  summary only read); spike JSON and both figure PNGs regenerate byte-identically;
-  static LaTeX check — `checklist` envs **4→2**, all envs balanced, all `\cref` targets
-  resolve, all cite keys in bib, all 12 graphics stems on disk, zero stale `prop:cost`
-  refs; and a **28-point numeric re-audit** against the regenerated artefacts, which
-  caught one last rounding slip (coherent $R^2$ 0.96 → 0.95).
-- **No PDF has ever been built** — no TeX toolchain on the dev node.
+- Branch `phase-4`, pushed; **PR #16 open** against `main`. Second review verdict:
+  **MERGE AFTER FIXES**, and the fixes are applied (2026-07-27, uncommitted at time of
+  writing).
+- **Verification done (2026-07-27, in a venv built from `requirements.txt` verbatim):**
+  full suite **213 passed / 0 failed**; `git diff results/st2/` empty (the frontier
+  freeze is only ever read); the spike regenerates byte-identically run-to-run in a
+  fixed environment; and a full re-audit of every quoted number against the regenerated
+  artefacts after the arms fix.
+- **The PDF now builds** — this laptop has a TeX toolchain, unlike the dev node.
+  `latexmk`: **24 pages, 0 errors, 0 undefined refs, 0 undefined citations, 0 overfull
+  boxes**, all 12 graphics resolving. First time the manuscript has ever been compiled.
+  (One first-pass `natbib` notice from `\usepackage{natbib}` + `\bibliographystyle{unsrt}`
+  resolves on the bibtex pass — pre-existing config, harmless.)
 
 ## Next steps
 
