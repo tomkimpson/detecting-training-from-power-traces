@@ -94,9 +94,15 @@ def apply_house_style() -> None:
     """Apply the shared SciencePlots + repo-override rcParams. Idempotent."""
     plt.style.use(["science", "nature", "no-latex"])
     plt.rcParams.update({
-        # sans-serif Nature look; math glyphs in a matching sans face
+        # sans-serif Nature look; math glyphs in a matching sans face.
+        # DejaVu Sans first ON PURPOSE: it ships with matplotlib, so it resolves
+        # identically on every machine. Helvetica/Arial resolve only where the
+        # system happens to have them, and the fallback silently changes text
+        # metrics -> different tight-bbox -> different figure bytes. Every figure
+        # tracked in this repo was rendered with DejaVu; pinning it first is what
+        # makes "regenerate and diff" a usable reproducibility check.
         "font.family": "sans-serif",
-        "font.sans-serif": ["Helvetica", "Arial", "DejaVu Sans"],
+        "font.sans-serif": ["DejaVu Sans", "Helvetica", "Arial"],
         "mathtext.fontset": "stixsans",
         # editable embedded TrueType (journal requirement)
         "pdf.fonttype": 42,

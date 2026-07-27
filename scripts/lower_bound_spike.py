@@ -79,10 +79,10 @@ from powerladder.typeb.deperiod import cadence_cv, phase_diffusion_coeff  # noqa
 
 # --- parameters (no magic numbers below) -------------------------------------
 SEED = 0
-# 600 traces/class/level. The original 80 was too few: the H0 fluctuation of the
-# one-sided KS statistic is ~0.10 at n=80 (see _ks_null_floor), comparable to the
-# epsilons being inverted, which left kappa_J varying ~4x across seeds and the
-# derived sigma*(eps) unstable by ~2x. At 600 the floor drops to ~0.04.
+# 600 traces/class/level. The original 80 was too few: the H0 floor of the
+# one-sided KS statistic is 0.25 at n=80 (see _ks_null_floor), larger than every
+# epsilon being inverted, which left kappa_J varying ~4x across seeds and the
+# derived sigma*(eps) unstable by ~2x. At 600 the floor drops to 0.093.
 N_EACH = 600
 F0_HZ = 1.0                       # fixed iteration cadence for a clean overlay
 SIGMAS = (0.0, 0.01, 0.02, 0.03, 0.05, 0.07, 0.1, 0.15, 0.2, 0.35, 0.5)  # jitter grid
@@ -194,6 +194,13 @@ def _train_scores(sigma: float, work: bool,
     ``work=False``: i.i.d. period jitter (ko_p.sigma_jitter, the accumulating
     family the bound targets). ``work=True``: real-work variation (training_F
     work_sigma), the measured ~zero-cost escape, for comparison.
+
+    BOTH arms set sigma_jitter explicitly so the comparison is at MATCHED total
+    distortion: the work arm zeroes KoWorkloadParams.sigma_jitter (default 0.1)
+    before applying work_sigma. Leaving the default in place would give the work
+    arm 0.1 of period jitter on top of its work variation, which is not a matched
+    comparison -- it made J_work(0) read as J_jitter(0.1) and inverted the
+    ordering of the two curves below sigma = 0.1.
     """
     t = make_time_grid(GLUE.duration_s, 1.0 / GLUE.fs)
     f_max = DEFAULT.floor.F_max
@@ -202,7 +209,8 @@ def _train_scores(sigma: float, work: bool,
     coh = np.empty(N_EACH)
     for i in range(N_EACH):
         if work:
-            F = training_F(t, KO, rng, f_peak=f_peak, f0=F0_HZ,
+            ko = KoWorkloadParams(**{**KO.__dict__, "sigma_jitter": 0.0})
+            F = training_F(t, ko, rng, f_peak=f_peak, f0=F0_HZ,
                            eta_scale=GLUE.eta_scale, work_sigma=sigma)
         else:
             ko = KoWorkloadParams(**{**KO.__dict__, "sigma_jitter": sigma})
