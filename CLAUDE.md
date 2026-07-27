@@ -1,4 +1,4 @@
-# CLAUDE.md — certifying-training-from-power
+# CLAUDE.md — detecting-training-from-power-traces
 
 Paper 2 of the AI-compute-verification programme: *"What a Passive Power Meter Can
 Certify About AI Training."* Spun out from the `analogue-sensors-for-ai-verification`
@@ -33,7 +33,7 @@ monorepo on 2026-07-22 as a clean, single-paper repo.
 ## Project Structure
 
 ```
-certifying-training-from-power/
+detecting-training-from-power-traces/
 ├── powerladder/    # Importable library (the paper-2 detection/scenario code)
 ├── scripts/        # Standalone entry points (run directly)
 ├── data/           # Static input data (e.g. measured cost anchors)

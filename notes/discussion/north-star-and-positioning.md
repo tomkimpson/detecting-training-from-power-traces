@@ -1,4 +1,4 @@
-# North star & positioning — certifying-training-from-power
+# North star & positioning — detecting-training-from-power-traces
 
 **Date:** 2026-07-23
 **Status:** strategic memo (rationale record, not a tracker). Captures a sense-making

@@ -1,4 +1,4 @@
-# Research log — certifying-training-from-power
+# Research log — detecting-training-from-power-traces
 
 Dated narrative of work sessions, newest at top. Append-only historical record
 (forward-looking state lives in `handoff.md`).

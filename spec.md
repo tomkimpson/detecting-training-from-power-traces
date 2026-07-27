@@ -1,4 +1,4 @@
-# spec.md — certifying-training-from-power
+# spec.md — detecting-training-from-power-traces
 
 **Source of truth for project scope.** Do not modify without explicit approval. The
 detailed realisation (methods, staged plan, wording discipline) lives in

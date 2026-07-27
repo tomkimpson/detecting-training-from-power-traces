@@ -1,4 +1,4 @@
-# tasks.md — certifying-training-from-power
+# tasks.md — detecting-training-from-power-traces
 
 Phased task tracker for Paper 2. Phasing follows
 [`notes/plans/plan-for-paper-2.md`](notes/plans/plan-for-paper-2.md) §8. Mark tasks in-progress /
