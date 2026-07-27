@@ -36,16 +36,56 @@ pytest -p no:debugging -m "not gpu"
 (`-p no:debugging` is retained from the source project. `scikit-learn` is required for
 the RF bake-off baseline tests; without it those 4 tests error out and the rest pass.)
 
+**Known baseline:** in the pinned environment (`requirements.txt`) a clean clone reports
+**213 passed / 0 failed** — verified 2026-07-27 in a fresh venv built from the pins and in
+a conda env with numpy 2.4.4 / scipy 1.17.1. Treat any failure as real.
+
+The exception to watch for is the `ko_workload` / `deperiod` byte-identity and digest
+fixtures: their reference hashes are sensitive to the BLAS build, so on an unpinned or
+differently-built numpy they can fail without anything having regressed. If you see
+failures, check them against the pins before treating them as regressions — but do not
+assume a fixed number of them is expected.
+
 ## Reproduce the results and figures
 
 Everything under `results/` and `figures/` is regenerable. From the repo root:
 
-**ST2 — de-periodicisation frontier (fast, ~2 min):**
+**ST2 — de-periodicisation frontier.** The committed numbers are a slurm freeze
+(`notes/results/st2-frontier-freeze-findings.md`). The first two commands below
+**rebuild** `results/st2/*_summary.json` and overwrite that freeze, so run them on slurm
+(see the array recipe further down), not on the dev node:
 ```
 python scripts/plot_st2_sweeps.py                                    # -> results/st2/*_summary.json, figures/st2_*
 python scripts/plot_st2_frontier.py --b2-dir data/measured_cost_anchors
     # -> results/st2/frontier_summary.json (verdict: GO, provisional=false), figures/st2_frontier.*
 ```
+Only the Pareto re-plot is safe to run locally — it reads `frontier_summary.json` and
+writes no results artefact (~1 s):
+```
+python scripts/plot_st2_pareto.py    # -> figures/st2_cost_pareto.*
+```
+
+**Identifiability — covertness cost bound (lightweight CPU check, ~30 s):**
+```
+python scripts/lower_bound_spike.py
+    # -> results/spike/lower_bound_spike.json, figures/lower_bound_spike.*
+```
+Sanity-checks paper §3 / App. B: the parameter-free coherent-power rolloff
+(`kappa = pi^2 f0 T`), the attained advantage `J = max(TPR-FPR) <= TV`, and the
+covertness thresholds `sigma*(eps)` read off it with bootstrap intervals.
+
+Seeded and deterministic **within a fixed environment**: run it twice on one machine and
+the JSON and both figures come back byte-identical. Across machines they will not, and
+that is expected — `requirements.txt` pins numpy but not the BLAS (last-ULP drift in the
+JSON floats), the PDF's text metrics depend on which fonts the system resolves for the
+SciencePlots `nature` style, and PNG bytes embed the matplotlib version and a
+zlib-build-dependent image stream. With fonts matched the PNGs are pixel-identical. So
+regenerate-and-diff is a valid check on one machine; across machines compare the
+*values*, not the bytes.
+
+n=600 per class: at smaller sizings the H0 floor of `J` (`_ks_null_floor`, mean + 3 sd of
+the one-sided KS null) is on the same scale as the epsilons being inverted — 0.25 at
+n=80 against 0.093 at n=600 — which lets null points into the fit and destabilises it.
 
 **ST2 — meter-requirement boundary sweep ("minimum meter specification", slurm):**
 ```
@@ -90,12 +130,22 @@ use is `python scripts/st1_np_ceiling.py --smoke` only (repo policy: freezes on 
 
 ## Build the paper
 
+`paper/main.pdf` is **tracked**, so you can read the compiled manuscript without a TeX
+toolchain. When you change `main.tex`, rebuild and commit the PDF alongside the source:
+
 ```
-cd paper && latexmk -pdf main.tex
+cd paper && SOURCE_DATE_EPOCH=0 FORCE_SOURCE_DATE=1 latexmk -f -pdf main.tex
 ```
 
-The manuscript is a scaffold in active development: each section opens with a red TODO
-checklist that is deleted before submission.
+The two environment variables pin the PDF's embedded `/CreationDate` to the epoch, which
+makes the build byte-reproducible — without them every rebuild rewrites ~700 kB of binary
+with identical content and the tracked PDF churns on every commit. `-f` carries the build
+past a first-pass `natbib` notice (`\usepackage{natbib}` with `\bibliographystyle{unsrt}`)
+that resolves once the bibtex pass has run.
+
+Current state: **24 pages, 0 errors, 0 undefined references or citations.** The manuscript
+is still a scaffold in active development — two sections open with a red TODO checklist
+that is deleted before submission.
 
 ## Layout
 

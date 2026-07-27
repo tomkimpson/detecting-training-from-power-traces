@@ -20,7 +20,11 @@ venv/
 *.fdb_latexmk
 *.synctex.gz
 *.toc
-paper/main.pdf
+# paper/main.pdf is deliberately TRACKED (not ignored): the compiled manuscript is
+# the artefact collaborators actually read, and for most of this project's life no
+# dev node had a TeX toolchain, so a committed PDF is the only way to see the paper
+# without one. Rebuild with the byte-reproducible command in README ("Build the paper")
+# and commit the result alongside the source that produced it.
 
 # Per-cell sweep artifacts (regenerable; only *_summary.json + figures tracked)
 results/st1/raw/
@@ -53,3 +57,6 @@ figures/st1_np_ceiling_smoke.*
 results/st1/slurm/*
 !results/st1/slurm/.gitkeep
 !results/rung2/slurm/.gitkeep
+
+# Pre-merge review artefacts (transient; findings belong in notes/results/)
+PR_REVIEW_*.md

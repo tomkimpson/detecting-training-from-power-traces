@@ -56,6 +56,17 @@ C = {
     "grey": "#9a9a9a",
 }
 
+# ST2 attack-family colours, so the Sec.-6 frontier and Pareto figures read as one
+# system. Single source of truth for new call sites; scripts/plot_st2_frontier.py
+# still carries its own identical copy (same hex values) and should import this
+# instead next time that file is touched -- re-running it rewrites the frozen
+# frontier_summary.json, so it is deliberately left alone here.
+FAMILY_COLOR = {
+    "jitter": C["orange"], "work": C["blue"], "drift": C["green"],
+    "phase": C["vermillion"], "relocate": C["purple"], "harmonic": C["yellow"],
+    "shape": C["skyblue"], "dilute": C["black"], "meter": C["grey"],
+}
+
 # Native figure widths [inches] matched to the single-column (6.5 in) manuscript so
 # the \includegraphics widths render at ~1:1 (no text rescaling):
 #   WIDTH_WIDE   ~ 0.78 * 6.5 in  (Figs 3, 4)
@@ -83,9 +94,15 @@ def apply_house_style() -> None:
     """Apply the shared SciencePlots + repo-override rcParams. Idempotent."""
     plt.style.use(["science", "nature", "no-latex"])
     plt.rcParams.update({
-        # sans-serif Nature look; math glyphs in a matching sans face
+        # sans-serif Nature look; math glyphs in a matching sans face.
+        # DejaVu Sans first ON PURPOSE: it ships with matplotlib, so it resolves
+        # identically on every machine. Helvetica/Arial resolve only where the
+        # system happens to have them, and the fallback silently changes text
+        # metrics -> different tight-bbox -> different figure bytes. Every figure
+        # tracked in this repo was rendered with DejaVu; pinning it first is what
+        # makes "regenerate and diff" a usable reproducibility check.
         "font.family": "sans-serif",
-        "font.sans-serif": ["Helvetica", "Arial", "DejaVu Sans"],
+        "font.sans-serif": ["DejaVu Sans", "Helvetica", "Arial"],
         "mathtext.fontset": "stixsans",
         # editable embedded TrueType (journal requirement)
         "pdf.fonttype": 42,
@@ -154,7 +171,11 @@ def save(fig, stem: str, subdir: str | None = None) -> pathlib.Path:
     out_dir = _FIG_DIR / subdir if subdir else _FIG_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
     pdf = out_dir / f"{stem}.pdf"
-    fig.savefig(pdf)
+    # Suppress the wall-clock /CreationDate matplotlib would otherwise stamp into
+    # the PDF: with it, a tracked figure is byte-different on every regeneration
+    # even when the plot is identical, so "every figure is regenerable" cannot be
+    # checked by regenerate-and-diff and the figures churn in git for no reason.
+    fig.savefig(pdf, metadata={"CreationDate": None})
     fig.savefig(out_dir / f"{stem}.png")
     return pdf
 
