@@ -1,4 +1,4 @@
-# certifying-training-from-power
+# detecting-training-from-power-traces
 
 *What a passive power meter can certify about AI training.*
 
