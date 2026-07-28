@@ -92,7 +92,35 @@
 \printAffiliationsAndNotice{}
 
 \begin{abstract}
-ABSTRACT PENDING.
+Compute-governance regimes that register or restrict large training runs
+presuppose that a regulator can tell when training happens on monitored
+hardware, and a power meter outside the prover's control is the one passive
+channel available against a prover who does not cooperate. We ask what such a
+meter can certify, and organise the answer as a ladder of four claims of
+increasing governance relevance, each with a stated information cost and a hard
+ceiling. Evidence is developed on a literature-parameterized scenario model of
+datacentre AI workloads together with an explicit off-chip observation model,
+against both a benign prover and an adaptive one who knows the detector. We
+find that the iteration cadence of synchronous training is recoverable by a
+tracked cyclostationary detector, but that the complete
+tracker--resample--test pipeline admits no analytic calibration, so we report
+it as an effective score with per-trace surrogate calibration rather than as a
+constant false-alarm-rate test. Our central result is the de-periodicisation
+frontier, which prices hiding against measured throughput anchors and is
+strongly asymmetric: a prover that varies real work per iteration hides from
+every fixed-frequency test at essentially zero cost, while the best anchored
+attack against the tracking class buys little hiding for a $159\%$ overhead.
+Two limits are firmer than the detectors. The observation channel is itself a
+condition on every claim --- a one-second-integrating, one-hertz meter defeats
+all detectors on an unmodified honest workload --- and the meter certifies a
+physical schedule rather than training semantics: five non-training loads,
+including one that computes gradients and discards them, are classified as
+training by every rule we test. Escaping that ceiling requires leaving the
+passive channel for an active challenge protocol, which we specify but do not
+run. Real hardware enters as a negative transport case: on a single GPU the
+cadence signature is roughly $75$ times shallower than the model assumes,
+which we attribute to the absence of distributed synchronisation and state as
+a falsifiable prediction rather than a result.
 \end{abstract}
 
 
@@ -101,9 +129,6 @@ ABSTRACT PENDING.
 \label{sec:intro}
 % ============================================================================
 
-% IMPORTED from paper-verification/main.tex §1 (adapted): governance
-% motivation. Needs revision for the ladder framing — the old text motivates
-% a single detector; the new paper motivates a menu of certifiable claims.
 Compute governance proposals call for evaluations, audits, and the
 registration or prohibition of training runs above specified compute
 thresholds
@@ -122,13 +147,126 @@ prover. This paper asks, as a theory-and-methods question: what can such a
 meter certify, with what methods, at what cost in verifier information, and
 against an adversary who knows the detector?
 
+Our answer is that a passive external power trace can provide calibrated
+structural evidence, and conditional evidence of efficient
+iteration-structured training, but not universal semantic identification. An
+adaptive prover can attack the exposed cadence, and the empirical question is
+what detection--utility frontier erasing it requires. Stronger work
+verification is possible only conditionally, on additional challenge and
+transcript primitives.
+
+\paragraph{A ladder, not a detector.}
+That answer is not a single yes or no, so we do not organise the paper around
+a single test. We organise it as a \emph{claim ladder}
+(\cref{tab:ladder}): four claims of increasing governance relevance, each
+bought at a stated cost in verifier information, and each with a hard ceiling
+that motivates the next. Rung~1 establishes that order-coherent power
+structure is present, which is evidence rather than identification. Rung~2
+converts that structure into training-likeness, at the price of committing to
+an inference null; its ceiling is the semantic decoy. Rung~3 escapes both the
+null and the decoy by binding the physical response to an unpredictable
+challenge, at the price of the prover's cooperation; its ceiling is a
+challenge-aware dummy load. Rung~4 ties the response to declared work, but
+only given a transcript primitive we assume rather than build. Each rung is
+the principled response to the previous rung's ceiling, and the contribution is
+mapping the ladder honestly --- including where each rung stops. The ladder is
+analogous in spirit to an attestation ladder in which more verifier information
+permits a stronger claim at greater institutional cost, but it is a ladder of
+claims and assumptions, not a quantitative bound on unidentified compute.
+
+Within every rung we run two adversary settings: a \textbf{benign}
+(non-adaptive) prover who runs its workload without regard to the meter, and
+an \textbf{adaptive} (hiding) prover who knows the detector and reshapes its
+schedule to evade it. Most of what is interesting lies in the gap between them.
+
+\paragraph{Scope.}
+We use the time-resolved power trace and exclude the integrated-energy channel:
+no bounding of how much compute was performed, no energy-per-token pricing as a
+verification instrument. This is a restriction on the observable, not a claim
+that everything lives in the spectrum --- cyclostationary structure is expressed
+spectrally, but the challenge correlation of Rung~3 is a time-domain operation
+on the same trace.
+
+\paragraph{Target population.}
+We do not claim a recoverable cadence is universally necessary for training.
+Some conceivable execution can be made fully aperiodic. Instead we target
+efficient, synchronous, iteration-structured training that exposes a
+recoverable cadence --- an expected physical signature of that regime,
+especially where distributed synchronisation makes the modulation deep and
+coherent. Destroying that cadence is then an adversarial action with a
+measurable budget, not a counterexample to the method, and measuring that
+budget is what \cref{sec:frontier} does.
+
+\paragraph{Why theory and methods, rather than hardware.}
+We do not have hardware that can test the real question. The iteration cadence
+exists on a single GPU, and our measurements find the corresponding ripple at
+about $0.40\%$ of board power, but a single saturated card has no
+communication phase, so the modulation is shallow and easily washed out. A
+single-node rig matches neither a datacentre nor the aggregate regime of the
+workload model we adopt. All evidence therefore lives on a
+literature-parameterized scenario model (\cref{sec:scenario}), which we are
+careful not to call calibrated: a factor of roughly $75$ separates the
+modulation depth that model assumes from what we measure on one A100. Real
+hardware enters as a negative transport case (\cref{sec:reality}), not as a
+pillar, and the prediction that distributed synchronisation deepens and coheres
+the signature is stated as falsifiable rather than claimed as a result.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+	\setlength{\itemsep}{1pt}
+	\item \textbf{The claim ladder} (\cref{tab:ladder}) as an organising frame
+	for passive compute verification: four claims, their information costs, and
+	their ceilings, closed out one by one in \cref{tab:closeout}.
+	\item \textbf{A tracked cyclostationary detector for Rung~1}
+	(\cref{sec:structural}), with a negative methodological result we report
+	rather than bury: no covariance configuration calibrates the complete
+	tracker--resample--test pipeline end to end, so it is not a constant
+	false-alarm-rate test and we do not present it as one. It is an effective
+	score with per-trace surrogate calibration, level-exact on the
+	linear-stationary nulls we tested. A pre-registered bake-off
+	(\cref{app:bakeoff}) makes the choice of detector an outcome, and against a
+	Whittle likelihood-ratio ceiling the tracker is essentially optimal on the
+	inference null while only the cyclostationary order family approaches the
+	ceiling on structural confusers.
+	\item \textbf{The de-periodicisation frontier} (\cref{sec:frontier}), the
+	central result, priced against measured throughput anchors. Its shape is an
+	asymmetry: against fixed-frequency tests a prover reaches a hiding rate of
+	$0.74$ at essentially zero throughput cost by varying real work per
+	iteration, whereas against the tracking class the best anchored attack
+	reaches only $0.16$ at $159\%$ overhead.
+	\item \textbf{A minimum meter specification} (\cref{subsec:meter_spec}):
+	the observation channel is a first-class condition on every rung, and we
+	locate where each detector class dies in sample rate, integration window,
+	and in-band transfer function. A $1$\,s-integrating, $1$\,Hz-reporting meter
+	defeats every detector on an unmodified honest workload.
+	\item \textbf{Rung-2 classification with semantic falsification controls}
+	(\cref{sec:classification}). Three decision rules separate training from the
+	stated inference null perfectly and survive six domain shifts; but five
+	non-training loads, including a decoy that computes gradients and discards
+	them, all score as training. The meter certifies the physical schedule, not
+	training semantics --- a ceiling no better passive detector removes.
+	\item \textbf{A negative transport case} (\cref{sec:reality}): what we
+	measured on real hardware, why it does not carry the distributed claim, and
+	what would falsify the prediction that it should.
+\end{enumerate}
+
+Supporting these, \cref{subsec:identifiability} gives the formal counterpart of
+the Rung-1 and Rung-2 ceilings: an observational-equivalence argument for why
+no passive test can identify training semantics, and a covertness cost bound
+showing that a prover using i.i.d.\ phase jitter to reach a target covertness
+level against an exhibited verifier must pay in throughput or learning
+efficiency. We are explicit about what that bound does not cover, and
+\cref{sec:frontier} supplies the near-free attack that shows why the gap
+matters.
+
 \begin{table*}[t]
 	\centering
 	\small
-	\caption{The claim ladder (draft from plan \S1.3). Each rung answers a
+	\caption{The claim ladder. Each rung answers a
 	strictly more governance-relevant question at a stated cost in verifier
 	information; each rung's hard ceiling motivates the next. Within each rung
-	we consider a benign (non-adaptive) and an adaptive (hiding) prover.}
+	we consider a benign (non-adaptive) and an adaptive (hiding) prover.
+	\Cref{tab:closeout} closes each rung out against the evidence.}
 	\label{tab:ladder}
 	\begin{tabular}{@{}p{2.6cm}p{4.2cm}p{3.4cm}p{4.6cm}@{}}
 		\toprule
@@ -485,6 +623,203 @@ result, because two steps in its justification are not closed
 \section{Scenario models}
 \label{sec:scenario}
 % ============================================================================
+
+Every number in this paper is produced by one generator, and the generator has
+four layers with different owners. Being explicit about which is which matters
+more here than it usually would, because the credibility of a synthetic result
+rests entirely on where its structure came from. In one sentence: we adopt Ko
+and Zhu's training, fine-tuning, and aggregate workload model; we construct a
+literature-motivated continuous-batching inference null in the same power and
+superposition framework; and Rung-2 conclusions are conditional on that stated
+null. The slow cadence wander, the adversary transformations, and the
+observation map are also ours. \Cref{fig:scenario_traces} shows what the four
+workload classes look like at the meter.
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\linewidth]{scenario_traces}
+	\caption{The four workload classes at the meter, on the nominal channel
+	(20\,Hz sampling, no filtering or decimation, $\sigma_\eta = 4$\,W). Top:
+	a 20\,s excerpt. Bottom: the multitaper spectrum over the
+	$0.3$--$1.7$\,Hz search band, with the true cadence marked. Training,
+	fine-tuning, and the aggregate carry a line at $f_0$; the inference null
+	does not. It is not quiet --- it puts roughly three times the training
+	in-band power into the same band --- but that power is spread, so its
+	peak-to-median contrast is $3.2$ against $44$ for training. A matched
+	filter sees a raised floor and a tracker finds no path to follow. Cadences
+	are pinned for legibility ($f_0 = 0.9$\,Hz training, $0.5$\,Hz
+	fine-tuning); elsewhere they are drawn from the Ko bands.
+	Reproduced by \texttt{scripts/plot\_scenario\_traces.py}.}
+	\label{fig:scenario_traces}
+\end{figure*}
+
+\subsection{Adopted: the Ko--Zhu workload model}
+\label{subsec:ko}
+
+The training and fine-tuning waveforms are Ko and Zhu's
+\citep{ko2025widearea}, taken with their published parameters. Training is a
+two-phase iteration cycle: a compute up-phase at high operation rate followed
+by a communication down-phase at low rate, with the period jittered
+multiplicatively about a cadence $f_0$ drawn uniformly from $0.5$--$1.5$\,Hz,
+the phase ratio drawn per iteration, and both levels perturbed. Fine-tuning is
+the same engine on a second parameter set, with a lower cadence band and a
+deeper tail-to-idle swing. The aggregate is their superposition: one dominant
+training run at nine parts, against a background of smaller trainings and
+fine-tunings at half a part each, all at one meter.
+
+Two adaptations are worth stating. Ko and Zhu write the compute/communication
+phase ratio as $r$; we reserve $r$ for the energy cost per operation of
+\cref{eq:device} and write the ratio $\rho$. And their intra-phase fluctuation
+term is a sub-millisecond effect: a meter integrating at tens of hertz averages
+it far below one sample, so carrying it at full amplitude into a time-resolved
+detector would be a modelling error rather than fidelity. We scale it down and
+let the residual enter through the meter-noise channel of \cref{eq:meter},
+which is where an off-chip instrument actually sees it.
+
+We adopt this layer rather than inventing one for a specific reason. Ko and
+Zhu's model was developed for grid-stability analysis and independently
+reviewed by operators at AWS and Meta, so the training signature we detect is
+not a signature we designed to be detectable.
+
+\subsection{Constructed: the inference null}
+\label{subsec:null}
+
+Ko and Zhu model training, fine-tuning, and their aggregate. They do not
+supply an inference workload, and Rung~2 needs one: without a stated
+alternative, ``this trace is training-like'' has no content. We therefore
+construct an inference null in the same power and superposition framework,
+parameterised from the LLM-serving literature rather than from Ko and Zhu.
+
+It superposes three structures. A decode floor, modelled as band-limited noise
+over $0.1$--$4$\,Hz, stands for continuous batching
+\citep{yu2022orca,kwon2023vllm}: the per-step cadence exists, but the batch
+composition reshuffles every step, so the cadence smears into broadband in-band
+power with no coherent frequency path. A slow Ornstein--Uhlenbeck envelope with
+a $5$\,s correlation time and $40\%$ depth stands for expert-load imbalance
+under sparse routing \citep{shazeer2017moe}; amplitude modulation spreads the
+decode energy into sidebands, which makes the null \emph{harder}, not easier.
+Prefill bursts arrive as a Poisson process at $0.08$\,Hz; memoryless arrivals
+carry no line and simply raise the broadband in-band level.
+
+The design intent is that none of the three carries a line. That is what makes
+the null hard and what \cref{fig:scenario_traces} verifies: the null delivers
+more in-band power than training while showing an order of magnitude less
+spectral contrast. We also build an inference-dominant aggregate, substituting
+this process into the dominant slot of Ko and Zhu's superposition at the same
+power share. The two aggregate classes are then power-matched and both contain
+the background's weak lines, so a detector must find the \emph{dominant} line,
+not merely any line.
+
+Everything downstream inherits the conditionality this creates. Rung-2
+conclusions (\cref{sec:classification}) hold against this null, and a prover
+running an inference workload with structure we have not modelled is outside
+what those conclusions cover.
+
+\subsection{Constructed: cadence wander and the adversary operators}
+\label{subsec:generator_attacks}
+
+Two further additions are ours. The first is honest: a slow
+Ornstein--Uhlenbeck walk of the cadence itself, since a real training run's
+iteration rate drifts with data, checkpointing, and contention. This is not an
+attack, and it is the axis on which fixed-frequency detectors fail first.
+
+The second implements the adversary operators of
+\cref{subsec:adversary} inside the generator, so that each attack costs what
+the physics says it costs rather than being applied as a post-hoc filter. Work
+variation quantises the up-phase into an integer number of gradient-accumulation
+micro-steps and varies that count, which moves real work; crucially the
+down-phase keeps its honest draw, because a synchronous exchange does not
+shrink because the preceding compute phase was shorter. Phase slip diffuses
+iteration boundaries by a Brownian increment while holding the target period
+fixed --- distinct from Ko and Zhu's jitter, which draws independent periods
+and so ties boundary diffusion to the period variance. Harmonic smoothing
+convolves the level waveform with a raised cosine, ramping transitions so the
+harmonic comb dies while the fundamental survives. Shape filling raises the
+down-phase level toward the up-phase, collapsing the swing at matched mean
+power. \Cref{sec:frontier} prices each of these.
+
+\subsection{Constructed: the observation map}
+\label{subsec:obsmap}
+
+The generator produces an operation rate $F(t)$; the device map of
+\cref{eq:device} turns it into device power, and the observation map of
+\cref{eq:meter} turns that into what a verifier reads. The implemented axes
+are: a Butterworth low-pass standing for power-delivery and reporting
+bandwidth; a trailing boxcar integration window; zero-order-hold decimation
+onto a slower sample grid, deliberately without an anti-alias filter so that
+aliasing is representable; an in-band notch of tunable depth and $Q$ for a
+transfer-function anti-resonance near the cadence; a stable gain; additive
+white or AR(1) meter noise; Ornstein--Uhlenbeck baseline wander; and a
+square-wave controller limit cycle whose instantaneous frequency itself
+wanders. One honest limitation: the realised quantisation is temporal --- the
+integration window and the sample grid --- as there is no amplitude-quantisation
+knob in the model.
+
+The default configuration is an exact identity: with every axis off the map
+returns the device trace unchanged and consumes no randomness. That is what
+makes a one-axis-at-a-time sweep interpretable, because any movement is
+attributable to the axis being swept.
+
+\Cref{fig:scenario_meter} runs that sweep on a fixed honest training workload,
+reporting how much of the cadence survives as the ratio of spectral power at
+the known $f_0$ to the in-band power the meter itself contributes. All six axes
+degrade it, and two extinguish it outright within the range a real instrument
+might occupy: a $1$\,s integration window and a $1$\,Hz sample rate. This is a
+statement about the signal in the channel, not about any detector. What each
+detector class does with what survives --- and hence the minimum meter
+specification --- is \cref{subsec:meter_spec}.
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\linewidth]{scenario_meter}
+	\caption{Sensitivity of the cadence signature to the observation map, one
+	axis at a time on a fixed honest training workload ($f_0 = 0.9$\,Hz, 20
+	realisations, median and interquartile range). The measure is spectral
+	power at the known $f_0$ over the in-band power the meter itself
+	contributes, normalised to the nominal channel, so that attenuating axes
+	act on the numerator and additive ones on the denominator and every panel
+	reads the same way: down is worse for the verifier. Crosses mark settings
+	where the cadence is not observable at all. Note $f_0$ is pinned away from
+	$1.0$\,Hz, which would coincide with both the $2$\,Hz Nyquist frequency and
+	the first sinc null of a $1$\,s boxcar. Reproduced by
+	\texttt{scripts/plot\_scenario\_meter.py}.}
+	\label{fig:scenario_meter}
+\end{figure*}
+
+\subsection{Sensitivity, not calibration}
+\label{subsec:sensitivity}
+
+The generator is literature-parameterized, not calibrated. The distinction is
+load-bearing, and the evidence for it is our own: Ko and Zhu's model assumes an
+iteration-cadence modulation of roughly $30\%$ of power, whereas we measure
+about $0.40\%$ of board power at the corresponding frequency on a single A100
+--- a gap of some $75\times$ (\cref{sec:reality}).
+
+That gap is a scale and instrument limit rather than a modelling error. Ko and
+Zhu's deep modulation is a datacentre-aggregate effect driven by distributed
+synchronisation, which a single saturated card does not exhibit because it has
+no communication phase; and the on-device telemetry we measured through is
+itself a smoothed, roughly $10$\,Hz channel. The cadence is real at every
+scale; its power signature is collective. Since the parameters were not fitted
+to measured hardware, we do not claim they were, and we report sensitivity
+analyses instead: results are stated as a function of the generator and
+observation-map parameters rather than at a single privileged operating point.
+(The word ``calibration'' appears elsewhere in this paper in an unrelated
+sense --- the per-trace surrogate calibration of the detector null in
+\cref{subsec:st1} --- which concerns a test's false-alarm rate, not the
+generator's fidelity to hardware.)
+
+\subsection{The transfer family}
+\label{subsec:transfer}
+
+Finally, we fix the population over which \cref{sec:classification} tests
+domain shift. Six shifts move one factor each away from the nominal setting:
+device headroom down to $0.70$ and up to $0.95$ of peak; observation duration
+halved to $150$\,s, which halves the frequency resolution; the cadence band
+shifted up to $0.8$--$1.8$\,Hz, so its top now lies outside the
+$0.3$--$1.7$\,Hz search band; a meter carrying the controller limit cycle; and
+a meter with heavy coloured noise and baseline wander. Decision rules are
+fitted on the nominal population and evaluated on the shifted one zero-shot.
 
 % ============================================================================
 \section{Structural evidence (Rung 1)}
