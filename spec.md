@@ -114,5 +114,5 @@ the Ko-scale modulation from the measured single-GPU cadence).
 
 Phase 0 de-risking gates are **complete** (ST0 desk work; ST1 adaptive-detector null
 validity = **GO, honest reframe**; ST2 de-periodicisation frontier = **GO,
-definitive**). See `tasks.md` for the phased tracker and `notes/results/st1-findings.md` for the
-ST1 gate record. Phase 1 (Rung 1 full) is next.
+definitive**). See `handoff.md` for current status and `notes/results/st1-findings.md` for the
+ST1 gate record. Phases 1–4 are complete; the manuscript is drafted in full.

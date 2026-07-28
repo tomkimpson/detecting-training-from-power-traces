@@ -37,7 +37,7 @@ pytest -p no:debugging -m "not gpu"
 the RF bake-off baseline tests; without it those 4 tests error out and the rest pass.)
 
 **Known baseline:** in the pinned environment (`requirements.txt`) a clean clone reports
-**213 passed / 0 failed** — verified 2026-07-27 in a fresh venv built from the pins and in
+**228 passed / 0 failed** — verified 2026-07-27 in a fresh venv built from the pins and in
 a conda env with numpy 2.4.4 / scipy 1.17.1. Treat any failure as real.
 
 The exception to watch for is the `ko_workload` / `deperiod` byte-identity and digest
@@ -64,6 +64,18 @@ writes no results artefact (~1 s):
 ```
 python scripts/plot_st2_pareto.py    # -> figures/st2_cost_pareto.*
 ```
+
+**Scenario models — example traces and observation-map sensitivity (local, CPU-only,
+~5 s each):**
+```
+python scripts/plot_scenario_traces.py   # -> figures/scenario_traces.*
+python scripts/plot_scenario_meter.py    # -> figures/scenario_meter.*
+```
+The two paper §4 figures. Both generate their own data and write no results artefact,
+so they are safe to run locally. `plot_scenario_traces.py` renders the four workload
+classes (training, fine-tuning, inference null, aggregate) in time and frequency;
+`plot_scenario_meter.py` sweeps each `MeterParams` axis on one fixed honest training
+workload and reports how much of the cadence survives the channel.
 
 **Identifiability — covertness cost bound (lightweight CPU check, ~30 s):**
 ```
@@ -134,24 +146,30 @@ use is `python scripts/st1_np_ceiling.py --smoke` only (repo policy: freezes on 
 toolchain. When you change `main.tex`, rebuild and commit the PDF alongside the source:
 
 ```
-cd paper && SOURCE_DATE_EPOCH=0 FORCE_SOURCE_DATE=1 latexmk -f -pdf main.tex
+cd paper && SOURCE_DATE_EPOCH=1785110400 FORCE_SOURCE_DATE=1 latexmk -f -pdf main.tex
 ```
 
-The two environment variables pin the PDF's embedded `/CreationDate` to the epoch, which
-makes the build byte-reproducible — without them every rebuild rewrites ~700 kB of binary
-with identical content and the tracked PDF churns on every commit. `-f` carries the build
-past a first-pass `natbib` notice (`\usepackage{natbib}` with `\bibliographystyle{unsrt}`)
-that resolves once the bibtex pass has run.
+The two environment variables pin the PDF's embedded `/CreationDate`, which makes the
+build byte-reproducible — without them every rebuild rewrites ~700 kB of binary with
+identical content and the tracked PDF churns on every commit. The epoch is a fixed real
+date (2026-07-27) rather than 0, because the ICML `[preprint]` footer prints `\today`:
+at epoch 0 it reads "Preprint. January 1, 1970." Bump it when you want the printed date
+to move. `-f` carries the build past a first-pass `natbib` notice that resolves once the
+bibtex pass has run.
 
-Current state: **24 pages, 0 errors, 0 undefined references or citations.** The manuscript
-is still a scaffold in active development — two sections open with a red TODO checklist
-that is deleted before submission.
+The manuscript uses the ICML 2026 two-column style in `[preprint]` mode; `icml2026.sty`,
+`icml2026.bst`, `fancyhdr.sty` and `algorithm{,ic}.sty` are vendored in `paper/`.
+
+Current state: **28 pages, 0 errors, 0 overfull boxes, 0 undefined references or
+citations.** All section scaffolds are written; the one item outstanding before
+submission is the third author's affiliation, which still renders as "Affiliation TBD".
 
 ## Layout
 
 - `powerladder/` — library: `st1/` (adaptive structural detector), `typeb/` (detector
   bank + ST2 frontier), `ko_workload.py`, `observation.py`, `config.py`.
-- `scripts/` — the six figure/experiment entry points above.
+- `scripts/` — the figure/experiment entry points above, plus the slurm harnesses
+  in `scripts/slurm/`.
 - `results/`, `figures/` — regenerable outputs.
 - `data/measured_cost_anchors/` — measured GPU throughput anchors (static; see its README).
 - `notes/` — plan, review, ST1 findings, background memo.

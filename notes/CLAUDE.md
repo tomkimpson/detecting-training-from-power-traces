@@ -21,8 +21,8 @@ exception).
 1. **New note → pick the single best-fit directory.** If a note mixes findings with a
    plan, split it or file it by its primary purpose.
 2. **Date + status header at the top** of every note (existing docs follow this).
-3. **Notes are records, not trackers.** Status lives in `tasks.md`, scope in
-   `spec.md`, session state in `handoff.md`. A note captures rationale or findings at
+3. **Notes are records, not trackers.** Status and scope live in `handoff.md` and
+   `spec.md` respectively; session state in `handoff.md`. A note captures rationale or findings at
    a point in time; prefer appending dated sections over silently rewriting history.
 4. **Cross-referencing:** use repo-rooted paths (`notes/plans/…`) from outside
    `notes/`, relative paths within it. Code docstrings and the manuscript cite these
