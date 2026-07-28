@@ -92,35 +92,30 @@
 \printAffiliationsAndNotice{}
 
 \begin{abstract}
-Compute-governance regimes that register or restrict large training runs
-presuppose that a regulator can tell when training happens on monitored
-hardware, and a power meter outside the prover's control is the one passive
-channel available against a prover who does not cooperate. We ask what such a
-meter can certify, and organise the answer as a ladder of four claims of
-increasing governance relevance, each with a stated information cost and a hard
-ceiling. Evidence is developed on a literature-parameterized scenario model of
-datacentre AI workloads together with an explicit off-chip observation model,
-against both a benign prover and an adaptive one who knows the detector. We
-find that the iteration cadence of synchronous training is recoverable by a
-tracked cyclostationary detector, but that the complete
-tracker--resample--test pipeline admits no analytic calibration, so we report
-it as an effective score with per-trace surrogate calibration rather than as a
-constant false-alarm-rate test. Our central result is the de-periodicisation
-frontier, which prices hiding against measured throughput anchors and is
-strongly asymmetric: a prover that varies real work per iteration hides from
-every fixed-frequency test at essentially zero cost, while the best anchored
-attack against the tracking class buys little hiding for a $159\%$ overhead.
-Two limits are firmer than the detectors. The observation channel is itself a
-condition on every claim --- a one-second-integrating, one-hertz meter defeats
-all detectors on an unmodified honest workload --- and the meter certifies a
-physical schedule rather than training semantics: five non-training loads,
-including one that computes gradients and discards them, are classified as
-training by every rule we test. Escaping that ceiling requires leaving the
+Compute-governance regimes that restrict large training runs presuppose that a
+regulator can tell when training happens on monitored hardware, and a power
+meter outside the prover's control is the one passive channel available
+against a prover who does not cooperate. We ask what such a meter can certify,
+and answer with a ladder of four claims, each with a stated information cost
+and a hard ceiling. Evidence comes from a literature-parameterized scenario
+model of datacentre AI workloads and an explicit off-chip observation model,
+against both a benign prover and an adaptive one who knows the detector. The
+iteration cadence of synchronous training is recoverable by a tracked
+cyclostationary detector, but the complete pipeline admits no analytic
+calibration, so we report it as an effective score with per-trace surrogate
+calibration rather than a constant false-alarm-rate test. Our central result
+is the de-periodicisation frontier, which prices hiding against measured
+throughput anchors and is strongly asymmetric: varying real work per iteration
+hides from every fixed-frequency test at essentially zero cost, while the best
+anchored attack against the tracking class buys little hiding for a $159\%$
+overhead. Two limits are firmer than the detectors. The observation channel is
+itself a condition on every claim --- a one-second-integrating, one-hertz
+meter defeats all detectors on an honest workload --- and the meter certifies
+a physical schedule, not training semantics: five non-training loads,
+including one computing gradients and discarding them, are classified as
+training by every rule we test. Escaping that ceiling means leaving the
 passive channel for an active challenge protocol, which we specify but do not
-run. Real hardware enters as a negative transport case: on a single GPU the
-cadence signature is roughly $75$ times shallower than the model assumes,
-which we attribute to the absence of distributed synchronisation and state as
-a falsifiable prediction rather than a result.
+run.
 \end{abstract}
 
 
