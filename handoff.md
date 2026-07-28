@@ -228,3 +228,26 @@ follow the system fonts. README now says this.
   "tidy" those hedges away — they are the difference between the claim being true and false.
 - Idle-jitter cost range: the manuscript says **15–375%** (the frozen number). The spike
   note and plan §5 say 15–680%; prefer the frozen figure in prose.
+
+## Backlog (low priority)
+
+Carried over from `tasks.md`, which was retired on 2026-07-27 once its Phase 0–4
+tracker was fully closed out. Neither item blocks anything.
+
+- **Trim `powerladder/config.py` to paper-2 parameters.** `B2Params`, `BenchConfig`
+  and the beta params are dead weight carried over from the
+  `analogue-sensors-for-ai-verification` monorepo. Grep for uses before deleting —
+  `DEFAULT` is constructed from all of them.
+- **Optionally make `powerladder` pip-installable** (`[project]` + setuptools) and
+  drop the `sys.path.insert` shims at the top of every script in `scripts/`. Note
+  that `tests/test_scenario_figures.py`, `test_st2_pareto.py`, `test_st2_sweeps.py`
+  and `test_lower_bound_spike.py` load scripts by path via `importlib` precisely
+  because `scripts/` is not a package; that idiom would still work, but the shims
+  inside the scripts could go.
+
+## Pre-submission blocker
+
+- **Emlyn Graham's affiliation is unset.** `paper/main.tex:81` renders as
+  "Affiliation TBD" in the author block. `check-arxiv-llm-compliance` flags this as
+  Category B placeholder text, and it is the sole reason that check returns FAIL —
+  everything else is clean. Fix before any arXiv submission.
