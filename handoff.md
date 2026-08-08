@@ -1,4 +1,69 @@
-# Handoff — 2026-07-24 (Phase 4 closed, then hardened by /check-PR)
+# Handoff — 2026-08-07 (research talk drafted and rendered)
+
+## Current status
+
+- Branch: `feat/research-talk`.
+- Added a 21-slide main research talk plus 6 appendix slides in
+  `talk/slides.md`, with presenter notes embedded as Markdown comments.
+- Rendered deliverables: `talk/slides.pdf` (27 pages, 16:9, 3.2 MB) and
+  `talk/slides.html`; reproduction commands are in `talk/README.md` and pin Marp CLI
+  4.5.0.
+- Visually inspected all 27 pages as rasterized contact sheets, then checked the dense
+  Pareto, meter-boundary, semantic-control, and lower-bound slides at higher resolution.
+  No content is clipped in the final render.
+- No Python or paper source changed, so the test suite and paper build were not rerun.
+
+## Talk spine and decisions
+
+The talk is deliberately not a paper-section summary. Its sequence is:
+
+1. governance inverse problem — one external scalar trace;
+2. the synchronous-training cadence hypothesis;
+3. the historical failure mode — Viterbi can follow a real but wrong controller line;
+4. the deeper identifiability limit — even the right schedule does not establish
+   training semantics;
+5. the four-rung claim ladder;
+6. the Rung-1 order-tracking pipeline and the two distinct null/calibration problems;
+7. the de-periodicisation cost frontier as the central empirical result;
+8. the meter boundary and Rung-2 semantic falsification controls;
+9. why stronger Rung-3/4 claims need an active challenge and transcript binding;
+10. the single-A100 negative transport case and an explicit established/open ledger.
+
+One qualification is now in the main talk rather than hidden in notes: the ST2
+“tracking class” curve is a diagnostic per-cell envelope. Raw Viterbi is robust to
+variable-real-work attacks but fails against controller-line structural confusers; the
+order-domain rules reject those confusers but degrade earlier under variable work. The
+project has not yet demonstrated one jointly calibrated deployed decision policy that
+inherits both strengths across the full frontier. A verifier may run any algorithms it
+wants, but the final combined policy (including algorithm selection) must be calibrated
+and evaluated as a whole.
+
+## Next steps
+
+1. Rehearse once and trim to the actual time slot; the current main deck is suited to
+   roughly 20 minutes if the technical figures are narrated selectively.
+2. Use Appendix slide 22 (“The paper spine implied by the talk”) when restructuring the
+   manuscript: identifiability → claim ladder → frontier → ceilings, with detector
+   construction supporting rather than driving the narrative.
+3. Decide whether to add the missing joint-rule experiment before tightening the paper,
+   or scope the frontier language consistently as a detector-class diagnostic.
+4. Highest-value empirical follow-up remains an external meter on synchronized
+   multi-GPU training; the measured single-A100 trace is a negative transport case.
+
+## Key files and gotchas
+
+- Source: `talk/slides.md`; rendered deck: `talk/slides.pdf`; browser version:
+  `talk/slides.html`; build instructions: `talk/README.md`.
+- The deck links directly to generated assets under `figures/`; do not copy or hand-edit
+  them under `talk/`.
+- Rendering needs `--html --allow-local-files` because the deck uses HTML layout and
+  repository-local figures.
+- All positive detection results are labelled synthetic/scenario-based. Keep those
+  labels and the 75× modulation-gap reality-check slide when shortening the talk.
+
+---
+
+# Previous handoff — 2026-07-24 (Phase 4 closed, then hardened by /check-PR)
 
 ## What happened this session
 
