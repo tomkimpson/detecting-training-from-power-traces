@@ -1,0 +1,484 @@
+{
+  "status": "stage-3 identifiable-regime search; not a frozen paper result",
+  "question": "is there a non-saturated regime where true event alignment measurably beats random alignment?",
+  "sizes": {
+    "fit": 30,
+    "evaluation": 30,
+    "random_alignments": 3,
+    "bootstrap": 200
+  },
+  "seed": 20260808,
+  "admission_rule": {
+    "e1_band": [
+      0.7,
+      0.95
+    ],
+    "e0_saturation_ceiling": 0.98,
+    "min_align_plus": 0.1,
+    "min_e0_minus_e1": 0.1
+  },
+  "baseline": {
+    "duration_s": 90.0,
+    "share": null,
+    "f_peak_frac": null,
+    "nulls": "composite"
+  },
+  "points": {
+    "T3": {
+      "spec": {
+        "duration_s": 3.0,
+        "share": null,
+        "f_peak_frac": null,
+        "nulls": "composite"
+      },
+      "e1_auc": 0.9338888888888889,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 0.36833333333333335,
+      "align_plus": 0.6316666666666666,
+      "align_plus_lo": 0.5374513888888889,
+      "align_plus_hi": 0.7261319444444445,
+      "e0_minus_e1": 0.06611111111111112,
+      "event_recall": 0.7472222222222222,
+      "event_timing_error_s": 0.02483937952860199,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": true,
+        "align_plus_large_enough": true,
+        "align_plus_interval_excludes_zero": true,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T5": {
+      "spec": {
+        "duration_s": 5.0,
+        "share": null,
+        "f_peak_frac": null,
+        "nulls": "composite"
+      },
+      "e1_auc": 0.9163888888888889,
+      "e0_true_auc": 0.9997222222222222,
+      "e0_random_auc": 0.39222222222222225,
+      "align_plus": 0.6074999999999999,
+      "align_plus_lo": 0.49384722222222227,
+      "align_plus_hi": 0.7111319444444445,
+      "e0_minus_e1": 0.08333333333333326,
+      "event_recall": 0.7736507936507936,
+      "event_timing_error_s": 0.027295925973708945,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": true,
+        "align_plus_large_enough": true,
+        "align_plus_interval_excludes_zero": true,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T10": {
+      "spec": {
+        "duration_s": 10.0,
+        "share": null,
+        "f_peak_frac": null,
+        "nulls": "composite"
+      },
+      "e1_auc": 0.9738888888888889,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 0.9313888888888889,
+      "align_plus": 0.06861111111111107,
+      "align_plus_lo": 0.018520833333333358,
+      "align_plus_hi": 0.1494236111111112,
+      "e0_minus_e1": 0.026111111111111085,
+      "event_recall": 0.7938394013394013,
+      "event_timing_error_s": 0.023653140153673924,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": false,
+        "align_plus_interval_excludes_zero": true,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T20": {
+      "spec": {
+        "duration_s": 20.0,
+        "share": null,
+        "f_peak_frac": null,
+        "nulls": "composite"
+      },
+      "e1_auc": 1.0,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 0.9819444444444444,
+      "align_plus": 0.018055555555555602,
+      "align_plus_lo": 0.004152777777777764,
+      "align_plus_hi": 0.03833333333333333,
+      "e0_minus_e1": 0.0,
+      "event_recall": 0.8471996552829886,
+      "event_timing_error_s": 0.025175533319115484,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": false,
+        "align_plus_interval_excludes_zero": true,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T45": {
+      "spec": {
+        "duration_s": 45.0,
+        "share": null,
+        "f_peak_frac": null,
+        "nulls": "composite"
+      },
+      "e1_auc": 1.0,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 1.0,
+      "align_plus": 0.0,
+      "align_plus_lo": 0.0,
+      "align_plus_hi": 0.0,
+      "e0_minus_e1": 0.0,
+      "event_recall": 0.7413222931000664,
+      "event_timing_error_s": 0.02404366717569495,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": false,
+        "align_plus_interval_excludes_zero": false,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T90": {
+      "spec": {
+        "duration_s": 90.0,
+        "share": null,
+        "f_peak_frac": null,
+        "nulls": "composite"
+      },
+      "e1_auc": 1.0,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 1.0,
+      "align_plus": 0.0,
+      "align_plus_lo": 0.0,
+      "align_plus_hi": 0.0,
+      "e0_minus_e1": 0.0,
+      "event_recall": 0.7380641056643384,
+      "event_timing_error_s": 0.023174538166950143,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": false,
+        "align_plus_interval_excludes_zero": false,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T90_share0.5": {
+      "spec": {
+        "duration_s": 90.0,
+        "share": 0.5,
+        "f_peak_frac": null,
+        "nulls": "composite"
+      },
+      "e1_auc": 1.0,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 0.9819444444444444,
+      "align_plus": 0.018055555555555602,
+      "align_plus_lo": 0.00415972222222221,
+      "align_plus_hi": 0.036395833333333356,
+      "e0_minus_e1": 0.0,
+      "event_recall": 0.5368671649081949,
+      "event_timing_error_s": 0.028185283917590898,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": false,
+        "align_plus_interval_excludes_zero": true,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T90_share0.35": {
+      "spec": {
+        "duration_s": 90.0,
+        "share": 0.35,
+        "f_peak_frac": null,
+        "nulls": "composite"
+      },
+      "e1_auc": 0.9994444444444445,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 0.9552777777777778,
+      "align_plus": 0.04472222222222222,
+      "align_plus_lo": 0.0122152777777778,
+      "align_plus_hi": 0.08129861111111117,
+      "e0_minus_e1": 0.0005555555555555314,
+      "event_recall": 0.31578557023215514,
+      "event_timing_error_s": 0.029913563540951316,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": false,
+        "align_plus_interval_excludes_zero": true,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T90_share0.2": {
+      "spec": {
+        "duration_s": 90.0,
+        "share": 0.2,
+        "f_peak_frac": null,
+        "nulls": "composite"
+      },
+      "e1_auc": 0.9936111111111111,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 0.9275,
+      "align_plus": 0.07250000000000001,
+      "align_plus_lo": 0.03638194444444447,
+      "align_plus_hi": 0.12113888888888884,
+      "e0_minus_e1": 0.006388888888888888,
+      "event_recall": 0.17864036244570572,
+      "event_timing_error_s": 0.03770516919848799,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": false,
+        "align_plus_interval_excludes_zero": true,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T90_share0.1": {
+      "spec": {
+        "duration_s": 90.0,
+        "share": 0.1,
+        "f_peak_frac": null,
+        "nulls": "composite"
+      },
+      "e1_auc": 0.9997222222222222,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 0.9333333333333333,
+      "align_plus": 0.06666666666666665,
+      "align_plus_lo": 0.03495833333333336,
+      "align_plus_hi": 0.1044652777777778,
+      "e0_minus_e1": 0.0002777777777778212,
+      "event_recall": 0.11856585131089434,
+      "event_timing_error_s": 0.04382146907891887,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": false,
+        "align_plus_interval_excludes_zero": true,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T90_fpk0.425": {
+      "spec": {
+        "duration_s": 90.0,
+        "share": null,
+        "f_peak_frac": 0.425,
+        "nulls": "composite"
+      },
+      "e1_auc": 1.0,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 0.9922222222222222,
+      "align_plus": 0.007777777777777772,
+      "align_plus_lo": 0.0005486111111110888,
+      "align_plus_hi": 0.020284722222222176,
+      "e0_minus_e1": 0.0,
+      "event_recall": 0.8054985518306974,
+      "event_timing_error_s": 0.02481042650596521,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": false,
+        "align_plus_interval_excludes_zero": true,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T90_fpk0.21": {
+      "spec": {
+        "duration_s": 90.0,
+        "share": null,
+        "f_peak_frac": 0.21,
+        "nulls": "composite"
+      },
+      "e1_auc": 1.0,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 0.9947222222222222,
+      "align_plus": 0.005277777777777826,
+      "align_plus_lo": 0.0005486111111110888,
+      "align_plus_hi": 0.012777777777777777,
+      "e0_minus_e1": 0.0,
+      "event_recall": 0.8518752891104601,
+      "event_timing_error_s": 0.02483741462438971,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": false,
+        "align_plus_interval_excludes_zero": true,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T90_fpk0.106": {
+      "spec": {
+        "duration_s": 90.0,
+        "share": null,
+        "f_peak_frac": 0.106,
+        "nulls": "composite"
+      },
+      "e1_auc": 1.0,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 0.9622222222222222,
+      "align_plus": 0.0377777777777778,
+      "align_plus_lo": 0.01719444444444447,
+      "align_plus_hi": 0.06730555555555554,
+      "e0_minus_e1": 0.0,
+      "event_recall": 0.8656662399090441,
+      "event_timing_error_s": 0.025120669892592318,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": false,
+        "align_plus_interval_excludes_zero": true,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T90_fpk0.053": {
+      "spec": {
+        "duration_s": 90.0,
+        "share": null,
+        "f_peak_frac": 0.053,
+        "nulls": "composite"
+      },
+      "e1_auc": 1.0,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 0.9575,
+      "align_plus": 0.04249999999999998,
+      "align_plus_lo": 0.018055555555555602,
+      "align_plus_hi": 0.07140277777777773,
+      "e0_minus_e1": 0.0,
+      "event_recall": 0.719392823605697,
+      "event_timing_error_s": 0.028000322080059092,
+      "n_positive": 30,
+      "n_null": 120,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": false,
+        "align_plus_interval_excludes_zero": true,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T90_surrogate_ft": {
+      "spec": {
+        "duration_s": 90.0,
+        "share": null,
+        "f_peak_frac": null,
+        "nulls": "surrogate_ft"
+      },
+      "e1_auc": 1.0,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 1.0,
+      "align_plus": 0.0,
+      "align_plus_lo": 0.0,
+      "align_plus_hi": 0.0,
+      "e0_minus_e1": 0.0,
+      "event_recall": 0.8157067071918719,
+      "event_timing_error_s": 0.024936452667986053,
+      "n_positive": 30,
+      "n_null": 30,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": false,
+        "align_plus_interval_excludes_zero": false,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    },
+    "T90_surrogate_aaft": {
+      "spec": {
+        "duration_s": 90.0,
+        "share": null,
+        "f_peak_frac": null,
+        "nulls": "surrogate_aaft"
+      },
+      "e1_auc": 0.9977777777777778,
+      "e0_true_auc": 1.0,
+      "e0_random_auc": 0.8188888888888889,
+      "align_plus": 0.1811111111111111,
+      "align_plus_lo": 0.08872222222222224,
+      "align_plus_hi": 0.29227777777777786,
+      "e0_minus_e1": 0.0022222222222222365,
+      "event_recall": 0.7533220236587401,
+      "event_timing_error_s": 0.02474035918086548,
+      "n_positive": 30,
+      "n_null": 30,
+      "verdict": {
+        "e0_not_saturated": false,
+        "e1_in_measurable_band": false,
+        "align_plus_large_enough": true,
+        "align_plus_interval_excludes_zero": true,
+        "estimation_gap_large_enough": false,
+        "credible_channel": true,
+        "admitted": false
+      }
+    }
+  },
+  "n_points": 16,
+  "desaturated_points": [
+    "T3",
+    "T5"
+  ],
+  "admitted_points": [],
+  "any_admitted": false,
+  "elapsed_s": 39.11495876312256
+}

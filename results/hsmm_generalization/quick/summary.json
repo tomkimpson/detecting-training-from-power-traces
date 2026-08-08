@@ -1,0 +1,5341 @@
+{
+  "status": "stage-1 generalization falsification; not a frozen paper result",
+  "method": "blind marked-renewal E1 re-fitted under positive-family and null-family holdouts; no HSMM E2",
+  "duration_s": 60.0,
+  "fs": 20.0,
+  "sizes": {
+    "fit_total_per_config": 25,
+    "fit_pool_per_condition": 25,
+    "fit_per_null_family": 10,
+    "calibration": 20,
+    "evaluation": 20
+  },
+  "seed": 20260807,
+  "target_far": 0.05,
+  "feature_names": [
+    "event_rate_hz",
+    "paired_fraction",
+    "duration_median_s",
+    "duration_cv",
+    "amplitude_median_z",
+    "amplitude_cv",
+    "plateau_abs_slope",
+    "plateau_noise",
+    "edge_balance",
+    "shape_repeatability",
+    "interval_cv"
+  ],
+  "feature_set_removed": {
+    "full": [],
+    "local_only": [
+      "event_rate_hz",
+      "interval_cv"
+    ],
+    "shape_duration": [
+      "event_rate_hz",
+      "interval_cv",
+      "amplitude_median_z",
+      "amplitude_cv"
+    ]
+  },
+  "null_families": [
+    "inference",
+    "ar1",
+    "ar2_resonant",
+    "controller",
+    "controller_ar1",
+    "periodic_inference"
+  ],
+  "configurations": {
+    "pooled_baseline": {
+      "kind": "positive_fit",
+      "fit_conditions": {
+        "honest": 5,
+        "work_0.5": 5,
+        "work_0.7": 5,
+        "drift_0.8": 5,
+        "drift_1.5": 5
+      },
+      "fit_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [],
+      "held_out_null": null,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 403.60890753362634,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 106.2876273677953
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1569.2674758521782
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 6185.854183993313
+            },
+            "drift_0.8": {
+              "auc_union": 0.9941666666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.965,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.965,
+              "tpr_at_composite_far": 0.3,
+              "score_median": 165.6163557114309
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 310.38618423359793
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 334.8360249591921,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 94.57367755246638
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1161.2153830864156
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 5129.799637758562
+            },
+            "drift_0.8": {
+              "auc_union": 0.9945833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9675,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9675,
+              "tpr_at_composite_far": 0.35,
+              "score_median": 108.69545315820955
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 231.04277257350546
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 88.62099841312728,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 50.556099333437814
+            },
+            "work_0.5": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 71.56054446067262
+            },
+            "work_0.7": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 55.82779189956848
+            },
+            "drift_0.8": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 31.729418832620546
+            },
+            "drift_1.5": {
+              "auc_union": 0.9791666666666666,
+              "auc_by_null": {
+                "inference": 0.9725,
+                "ar1": 0.9725,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.98
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 17.01498195291579
+            }
+          }
+        }
+      },
+      "oracle": {
+        "threshold": -3614.225932284903,
+        "calibration_fpr": {
+          "inference": 0.0,
+          "ar1": 0.0,
+          "ar2_resonant": 0.0,
+          "controller": 0.0,
+          "controller_ar1": 0.0,
+          "periodic_inference": 0.05
+        },
+        "evaluation_fpr": {
+          "inference": 0.05,
+          "ar1": 0.0,
+          "ar2_resonant": 0.0,
+          "controller": 0.0,
+          "controller_ar1": 0.0,
+          "periodic_inference": 0.15
+        },
+        "conditions": {
+          "honest": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 130.09476753687713
+          },
+          "work_0.5": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 1743.0005497696561
+          },
+          "work_0.7": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 6810.738595676459
+          },
+          "drift_0.8": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 177.78040836459704
+          },
+          "drift_1.5": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 413.15662993011836
+          }
+        }
+      }
+    },
+    "honest_only": {
+      "kind": "positive_fit",
+      "fit_conditions": {
+        "honest": 25
+      },
+      "fit_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [
+        "work_0.5",
+        "work_0.7",
+        "drift_0.8",
+        "drift_1.5"
+      ],
+      "held_out_null": null,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": -61.74877702630821,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.05,
+            "ar2_resonant": 0.05,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.05
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.05,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.1
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 117.80859086351303
+            },
+            "work_0.5": {
+              "auc_union": 0.975,
+              "auc_by_null": {
+                "inference": 0.965,
+                "ar1": 0.985,
+                "ar2_resonant": 0.9525,
+                "controller": 1.0,
+                "controller_ar1": 0.9925,
+                "periodic_inference": 0.955
+              },
+              "min_auc": 0.9525,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 1440.498791473288
+            },
+            "work_0.7": {
+              "auc_union": 0.9541666666666667,
+              "auc_by_null": {
+                "inference": 0.95,
+                "ar1": 0.965,
+                "ar2_resonant": 0.95,
+                "controller": 0.95,
+                "controller_ar1": 0.96,
+                "periodic_inference": 0.95
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 4906.061446829533
+            },
+            "drift_0.8": {
+              "auc_union": 0.9570833333333333,
+              "auc_by_null": {
+                "inference": 0.95,
+                "ar1": 0.9725,
+                "ar2_resonant": 0.95,
+                "controller": 0.95,
+                "controller_ar1": 0.97,
+                "periodic_inference": 0.95
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 142.6725031324229
+            },
+            "drift_1.5": {
+              "auc_union": 0.9008333333333334,
+              "auc_by_null": {
+                "inference": 0.9,
+                "ar1": 0.9,
+                "ar2_resonant": 0.9,
+                "controller": 0.9,
+                "controller_ar1": 0.905,
+                "periodic_inference": 0.9
+              },
+              "min_auc": 0.9,
+              "tpr_at_composite_far": 0.9,
+              "score_median": 190.26010710314512
+            }
+          }
+        },
+        "local_only": {
+          "threshold": -63.493751319437216,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.05,
+            "ar2_resonant": 0.05,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.05
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.05,
+            "ar2_resonant": 0.1,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.15
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 105.603291872585
+            },
+            "work_0.5": {
+              "auc_union": 0.9675,
+              "auc_by_null": {
+                "inference": 0.9575,
+                "ar1": 0.98,
+                "ar2_resonant": 0.95,
+                "controller": 0.98,
+                "controller_ar1": 0.9875,
+                "periodic_inference": 0.95
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 1059.280522100721
+            },
+            "work_0.7": {
+              "auc_union": 0.9529166666666666,
+              "auc_by_null": {
+                "inference": 0.95,
+                "ar1": 0.96,
+                "ar2_resonant": 0.95,
+                "controller": 0.95,
+                "controller_ar1": 0.9575,
+                "periodic_inference": 0.95
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 4040.332697603283
+            },
+            "drift_0.8": {
+              "auc_union": 0.9558333333333333,
+              "auc_by_null": {
+                "inference": 0.95,
+                "ar1": 0.9675,
+                "ar2_resonant": 0.95,
+                "controller": 0.95,
+                "controller_ar1": 0.9675,
+                "periodic_inference": 0.95
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 105.57229069032203
+            },
+            "drift_1.5": {
+              "auc_union": 0.89875,
+              "auc_by_null": {
+                "inference": 0.9,
+                "ar1": 0.8975,
+                "ar2_resonant": 0.8975,
+                "controller": 0.9,
+                "controller_ar1": 0.905,
+                "periodic_inference": 0.8925
+              },
+              "min_auc": 0.8925,
+              "tpr_at_composite_far": 0.9,
+              "score_median": 141.22208580969118
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": -49.90066548706859,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.05,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.05
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.05
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 53.48572470776065
+            },
+            "work_0.5": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 72.03995108398885
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 57.29792641661324
+            },
+            "drift_0.8": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 31.855260964400358
+            },
+            "drift_1.5": {
+              "auc_union": 0.9095833333333333,
+              "auc_by_null": {
+                "inference": 0.9,
+                "ar1": 0.9425,
+                "ar2_resonant": 0.8925,
+                "controller": 0.905,
+                "controller_ar1": 0.94,
+                "periodic_inference": 0.8775
+              },
+              "min_auc": 0.8775,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 11.241253350286497
+            }
+          }
+        }
+      },
+      "oracle": {
+        "threshold": -22971.148920936786,
+        "calibration_fpr": {
+          "inference": 0.0,
+          "ar1": 0.0,
+          "ar2_resonant": 0.0,
+          "controller": 0.0,
+          "controller_ar1": 0.0,
+          "periodic_inference": 0.05
+        },
+        "evaluation_fpr": {
+          "inference": 0.05,
+          "ar1": 0.0,
+          "ar2_resonant": 0.0,
+          "controller": 0.0,
+          "controller_ar1": 0.0,
+          "periodic_inference": 0.2
+        },
+        "conditions": {
+          "honest": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 143.70857852748406
+          },
+          "work_0.5": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": -284.04011843146816
+          },
+          "work_0.7": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 993.115118853133
+          },
+          "drift_0.8": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 72.77911526963022
+          },
+          "drift_1.5": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": -372.61890991224925
+          }
+        }
+      }
+    },
+    "fit_honest_drift": {
+      "kind": "positive_fit",
+      "fit_conditions": {
+        "honest": 9,
+        "drift_0.8": 8,
+        "drift_1.5": 8
+      },
+      "fit_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [
+        "work_0.5",
+        "work_0.7"
+      ],
+      "held_out_null": null,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 534.8855131564594,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 107.1204224305513
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1565.378859874475
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 6178.597757795158
+            },
+            "drift_0.8": {
+              "auc_union": 0.9941666666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.965,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.965,
+              "tpr_at_composite_far": 0.3,
+              "score_median": 166.18638595776594
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 311.27245720100274
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 457.3646526957686,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 95.59772196082977
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1160.359139299278
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 5124.576559792433
+            },
+            "drift_0.8": {
+              "auc_union": 0.9941666666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.965,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.965,
+              "tpr_at_composite_far": 0.3,
+              "score_median": 109.77069647033467
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 232.28217821609644
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 203.46003527901703,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 49.62700440146833
+            },
+            "work_0.5": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 69.7534737834597
+            },
+            "work_0.7": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 54.109552986463385
+            },
+            "drift_0.8": {
+              "auc_union": 0.99125,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.9975
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 31.582770205414295
+            },
+            "drift_1.5": {
+              "auc_union": 0.9825,
+              "auc_by_null": {
+                "inference": 0.985,
+                "ar1": 0.97,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.99
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 17.52266118839097
+            }
+          }
+        }
+      },
+      "oracle": {
+        "threshold": -3658.8875830858756,
+        "calibration_fpr": {
+          "inference": 0.0,
+          "ar1": 0.0,
+          "ar2_resonant": 0.0,
+          "controller": 0.0,
+          "controller_ar1": 0.0,
+          "periodic_inference": 0.05
+        },
+        "evaluation_fpr": {
+          "inference": 0.05,
+          "ar1": 0.0,
+          "ar2_resonant": 0.0,
+          "controller": 0.0,
+          "controller_ar1": 0.0,
+          "periodic_inference": 0.15
+        },
+        "conditions": {
+          "honest": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 130.75241647514434
+          },
+          "work_0.5": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 1738.025812000566
+          },
+          "work_0.7": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 6797.152965147079
+          },
+          "drift_0.8": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 177.93271151690433
+          },
+          "drift_1.5": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 424.1197529695845
+          }
+        }
+      }
+    },
+    "fit_honest_work": {
+      "kind": "positive_fit",
+      "fit_conditions": {
+        "honest": 9,
+        "work_0.5": 8,
+        "work_0.7": 8
+      },
+      "fit_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [
+        "drift_0.8",
+        "drift_1.5"
+      ],
+      "held_out_null": null,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": -26.574738866317,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.05
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.15
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 110.13305544709019
+            },
+            "work_0.5": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 1573.1089681872454
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 6183.679481372972
+            },
+            "drift_0.8": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 168.91230566946444
+            },
+            "drift_1.5": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 313.3831574771384
+            }
+          }
+        },
+        "local_only": {
+          "threshold": -33.299209342997635,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.05,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.05
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.05,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.15
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 97.34184855753331
+            },
+            "work_0.5": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 1164.2934704888548
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 5132.385074716694
+            },
+            "drift_0.8": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 111.73904729291263
+            },
+            "drift_1.5": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 233.81308754571273
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": -26.99156373670343,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.05,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.05
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.1
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 51.608223434782175
+            },
+            "work_0.5": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 74.26120874035729
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 58.39169563952237
+            },
+            "drift_0.8": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 32.01876107559251
+            },
+            "drift_1.5": {
+              "auc_union": 0.9570833333333333,
+              "auc_by_null": {
+                "inference": 0.91,
+                "ar1": 0.955,
+                "ar2_resonant": 0.995,
+                "controller": 0.9975,
+                "controller_ar1": 0.985,
+                "periodic_inference": 0.9
+              },
+              "min_auc": 0.9,
+              "tpr_at_composite_far": 0.9,
+              "score_median": 12.387509193154111
+            }
+          }
+        }
+      },
+      "oracle": {
+        "threshold": -2724.742881869069,
+        "calibration_fpr": {
+          "inference": 0.0,
+          "ar1": 0.0,
+          "ar2_resonant": 0.0,
+          "controller": 0.0,
+          "controller_ar1": 0.0,
+          "periodic_inference": 0.05
+        },
+        "evaluation_fpr": {
+          "inference": 0.05,
+          "ar1": 0.0,
+          "ar2_resonant": 0.0,
+          "controller": 0.0,
+          "controller_ar1": 0.0,
+          "periodic_inference": 0.15
+        },
+        "conditions": {
+          "honest": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 135.59628516656227
+          },
+          "work_0.5": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 1750.2115085375212
+          },
+          "work_0.7": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 6816.85800785957
+          },
+          "drift_0.8": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 170.83261301878008
+          },
+          "drift_1.5": {
+            "auc_union": 1.0,
+            "auc_by_null": {
+              "inference": 1.0,
+              "ar1": 1.0,
+              "ar2_resonant": 1.0,
+              "controller": 1.0,
+              "controller_ar1": 1.0,
+              "periodic_inference": 1.0
+            },
+            "min_auc": 1.0,
+            "tpr_at_composite_far": 1.0,
+            "score_median": 188.74351778050203
+          }
+        }
+      }
+    },
+    "null_holdout_retained:inference": {
+      "kind": "null_holdout",
+      "fit_conditions": {
+        "honest": 5,
+        "work_0.5": 5,
+        "work_0.7": 5,
+        "drift_0.8": 5,
+        "drift_1.5": 5
+      },
+      "fit_null_families": [
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [],
+      "held_out_null": "inference",
+      "held_out_null_in_calibration": true,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 403.60890753362634,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9920833333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9525,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9525,
+              "tpr_at_composite_far": 0.05,
+              "score_median": 136.08905077193918
+            },
+            "work_0.5": {
+              "auc_union": 0.99875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9925,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9925,
+              "tpr_at_composite_far": 0.85,
+              "score_median": 1871.387267087489
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 6185.854183993313
+            },
+            "drift_0.8": {
+              "auc_union": 0.9833333333333333,
+              "auc_by_null": {
+                "inference": 0.9325,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9675,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9325,
+              "tpr_at_composite_far": 0.35,
+              "score_median": 202.8297336665398
+            },
+            "drift_1.5": {
+              "auc_union": 0.99125,
+              "auc_by_null": {
+                "inference": 0.9675,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.98,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9675,
+              "tpr_at_composite_far": 0.6,
+              "score_median": 697.0116797618111
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 334.8360249591921,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9925,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.955,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.955,
+              "tpr_at_composite_far": 0.1,
+              "score_median": 129.66710445939142
+            },
+            "work_0.5": {
+              "auc_union": 0.99875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9925,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9925,
+              "tpr_at_composite_far": 0.85,
+              "score_median": 1161.2153830864156
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 5129.799637758562
+            },
+            "drift_0.8": {
+              "auc_union": 0.99375,
+              "auc_by_null": {
+                "inference": 0.9925,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.97,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.97,
+              "tpr_at_composite_far": 0.4,
+              "score_median": 182.34515357216293
+            },
+            "drift_1.5": {
+              "auc_union": 0.9958333333333333,
+              "auc_by_null": {
+                "inference": 0.995,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.98,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.98,
+              "tpr_at_composite_far": 0.6,
+              "score_median": 595.210928725053
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 88.62099841312728,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 52.015898154339894
+            },
+            "work_0.5": {
+              "auc_union": 0.9925,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.955,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.955,
+              "tpr_at_composite_far": 0.1,
+              "score_median": 83.19670486208666
+            },
+            "work_0.7": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 55.82779189956848
+            },
+            "drift_0.8": {
+              "auc_union": 0.9908333333333333,
+              "auc_by_null": {
+                "inference": 0.995,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 42.38765093498729
+            },
+            "drift_1.5": {
+              "auc_union": 0.9725,
+              "auc_by_null": {
+                "inference": 0.9125,
+                "ar1": 0.985,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.9875
+              },
+              "min_auc": 0.9125,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 28.951439488378753
+            }
+          }
+        }
+      }
+    },
+    "null_holdout_excluded:inference": {
+      "kind": "null_holdout",
+      "fit_conditions": {
+        "honest": 5,
+        "work_0.5": 5,
+        "work_0.7": 5,
+        "drift_0.8": 5,
+        "drift_1.5": 5
+      },
+      "fit_null_families": [
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [],
+      "held_out_null": "inference",
+      "held_out_null_in_calibration": false,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 403.60890753362634,
+          "calibration_fpr": {
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9920833333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9525,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9525,
+              "tpr_at_composite_far": 0.05,
+              "score_median": 136.08905077193918
+            },
+            "work_0.5": {
+              "auc_union": 0.99875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9925,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9925,
+              "tpr_at_composite_far": 0.85,
+              "score_median": 1871.387267087489
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 6185.854183993313
+            },
+            "drift_0.8": {
+              "auc_union": 0.9833333333333333,
+              "auc_by_null": {
+                "inference": 0.9325,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9675,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9325,
+              "tpr_at_composite_far": 0.35,
+              "score_median": 202.8297336665398
+            },
+            "drift_1.5": {
+              "auc_union": 0.99125,
+              "auc_by_null": {
+                "inference": 0.9675,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.98,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9675,
+              "tpr_at_composite_far": 0.6,
+              "score_median": 697.0116797618111
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 334.8360249591921,
+          "calibration_fpr": {
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9925,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.955,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.955,
+              "tpr_at_composite_far": 0.1,
+              "score_median": 129.66710445939142
+            },
+            "work_0.5": {
+              "auc_union": 0.99875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9925,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9925,
+              "tpr_at_composite_far": 0.85,
+              "score_median": 1161.2153830864156
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 5129.799637758562
+            },
+            "drift_0.8": {
+              "auc_union": 0.99375,
+              "auc_by_null": {
+                "inference": 0.9925,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.97,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.97,
+              "tpr_at_composite_far": 0.4,
+              "score_median": 182.34515357216293
+            },
+            "drift_1.5": {
+              "auc_union": 0.9958333333333333,
+              "auc_by_null": {
+                "inference": 0.995,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.98,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.98,
+              "tpr_at_composite_far": 0.6,
+              "score_median": 595.210928725053
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 88.62099841312728,
+          "calibration_fpr": {
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 52.015898154339894
+            },
+            "work_0.5": {
+              "auc_union": 0.9925,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.955,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.955,
+              "tpr_at_composite_far": 0.1,
+              "score_median": 83.19670486208666
+            },
+            "work_0.7": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 55.82779189956848
+            },
+            "drift_0.8": {
+              "auc_union": 0.9908333333333333,
+              "auc_by_null": {
+                "inference": 0.995,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 42.38765093498729
+            },
+            "drift_1.5": {
+              "auc_union": 0.9725,
+              "auc_by_null": {
+                "inference": 0.9125,
+                "ar1": 0.985,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.9875
+              },
+              "min_auc": 0.9125,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 28.951439488378753
+            }
+          }
+        }
+      }
+    },
+    "null_holdout_retained:ar1": {
+      "kind": "null_holdout",
+      "fit_conditions": {
+        "honest": 5,
+        "work_0.5": 5,
+        "work_0.7": 5,
+        "drift_0.8": 5,
+        "drift_1.5": 5
+      },
+      "fit_null_families": [
+        "inference",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [],
+      "held_out_null": "ar1",
+      "held_out_null_in_calibration": true,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 785.8876282477055,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.975,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 106.2876273677953
+            },
+            "work_0.5": {
+              "auc_union": 0.9979166666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9875,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9875,
+              "tpr_at_composite_far": 0.75,
+              "score_median": 1569.2674758521782
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 6185.854183993313
+            },
+            "drift_0.8": {
+              "auc_union": 0.99,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.98,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.96,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.96,
+              "tpr_at_composite_far": 0.2,
+              "score_median": 165.6163557114309
+            },
+            "drift_1.5": {
+              "auc_union": 0.9925,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.985,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.97,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.97,
+              "tpr_at_composite_far": 0.4,
+              "score_median": 310.38618423359793
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 661.4588688684289,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.975,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 94.57367755246638
+            },
+            "work_0.5": {
+              "auc_union": 0.9979166666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9875,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9875,
+              "tpr_at_composite_far": 0.75,
+              "score_median": 1161.2153830864156
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 5129.799637758562
+            },
+            "drift_0.8": {
+              "auc_union": 0.99,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.98,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.96,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.96,
+              "tpr_at_composite_far": 0.2,
+              "score_median": 108.69545315820955
+            },
+            "drift_1.5": {
+              "auc_union": 0.9929166666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.985,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 231.04277257350546
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 682.5738602462476,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9883333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.98,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 50.556099333437814
+            },
+            "work_0.5": {
+              "auc_union": 0.9908333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.995,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 72.46118364599195
+            },
+            "work_0.7": {
+              "auc_union": 0.99,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.99,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 69.02106517872535
+            },
+            "drift_0.8": {
+              "auc_union": 0.9845833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.9575,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 34.39214349499231
+            },
+            "drift_1.5": {
+              "auc_union": 0.9629166666666666,
+              "auc_by_null": {
+                "inference": 0.9825,
+                "ar1": 0.8575,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.9875
+              },
+              "min_auc": 0.8575,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 19.130577753630405
+            }
+          }
+        }
+      }
+    },
+    "null_holdout_excluded:ar1": {
+      "kind": "null_holdout",
+      "fit_conditions": {
+        "honest": 5,
+        "work_0.5": 5,
+        "work_0.7": 5,
+        "drift_0.8": 5,
+        "drift_1.5": 5
+      },
+      "fit_null_families": [
+        "inference",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [],
+      "held_out_null": "ar1",
+      "held_out_null_in_calibration": false,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 785.8876282477055,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.975,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 106.2876273677953
+            },
+            "work_0.5": {
+              "auc_union": 0.9979166666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9875,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9875,
+              "tpr_at_composite_far": 0.75,
+              "score_median": 1569.2674758521782
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 6185.854183993313
+            },
+            "drift_0.8": {
+              "auc_union": 0.99,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.98,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.96,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.96,
+              "tpr_at_composite_far": 0.2,
+              "score_median": 165.6163557114309
+            },
+            "drift_1.5": {
+              "auc_union": 0.9925,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.985,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.97,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.97,
+              "tpr_at_composite_far": 0.4,
+              "score_median": 310.38618423359793
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 661.4588688684289,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.975,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 94.57367755246638
+            },
+            "work_0.5": {
+              "auc_union": 0.9979166666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9875,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9875,
+              "tpr_at_composite_far": 0.75,
+              "score_median": 1161.2153830864156
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 5129.799637758562
+            },
+            "drift_0.8": {
+              "auc_union": 0.99,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.98,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.96,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.96,
+              "tpr_at_composite_far": 0.2,
+              "score_median": 108.69545315820955
+            },
+            "drift_1.5": {
+              "auc_union": 0.9929166666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.985,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 231.04277257350546
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 682.5738602462476,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9883333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.98,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 50.556099333437814
+            },
+            "work_0.5": {
+              "auc_union": 0.9908333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.995,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 72.46118364599195
+            },
+            "work_0.7": {
+              "auc_union": 0.99,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.99,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 69.02106517872535
+            },
+            "drift_0.8": {
+              "auc_union": 0.9845833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 0.9575,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 34.39214349499231
+            },
+            "drift_1.5": {
+              "auc_union": 0.9629166666666666,
+              "auc_by_null": {
+                "inference": 0.9825,
+                "ar1": 0.8575,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.9875
+              },
+              "min_auc": 0.8575,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 19.130577753630405
+            }
+          }
+        }
+      }
+    },
+    "null_holdout_retained:ar2_resonant": {
+      "kind": "null_holdout",
+      "fit_conditions": {
+        "honest": 5,
+        "work_0.5": 5,
+        "work_0.7": 5,
+        "drift_0.8": 5,
+        "drift_1.5": 5
+      },
+      "fit_null_families": [
+        "inference",
+        "ar1",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [],
+      "held_out_null": "ar2_resonant",
+      "held_out_null_in_calibration": true,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 403.60890753362634,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 106.2876273677953
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1615.962469872154
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 13167.289890121208
+            },
+            "drift_0.8": {
+              "auc_union": 0.9941666666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.965,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.965,
+              "tpr_at_composite_far": 0.3,
+              "score_median": 165.6163557114309
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 310.38618423359793
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 334.8360249591921,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 94.57367755246638
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1439.0647411345278
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 12455.062839731234
+            },
+            "drift_0.8": {
+              "auc_union": 0.9933333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 0.9925,
+                "controller": 1.0,
+                "controller_ar1": 0.9675,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9675,
+              "tpr_at_composite_far": 0.35,
+              "score_median": 108.69545315820955
+            },
+            "drift_1.5": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 0.9775,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 231.04277257350546
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 88.62099841312728,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9804166666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 0.9325,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9325,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 50.556099333437814
+            },
+            "work_0.5": {
+              "auc_union": 0.9883333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 0.98,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 71.56054446067262
+            },
+            "work_0.7": {
+              "auc_union": 0.9829166666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 0.9475,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9475,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 55.82779189956848
+            },
+            "drift_0.8": {
+              "auc_union": 0.96875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 0.8625,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.8625,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 31.729418832620546
+            },
+            "drift_1.5": {
+              "auc_union": 0.9225,
+              "auc_by_null": {
+                "inference": 0.9725,
+                "ar1": 0.9725,
+                "ar2_resonant": 0.66,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.98
+              },
+              "min_auc": 0.66,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 17.01498195291579
+            }
+          }
+        }
+      }
+    },
+    "null_holdout_excluded:ar2_resonant": {
+      "kind": "null_holdout",
+      "fit_conditions": {
+        "honest": 5,
+        "work_0.5": 5,
+        "work_0.7": 5,
+        "drift_0.8": 5,
+        "drift_1.5": 5
+      },
+      "fit_null_families": [
+        "inference",
+        "ar1",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [],
+      "held_out_null": "ar2_resonant",
+      "held_out_null_in_calibration": false,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 403.60890753362634,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 106.2876273677953
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1615.962469872154
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 13167.289890121208
+            },
+            "drift_0.8": {
+              "auc_union": 0.9941666666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.965,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.965,
+              "tpr_at_composite_far": 0.3,
+              "score_median": 165.6163557114309
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 310.38618423359793
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 334.8360249591921,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 94.57367755246638
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1439.0647411345278
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 12455.062839731234
+            },
+            "drift_0.8": {
+              "auc_union": 0.9933333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 0.9925,
+                "controller": 1.0,
+                "controller_ar1": 0.9675,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9675,
+              "tpr_at_composite_far": 0.35,
+              "score_median": 108.69545315820955
+            },
+            "drift_1.5": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 0.9775,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 231.04277257350546
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 88.62099841312728,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9804166666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 0.9325,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9325,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 50.556099333437814
+            },
+            "work_0.5": {
+              "auc_union": 0.9883333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 0.98,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 71.56054446067262
+            },
+            "work_0.7": {
+              "auc_union": 0.9829166666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 0.9475,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9475,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 55.82779189956848
+            },
+            "drift_0.8": {
+              "auc_union": 0.96875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 0.8625,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.8625,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 31.729418832620546
+            },
+            "drift_1.5": {
+              "auc_union": 0.9225,
+              "auc_by_null": {
+                "inference": 0.9725,
+                "ar1": 0.9725,
+                "ar2_resonant": 0.66,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.98
+              },
+              "min_auc": 0.66,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 17.01498195291579
+            }
+          }
+        }
+      }
+    },
+    "null_holdout_retained:controller": {
+      "kind": "null_holdout",
+      "fit_conditions": {
+        "honest": 5,
+        "work_0.5": 5,
+        "work_0.7": 5,
+        "drift_0.8": 5,
+        "drift_1.5": 5
+      },
+      "fit_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [],
+      "held_out_null": "controller",
+      "held_out_null_in_calibration": true,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 403.60890753362634,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 106.2876273677953
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1569.2674758521782
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 6185.854183993313
+            },
+            "drift_0.8": {
+              "auc_union": 0.9941666666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.965,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.965,
+              "tpr_at_composite_far": 0.3,
+              "score_median": 165.6163557114309
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 310.38618423359793
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 334.8360249591921,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 94.57367755246638
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1161.2153830864156
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 5129.799637758562
+            },
+            "drift_0.8": {
+              "auc_union": 0.9945833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9675,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9675,
+              "tpr_at_composite_far": 0.35,
+              "score_median": 108.69545315820955
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 231.04277257350546
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 88.62099841312728,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 50.556099333437814
+            },
+            "work_0.5": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 71.56054446067262
+            },
+            "work_0.7": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 55.82779189956848
+            },
+            "drift_0.8": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 31.729418832620546
+            },
+            "drift_1.5": {
+              "auc_union": 0.9791666666666666,
+              "auc_by_null": {
+                "inference": 0.9725,
+                "ar1": 0.9725,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.98
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 17.01498195291579
+            }
+          }
+        }
+      }
+    },
+    "null_holdout_excluded:controller": {
+      "kind": "null_holdout",
+      "fit_conditions": {
+        "honest": 5,
+        "work_0.5": 5,
+        "work_0.7": 5,
+        "drift_0.8": 5,
+        "drift_1.5": 5
+      },
+      "fit_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [],
+      "held_out_null": "controller",
+      "held_out_null_in_calibration": false,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 403.60890753362634,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 106.2876273677953
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1569.2674758521782
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 6185.854183993313
+            },
+            "drift_0.8": {
+              "auc_union": 0.9941666666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.965,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.965,
+              "tpr_at_composite_far": 0.3,
+              "score_median": 165.6163557114309
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 310.38618423359793
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 334.8360249591921,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 94.57367755246638
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1161.2153830864156
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 5129.799637758562
+            },
+            "drift_0.8": {
+              "auc_union": 0.9945833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9675,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9675,
+              "tpr_at_composite_far": 0.35,
+              "score_median": 108.69545315820955
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 231.04277257350546
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 88.62099841312728,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 50.556099333437814
+            },
+            "work_0.5": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 71.56054446067262
+            },
+            "work_0.7": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 55.82779189956848
+            },
+            "drift_0.8": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 31.729418832620546
+            },
+            "drift_1.5": {
+              "auc_union": 0.9791666666666666,
+              "auc_by_null": {
+                "inference": 0.9725,
+                "ar1": 0.9725,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.98
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 17.01498195291579
+            }
+          }
+        }
+      }
+    },
+    "null_holdout_retained:controller_ar1": {
+      "kind": "null_holdout",
+      "fit_conditions": {
+        "honest": 5,
+        "work_0.5": 5,
+        "work_0.7": 5,
+        "drift_0.8": 5,
+        "drift_1.5": 5
+      },
+      "fit_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [],
+      "held_out_null": "controller_ar1",
+      "held_out_null_in_calibration": true,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 403.60890753362634,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 106.2876273677953
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1569.2674758521782
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 6185.854183993313
+            },
+            "drift_0.8": {
+              "auc_union": 0.9941666666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.965,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.965,
+              "tpr_at_composite_far": 0.3,
+              "score_median": 165.6163557114309
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 310.38618423359793
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 334.8360249591921,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 94.57367755246638
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1161.2153830864156
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 5129.799637758562
+            },
+            "drift_0.8": {
+              "auc_union": 0.9945833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9675,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9675,
+              "tpr_at_composite_far": 0.35,
+              "score_median": 108.69545315820955
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 231.04277257350546
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 88.62099841312728,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 50.556099333437814
+            },
+            "work_0.5": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 71.56054446067262
+            },
+            "work_0.7": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 55.82779189956848
+            },
+            "drift_0.8": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 31.729418832620546
+            },
+            "drift_1.5": {
+              "auc_union": 0.9791666666666666,
+              "auc_by_null": {
+                "inference": 0.9725,
+                "ar1": 0.9725,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.98
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 17.01498195291579
+            }
+          }
+        }
+      }
+    },
+    "null_holdout_excluded:controller_ar1": {
+      "kind": "null_holdout",
+      "fit_conditions": {
+        "honest": 5,
+        "work_0.5": 5,
+        "work_0.7": 5,
+        "drift_0.8": 5,
+        "drift_1.5": 5
+      },
+      "fit_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "periodic_inference"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [],
+      "held_out_null": "controller_ar1",
+      "held_out_null_in_calibration": false,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 403.60890753362634,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 106.2876273677953
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1569.2674758521782
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 6185.854183993313
+            },
+            "drift_0.8": {
+              "auc_union": 0.9941666666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.965,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.965,
+              "tpr_at_composite_far": 0.3,
+              "score_median": 165.6163557114309
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 310.38618423359793
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 334.8360249591921,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 94.57367755246638
+            },
+            "work_0.5": {
+              "auc_union": 0.9983333333333333,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.99,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.99,
+              "tpr_at_composite_far": 0.8,
+              "score_median": 1161.2153830864156
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 5129.799637758562
+            },
+            "drift_0.8": {
+              "auc_union": 0.9945833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9675,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9675,
+              "tpr_at_composite_far": 0.35,
+              "score_median": 108.69545315820955
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 231.04277257350546
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 88.62099841312728,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 50.556099333437814
+            },
+            "work_0.5": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 71.56054446067262
+            },
+            "work_0.7": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 55.82779189956848
+            },
+            "drift_0.8": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 31.729418832620546
+            },
+            "drift_1.5": {
+              "auc_union": 0.9791666666666666,
+              "auc_by_null": {
+                "inference": 0.9725,
+                "ar1": 0.9725,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.98
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 17.01498195291579
+            }
+          }
+        }
+      }
+    },
+    "null_holdout_retained:periodic_inference": {
+      "kind": "null_holdout",
+      "fit_conditions": {
+        "honest": 5,
+        "work_0.5": 5,
+        "work_0.7": 5,
+        "drift_0.8": 5,
+        "drift_1.5": 5
+      },
+      "fit_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1",
+        "periodic_inference"
+      ],
+      "held_out_conditions": [],
+      "held_out_null": "periodic_inference",
+      "held_out_null_in_calibration": true,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 403.60890753362634,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 162.91252203643307
+            },
+            "work_0.5": {
+              "auc_union": 0.99875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9925,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9925,
+              "tpr_at_composite_far": 0.85,
+              "score_median": 1569.2674758521782
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 6185.854183993313
+            },
+            "drift_0.8": {
+              "auc_union": 0.9941666666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.965,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.965,
+              "tpr_at_composite_far": 0.3,
+              "score_median": 165.6163557114309
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 310.38618423359793
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 334.8360249591921,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 109.02274197077493
+            },
+            "work_0.5": {
+              "auc_union": 0.99875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9925,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9925,
+              "tpr_at_composite_far": 0.85,
+              "score_median": 1161.2153830864156
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 5129.799637758562
+            },
+            "drift_0.8": {
+              "auc_union": 0.9945833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9675,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9675,
+              "tpr_at_composite_far": 0.35,
+              "score_median": 108.69545315820955
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 231.04277257350546
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 88.62099841312728,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.99125,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9525,
+                "periodic_inference": 0.995
+              },
+              "min_auc": 0.9525,
+              "tpr_at_composite_far": 0.05,
+              "score_median": 73.12765018020664
+            },
+            "work_0.5": {
+              "auc_union": 0.9904166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.9925
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 72.69651363898353
+            },
+            "work_0.7": {
+              "auc_union": 0.98875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.9825
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 55.82779189956848
+            },
+            "drift_0.8": {
+              "auc_union": 0.9825,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.945
+              },
+              "min_auc": 0.945,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 31.729418832620546
+            },
+            "drift_1.5": {
+              "auc_union": 0.9558333333333333,
+              "auc_by_null": {
+                "inference": 0.9725,
+                "ar1": 0.9725,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.84
+              },
+              "min_auc": 0.84,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 17.01498195291579
+            }
+          }
+        }
+      }
+    },
+    "null_holdout_excluded:periodic_inference": {
+      "kind": "null_holdout",
+      "fit_conditions": {
+        "honest": 5,
+        "work_0.5": 5,
+        "work_0.7": 5,
+        "drift_0.8": 5,
+        "drift_1.5": 5
+      },
+      "fit_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1"
+      ],
+      "calibration_null_families": [
+        "inference",
+        "ar1",
+        "ar2_resonant",
+        "controller",
+        "controller_ar1"
+      ],
+      "held_out_conditions": [],
+      "held_out_null": "periodic_inference",
+      "held_out_null_in_calibration": false,
+      "n_fit_total": 25,
+      "feature_sets": {
+        "full": {
+          "threshold": 403.60890753362634,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 162.91252203643307
+            },
+            "work_0.5": {
+              "auc_union": 0.99875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9925,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9925,
+              "tpr_at_composite_far": 0.85,
+              "score_median": 1569.2674758521782
+            },
+            "work_0.7": {
+              "auc_union": 0.9995833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9975,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9975,
+              "tpr_at_composite_far": 0.95,
+              "score_median": 6185.854183993313
+            },
+            "drift_0.8": {
+              "auc_union": 0.9941666666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.965,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.965,
+              "tpr_at_composite_far": 0.3,
+              "score_median": 165.6163557114309
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 310.38618423359793
+            }
+          }
+        },
+        "local_only": {
+          "threshold": 334.8360249591921,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.9916666666666667,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 109.02274197077493
+            },
+            "work_0.5": {
+              "auc_union": 0.99875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9925,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9925,
+              "tpr_at_composite_far": 0.85,
+              "score_median": 1161.2153830864156
+            },
+            "work_0.7": {
+              "auc_union": 1.0,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 1.0,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 1.0,
+              "tpr_at_composite_far": 1.0,
+              "score_median": 5129.799637758562
+            },
+            "drift_0.8": {
+              "auc_union": 0.9945833333333334,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9675,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9675,
+              "tpr_at_composite_far": 0.35,
+              "score_median": 108.69545315820955
+            },
+            "drift_1.5": {
+              "auc_union": 0.9954166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9725,
+                "periodic_inference": 1.0
+              },
+              "min_auc": 0.9725,
+              "tpr_at_composite_far": 0.45,
+              "score_median": 231.04277257350546
+            }
+          }
+        },
+        "shape_duration": {
+          "threshold": 88.62099841312728,
+          "calibration_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0
+          },
+          "evaluation_fpr": {
+            "inference": 0.0,
+            "ar1": 0.0,
+            "ar2_resonant": 0.0,
+            "controller": 0.0,
+            "controller_ar1": 0.0,
+            "periodic_inference": 0.0
+          },
+          "conditions": {
+            "honest": {
+              "auc_union": 0.99125,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.9525,
+                "periodic_inference": 0.995
+              },
+              "min_auc": 0.9525,
+              "tpr_at_composite_far": 0.05,
+              "score_median": 73.12765018020664
+            },
+            "work_0.5": {
+              "auc_union": 0.9904166666666666,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.9925
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 72.69651363898353
+            },
+            "work_0.7": {
+              "auc_union": 0.98875,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.9825
+              },
+              "min_auc": 0.95,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 55.82779189956848
+            },
+            "drift_0.8": {
+              "auc_union": 0.9825,
+              "auc_by_null": {
+                "inference": 1.0,
+                "ar1": 1.0,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.945
+              },
+              "min_auc": 0.945,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 31.729418832620546
+            },
+            "drift_1.5": {
+              "auc_union": 0.9558333333333333,
+              "auc_by_null": {
+                "inference": 0.9725,
+                "ar1": 0.9725,
+                "ar2_resonant": 1.0,
+                "controller": 1.0,
+                "controller_ar1": 0.95,
+                "periodic_inference": 0.84
+              },
+              "min_auc": 0.84,
+              "tpr_at_composite_far": 0.0,
+              "score_median": 17.01498195291579
+            }
+          }
+        }
+      }
+    }
+  },
+  "verdict": {
+    "tpr_decline_margin": 0.1,
+    "auc_decline_margin": 0.05,
+    "held_out_null_fpr_tolerance": 0.1,
+    "n_material_declines": 7,
+    "material_declines": [
+      {
+        "configuration": "honest_only",
+        "feature_set": "full",
+        "condition": "drift_1.5",
+        "held_out": true,
+        "tpr": 0.9,
+        "tpr_drop": -0.45,
+        "auc_union": 0.9008333333333334,
+        "auc_drop": 0.09458333333333324
+      },
+      {
+        "configuration": "honest_only",
+        "feature_set": "local_only",
+        "condition": "drift_1.5",
+        "held_out": true,
+        "tpr": 0.9,
+        "tpr_drop": -0.45,
+        "auc_union": 0.89875,
+        "auc_drop": 0.09666666666666657
+      },
+      {
+        "configuration": "honest_only",
+        "feature_set": "shape_duration",
+        "condition": "drift_1.5",
+        "held_out": true,
+        "tpr": 0.8,
+        "tpr_drop": -0.8,
+        "auc_union": 0.9095833333333333,
+        "auc_drop": 0.06958333333333333
+      },
+      {
+        "configuration": "null_holdout_retained:ar1",
+        "feature_set": "local_only",
+        "condition": "drift_0.8",
+        "held_out": false,
+        "tpr": 0.2,
+        "tpr_drop": 0.14999999999999997,
+        "auc_union": 0.99,
+        "auc_drop": 0.004583333333333384
+      },
+      {
+        "configuration": "null_holdout_excluded:ar1",
+        "feature_set": "local_only",
+        "condition": "drift_0.8",
+        "held_out": false,
+        "tpr": 0.2,
+        "tpr_drop": 0.14999999999999997,
+        "auc_union": 0.99,
+        "auc_drop": 0.004583333333333384
+      },
+      {
+        "configuration": "null_holdout_retained:ar2_resonant",
+        "feature_set": "shape_duration",
+        "condition": "drift_1.5",
+        "held_out": false,
+        "tpr": 0.0,
+        "tpr_drop": 0.0,
+        "auc_union": 0.9225,
+        "auc_drop": 0.05666666666666664
+      },
+      {
+        "configuration": "null_holdout_excluded:ar2_resonant",
+        "feature_set": "shape_duration",
+        "condition": "drift_1.5",
+        "held_out": false,
+        "tpr": 0.0,
+        "tpr_drop": 0.0,
+        "auc_union": 0.9225,
+        "auc_drop": 0.05666666666666664
+      }
+    ],
+    "n_held_out_null_fpr_breaches": 0,
+    "held_out_null_fpr_breaches": [],
+    "worst_held_out_condition_tpr": 0.0,
+    "generalizes_without_material_decline": false
+  },
+  "elapsed_s": 3.5695619583129883
+}

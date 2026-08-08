@@ -598,6 +598,42 @@ def aggregate_F(
     return F + _aggregate_background(t, params, rng, f_peak, n_tr, n_ft, eta_scale)
 
 
+def aggregate_F_phase_meta(
+    t: np.ndarray,
+    params: KoWorkloadParams,
+    rng: np.random.Generator,
+    f_peak: float = 1.0,
+    n_tr: int = 4,
+    n_ft: int = 4,
+    f0: float | None = None,
+    eta_scale: float = 1.0,
+    f0_drift_hz: float = 0.0,
+    work_sigma: float = 0.0,
+) -> tuple[np.ndarray, TrainingPhaseMetadata]:
+    """:func:`aggregate_F` plus the dominant training's phase metadata.
+
+    A non-breaking, evaluation-only sibling of :func:`aggregate_F`, standing to it
+    exactly as :func:`training_F_phase_meta` stands to :func:`training_F`.  The
+    background workloads are drawn identically; only the dominant slot is swapped
+    for the metadata-carrying generator, so the returned boundaries describe the
+    line under test and not the superposition.
+
+    This exists so the superposition/dilution axis can be measured with the same
+    alignment diagnostics as the single-workload case: burying the dominant
+    training under other workloads is the sharpest available challenge to the
+    claim that local compute-to-communication events carry the decision.
+    """
+    w_dom, _, _ = params.aggregate_ratio
+    total = sum(params.aggregate_ratio)
+    F, metadata = training_F_phase_meta(
+        t, params, rng, f_peak=f_peak * w_dom / total, f0=f0,
+        eta_scale=eta_scale, f0_drift_hz=f0_drift_hz, work_sigma=work_sigma,
+    )
+    background = _aggregate_background(t, params, rng, f_peak, n_tr, n_ft,
+                                       eta_scale)
+    return F + background, metadata
+
+
 def aggregate_null_F(
     t: np.ndarray,
     params: KoWorkloadParams,

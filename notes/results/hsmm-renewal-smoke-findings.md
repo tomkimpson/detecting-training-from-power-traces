@@ -2,7 +2,18 @@
 
 **Date:** 2026-08-07  
 **Branch:** `feat/hsmm-renewal-smoke`  
-**Status:** **GO to E2** (viability smoke only; not a frozen paper result)
+**Status:** **GO to E2 — WITHDRAWN 2026-08-07.** Viability smoke only; not a frozen
+paper result.
+
+> **CORRECTION (2026-08-07).** The E0 gate below is **invalid**. It compared
+> oracle-windowed positives against *blind*-extracted nulls, and several oracle
+> features (`paired_fraction`, hardcoded to 1.0; `duration_median_s`;
+> `duration_cv`) are read off the generator's latent schedule — so the oracle
+> scores AUC 1.000 on a pure-noise trace. Every "oracle AUC 1.00" claim in this
+> note measures metadata, not channel information. See
+> [`hsmm-e0-defect-and-fair-ceiling.md`](hsmm-e0-defect-and-fair-ceiling.md) for
+> the defect, the fix, and the fair ceiling. The blind E1 results in this note are
+> unaffected; `oracle_auc_recovered_by_blind` is conservative but misnamed.
 
 ## Question
 

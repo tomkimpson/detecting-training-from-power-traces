@@ -438,18 +438,45 @@ def fit_gaussian_profile(
                            logdet=float(logdet))
 
 
+def widen_profile(profile: GaussianProfile, factor: float) -> GaussianProfile:
+    """Scale a profile's covariance isotropically by ``factor``.
+
+    Unlike ``shrinkage`` -- which blends the covariance towards its diagonal and
+    so preserves every marginal variance -- this changes the profile's overall
+    width.  It exists to test whether a power loss on distant populations is a
+    too-narrow training profile rather than missing information.
+    """
+    if factor <= 0.0:
+        raise ValueError("factor must be positive")
+    d = profile.mean.size
+    return GaussianProfile(
+        mean=profile.mean,
+        precision=profile.precision / factor,
+        logdet=profile.logdet + d * float(np.log(factor)),
+    )
+
+
 def fit_likelihood_from_features(
     training_features: np.ndarray,
     null_feature_groups: Iterable[np.ndarray],
     *,
     params: EventParams = EventParams(),
+    shrinkage: float = 0.25,
 ) -> RenewalLikelihood:
-    """Fit the profiled E1 likelihood from disjoint feature matrices."""
-    nulls = tuple(fit_gaussian_profile(group) for group in null_feature_groups)
+    """Fit the profiled E1 likelihood from disjoint feature matrices.
+
+    ``shrinkage`` regularises every profile's covariance towards its diagonal.
+    It is exposed so a campaign can measure how much of a power loss is a
+    profile-width artefact rather than missing information.
+    """
+    nulls = tuple(fit_gaussian_profile(group, shrinkage=shrinkage)
+                  for group in null_feature_groups)
     if not nulls:
         raise ValueError("at least one null feature group is required")
-    return RenewalLikelihood(fit_gaussian_profile(training_features), nulls,
-                             params=params)
+    return RenewalLikelihood(
+        fit_gaussian_profile(training_features, shrinkage=shrinkage), nulls,
+        params=params,
+    )
 
 
 def fit_renewal_likelihood(
