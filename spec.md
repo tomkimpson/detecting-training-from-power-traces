@@ -116,3 +116,289 @@ Phase 0 de-risking gates are **complete** (ST0 desk work; ST1 adaptive-detector 
 validity = **GO, honest reframe**; ST2 de-periodicisation frontier = **GO,
 definitive**). See `handoff.md` for current status and `notes/results/st1-findings.md` for the
 ST1 gate record. Phases 1–4 are complete; the manuscript is drafted in full.
+
+---
+
+## Provisional extension: duration-aware event detection
+
+**Status:** approved prototype / smoke test, not yet part of the paper's claimed
+method or evidence.
+
+**Branch:** `feat/hsmm-renewal-smoke`.
+
+### Motivation
+
+The current detector family has complementary boundaries. The raw Viterbi ridge
+score retains power when cadence wanders rapidly or real work varies, but a strong
+controller limit cycle can score more highly than training. The tracked
+cyclostationary/order statistics reject that structural confuser at modest wander,
+but lose power at the fast-wander end of the frontier. We have not demonstrated one
+jointly calibrated decision rule that inherits both strengths across the full
+frontier.
+
+The proposed extension tests a different physical invariant. Under the admissible
+training family, an iteration contains a compute phase followed by a synchronous
+communication/optimizer phase. Varying useful real work changes the compute-phase
+duration, while the communication/down-phase duration retains its honest
+distribution. The resulting global cadence may be incoherent even though a marked
+sequence of local compute-to-communication events remains observable.
+
+### Hypothesis
+
+> Under work variation and cadence drift, externally observed training traces retain
+> locally repeatable compute-to-communication events whose shape and duration allow a
+> duration-aware event model to distinguish training-shaped multi-phase execution
+> from hard inference and controller-like structural nulls without access to the
+> generator's phase boundaries at decision time.
+
+The intended detector is a marked-renewal model or an explicit-duration hidden
+semi-Markov model (HSMM), not a frequency tracker. Its evidence should arise from
+local state transitions, dwell durations, event marks, and their ordered recurrence,
+not from a single coherent spectral ridge.
+
+### Claim and information cost
+
+If successful, this extension strengthens Rung 1 only:
+
+> The trace contains recurrent, ordered, multi-phase physical execution consistent
+> with compute/communication alternation under a specified composite structural null.
+
+It does not identify training semantics. Discarded-update training, a
+training-shaped non-ML loop, and any sufficiently faithful semantic decoy remain
+expected positives. The detector may use profiled distributions learned from the
+scenario model; that additional modelling information must be stated and must not be
+described as corpus-free.
+
+### Load-bearing physical prediction
+
+The prototype exists first to test one prediction, before a general HSMM is built:
+
+1. work variation broadens compute/up-phase durations;
+2. communication/down-phase durations retain a distinguishable distribution;
+3. the external observation retains a repeatable local dip/transition around the
+   communication phase; and
+4. that local evidence survives at the `work=0.7` and fast-drift cells where the
+   existing detector families cease to provide one jointly strong rule.
+
+If ground-truth-aligned communication events are not separable at those cells, the
+HSMM direction is stopped: a blind state estimator cannot recover information that is
+absent even under oracle alignment.
+
+### Three-gate prototype
+
+#### Gate E0: oracle-aligned information ceiling
+
+Expose evaluation-only phase metadata from the scenario generator:
+
+- iteration/compute-phase start;
+- communication/down-phase start;
+- compute duration;
+- communication duration; and
+- their locations after the observation map is applied.
+
+This metadata may be used to evaluate and profile an oracle statistic, but must never
+be passed to a deployable detector score.
+
+For each true communication start, extract a fixed physical-time window from the
+observed power trace. Robustly remove its local baseline and scale, then estimate on a
+disjoint fitting split:
+
+- a mean communication-event template;
+- the distribution of transition amplitude and slope;
+- the distribution of low-state dwell time; and
+- within-trace event repeatability.
+
+Score held-out traces by their aligned template likelihood/repeatability and compare
+with randomly aligned or best-matched windows from each null. E0 asks only whether
+the proposed local information is present in the observed channel.
+
+**E0 continue criterion:** oracle AUC at least `0.90` for `work=0.7` against both the
+hard inference null and the controller-like composite null on held-out traces.
+
+**E0 kill criterion:** oracle AUC below `0.80` in either comparison. Values in
+`[0.80, 0.90)` are an honest marginal result and require inspecting event SNR and
+meter sensitivity before E1.
+
+#### Gate E1: blind marked-event detector
+
+Build the smallest detector that does not use phase metadata or a nominal cadence:
+
+1. robustly detrend and scale the trace;
+2. smooth at one fixed, physically expressed bandwidth;
+3. obtain candidate downward and upward transitions from matched edge/dip filters;
+4. pair a downward transition with a subsequent recovery under broad physical
+   duration limits; and
+5. attach event marks: dip amplitude, dwell duration, downward/upward slope, local
+   template similarity, local variance change, and time since the previous event.
+
+The first E1 score may be a fixed interpretable combination of:
+
+- credible paired-event rate;
+- median held-out template similarity;
+- communication-duration consistency;
+- ordered down/up pairing fraction; and
+- a penalty for unmatched transitions.
+
+A marked-renewal likelihood is preferred once the plumbing works:
+
+```
+S_event(x) = log p({event times, durations, marks} | train-event model)
+             - max_j log p({event times, durations, marks} | null model j)
+```
+
+Ground-truth metadata is used only for diagnostics: event recall, precision, and
+transition timing error. It is forbidden from the scoring interface and this
+separation must be covered by tests.
+
+**E1 continue criterion:** on `work=0.7`, recover at least `70%` of true
+communication events within `100 ms` at the nominal 20 Hz channel, and retain at
+least `70%` of the oracle's excess AUC over chance:
+
+```
+(AUC_blind - 0.5) / (AUC_oracle - 0.5) >= 0.70.
+```
+
+Failure of the timing diagnostic alone is not decisive if the trace-level blind score
+passes: multiple equivalent segmentations may support the correct structural
+decision.
+
+#### Gate E2: explicit-duration HSMM
+
+Build E2 only if E0 passes and E1 is non-trivial. The minimum alternative model has
+two mandatory-alternating states:
+
+```
+COMPUTE -> COMMUNICATION -> COMPUTE -> ...
+```
+
+It uses robust emissions for normalized power and local slope, a broad compute-state
+duration distribution, and a separate communication-state duration distribution.
+The decision statistic is the forward marginal likelihood over all admissible
+segmentations, not the maximum-likelihood state path.
+
+The composite-null denominator must include, at minimum:
+
+- hard continuous-batching inference;
+- stationary coloured and resonant processes;
+- a controller limit cycle;
+- controller plus coloured noise; and
+- periodic inference.
+
+The provisional score is
+
+```
+S_HSMM(x) = log p(x | M_train) - max_j log p(x | M_null,j).
+```
+
+For the first smoke test, emissions and duration laws may be profiled from a disjoint
+scenario-model fitting split using latent labels. This deliberately gives the model
+its best plausible chance. A later experiment must distinguish this profiled detector
+from a self-fitted or corpus-light structural test.
+
+### Smoke populations
+
+The minimum hard-cell grid is:
+
+| Role | Population | Reason |
+|---|---|---|
+| Positive | honest training | no-regression anchor |
+| Positive | `work=0.5` | confirmed approximately zero-cost work variation |
+| Positive | `work=0.7` | Viterbi bend / primary event-model target |
+| Positive | `drift=0.8` | tracked-order fast-wander boundary |
+| Positive | `drift=1.5` | extreme fast-wander stress |
+| Null | hard inference | stated Rung-2 null |
+| Null | AR(1) / resonant AR(2) | coloured structural nulls |
+| Null | controller | Viterbi's principal confuser |
+| Null | controller + AR(1) | confuser plus coloured background |
+| Null | periodic inference | periodic non-training computation |
+
+If this grid passes, expand to phase slip, harmonic smoothing, dilution, amplitude
+shaping, and the meter boundary. `shape_fill_frac=1` and the one-second-integrating
+1 Hz meter are expected information-erasure points, not required successes.
+
+Semantic controls are reported separately. The discarded-update decoy and
+training-shaped non-ML loop are expected positives and are not part of the
+composite structural null.
+
+### Data separation and calibration
+
+Use deterministic, disjoint RNG streams for:
+
+1. model/template fitting;
+2. null calibration; and
+3. untouched evaluation.
+
+The local plumbing smoke may use short records and tiny populations, but cannot freeze
+scientific numbers. The viability run uses:
+
+- 60--90 s records initially, followed by the canonical 300 s record if the method
+  passes;
+- at least 50 traces per fitted population;
+- 200 traces per null family for calibration; and
+- 200 held-out traces per evaluation population.
+
+Only FAR `0.05` is interpreted in the viability smoke. FAR `0.01` has inadequate
+tail resolution until a larger calibration campaign is run.
+
+The event/HSMM score, Viterbi, and tracked-order baselines must all be calibrated and
+evaluated on the same populations. For a finite union of null families, the operative
+threshold is the most conservative per-family empirical threshold. No previously
+reported detector rate obtained under an inference-only or controller-only threshold
+is used as a direct comparison.
+
+### Overall go/no-go decision
+
+The extension is a **GO** if, at composite-null FAR `0.05` on untouched evaluation
+traces:
+
+- honest-training TPR is at least `0.90`;
+- no individual calibrated null family exceeds the allowed false-alarm rate beyond
+  finite-sample uncertainty;
+- `work=0.7` or the fast-drift cells improve worst-cell TPR by at least `0.15` over
+  the better of Viterbi and tracked-order baselines under the same composite
+  calibration, or otherwise produce a material improvement in worst-cell power;
+- controller rejection is retained rather than traded for work-variation power; and
+- the score consumes only `(t, P_obs)` at decision time.
+
+The extension is a **NO-GO** if it merely rediscovers global cadence, cannot reject a
+controller, requires latent boundaries at decision time, or has no oracle-aligned
+information at the hard frontier cells.
+
+### Observation-channel check
+
+If the nominal test passes, repeat E1/E2 at 20, 10, 5, and 2 Hz and with integration
+windows of 0, 0.1, 0.25, and 0.5 s. The method's meter requirement is reported even if
+it is stricter than the existing tracking detector's requirement. A method that works
+only on the pristine 20 Hz channel is scientifically interesting but operationally
+weak.
+
+### Implementation and outputs
+
+The prototype should add:
+
+- a non-breaking phase-metadata interface beside `training_F_meta`;
+- `powerladder/typeb/renewal.py` for preprocessing, event extraction, marks, and the
+  initial trace score;
+- `powerladder/typeb/hsmm.py` only after the E0/E1 gates justify it;
+- `scripts/smoke_hsmm.py` for the disjoint smoke campaign;
+- deterministic unit tests that prove detector functions accept no latent metadata;
+  and
+- results under `results/hsmm_smoke/`, never overwriting frozen ST1/ST2 artifacts.
+
+The first report contains:
+
+1. oracle and blind score distributions by population;
+2. event recall and timing error versus work variation;
+3. TPR versus work level at a shared composite-null FAR `0.05`;
+4. the same operating point for Viterbi and tracked-order baselines; and
+5. an explicit E0/E1/E2 go/no-go verdict.
+
+### Interpretation limit
+
+Synthetic success would establish only that a duration-aware detector extracts the
+local event information assumed by the scenario model. It would not validate the
+physical prediction that an external meter sees a distributed all-reduce phase. The
+decisive transport experiment remains simultaneous external measurement of real
+multi-GPU or multi-node distributed training. The existing single-A100 data is an
+expected negative transport control because it lacks a substantial collective
+communication phase.

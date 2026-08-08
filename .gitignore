@@ -58,5 +58,8 @@ results/st1/slurm/*
 !results/st1/slurm/.gitkeep
 !results/rung2/slurm/.gitkeep
 
+# Duration-aware E0/E1 plumbing run; the full viability summary is retained.
+results/hsmm_smoke/quick/
+
 # Pre-merge review artefacts (transient; findings belong in notes/results/)
 PR_REVIEW_*.md

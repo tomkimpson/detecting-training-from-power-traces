@@ -31,6 +31,8 @@ periods (tests) or to relate an adversary's bandwidth to the line (task 1.3).
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
 
 from .config import KoWorkloadParams
@@ -42,6 +44,27 @@ _MIN_JITTER_FACTOR = 0.05
 # Floor on the drifting frequency factor g; f0_eff = f0*g never falls below this
 # fraction of f0 (defends the period formula when the OU walk wanders low).
 _MIN_DRIFT_FACTOR = 0.1
+
+
+@dataclass(frozen=True)
+class TrainingPhaseMetadata:
+    """Evaluation-only boundaries for complete synthetic training iterations.
+
+    The arrays describe the latent schedule before the observation map is
+    applied.  Detector functions must never consume this object; it exists to
+    measure whether local compute-to-communication events survive that map and
+    to diagnose a blind event detector against generator ground truth.
+    """
+
+    compute_starts: np.ndarray
+    communication_starts: np.ndarray
+    compute_durations: np.ndarray
+    communication_durations: np.ndarray
+
+    @property
+    def iteration_starts(self) -> np.ndarray:
+        """Start time of every complete iteration."""
+        return self.compute_starts
 
 
 def _drift_sigma(f0_drift_hz: float, f0: float, theta: float) -> float:
@@ -298,6 +321,55 @@ def training_F_meta(
         shape_fill_frac=shape_fill_frac,
     )
     return F, phase_starts[::2]
+
+
+def training_F_phase_meta(
+    t: np.ndarray,
+    params: KoWorkloadParams,
+    rng: np.random.Generator,
+    f_peak: float = 1.0,
+    f0: float | None = None,
+    eta_scale: float = 1.0,
+    f0_drift_hz: float = 0.0,
+    work_sigma: float = 0.0,
+    work_drift_hz: float = 0.0,
+    work_shift_hz: float | None = None,
+    phase_slip_sigma: float = 0.0,
+    harmonic_smooth_s: float = 0.0,
+    shape_fill_frac: float = 0.0,
+) -> tuple[np.ndarray, TrainingPhaseMetadata]:
+    """Training trace plus complete compute/communication phase metadata.
+
+    This is a non-breaking, evaluation-only sibling of :func:`training_F_meta`.
+    It calls the same generator once and exposes the alternating phase starts
+    that the existing wrapper intentionally reduces to iteration boundaries.
+    Only complete compute/down pairs are returned, so every duration is finite
+    and lies within the generated schedule (the final partial iteration is
+    omitted).
+    """
+    F, phase_starts = _periodic_F_meta(
+        t, f_peak, params.f0_lo, params.f0_hi, params.sigma_jitter,
+        params.rho_tr_lo, params.rho_tr_hi, params.sigma_delta_tr,
+        params.mu_delta_tr, params.eta_up_tr, params.eta_down_tr, rng,
+        f0=f0, eta_scale=eta_scale,
+        f0_drift_hz=f0_drift_hz, f0_drift_theta=params.f0_drift_theta,
+        work_sigma=work_sigma, work_drift_hz=work_drift_hz,
+        work_shift_hz=work_shift_hz, work_base_accum=params.work_base_accum,
+        phase_slip_sigma=phase_slip_sigma,
+        harmonic_smooth_s=harmonic_smooth_s,
+        shape_fill_frac=shape_fill_frac,
+    )
+    n_complete = max((phase_starts.size - 1) // 2, 0)
+    compute_starts = phase_starts[:2 * n_complete:2].copy()
+    communication_starts = phase_starts[1:2 * n_complete:2].copy()
+    next_compute_starts = phase_starts[2:2 * n_complete + 1:2]
+    metadata = TrainingPhaseMetadata(
+        compute_starts=compute_starts,
+        communication_starts=communication_starts,
+        compute_durations=communication_starts - compute_starts,
+        communication_durations=next_compute_starts - communication_starts,
+    )
+    return F, metadata
 
 
 def training_F(

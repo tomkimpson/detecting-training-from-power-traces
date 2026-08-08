@@ -1,0 +1,733 @@
+{
+  "status": "smoke-test only; not a frozen paper result",
+  "method": "oracle E0 plus blind marked-renewal E1; no HSMM E2 yet",
+  "duration_s": 90.0,
+  "fs": 20.0,
+  "sizes": {
+    "fit": 50,
+    "calibration": 200,
+    "evaluation": 200
+  },
+  "seed": 20260807,
+  "target_far": 0.05,
+  "feature_names": [
+    "event_rate_hz",
+    "paired_fraction",
+    "duration_median_s",
+    "duration_cv",
+    "amplitude_median_z",
+    "amplitude_cv",
+    "plateau_abs_slope",
+    "plateau_noise",
+    "edge_balance",
+    "shape_repeatability",
+    "interval_cv"
+  ],
+  "null_families": [
+    "inference",
+    "ar1",
+    "ar2_resonant",
+    "controller",
+    "controller_ar1",
+    "periodic_inference"
+  ],
+  "thresholds": {
+    "renewal": -17.154970231526843,
+    "renewal_local_only": -17.32034808303013,
+    "renewal_shape_duration": -6.071135055239984,
+    "oracle": -2479.7444439988835,
+    "viterbi": 5.560969487594664,
+    "dg_order_full": 6.011655487173552,
+    "dg_order_semicoh": 4.949695181748517
+  },
+  "calibration_fpr": {
+    "renewal": {
+      "inference": 0.05,
+      "ar1": 0.0,
+      "ar2_resonant": 0.0,
+      "controller": 0.015,
+      "controller_ar1": 0.01,
+      "periodic_inference": 0.005
+    },
+    "renewal_local_only": {
+      "inference": 0.05,
+      "ar1": 0.005,
+      "ar2_resonant": 0.0,
+      "controller": 0.015,
+      "controller_ar1": 0.01,
+      "periodic_inference": 0.0
+    },
+    "renewal_shape_duration": {
+      "inference": 0.05,
+      "ar1": 0.025,
+      "ar2_resonant": 0.0,
+      "controller": 0.015,
+      "controller_ar1": 0.01,
+      "periodic_inference": 0.0
+    },
+    "oracle": {
+      "inference": 0.005,
+      "ar1": 0.0,
+      "ar2_resonant": 0.035,
+      "controller": 0.0,
+      "controller_ar1": 0.0,
+      "periodic_inference": 0.05
+    },
+    "viterbi": {
+      "inference": 0.0,
+      "ar1": 0.0,
+      "ar2_resonant": 0.0,
+      "controller": 0.05,
+      "controller_ar1": 0.01,
+      "periodic_inference": 0.0
+    },
+    "dg_order_full": {
+      "inference": 0.0,
+      "ar1": 0.0,
+      "ar2_resonant": 0.0,
+      "controller": 0.0,
+      "controller_ar1": 0.0,
+      "periodic_inference": 0.05
+    },
+    "dg_order_semicoh": {
+      "inference": 0.0,
+      "ar1": 0.0,
+      "ar2_resonant": 0.0,
+      "controller": 0.0,
+      "controller_ar1": 0.0,
+      "periodic_inference": 0.05
+    }
+  },
+  "evaluation_fpr": {
+    "renewal": {
+      "inference": 0.08,
+      "ar1": 0.01,
+      "ar2_resonant": 0.0,
+      "controller": 0.015,
+      "controller_ar1": 0.02,
+      "periodic_inference": 0.01
+    },
+    "renewal_local_only": {
+      "inference": 0.04,
+      "ar1": 0.005,
+      "ar2_resonant": 0.0,
+      "controller": 0.015,
+      "controller_ar1": 0.02,
+      "periodic_inference": 0.005
+    },
+    "renewal_shape_duration": {
+      "inference": 0.04,
+      "ar1": 0.005,
+      "ar2_resonant": 0.0,
+      "controller": 0.015,
+      "controller_ar1": 0.02,
+      "periodic_inference": 0.015
+    },
+    "oracle": {
+      "inference": 0.015,
+      "ar1": 0.0,
+      "ar2_resonant": 0.01,
+      "controller": 0.0,
+      "controller_ar1": 0.0,
+      "periodic_inference": 0.045
+    },
+    "viterbi": {
+      "inference": 0.0,
+      "ar1": 0.0,
+      "ar2_resonant": 0.0,
+      "controller": 0.03,
+      "controller_ar1": 0.0,
+      "periodic_inference": 0.0
+    },
+    "dg_order_full": {
+      "inference": 0.0,
+      "ar1": 0.0,
+      "ar2_resonant": 0.0,
+      "controller": 0.0,
+      "controller_ar1": 0.0,
+      "periodic_inference": 0.075
+    },
+    "dg_order_semicoh": {
+      "inference": 0.0,
+      "ar1": 0.0,
+      "ar2_resonant": 0.0,
+      "controller": 0.0,
+      "controller_ar1": 0.0,
+      "periodic_inference": 0.11
+    }
+  },
+  "conditions": {
+    "honest": {
+      "family": "drift",
+      "level": 0.0,
+      "timing": {
+        "recall_mean": 0.8552708582457725,
+        "recall_median": 0.9778998778998779,
+        "precision_mean": 0.9975459699785714,
+        "precision_median": 1.0,
+        "timing_error_median_s": 0.024564327991304147
+      },
+      "oracle_auc_recovered_by_blind": 1.0,
+      "renewal": {
+        "auc_union": 1.0,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 1.0,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 112.16974138946377
+      },
+      "renewal_local_only": {
+        "auc_union": 1.0,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 1.0,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 96.28283404601802
+      },
+      "renewal_shape_duration": {
+        "auc_union": 0.9941666666666666,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 0.985,
+          "controller_ar1": 0.98,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 0.98,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 69.60663655768948
+      },
+      "oracle": {
+        "auc_union": 1.0,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 1.0,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 144.94919015853375
+      },
+      "viterbi": {
+        "auc_union": 0.5878291666666666,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 0.999975,
+          "ar2_resonant": 0.5854,
+          "controller": 0.0,
+          "controller_ar1": 0.0,
+          "periodic_inference": 0.9416
+        },
+        "min_auc": 0.0,
+        "tpr_at_composite_far": 0.0,
+        "score_median": 3.23115944547952
+      },
+      "dg_order_full": {
+        "auc_union": 0.9214,
+        "auc_by_null": {
+          "inference": 0.9258,
+          "ar1": 0.945675,
+          "ar2_resonant": 0.989225,
+          "controller": 0.995425,
+          "controller_ar1": 0.993225,
+          "periodic_inference": 0.67905
+        },
+        "min_auc": 0.67905,
+        "tpr_at_composite_far": 0.445,
+        "score_median": 4.917749517743172
+      },
+      "dg_order_semicoh": {
+        "auc_union": 0.9671375,
+        "auc_by_null": {
+          "inference": 0.992875,
+          "ar1": 0.995475,
+          "ar2_resonant": 0.999825,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 0.81465
+        },
+        "min_auc": 0.81465,
+        "tpr_at_composite_far": 0.685,
+        "score_median": 7.133575032002078
+      }
+    },
+    "work_0.5": {
+      "family": "work",
+      "level": 0.5,
+      "timing": {
+        "recall_mean": 0.994197666847723,
+        "recall_median": 1.0,
+        "precision_mean": 0.9631295015940526,
+        "precision_median": 1.0,
+        "timing_error_median_s": 0.024380387117847846
+      },
+      "oracle_auc_recovered_by_blind": 1.0,
+      "renewal": {
+        "auc_union": 1.0,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 1.0,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 2964.3814161372393
+      },
+      "renewal_local_only": {
+        "auc_union": 1.0,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 1.0,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 2841.666886411686
+      },
+      "renewal_shape_duration": {
+        "auc_union": 0.9941625,
+        "auc_by_null": {
+          "inference": 0.999975,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 0.985,
+          "controller_ar1": 0.98,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 0.98,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 69.9096453350457
+      },
+      "oracle": {
+        "auc_union": 1.0,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 1.0,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 2982.6779446187484
+      },
+      "viterbi": {
+        "auc_union": 0.1686875,
+        "auc_by_null": {
+          "inference": 0.899725,
+          "ar1": 0.10925,
+          "ar2_resonant": 0.0013,
+          "controller": 0.0,
+          "controller_ar1": 0.0,
+          "periodic_inference": 0.00185
+        },
+        "min_auc": 0.0,
+        "tpr_at_composite_far": 0.0,
+        "score_median": 1.2040923858326265
+      },
+      "dg_order_full": {
+        "auc_union": 0.7113166666666667,
+        "auc_by_null": {
+          "inference": 0.59445,
+          "ar1": 0.684225,
+          "ar2_resonant": 0.93015,
+          "controller": 0.968925,
+          "controller_ar1": 0.955975,
+          "periodic_inference": 0.134175
+        },
+        "min_auc": 0.134175,
+        "tpr_at_composite_far": 0.0,
+        "score_median": 0.08509626627745923
+      },
+      "dg_order_semicoh": {
+        "auc_union": 0.7349,
+        "auc_by_null": {
+          "inference": 0.67945,
+          "ar1": 0.735325,
+          "ar2_resonant": 0.979875,
+          "controller": 0.99955,
+          "controller_ar1": 0.996975,
+          "periodic_inference": 0.018225
+        },
+        "min_auc": 0.018225,
+        "tpr_at_composite_far": 0.0,
+        "score_median": 0.06933193885495201
+      }
+    },
+    "work_0.7": {
+      "family": "work",
+      "level": 0.7,
+      "timing": {
+        "recall_mean": 0.9920446195778675,
+        "recall_median": 1.0,
+        "precision_mean": 0.8696179507230601,
+        "precision_median": 0.9473684210526315,
+        "timing_error_median_s": 0.02476479177749802
+      },
+      "oracle_auc_recovered_by_blind": 1.0,
+      "renewal": {
+        "auc_union": 1.0,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 1.0,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 7903.1329779481875
+      },
+      "renewal_local_only": {
+        "auc_union": 1.0,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 1.0,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 7409.142566879952
+      },
+      "renewal_shape_duration": {
+        "auc_union": 0.9934791666666667,
+        "auc_by_null": {
+          "inference": 0.996875,
+          "ar1": 0.999325,
+          "ar2_resonant": 1.0,
+          "controller": 0.985,
+          "controller_ar1": 0.98,
+          "periodic_inference": 0.999675
+        },
+        "min_auc": 0.98,
+        "tpr_at_composite_far": 0.99,
+        "score_median": 53.138437204007744
+      },
+      "oracle": {
+        "auc_union": 1.0,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 1.0,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 9345.847691090508
+      },
+      "viterbi": {
+        "auc_union": 0.11383333333333333,
+        "auc_by_null": {
+          "inference": 0.656175,
+          "ar1": 0.026675,
+          "ar2_resonant": 0.0001,
+          "controller": 0.0,
+          "controller_ar1": 0.0,
+          "periodic_inference": 5e-05
+        },
+        "min_auc": 0.0,
+        "tpr_at_composite_far": 0.0,
+        "score_median": 0.9400127056242833
+      },
+      "dg_order_full": {
+        "auc_union": 0.7065291666666667,
+        "auc_by_null": {
+          "inference": 0.5789,
+          "ar1": 0.67095,
+          "ar2_resonant": 0.93055,
+          "controller": 0.98,
+          "controller_ar1": 0.961725,
+          "periodic_inference": 0.11705
+        },
+        "min_auc": 0.11705,
+        "tpr_at_composite_far": 0.0,
+        "score_median": 0.06555557501972575
+      },
+      "dg_order_semicoh": {
+        "auc_union": 0.7089416666666667,
+        "auc_by_null": {
+          "inference": 0.6103,
+          "ar1": 0.6726,
+          "ar2_resonant": 0.9703,
+          "controller": 0.9986,
+          "controller_ar1": 0.993525,
+          "periodic_inference": 0.008325
+        },
+        "min_auc": 0.008325,
+        "tpr_at_composite_far": 0.0,
+        "score_median": 0.03208500215127934
+      }
+    },
+    "drift_0.8": {
+      "family": "drift",
+      "level": 0.8,
+      "timing": {
+        "recall_mean": 0.8008821519603595,
+        "recall_median": 0.8804761904761904,
+        "precision_mean": 0.898316899782538,
+        "precision_median": 1.0,
+        "timing_error_median_s": 0.023881340784161154
+      },
+      "oracle_auc_recovered_by_blind": 1.0,
+      "renewal": {
+        "auc_union": 1.0,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 1.0,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 124.20797272462667
+      },
+      "renewal_local_only": {
+        "auc_union": 0.9998833333333333,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 0.9997,
+          "controller_ar1": 0.9996,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 0.9996,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 110.27134107604368
+      },
+      "renewal_shape_duration": {
+        "auc_union": 0.9893625,
+        "auc_by_null": {
+          "inference": 0.982525,
+          "ar1": 0.9944,
+          "ar2_resonant": 0.999975,
+          "controller": 0.985,
+          "controller_ar1": 0.98,
+          "periodic_inference": 0.994275
+        },
+        "min_auc": 0.98,
+        "tpr_at_composite_far": 0.97,
+        "score_median": 43.1403202175308
+      },
+      "oracle": {
+        "auc_union": 1.0,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 1.0,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 230.1297248256505
+      },
+      "viterbi": {
+        "auc_union": 0.22268333333333334,
+        "auc_by_null": {
+          "inference": 0.968475,
+          "ar1": 0.326925,
+          "ar2_resonant": 0.0114,
+          "controller": 0.0,
+          "controller_ar1": 0.0,
+          "periodic_inference": 0.0293
+        },
+        "min_auc": 0.0,
+        "tpr_at_composite_far": 0.0,
+        "score_median": 1.5487585412789309
+      },
+      "dg_order_full": {
+        "auc_union": 0.6471625,
+        "auc_by_null": {
+          "inference": 0.466175,
+          "ar1": 0.56535,
+          "ar2_resonant": 0.883725,
+          "controller": 0.95325,
+          "controller_ar1": 0.9296,
+          "periodic_inference": 0.084875
+        },
+        "min_auc": 0.084875,
+        "tpr_at_composite_far": 0.0,
+        "score_median": 0.02450143489689024
+      },
+      "dg_order_semicoh": {
+        "auc_union": 0.6733083333333333,
+        "auc_by_null": {
+          "inference": 0.521025,
+          "ar1": 0.58155,
+          "ar2_resonant": 0.9427,
+          "controller": 0.9958,
+          "controller_ar1": 0.985025,
+          "periodic_inference": 0.01375
+        },
+        "min_auc": 0.01375,
+        "tpr_at_composite_far": 0.0,
+        "score_median": 0.012452825386677104
+      }
+    },
+    "drift_1.5": {
+      "family": "drift",
+      "level": 1.5,
+      "timing": {
+        "recall_mean": 0.7267571841087269,
+        "recall_median": 0.7511904761904762,
+        "precision_mean": 0.7343699922421189,
+        "precision_median": 0.9655172413793104,
+        "timing_error_median_s": 0.02328884664202091
+      },
+      "oracle_auc_recovered_by_blind": 1.0,
+      "renewal": {
+        "auc_union": 1.0,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 1.0,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 483.8895556293543
+      },
+      "renewal_local_only": {
+        "auc_union": 0.99965,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 0.9991,
+          "controller_ar1": 0.9988,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 0.9988,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 467.44852064518125
+      },
+      "renewal_shape_duration": {
+        "auc_union": 0.9827416666666666,
+        "auc_by_null": {
+          "inference": 0.952325,
+          "ar1": 0.988375,
+          "ar2_resonant": 0.999975,
+          "controller": 0.985,
+          "controller_ar1": 0.98,
+          "periodic_inference": 0.990775
+        },
+        "min_auc": 0.952325,
+        "tpr_at_composite_far": 0.84,
+        "score_median": 22.637343579781472
+      },
+      "oracle": {
+        "auc_union": 1.0,
+        "auc_by_null": {
+          "inference": 1.0,
+          "ar1": 1.0,
+          "ar2_resonant": 1.0,
+          "controller": 1.0,
+          "controller_ar1": 1.0,
+          "periodic_inference": 1.0
+        },
+        "min_auc": 1.0,
+        "tpr_at_composite_far": 1.0,
+        "score_median": 2518.2607409972143
+      },
+      "viterbi": {
+        "auc_union": 0.23130416666666667,
+        "auc_by_null": {
+          "inference": 0.931675,
+          "ar1": 0.414225,
+          "ar2_resonant": 0.0121,
+          "controller": 0.0,
+          "controller_ar1": 0.0,
+          "periodic_inference": 0.029825
+        },
+        "min_auc": 0.0,
+        "tpr_at_composite_far": 0.0,
+        "score_median": 1.6874429484063636
+      },
+      "dg_order_full": {
+        "auc_union": 0.5818791666666666,
+        "auc_by_null": {
+          "inference": 0.336275,
+          "ar1": 0.442975,
+          "ar2_resonant": 0.8368,
+          "controller": 0.93145,
+          "controller_ar1": 0.9003,
+          "periodic_inference": 0.043475
+        },
+        "min_auc": 0.043475,
+        "tpr_at_composite_far": 0.0,
+        "score_median": 0.006192100557734683
+      },
+      "dg_order_semicoh": {
+        "auc_union": 0.5951166666666666,
+        "auc_by_null": {
+          "inference": 0.3667,
+          "ar1": 0.4264,
+          "ar2_resonant": 0.858075,
+          "controller": 0.97375,
+          "controller_ar1": 0.94235,
+          "periodic_inference": 0.003425
+        },
+        "min_auc": 0.003425,
+        "tpr_at_composite_far": 0.0,
+        "score_median": 0.0017608227429080608
+      }
+    }
+  },
+  "gate": {
+    "E0_oracle_continue": true,
+    "E1_blind_continue": true,
+    "evaluation_fpr_within_smoke_tolerance": true,
+    "renewal_worst_hard_tpr": 1.0,
+    "best_existing_worst_hard_tpr": 0.0,
+    "worst_hard_tpr_improvement": 1.0,
+    "local_only_worst_hard_tpr": 1.0,
+    "local_only_removed_features": [
+      "event_rate_hz",
+      "interval_cv"
+    ],
+    "shape_duration_worst_hard_tpr": 0.84,
+    "shape_duration_removed_features": [
+      "event_rate_hz",
+      "interval_cv",
+      "amplitude_median_z",
+      "amplitude_cv"
+    ],
+    "overall_go_to_E2": true
+  },
+  "elapsed_s": 34.54728293418884
+}

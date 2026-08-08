@@ -17,7 +17,14 @@ from scipy.stats import ks_2samp
 
 from powerladder.config import DEFAULT
 from powerladder.forward import make_time_grid
-from powerladder.ko_workload import _periodic_F_meta, aggregate_F, finetune_F, training_F
+from powerladder.ko_workload import (
+    _periodic_F_meta,
+    aggregate_F,
+    finetune_F,
+    training_F,
+    training_F_meta,
+    training_F_phase_meta,
+)
 
 KO = DEFAULT.ko
 F_PEAK = 1.0e15
@@ -140,6 +147,28 @@ def test_work_defaults_byte_identical():
                       work_sigma=0.0, work_drift_hz=0.0, work_shift_hz=None)
     assert np.array_equal(base, expl)
     assert _digest(base) == REFS["training_f0_1.0_seed123"]
+
+
+def test_phase_metadata_is_nonbreaking_and_describes_complete_iterations():
+    """The evaluation-only phase API preserves F and exposes valid durations."""
+    t = make_time_grid(60.0, 0.05)
+    F_old, starts_old = training_F_meta(
+        t, KO, np.random.default_rng(321), f_peak=1.0, f0=1.0,
+        work_sigma=0.35,
+    )
+    F_new, meta = training_F_phase_meta(
+        t, KO, np.random.default_rng(321), f_peak=1.0, f0=1.0,
+        work_sigma=0.35,
+    )
+    assert np.array_equal(F_new, F_old)
+    assert np.array_equal(meta.iteration_starts, starts_old[:meta.iteration_starts.size])
+    assert meta.compute_starts.shape == meta.communication_starts.shape
+    assert meta.compute_durations.shape == meta.communication_durations.shape
+    assert np.all(meta.communication_starts > meta.compute_starts)
+    assert np.all(meta.compute_durations > 0.0)
+    assert np.all(meta.communication_durations > 0.0)
+    assert np.allclose(meta.communication_starts - meta.compute_starts,
+                       meta.compute_durations)
 
 
 # --- ST2 work-variation knobs (task 20.3) --------------------------------------
