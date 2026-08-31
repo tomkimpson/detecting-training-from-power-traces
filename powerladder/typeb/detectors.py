@@ -20,12 +20,21 @@ The decision gate (spec.md Sec. 4 B0): keep the HMM/Viterbi only if it beats the
 spectral baseline on ROC at a fixed FAR. The plan (Sec. 3 B0) predicts it wins
 *when f0 wanders* — which is simultaneously the honest-smearing regime and the
 jitter-adversary regime, the strongest reason to keep it in scope.
+
+    forward_statistic   — PROTOTYPE (not in any frozen result). Same spectrogram
+                          emission map and wander prior as the Viterbi tracker,
+                          but the HMM *forward* recursion: log-marginal over ALL
+                          frequency paths instead of the single MAP path. The
+                          Neyman–Pearson statistic under the model the tracker
+                          already assumes; see
+                          notes/discussion/track-before-detect-forward-statistic.md.
 """
 
 from __future__ import annotations
 
 import numpy as np
 from scipy import signal as sp_signal
+from scipy.special import logsumexp
 
 
 def _detrend(p_obs: np.ndarray) -> np.ndarray:
@@ -160,6 +169,96 @@ def viterbi_statistic(
     slowly-varying path stays on top.
     """
     scores = viterbi_path_scores(t, p_obs, band_lo, band_hi, nperseg=nperseg,
+                                 noverlap=noverlap, jump_penalty=jump_penalty)
+    return float(scores[-1]) if scores.size else 0.0
+
+
+def _wander_log_kernel(n_freq: int, jump_penalty: float) -> np.ndarray:
+    """Normalised log transition kernel for the forward recursion.
+
+    ``logT[i, k] = log P(bin k -> bin i)`` — the Viterbi tracker's Laplacian
+    wander penalty ``-jump_penalty*|i-k|`` promoted to a proper (per-source
+    normalised) transition probability, so that summing over paths marginalises
+    against a distribution rather than inflating with the path count. Edge bins
+    have fewer neighbours, so their columns concentrate slightly more mass on
+    small jumps; for the ~20-bin bands used here the effect is negligible.
+    """
+    idx = np.arange(n_freq)
+    raw = -jump_penalty * np.abs(idx[:, None] - idx[None, :])
+    return raw - logsumexp(raw, axis=0, keepdims=True)
+
+
+def forward_path_scores(
+    t: np.ndarray,
+    p_obs: np.ndarray,
+    band_lo: float,
+    band_hi: float,
+    *,
+    nperseg: int | None = None,
+    noverlap: int | None = None,
+    jump_penalty: float = 1.0,
+) -> np.ndarray:
+    """Running forward (sum-over-paths) statistic after each spectrogram frame.
+
+    Element ``j-1`` is the log-marginal score over the first ``j`` frames divided
+    by ``j`` — the sequential view of ``forward_statistic``, mirroring
+    ``viterbi_path_scores``. Same frame alignment and emission map, so the two
+    sequential statistics are directly comparable frame-by-frame on one trace.
+    """
+    n = np.asarray(p_obs).size
+    if nperseg is None:
+        # Same default as the Viterbi pair: ~16 s windows resolve a ~1 Hz line
+        # yet leave many frames to track over.
+        fs = 1.0 / (t[1] - t[0])
+        nperseg = int(min(n, max(64, round(16.0 * fs))))
+    if noverlap is None:
+        noverlap = nperseg // 2
+
+    _, _, logP = _spectrogram_band(t, p_obs, band_lo, band_hi, nperseg, noverlap)
+    n_freq, n_time = logP.shape
+    if n_freq == 0 or n_time == 0:
+        return np.zeros(0)
+    if n_freq == 1:
+        return np.cumsum(logP[0]) / np.arange(1, n_time + 1)
+
+    logT = _wander_log_kernel(n_freq, jump_penalty)
+    # Uniform prior over starting bins; alpha[i] = log sum over paths ending in i.
+    alpha = logP[:, 0] - np.log(n_freq)
+    out = np.empty(n_time)
+    out[0] = logsumexp(alpha)
+    for j in range(1, n_time):
+        alpha = logP[:, j] + logsumexp(alpha[None, :] + logT, axis=1)
+        out[j] = logsumexp(alpha) / (j + 1)
+    return out
+
+
+def forward_statistic(
+    t: np.ndarray,
+    p_obs: np.ndarray,
+    band_lo: float,
+    band_hi: float,
+    *,
+    nperseg: int | None = None,
+    noverlap: int | None = None,
+    jump_penalty: float = 1.0,
+) -> float:
+    """Sum-over-paths line detector: log-marginal contrast over ALL wander paths.
+
+    Casts the tracker as track-before-detect: hidden state = frequency bin,
+    emissions = the column-normalised log-contrast map of ``viterbi_statistic``,
+    transitions = the same Laplacian wander prior, normalised. Where Viterbi
+    keeps only the best path (MAP), the forward recursion marginalises the path
+    — the Neyman–Pearson detection statistic under the HMM the tracker already
+    assumes (Streit & Barrett 1990). The two agree when a single path dominates
+    (strong line); they diverge at low per-frame SNR under heavy wander, where
+    many paths carry comparable mass — the adversarial jitter regime.
+
+    Returned value is the final log-marginal averaged over time frames, so it is
+    comparable across traces of different length. NOT numerically comparable to
+    ``viterbi_statistic`` (whose penalty is unnormalised); each statistic meets
+    a threshold only through its own ROC / surrogate calibration.
+    """
+    scores = forward_path_scores(t, p_obs, band_lo, band_hi, nperseg=nperseg,
                                  noverlap=noverlap, jump_penalty=jump_penalty)
     return float(scores[-1]) if scores.size else 0.0
 
