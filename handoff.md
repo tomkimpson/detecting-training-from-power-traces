@@ -56,8 +56,14 @@ Seed-robust (seeds 1–3: AUC gap 0.06–0.13). Full table in the note §4.
    already at ρ_auc = 1.00 there (np-ceiling note).
 2. **Harmonic-comb emissions** (pitch-tracking cast; note §6) — the follow-on that
    targets the controller AUC-0.0 failure; composes with the forward recursion.
-3. **Cite the lineage block in related work** (`main.tex`): the four uncited bib
-   keys above; rebuild + commit `main.pdf` per CLAUDE.md when touching `main.tex`.
+3. ~~Cite the lineage block~~ — **DONE (2026-08-31, same branch/PR #20):** the four
+   keys are now cited in `subsec:tracked` (tracker lineage sentence) and
+   `app:bakeoff` (headroom passage names the forward statistic as future work, no
+   result claimed). `main.pdf` rebuilt with the pinned-epoch invocation: 28 pp,
+   0 errors / undefined / overfull — but in this session's **container TeX Live,
+   not the usual laptop toolchain**, so byte provenance differs (the known
+   cross-machine font/metric caveat); rebuild on the laptop if byte-continuity
+   with earlier PDFs matters.
 4. (Carried) **Pre-submission blocker:** third author's affiliation renders as
    "Affiliation TBD" (`paper/main.tex` author block) — sole `check-arxiv-llm-compliance`
    FAIL.
