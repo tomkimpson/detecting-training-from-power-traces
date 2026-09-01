@@ -31,6 +31,17 @@ sentence scopes to this from the start ("structural evidence … not universal
 semantic identification"), and the ceiling is what makes Rungs 3–4 necessary rather
 than optional.
 
+**Correction to this memo's original framing (2026-09-02).** As first written, this
+section left the impression that the decoy is an attack — and the manuscript made
+that error explicitly, listing "semantic decoy" as a prover attack operator in
+§4's adversary list beside jitter, burial and dilution. It is not one. Under the
+paper's only threat model the prover conceals training, and manufacturing evidence
+of the activity you are hiding buys nothing; the code had it right all along, where
+the decoy lives solely in `rung2_scenarios.py` as a *control* with no attack budget
+and no frontier cell. What is load-bearing is the non-identifiability result, whose
+governance content is the innocent mimics and the semantic-rule/structural-evidence
+gap, not a motivated decoy-runner. See "Manuscript actions" below.
+
 ## Resolution of step 2: the ceiling returns as the false-accusation problem
 
 Correct that in the covert-training direction the binding limitation is *hiding*
@@ -111,12 +122,32 @@ exactly how much this instrument is worth" is more useful to a governance design
 than an overclaimed method — regimes built on overclaimed instruments fail in the
 field, not in review.
 
-## Possible manuscript actions (not yet done)
+## Manuscript actions
 
-- One or two sentences in the introduction or the Rung 3 transition naming the
-  screening-instrument framing (CTBT/IAEA tradition: passive wide-area cueing →
-  targeted escalation), to preempt the "so it's useless" reading from a
-  policy-minded reviewer.
-- Optionally, one sentence where the semantic decoy is introduced, noting the
-  flip side explicitly: the same indistinguishability that lets a decoy fake
-  training is what caps the evidentiary weight of a positive detection.
+**Done 2026-09-02** (branch `fix/decoy-attack-framing`) — nine edits to
+`paper/main.tex` demoting the decoy from attack to proof device, and promoting the
+innocent mimics to the practically binding consequence:
+
+- **§4 adversary list:** semantic decoy removed from the attack operators; the
+  prover's concealment objective stated explicitly; a following paragraph says why
+  the decoy is *not* on the list, and notes that Rung 3's incentive flip is what
+  makes the challenge-aware decoy a genuine attack.
+- **§4 after `prop:noident`:** new paragraph — the proposition binds with no
+  adversary present, most of the equivalence class is benign, and the limit is
+  two-sided (it caps positive evidentiary weight as much as it admits counterfeits).
+- **§6 "semantic controls set the ceiling":** control list reordered to put the
+  benign loads first and name them the practically binding ones; the decoy demoted
+  to extremal member that cannot be engineered away.
+- **§7 Rung 2→3 transition, §7 challenge-aware ceiling, governance reading,
+  contributions bullet, both ladder tables, intro ladder preview:** "the semantic
+  decoy" → "semantic non-identifiability" as the name of the Rung-2 ceiling, with
+  the two-sidedness carried through.
+
+Build verified clean: 0 errors, 0 overfull boxes, 0 undefined references, 28 pages.
+
+**Still not done** — the screening-instrument framing from step 3 above (CTBT/IAEA
+tradition: passive wide-area cueing → targeted escalation) is not yet in the
+manuscript. One or two sentences in the introduction or the Rung 3 transition would
+preempt the "so it's useless" reading from a policy-minded reviewer. Deliberately
+left out of the present pass, which was scoped to the decoy-as-attack category
+error.

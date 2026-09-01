@@ -158,8 +158,8 @@ bought at a stated cost in verifier information, and each with a hard ceiling
 that motivates the next. Rung~1 establishes that order-coherent power
 structure is present, which is evidence rather than identification. Rung~2
 converts that structure into training-likeness, at the price of committing to
-an inference null; its ceiling is the semantic decoy. Rung~3 escapes both the
-null and the decoy by binding the physical response to an unpredictable
+an inference null; its ceiling is semantic non-identifiability. Rung~3 escapes
+both the null and that ceiling by binding the physical response to an unpredictable
 challenge, at the price of the prover's cooperation; its ceiling is a
 challenge-aware dummy load. Rung~4 ties the response to declared work, but
 only given a transcript primitive we assume rather than build. Each rung is
@@ -237,9 +237,11 @@ the signature is stated as falsifiable rather than claimed as a result.
 	\item \textbf{Rung-2 classification with semantic falsification controls}
 	(\cref{sec:classification}). Three decision rules separate training from the
 	stated inference null perfectly and survive six domain shifts; but five
-	non-training loads, including a decoy that computes gradients and discards
-	them, all score as training. The meter certifies the physical schedule, not
-	training semantics --- a ceiling no better passive detector removes.
+	non-training loads --- three of them benign operational loads, alongside a
+	decoy that computes gradients and discards them --- all score as training. The
+	meter certifies the physical schedule, not training semantics: a ceiling no
+	better passive detector removes, and one that limits positive evidence as much
+	as it admits counterfeits.
 	\item \textbf{A negative transport case} (\cref{sec:reality}): what we
 	measured on real hardware, why it does not carry the distributed claim, and
 	what would falsify the prediction that it should.
@@ -274,8 +276,8 @@ matters.
 		the searched family; die-to-meter attenuation \\
 		2. Conditional classification & The trace is more training-like than
 		the stated inference population & A representative or explicitly
-		modelled inference null & Domain shift; the semantic decoy
-		(training-shaped execution without retained training) \\
+		modelled inference null & Domain shift; semantic non-identifiability
+		(training-shaped execution, benign or deliberate, without training) \\
 		3. Active physical authentication & A load behind the meter responded
 		to an unpredictable verifier challenge & Prover participation; a
 		challenge-bound schedule & A challenge-aware dummy load; no semantic
@@ -425,20 +427,32 @@ predictions (\cref{sec:reality}).
 \label{subsec:adversary}
 
 % Plan §4: attack families as operators, each with a reported budget.
-The prover may apply, singly or in composition:
+Across the passive rungs the prover's objective is \emph{concealment}: to train
+while the trace reaching the meter stays consistent with the null. To that end it
+may apply, singly or in composition:
 \begin{itemize}
 	\item \textbf{phase attack}: jitter, drift, or randomised work per iteration;
 	\item \textbf{frequency relocation}: move the cadence toward or outside the search family;
 	\item \textbf{additive burial}: independent workload superposition / spectral-floor jamming;
 	\item \textbf{amplitude shaping}: added load flattening the compute/communication swing;
-	\item \textbf{dilution}: reduce the training duty fraction among other work;
-	\item \textbf{semantic decoy}: reproduce the physical schedule without retained training;
-	\item \textbf{challenge-aware decoy}: a correlated dummy response in the active protocol (\cref{sec:active}).
+	\item \textbf{dilution}: reduce the training duty fraction among other work.
 \end{itemize}
 With unlimited superposition, dilution, shaping power, time, or freedom to
 restructure work, the prover can drive the signal-to-noise ratio arbitrarily
 low or synthesise the null; robustness claims are therefore made only over
 specified attack families at specified budgets.
+
+One construction that recurs below is deliberately absent from that list. A
+\emph{semantic decoy} --- a load reproducing the physical schedule of training
+without retaining a trained model --- is not an attack a concealing prover would
+mount, since manufacturing evidence of the activity it is hiding buys it nothing.
+It enters this paper instead as a non-training control (\cref{sec:classification})
+and as the construction behind \cref{prop:noident}, and it carries weight for two
+reasons that need no motivated decoy-runner: its benign counterparts occur in
+ordinary datacentre operation, and the active protocol of \cref{sec:active}
+inverts the prover's objective, at which point a \emph{challenge-aware decoy} ---
+a correlated dummy response mimicking the prescribed reaction without training ---
+does become a live attack.
 
 \subsection{Identifiability and the cost of hiding}
 \label{subsec:identifiability}
@@ -489,6 +503,16 @@ the discarded-update decoy among them, score as training under all three decisio
 rules. \Cref{prop:noident} says that outcome is a property of the channel rather
 than of our classifier, which is why Rung~2's ceiling cannot be removed by a
 better detector and why Rung~3 has to add a challenge.
+
+The proposition binds even where no adversary is present. A concealing prover has
+no reason to run a decoy (\cref{subsec:adversary}), but most of the equivalence
+class is not adversarial at all: a training-shaped non-ML kernel loop, a
+controller limit cycle, and a periodic inference request generator all sit inside
+it, and all arise in ordinary operation. The consequence is two-sided. A rule
+phrased semantically --- training rather than serving, which model, whose weights
+--- cannot be adjudicated from the schedule alone in either direction, so the same
+equivalence that would let a decoy counterfeit training also caps the evidentiary
+weight the verifier can attach to a positive detection.
 
 What remains provable is quantitative and concerns the \emph{cost} of hiding. It
 is stated over the target population the paper scopes itself to, realised by the
@@ -1299,18 +1323,21 @@ leaving the stated parameter box does not close the gap.
 \paragraph{The semantic controls set the ceiling.} The controls are the point of
 the rung. We built seven loads whose training status we know and asked what each
 rule scores (\cref{tab:rung2_controls}). Five non-training loads --- a
-discarded-update decoy that runs the full forward/backward/optimizer step and
-throws the update away, a gradient-only computation, a training-shaped non-ML
-kernel loop, a controller limit cycle, and a periodic inference request generator
---- \emph{all} score as training, at fraction $1.00$ under every rule. A genuine
+training-shaped non-ML kernel loop, a controller limit cycle, a periodic inference
+request generator, a gradient-only computation, and a discarded-update decoy that
+runs the full forward/backward/optimizer step and throws the update away ---
+\emph{all} score as training, at fraction $1.00$ under every rule. A genuine
 training run diluted by an unrelated co-resident load is still caught ($1.00$).
 The reading is the one the claim ladder assigns to this rung: from power alone the
 verifier can certify a \emph{training-shaped periodic compute schedule}, not that
-the computation is gradient-descent training rather than a mimic. This is the
-semantic decoy, and it is the ceiling that motivates the active protocol of
-\cref{sec:active}. The controller cycle scoring as training is the same
-attribution boundary Rung~1 met in \cref{subsec:st1}: the structural signal is
-real, and calling it training needs the nuisance model of \cref{sec:threat}.
+the computation is gradient-descent training rather than a mimic. The first three
+loads are the practically binding ones, because they need no adversary: the
+controller cycle scoring as training is the same attribution boundary Rung~1 met
+in \cref{subsec:st1}, and calling structure training needs the nuisance model of
+\cref{sec:threat}. The decoy is the extremal member of the same class and the one
+that cannot be engineered away --- \cref{prop:noident} rules out any passive
+detector that separates it --- which is why this ceiling motivates the active
+protocol of \cref{sec:active} rather than a better classifier.
 
 \begin{table*}[t]
 	\centering
@@ -1371,13 +1398,16 @@ line, and which is where the tracker actually bends.
 % the optional ST3 pilot runs and passes.
 
 Rung 2 certifies the physical schedule, not training semantics. Its ceiling is
-the semantic decoy: a load that reproduces the compute--communication cadence of
-training without retaining a trained model scores as training under every passive
-rule (\cref{sec:classification}). No passive test can separate the two, because
-the meter sees only the schedule and the decoy copies the schedule. The way past
-a passive ceiling is to stop watching and start asking. If the verifier perturbs
-the machine and the machine must react, a decoy that merely replays a recording
-cannot follow: it does not know what it was asked.
+semantic non-identifiability: loads that reproduce the compute--communication
+cadence of training without training score as training under every passive rule
+(\cref{sec:classification}), and no passive test separates them, because the meter
+sees only the schedule and the mimic copies the schedule. The discarded-update
+decoy is the sharpest instance --- \cref{prop:noident} rules out any passive
+detector that separates it --- even though a concealing prover would never mount
+one (\cref{subsec:adversary}). The way past a passive ceiling is to stop watching
+and start asking. If the verifier perturbs the machine and the machine must react,
+a mimic that merely replays a recording cannot follow: it does not know what it
+was asked.
 
 Rung 3 makes this concrete with a challenge-synchronous protocol. The verifier
 emits an unpredictable balanced challenge sequence $c_k \in \{-1,+1\}$; the prover
@@ -1392,7 +1422,9 @@ authenticates a physical fact --- a load behind the meter responded to a signal 
 could not have predicted. This escapes the semantic decoy, whose passive schedule
 is by construction uncorrelated with the fresh challenge (\cref{subsec:adversary}).
 Its own ceiling is the challenge-aware dummy load: a device that receives the
-challenge and mimics the prescribed response without training.
+challenge and mimics the prescribed response without training. Unlike the passive
+decoy, this one is an attack a prover has reason to mount, because Rung~3 asks it
+to demonstrate training rather than to hide it.
 
 The correlation test is exact under the sharp null that the challenge has no
 effect on the measured process --- but only conditional on the randomisation
@@ -1507,9 +1539,9 @@ the paper's evidence attached to each rung.
 		nuisance model; the meter must meet \cref{subsec:meter_spec} \\
 		2. Conditional classification & The trace is more training-like than the
 		stated inference null (area under the curve $1.00$, stable across domain
-		shift) & \cref{sec:classification} & The semantic decoy: non-training
-		loads with a training-shaped schedule score as training; for the
-		discarded-update decoy \cref{prop:noident} shows no passive detector can
+		shift) & \cref{sec:classification} & Semantic non-identifiability:
+		non-training loads with a training-shaped schedule score as training,
+		benign ones included; \cref{prop:noident} shows no passive detector can
 		do better \\
 		Frontier & Fixed tests collapse under ${\approx}$zero-cost variable real
 		work while the tracker holds; costly de-periodicisations buy no
@@ -1560,9 +1592,11 @@ buys physical evidence of an efficient iteration-structured compute schedule fro
 an external meter alone, robust to a wander-and-drift adversary but not to a
 prover who varies real work or degrades the meter. Rung~2 buys the further claim
 that the schedule is more training-like than a stated inference baseline --- but
-not that the computation is training rather than a schedule-matched decoy, which
-is a limit of the passive channel, not of the method. Separating training from a
-decoy, and binding a physical response to declared work, both require moving off
+not that the computation is training rather than a schedule-matched mimic, benign
+or deliberate, which is a limit of the passive channel, not of the method. That
+limit runs both ways: it caps what a positive detection proves as well as what a
+counterfeit could fake. Separating training from a
+mimic, and binding a physical response to declared work, both require moving off
 the passive channel to the active protocol of \cref{sec:active} and the
 cryptographic primitive it assumes. The passive meter is thus a cheap, deployable
 front line that narrows the question and prices the cheap evasions, not a
