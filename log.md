@@ -5,6 +5,36 @@ Dated narrative of work sessions, newest at top. Append-only historical record
 
 ---
 
+## 2026-08-31 — the tracker is track-before-detect, and Viterbi was the approximation
+
+Started from the question "is there a technique other than Viterbi, and does this
+problem have a name in the signal-analysis literature?" It does: **track-before-detect**
+(radar/sonar), narrowband case lofargram line tracking — a lineage the bib already
+carries (Streit & Barrett, Suvorova, SOAP) but the manuscript never cites. The cast
+pays immediately: under the HMM the tracker implicitly assumes, Viterbi is the
+MAP-path *approximation*, and the Neyman–Pearson statistic is the **forward-algorithm
+marginal — sum over all paths** — at identical cost (`max` → `logsumexp`, the
+Laplacian penalty promoted to a normalised transition kernel).
+
+Prototyped it (`forward_statistic` / `forward_path_scores` in
+`powerladder/typeb/detectors.py`, additive; 5 new tests, 40/40 in the module) and
+smoke-tested on the B0 synth generator: forward ≥ Viterbi in every amplitude × wander
+cell, with the gap opening exactly where the theory predicts — weak line under heavy
+wander (AUC 0.94 vs 0.86 at amp 8 / wander 0.6; 0.82 vs 0.72 at amp 6), seed-robust.
+Strong stationary lines tie at 1.0, as they must.
+
+Write-up with the evaluation plan in
+`notes/discussion/track-before-detect-forward-statistic.md`: evaluate on the
+confuser/high-drift axes and as the tracking-class ceiling for the σ* bound (the two
+places the NP-ceiling note shows headroom), not the plain inference null (Viterbi is
+already at ρ = 1.00 there); harmonic-comb emissions (the pitch-tracking trick) as the
+follow-on that attacks the controller AUC-0.0 failure. No frozen number touched; the
+statistic is a bank *candidate* pending its own surrogate/FAR run. Full suite 229/5,
+the 5 being the known cross-machine BLAS byte-identity set, verified pre-existing on
+a clean checkout.
+
+---
+
 ## 2026-07-24 (later) — Phase 4 closed: identifiability theory, and a review that earned its keep
 
 Wrote the two remaining Phase-4 items, then ran `/check-PR` over the branch and spent

@@ -18,7 +18,8 @@ import dataclasses
 from powerladder.config import DEFAULT
 from powerladder.forward import make_time_grid
 from powerladder.ko_workload import aggregate_F, aggregate_null_F, inference_F, training_F
-from powerladder.typeb.detectors import (spectral_statistic, viterbi_best_path,
+from powerladder.typeb.detectors import (forward_path_scores, forward_statistic,
+                                  spectral_statistic, viterbi_best_path,
                                   viterbi_path_scores, viterbi_statistic)
 from powerladder.typeb.gate import evaluate, score_population
 from powerladder.typeb.roc import auc, roc_points, tpr_at_far
@@ -89,7 +90,8 @@ def test_unknown_label_raises(p, rng):
 
 # --- detectors -------------------------------------------------------------
 
-@pytest.mark.parametrize("detector", [spectral_statistic, viterbi_statistic])
+@pytest.mark.parametrize("detector",
+                         [spectral_statistic, viterbi_statistic, forward_statistic])
 def test_detector_ranks_training_above_inference(detector, p, rng):
     train, infer = make_population(30, p, rng, wander_hz=0.0)
     pos = score_population(train, detector, p)
@@ -116,6 +118,66 @@ def test_detectors_fire_on_ko_training(p, ko_p, rng):
         5 * spectral_statistic(null.t, null.P_obs, p.band_lo, p.band_hi)
     assert viterbi_statistic(t, P, p.band_lo, p.band_hi) > \
         viterbi_statistic(null.t, null.P_obs, p.band_lo, p.band_hi)
+
+
+# --- forward (sum-over-paths) statistic: PROTOTYPE --------------------------
+# notes/discussion/track-before-detect-forward-statistic.md. Not in any frozen
+# result; these tests pin the contract, not a bake-off verdict.
+
+def test_forward_path_scores_last_equals_statistic(p, rng):
+    tr = make_trace("train", p, rng, wander_hz=0.3)
+    scores = forward_path_scores(tr.t, tr.P_obs, p.band_lo, p.band_hi)
+    assert scores.size > 1
+    assert forward_statistic(tr.t, tr.P_obs, p.band_lo, p.band_hi) == scores[-1]
+
+
+def test_forward_empty_band_is_zero(p, rng):
+    """A band beyond Nyquist has no bins: empty sequential array, scalar 0.0."""
+    tr = make_trace("infer", p, rng)
+    assert forward_path_scores(tr.t, tr.P_obs, 50.0, 60.0).size == 0
+    assert forward_statistic(tr.t, tr.P_obs, 50.0, 60.0) == 0.0
+
+
+def test_forward_holds_under_wander(p, rng):
+    """The regime the sum-over-paths statistic exists for: a wandering line.
+
+    Under heavy wander the fixed-bin matched filter smears out; the forward
+    statistic, like Viterbi, integrates along wander paths and keeps separating.
+    """
+    train, infer = make_population(30, p, rng, wander_hz=0.5)
+    pos = score_population(train, forward_statistic, p)
+    neg = score_population(infer, forward_statistic, p)
+    fwd_auc = auc(pos, neg)
+    spec_auc = auc(score_population(train, spectral_statistic, p),
+                   score_population(infer, spectral_statistic, p))
+    assert fwd_auc > 0.9
+    assert fwd_auc > spec_auc
+
+
+def test_forward_gains_over_viterbi_at_low_snr_heavy_wander(p, rng):
+    """The regime the sum-over-paths upgrade is FOR: weak line, heavy wander.
+
+    Per-frame SNR too low for one path to dominate -> the MAP path undersells
+    the evidence that many near-optimal paths carry jointly. Robust across
+    seeds at n_each=100 (AUC gap 0.06-0.12); pinned here at the fixture seed.
+    """
+    weak = dataclasses.replace(p, amp_train=8.0)
+    train, infer = make_population(40, weak, rng, wander_hz=0.6)
+    fwd_auc = auc(score_population(train, forward_statistic, weak),
+                  score_population(infer, forward_statistic, weak))
+    vit_auc = auc(score_population(train, viterbi_statistic, weak),
+                  score_population(infer, viterbi_statistic, weak))
+    assert fwd_auc > vit_auc
+
+
+def test_forward_agrees_with_viterbi_when_one_path_dominates(p, rng):
+    """Strong stationary line: the MAP path carries the mass, so the two
+    statistics must rank a training trace identically far above the null."""
+    tr = make_trace("train", p, rng, wander_hz=0.0)
+    null = make_trace("infer", p, rng, wander_hz=0.0)
+    for stat in (viterbi_statistic, forward_statistic):
+        assert stat(tr.t, tr.P_obs, p.band_lo, p.band_hi) > \
+            stat(null.t, null.P_obs, p.band_lo, p.band_hi)
 
 
 # --- Ko f0 drift (B1 / task 3.2) -------------------------------------------

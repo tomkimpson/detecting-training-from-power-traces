@@ -895,7 +895,11 @@ An adaptive prover breaks the benign baselines cheaply by letting the cycle
 frequency wander, smearing the line across the searched band. We restore
 coherence by estimating the wander and undoing it before testing. The detector
 has three components, each with one job. First, a tracker estimates the
-instantaneous cycle frequency $\hat f_0(t)$ from the time--frequency plane; the
+instantaneous cycle frequency $\hat f_0(t)$ from the time--frequency plane by
+Viterbi dynamic programming under a slow-wander transition penalty --- the
+hidden-Markov frequency-line tracking developed for passive sonar
+\citep{streit1990frequency} and carried into continuous-gravitational-wave
+searches \citep{suvorova2016hmm,bayley2019soap,djurovic2011viterbi}; the
 tracker is a nuisance-parameter estimator, \emph{not} the detector. Second, the
 phase estimate
 \begin{equation}
@@ -1733,7 +1737,13 @@ order family approaches the ceiling, with \texttt{dg\_order\_full} reaching $0.9
 of it at low drift and fading to $0.10$ by the fastest wander, while the Viterbi
 tracker and matched filter score zero (they lock onto the limit cycle). The
 widening gap to the ceiling at high drift is the honest headroom above today's
-detectors, not a limit of the channel. The one caveat runs in our favour: the
+detectors, not a limit of the channel. The line-tracking literature names the
+natural candidate for that headroom: under the hidden-Markov wander model the
+tracker already assumes, the Viterbi score is the best-single-path
+approximation, and the Neyman--Pearson statistic is the forward-algorithm
+marginal over \emph{all} frequency paths \citep{streit1990frequency};
+evaluating that sum-over-paths statistic on these axes is future work. The one
+caveat runs in our favour: the
 ceiling is optimal only under the Whittle model, a second-order stationary-Gaussian
 statistic that discards harmonic-phase coherence and non-Gaussian structure, so the
 true optimum can only exceed it. The perfect ceiling is therefore a lower bound on
