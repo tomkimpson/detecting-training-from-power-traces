@@ -1,3 +1,38 @@
+# Handoff — 2026-09-03 (positioning vs Gargiulo & Kulp, arXiv 2609.00309)
+
+## What happened this session
+
+A new paper appeared (Gargiulo & Kulp, *Workload Identification with Physical Side
+Channels for AI Governance*, arXiv 2609.00309, 31 Aug 2026): 97% training / inference
+/ non-AI classification from a verifier-owned 10 MHz Rogowski probe on a single
+H200's PCIe power conductors, with four measured evasions costing 28–69% throughput.
+Assessed the overlap and wrote the positioning record on branch
+**`docs/position-vs-gargiulo-kulp`**:
+
+- **`notes/discussion/positioning-vs-gargiulo-kulp-2026.md`** — verdict (not sunk:
+  same headline, opposite end of the where-is-the-meter axis), side-by-side table,
+  a careful treatment of the hardware gap (their "no gap" is bought by the threat
+  model; the single-card gap is shared but bites only our collective observable;
+  corpus-per-device vs model), adversary/cost comparison, the semantic ceiling
+  applied to their observable, review risks with answers, and a numbered list of
+  additive manuscript edits (§9) plus an optional experiment on their public
+  dataset (§10).
+
+## Next steps
+
+1. Apply the §9 manuscript edits (bib entry `gargiulo2026workload`; intro trust-anchor
+   sentence; "what changes here" paragraph; `subsec:meter_spec`; decoy paragraph;
+   `sec:frontier`; Limitations). Additive only, no frozen numbers. Rebuild `main.pdf`
+   with the pinned-epoch invocation; run `check-refs`.
+2. Decide whether to run the §10 bandwidth/integration sweep on their Hugging Face
+   traces through `apply_meter`.
+3. Precision: they do **not** say "unspoofable"; quote "observed independently of
+   operator cooperation" and "requires restructuring the computation itself".
+
+(Previous handoff follows.)
+
+---
+
 # Handoff — 2026-08-31 (track-before-detect cast; forward-statistic prototype)
 
 ## What happened this session
