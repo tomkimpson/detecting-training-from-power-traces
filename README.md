@@ -1,6 +1,6 @@
 # certifying-training-from-power
 
-*What a passive power meter can certify about AI training.*
+*Detecting AI training in datacentre power.*
 
 A theory-and-methods study of what a verifier can (and cannot) certify about AI
 **training** from a **time-resolved external power trace**, for compute governance.
@@ -8,8 +8,8 @@ The work is organised as a **claim ladder** — a sequence of claims, each answe
 strictly more governance-relevant question at a stated cost in verifier information —
 with the **de-periodicisation detection–utility frontier** as its central result.
 
-The paper (`paper/main.tex`) is *"What a Passive Power Meter Can Certify About AI
-Training."* Its scope is fixed by [`spec.md`](spec.md); the detailed plan lives in
+The paper (`paper/main.tex`) is *"Detecting AI Training in Datacentre Power."*
+Its scope is fixed by [`spec.md`](spec.md); the detailed plan lives in
 [`notes/plans/plan-for-paper-2.md`](notes/plans/plan-for-paper-2.md) and its
 [review](notes/plans/plan-for-paper-2-review.md).
 
