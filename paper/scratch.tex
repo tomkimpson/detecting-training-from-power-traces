@@ -1,0 +1,67 @@
+% ============================================================================
+% PARKED MATERIAL --- NOT FOR SUBMISSION
+%
+% Included from main.tex behind \iftoggle{scratch}. Set the toggle to false
+% (or delete the \input line) to drop this appendix before submission.
+% ============================================================================
+
+\section{Scratch}
+\label{app:scratch}
+
+Material cut from the body during the 2026-09 restructure and parked here
+pending a decision. \textbf{This appendix is not part of the paper.}
+
+\subsection{Contributions list (cut from the introduction)}
+
+The introduction previously closed with an enumerated contributions list. It
+was cut because the section it headed is now prose; the claims themselves are
+made and evidenced in the body.
+
+\begin{enumerate}
+	\setlength{\itemsep}{1pt}
+	\item \textbf{The claim ladder} (\cref{tab:ladder}) as an organising frame
+	for passive compute verification: four claims, their information costs, and
+	their ceilings, closed out one by one in \cref{tab:closeout}.
+	\item \textbf{A tracked cyclostationary detector for Rung~1}
+	(\cref{sec:methods}), with a negative methodological result we report
+	rather than bury: no covariance configuration calibrates the complete
+	tracker--resample--test pipeline end to end, so it is not a constant
+	false-alarm-rate test and we do not present it as one. It is an effective
+	score with per-trace surrogate calibration, level-exact on the
+	linear-stationary nulls we tested. A pre-registered bake-off
+	(\cref{app:bakeoff}) makes the choice of detector an outcome, and against a
+	Whittle likelihood-ratio ceiling the tracker is essentially optimal on the
+	inference null while only the cyclostationary order family approaches the
+	ceiling on structural confusers.
+	\item \textbf{The de-periodicisation frontier} (\cref{sec:frontier}), the
+	central result, priced against measured throughput anchors. Its shape is an
+	asymmetry: against fixed-frequency tests a prover reaches a hiding rate of
+	$0.74$ at essentially zero throughput cost by varying real work per
+	iteration, whereas against the tracking class the best anchored attack
+	reaches only $0.16$ at $159\%$ overhead.
+	\item \textbf{A minimum meter specification} (\cref{subsec:meter_spec}):
+	the observation channel is a first-class condition on every rung, and we
+	locate where each detector class dies in sample rate, integration window,
+	and in-band transfer function. A $1$\,s-integrating, $1$\,Hz-reporting meter
+	defeats every detector on an unmodified honest workload.
+	\item \textbf{Rung-2 classification with semantic falsification controls}
+	(\cref{subsec:rung2}). Three decision rules separate training from the
+	stated inference null perfectly and survive six domain shifts; but five
+	non-training loads --- three of them benign operational loads, alongside a
+	decoy that computes gradients and discards them --- all score as training. The
+	meter certifies the physical schedule, not training semantics: a ceiling no
+	better passive detector removes, and one that limits positive evidence as much
+	as it admits counterfeits.
+	\item \textbf{A negative transport case} (\cref{sec:reality}): what we
+	measured on real hardware, why it does not carry the distributed claim, and
+	what would falsify the prediction that it should.
+\end{enumerate}
+
+Supporting these, \cref{subsec:identifiability} gives the formal counterpart of
+the Rung-1 and Rung-2 ceilings: an observational-equivalence argument for why
+no passive test can identify training semantics, and a covertness cost bound
+showing that a prover using i.i.d.\ phase jitter to reach a target covertness
+level against an exhibited verifier must pay in throughput or learning
+efficiency. We are explicit about what that bound does not cover, and
+\cref{sec:frontier} supplies the near-free attack that shows why the gap
+matters.
