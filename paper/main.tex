@@ -107,10 +107,16 @@ prover-owned telemetry is feasible but conditional on tamper-resistant read
 paths that do not yet exist
 \citep{rahman2026telemetry,ogara2025hardware}; active challenge-response
 protocols remove the trust anchor but require the prover's participation
-\citep{monfared2026timing}. A power meter outside the prover's control is the
-one passive channel a verifier can read today against an uncooperative
-prover. This paper asks, as a theory-and-methods question: what can such a
-meter certify, with what methods, at what cost in verifier information, and
+\citep{monfared2026timing}. A verifier-owned probe clamped around an
+accelerator's own supply conductors removes the trust anchor without needing
+the prover's cooperation, and separates training from inference and from
+non-AI work at $97\%$ accuracy on a single H200 --- at the price of physical
+access to the monitored hardware and continuous on-site monitoring
+\citep{gargiulo2026workload}. A power meter outside the prover's control, read
+at the facility rather than at the board, is the one passive channel a
+verifier can read today against an uncooperative prover to whose hardware it
+has no access. This paper asks, as a theory-and-methods question: what can
+such a meter certify, with what methods, at what cost in verifier information, and
 against an adversary who knows the detector?
 
 The tools this requires are not new, and we do not claim them. Inferring which
@@ -137,9 +143,14 @@ What changes here is the question, the adversary, and the channel. Classical
 load monitoring assumes cooperative or indifferent appliances and reads their
 switching edges and steady-state signatures; side-channel analysis assumes a
 proximate, high-bandwidth probe and a cooperative target running a known
-computation, and extracts a fine-grained secret. We assume a remote, filtered,
-low-rate meter and a target that actively hides, and we extract only the coarse
-structural fact of whether efficient iteration-structured training is present.
+computation, and extracts a fine-grained secret. That proximate case has
+already been carried into compute governance: a $10$\,MHz probe on one
+accelerator's supply conductors classifies training against inference from the
+spectral signature of the memory-bound optimizer-update phase, and holds up
+under decimation to about $38$\,kS/s \citep{gargiulo2026workload} --- three
+to four orders of magnitude above the meter rates studied here. We assume a
+remote, filtered, low-rate meter and a target that actively hides, and we
+extract only the coarse structural fact of whether efficient iteration-structured training is present.
 The signature we exploit is accordingly neither a switching edge nor a
 key-dependent transient but a quasi-periodic, frequency-wandering second-order
 structure, which needs an order-tracking front end
