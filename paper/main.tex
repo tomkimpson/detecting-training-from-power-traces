@@ -32,6 +32,20 @@
 
 \usepackage[capitalize,noabbrev]{cleveref}  % smart cross-referencing
 
+% >>>>>>>>>>>>>>>>>>>>>> DEVELOPER NOTE -- REMOVE BEFORE SUBMISSION >>>>>>>>>>>>
+% Temporary in-draft pointer to the revision memos (see \devnote use in
+% \cref{sec:intro}). Delete this fenced block and its single use in the
+% Introduction. It MUST go before any circulation or arXiv submission: an
+% in-manuscript note to the authors is exactly what arXiv treats as
+% placeholder text.
+\usepackage{xcolor}
+\newcommand{\devnote}[1]{%
+  \par\medskip{\raggedright\color{red}\small\noindent\textbf{Developer's note
+  (to be removed).} #1\par}\medskip}
+% Long note paths: monospace does not hyphenate, so break points are explicit.
+\newcommand{\devpath}[1]{\texttt{#1}}
+% <<<<<<<<<<<<<<<<<<<<<< DEVELOPER NOTE -- REMOVE BEFORE SUBMISSION <<<<<<<<<<<<
+
 % Short form of the title for the running header:
 \icmltitlerunning{Detecting AI Training in Datacentre Power}
 
@@ -94,6 +108,33 @@ run.
 \section{Introduction}
 \label{sec:intro}
 % ============================================================================
+
+% >>>>>>>>>>>>>>>>>>>>>> DEVELOPER NOTE -- REMOVE BEFORE SUBMISSION >>>>>>>>>>>>
+\devnote{This draft is complete and compiles clean, but it has not yet had the
+structural surgery the project's own review calls for, so treat the prose of
+\cref{sec:intro}, \cref{sec:results} and \cref{sec:discussion} as provisional
+and hold off on line-editing them. Read these three memos first:
+\devpath{notes/\allowbreak discussion/\allowbreak project-review-\allowbreak usefulness-\allowbreak novelty-\allowbreak and-\allowbreak empirical-\allowbreak priorities.md}
+(the review that sets the revision agenda),
+\devpath{notes/\allowbreak discussion/\allowbreak what-the-\allowbreak paper-does-\allowbreak stepwise.md} (the physics-to-claim
+chain in one pass), and
+\devpath{notes/\allowbreak discussion/\allowbreak positioning-vs-\allowbreak gargiulo-kulp-\allowbreak 2026.md} (what the
+high-bandwidth probe result does and does not take from us). The outstanding
+surgery, in the review's own priority order: (i)~the word ``null'' is doing
+four separate jobs --- calibration surrogate, operational negative, confounder
+stress test, semantic counterexample --- and \cref{sec:results} should name
+them apart and demote the calibration diagnostics to \cref{app:bakeoff};
+(ii)~the synthetic classification results should be compressed, since they
+demonstrate properties of the scenario model rather than detector performance
+in the field; (iii)~the contribution should be reframed to lead with the
+remote, low-rate trust boundary rather than the generic claim that power
+reveals training, which may mean retitling; (iv)~the asynchronous-training
+control is one oscillator with added drift, not a multi-worker model, so a
+coherence sweep is owed before \cref{sec:reality} claims robustness there; and
+(v)~production power stabilisation belongs in the threat model of
+\cref{sec:threat}. Items (i)--(iii) are edits; (iv) and (v) are new work, and
+may instead be deferred with a stated caveat.}
+% <<<<<<<<<<<<<<<<<<<<<< DEVELOPER NOTE -- REMOVE BEFORE SUBMISSION <<<<<<<<<<<<
 
 Compute governance proposals call for evaluations, audits, and the
 registration or prohibition of training runs above specified compute
