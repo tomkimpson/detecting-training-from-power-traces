@@ -160,7 +160,7 @@ bibtex pass has run.
 The manuscript uses the ICML 2026 two-column style in `[preprint]` mode; `icml2026.sty`,
 `icml2026.bst`, `fancyhdr.sty` and `algorithm{,ic}.sty` are vendored in `paper/`.
 
-Current state: **28 pages, 0 errors, 0 overfull boxes, 0 undefined references or
+Current state: **29 pages, 0 errors, 0 overfull boxes, 0 undefined references or
 citations.** All section scaffolds are written; the one item outstanding before
 submission is the third author's affiliation, which still renders as "Affiliation TBD".
 
