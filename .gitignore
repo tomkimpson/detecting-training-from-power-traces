@@ -60,3 +60,11 @@ results/st1/slurm/*
 
 # Pre-merge review artefacts (transient; findings belong in notes/results/)
 PR_REVIEW_*.md
+
+# Pandoc/XeLaTeX renderings of notes are regenerable from the .md alongside them;
+# the markdown is the tracked record.
+notes/**/*.pdf
+
+# Stale smoke output from the closed HSMM renewal experiment (PR #19, Aug 2026).
+# Kept locally, never tracked — same convention as the other *_smoke_* artefacts.
+results/hsmm_smoke/

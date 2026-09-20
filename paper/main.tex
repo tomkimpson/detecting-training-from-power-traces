@@ -107,10 +107,16 @@ prover-owned telemetry is feasible but conditional on tamper-resistant read
 paths that do not yet exist
 \citep{rahman2026telemetry,ogara2025hardware}; active challenge-response
 protocols remove the trust anchor but require the prover's participation
-\citep{monfared2026timing}. A power meter outside the prover's control is the
-one passive channel a verifier can read today against an uncooperative
-prover. This paper asks, as a theory-and-methods question: what can such a
-meter certify, with what methods, at what cost in verifier information, and
+\citep{monfared2026timing}. A verifier-owned probe clamped around an
+accelerator's own supply conductors removes the trust anchor without needing
+the prover's cooperation, and separates training from inference and from
+non-AI work at $97\%$ accuracy on a single H200 --- at the price of physical
+access to the monitored hardware and continuous on-site monitoring
+\citep{gargiulo2026workload}. A power meter outside the prover's control, read
+at the facility rather than at the board, is the one passive channel a
+verifier can read today against an uncooperative prover to whose hardware it
+has no access. This paper asks, as a theory-and-methods question: what can
+such a meter certify, with what methods, at what cost in verifier information, and
 against an adversary who knows the detector?
 
 The tools this requires are not new, and we do not claim them. Inferring which
@@ -137,9 +143,14 @@ What changes here is the question, the adversary, and the channel. Classical
 load monitoring assumes cooperative or indifferent appliances and reads their
 switching edges and steady-state signatures; side-channel analysis assumes a
 proximate, high-bandwidth probe and a cooperative target running a known
-computation, and extracts a fine-grained secret. We assume a remote, filtered,
-low-rate meter and a target that actively hides, and we extract only the coarse
-structural fact of whether efficient iteration-structured training is present.
+computation, and extracts a fine-grained secret. That proximate case has
+already been carried into compute governance: a $10$\,MHz probe on one
+accelerator's supply conductors classifies training against inference from the
+spectral signature of the memory-bound optimizer-update phase, and holds up
+under decimation to about $38$\,kS/s \citep{gargiulo2026workload} --- three
+to four orders of magnitude above the meter rates studied here. We assume a
+remote, filtered, low-rate meter and a target that actively hides, and we
+extract only the coarse structural fact of whether efficient iteration-structured training is present.
 The signature we exploit is accordingly neither a switching edge nor a
 key-dependent transient but a quasi-periodic, frequency-wandering second-order
 structure, which needs an order-tracking front end
@@ -1055,7 +1066,15 @@ in \cref{subsec:st1}, and calling structure training needs the nuisance model of
 \cref{sec:threat}. The decoy is the extremal member of the same class and the one
 that cannot be engineered away --- \cref{subsec:identifiability} rules out any
 passive detector that separates it --- which is why this ceiling motivates the active
-protocol of \cref{app:active} rather than a better classifier.
+protocol of \cref{app:active} rather than a better classifier. The ceiling is a
+property of the observable rather than of the meter's bandwidth. A learned
+classifier reading a board-level probe at $10$~MHz separates training from
+inference by the spectral signature of the memory-bound optimizer-update phase
+\citep{gargiulo2026workload}; the discarded-update decoy runs exactly that phase
+and discards only its result, so the mechanism such a classifier keys on is
+present in a load that is not training. More bandwidth resolves the physical
+schedule more sharply, and it is the schedule, not the semantics, that a passive
+meter reads.
 
 \begin{table*}[t]
 	\centering
@@ -1153,7 +1172,13 @@ leaves the tracked line detectable. Slowly drifting the cadence costs up to
 ${\sim}140\%$ and is precisely the regime the order tracker was built to survive
 (\cref{subsec:power}). Power shaping costs $170$--$230\%$. Against every one of
 these the tracking class holds while the prover pays a throughput tax that a
-compute-governance regime would itself flag.
+compute-governance regime would itself flag. Measured work on real hardware
+points the same way from a different channel: four evasion strategies run on a
+single H200 --- chunked optimizer updates, dilution with decoy inference,
+throttling, and diluted LoRA --- cost between $28$ and $69\%$ of throughput
+\citep{gargiulo2026workload}. Each of them inserts or substitutes work, which is
+what makes it expensive, and none varies the real computation per iteration ---
+the family we turn to next.
 
 \paragraph{The cheap attack collapses the fixed tests but not the tracker.} The
 dangerous family is variable real work. Varying the useful computation performed
@@ -1322,6 +1347,20 @@ drops it to $0.36$; the two together give $0.30$. The meter-erasure regime is
 over-determined --- it is a statement about the instrument, and a demand on it,
 rather than a de-periodicisation attack the prover can mount for free.
 
+\paragraph{The specification against measured hardware.} Work at the other end
+of the bandwidth range puts this requirement in perspective. A verifier-owned
+probe on a single H200's supply conductors finds the training signature
+concentrated below about $20$~kHz and still classifiable after decimation to
+about $38$~kS/s, where that study stops \citep{gargiulo2026workload} --- three to
+four orders of magnitude above the rates swept here. The two specifications are
+complementary rather than comparable, because they are requirements on different
+observables: theirs is the single-card optimizer-update phase, ours the
+collective iteration cadence. What the measured result does supply is
+real-hardware support for the direction of the collapse we find, since the fine
+structure a board-level probe exploits is long gone by the time a facility meter
+reads, and whatever survives at a few hertz must therefore be a slower and more
+collective observable than the one a probe sees.
+
 
 % ============================================================================
 \section{Reality check and transfer limits}
@@ -1351,6 +1390,16 @@ channel, a gap of about $75\times$ in modulation depth. The synthetic results ar
 therefore a sensitivity analysis over a plausible parameter family, not a
 prediction calibrated to this hardware --- which is why the paper's claims are
 scoped to the stated generator and its stated nulls throughout.
+
+\paragraph{The single-card gap is shared, and lands differently.} The measured
+side-channel corpus that separates training from inference at high bandwidth is
+also a single card, with cross-device generalisation left open
+\citep{gargiulo2026workload}. What differs is which observable the gap touches. A
+board-level probe reads the optimizer-update phase, which is present on one card,
+so the absent distributed setting costs that result little. The cadence is a
+collective effect of synchronisation, so a single card is exactly the case in
+which it is weakest --- which is why the same gap is a transport caveat there and a
+first-order limitation here.
 
 \paragraph{Falsifiable predictions.} The model makes two predictions we cannot
 test here but state as falsifiable. Distributed synchronisation should deepen the

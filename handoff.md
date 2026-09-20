@@ -1,3 +1,56 @@
+# Handoff — 2026-09-11 (external-style project review)
+
+## What happened this session
+
+Recorded a self-contained assessment of the project's usefulness to AI safety and
+verification, novelty against the 2026 literature, empirical gap, asynchronous-
+training boundary, production power-stabilization challenge, and null-test
+simplification:
+
+- **`notes/discussion/project-review-usefulness-novelty-and-empirical-priorities.md`**
+  — dated discussion memo with an executive verdict, multi-worker coherence analysis,
+  public H100-dataset reanalysis plan, preferred owned experiment, novelty table,
+  four-way cleanup of the overloaded "null" terminology, and a prioritized revision
+  sequence.
+- **`notes/discussion/project-review-usefulness-novelty-and-empirical-priorities.pdf`**
+  — six-page A4 rendering of the memo, generated with Pandoc and XeLaTeX; hyperlinks
+  and displayed mathematics are preserved. The Markdown uses Pandoc-compatible
+  dollar-delimited math (`$...$` / `$$...$$`), after correcting an initial render
+  that printed single-backslash math delimiters literally.
+
+No code, frozen result, manuscript text, or `spec.md` scope changed. Existing untracked
+`results/hsmm_smoke/` was left untouched. Current branch remains
+**`docs/cite-gargiulo-kulp`**.
+
+## Main conclusions captured in the note
+
+1. The strongest contribution is measurement science for a low-rate, independently
+   observed verification channel—not the generic claim that power can reveal
+   training.
+2. The current "asynchronous training" control is one oscillator with additional
+   drift/phase slip, not a true multi-worker asynchronous model. A coherence sweep is
+   required before claiming robustness.
+3. The public Vercellino et al. 8–64 GPU H100 dataset is the fastest route to testing
+   the central scale-and-coherence prediction, though it does not validate external
+   meter transport.
+4. Production power stabilization may challenge the present evasion-cost story and
+   should be added to the threat model.
+5. The main-text statistics can be simplified by separating calibration surrogates,
+   operational negatives, confounder stress tests, and semantic counterexamples.
+
+## Possible next steps
+
+1. Decide whether to turn the review's recommended revision sequence into an
+   implementation plan.
+2. If yes, start with the public H100 trace reanalysis and the multi-oscillator
+   coherence model before restructuring manuscript prose.
+3. Carry forward the existing Gargiulo & Kulp manuscript edits and third-author
+   affiliation blocker below.
+
+(Previous handoff follows.)
+
+---
+
 # Handoff — 2026-09-03 (positioning vs Gargiulo & Kulp, arXiv 2609.00309)
 
 ## What happened this session

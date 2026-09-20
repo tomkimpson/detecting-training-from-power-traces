@@ -97,7 +97,7 @@ certifying-training-from-power/
   renders "Preprint. January 1, 1970."
   `paper/main.pdf` is **tracked**, so rebuild and commit it whenever `main.tex` changes.
   Bibliography: `paper/references.bib`, author–year via `icml2026.bst`.
-- The manuscript is **fully drafted** (28 pp, 0 errors/overfull/undefined). All section
+- The manuscript is **fully drafted** (29 pp, 0 errors/overfull/undefined). All section
   scaffolds and the `checklist`/`todo` machinery were removed on 2026-07-27. `check-refs`
   and `check-arxiv-llm-compliance` both pass except for one known blocker: the third
   author's affiliation still renders as "Affiliation TBD".
