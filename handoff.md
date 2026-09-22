@@ -1,3 +1,58 @@
+# Handoff — 2026-09-23 (introduction restructured as a methods paper)
+
+## What happened this session
+
+Ran `/write-introduction` in critique-and-revise mode on `paper/main.tex` and
+applied the result on branch **`restructure`**:
+
+- **Introduction rewritten** (1693 words / 11 paragraphs / 16.5% of body →
+  ~1000 words / 7 paragraphs / 10.5%). Role structure is marked with
+  `% ---------- [n] ... ----------` comments: [1] hook, [2a–c] literature
+  (physical signature; signal-processing lineages; covert comms), [3] one-sentence
+  gap + stakes, [4] aim as five doing-verb claims with `\cref` pointers, [5]
+  roadmap. Framed as a **methods paper**: the gap is "no method turns a low-rate
+  external trace into a calibrated test, prices its evasion, and states what the
+  channel cannot certify."
+- **Cut:** the red developer's note and its preamble macros (`\devnote`,
+  `\devpath`; `xcolor` kept); the results-preview paragraph ("Our answer is…");
+  the two rung-by-rung ladder paragraphs; the "Three restrictions fix the scope"
+  paragraphs.
+- **Moved:** `tab:ladder` + a lead-in paragraph (ladder description, benign vs
+  adaptive prover) now open `sec:threat`. The three scope restrictions now form
+  the `\paragraph{Scope.}` of `sec:discussion`. Distance-bounding / PUF citations
+  re-homed to `app:active`.
+- **New intro citations:** `patel2023polca`, `streit1990frequency`,
+  `suvorova2016hmm`, `bayley2019soap` (the sonar/CW-GW lineage the 2026-08-31
+  handoff flagged as uncited is now cited in the intro too).
+- **Now uncited anywhere:** `brier2004cpa`, `maia2022magnetic`,
+  `naghibijouybari2018rendered`, `hu2020deepsniffer`, `liu2016codeexecution`
+  (the GPU side-channel corpus). Bib entries left in place; re-home or drop.
+- **Proposed citation left as a LaTeX comment** in intro §[2a]: Vercellino et al.
+  2026, arXiv:2604.07345 (multi-node H100 traces). Verify with `/check-refs`
+  before adding to `references.bib`.
+- PDF rebuilt with the pinned-epoch command: **28 pp**, 0 errors / overfull /
+  undefined. Ladder table floats to p. 4.
+
+## Open items from this pass
+
+1. **Conclusion opening no longer answers the gap.** `sec:discussion` still opens
+   "We set out to ask what a passive power meter can certify…"; rewrite to answer
+   the methods gap (build a calibrated test, price evasion, state the ceiling).
+2. **Abstract** leads with the ladder, not the method; revisit with `/write-abstract`
+   after the rest of the restructure.
+3. Two intro sentences are my gloss and should be checked against the body:
+   "both do so for *every* verifier at once" (steganography/covert comms) and
+   "tests for cyclostationary coherence at the tracked order" (matches the
+   stepwise memo's phrasing; confirm against `sec:methods`).
+4. Retitle? Review memo suggests foregrounding the low-rate condition.
+5. The review memo's remaining surgery (four "null" jobs in `sec:results`;
+   compress synthetic classification; async control; power stabilisation in the
+   threat model) is untouched.
+
+(Previous handoff follows.)
+
+---
+
 # Handoff — 2026-09-11 (external-style project review)
 
 ## What happened this session

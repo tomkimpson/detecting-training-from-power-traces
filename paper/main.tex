@@ -32,19 +32,7 @@
 
 \usepackage[capitalize,noabbrev]{cleveref}  % smart cross-referencing
 
-% >>>>>>>>>>>>>>>>>>>>>> DEVELOPER NOTE -- REMOVE BEFORE SUBMISSION >>>>>>>>>>>>
-% Temporary in-draft pointer to the revision memos (see \devnote use in
-% \cref{sec:intro}). Delete this fenced block and its single use in the
-% Introduction. It MUST go before any circulation or arXiv submission: an
-% in-manuscript note to the authors is exactly what arXiv treats as
-% placeholder text.
 \usepackage{xcolor}
-\newcommand{\devnote}[1]{%
-  \par\medskip{\raggedright\color{red}\small\noindent\textbf{Developer's note
-  (to be removed).} #1\par}\medskip}
-% Long note paths: monospace does not hyphenate, so break points are explicit.
-\newcommand{\devpath}[1]{\texttt{#1}}
-% <<<<<<<<<<<<<<<<<<<<<< DEVELOPER NOTE -- REMOVE BEFORE SUBMISSION <<<<<<<<<<<<
 
 % Short form of the title for the running header:
 \icmltitlerunning{Detecting AI Training in Datacentre Power}
@@ -109,189 +97,146 @@ run.
 \label{sec:intro}
 % ============================================================================
 
-% >>>>>>>>>>>>>>>>>>>>>> DEVELOPER NOTE -- REMOVE BEFORE SUBMISSION >>>>>>>>>>>>
-\devnote{This draft is complete and compiles clean, but it has not yet had the
-structural surgery the project's own review calls for, so treat the prose of
-\cref{sec:intro}, \cref{sec:results} and \cref{sec:discussion} as provisional
-and hold off on line-editing them. Read these three memos first:
-\devpath{notes/\allowbreak discussion/\allowbreak project-review-\allowbreak usefulness-\allowbreak novelty-\allowbreak and-\allowbreak empirical-\allowbreak priorities.md}
-(the review that sets the revision agenda),
-\devpath{notes/\allowbreak discussion/\allowbreak what-the-\allowbreak paper-does-\allowbreak stepwise.md} (the physics-to-claim
-chain in one pass), and
-\devpath{notes/\allowbreak discussion/\allowbreak positioning-vs-\allowbreak gargiulo-kulp-\allowbreak 2026.md} (what the
-high-bandwidth probe result does and does not take from us). The outstanding
-surgery, in the review's own priority order: (i)~the word ``null'' is doing
-four separate jobs --- calibration surrogate, operational negative, confounder
-stress test, semantic counterexample --- and \cref{sec:results} should name
-them apart and demote the calibration diagnostics to \cref{app:bakeoff};
-(ii)~the synthetic classification results should be compressed, since they
-demonstrate properties of the scenario model rather than detector performance
-in the field; (iii)~the contribution should be reframed to lead with the
-remote, low-rate trust boundary rather than the generic claim that power
-reveals training, which may mean retitling; (iv)~the asynchronous-training
-control is one oscillator with added drift, not a multi-worker model, so a
-coherence sweep is owed before \cref{sec:reality} claims robustness there; and
-(v)~production power stabilisation belongs in the threat model of
-\cref{sec:threat}. Items (i)--(iii) are edits; (iv) and (v) are new work, and
-may instead be deferred with a stated caveat.}
-% <<<<<<<<<<<<<<<<<<<<<< DEVELOPER NOTE -- REMOVE BEFORE SUBMISSION <<<<<<<<<<<<
+% ---------- [1] HOOK: the concrete governance problem and the one passive channel ----------
+Compute-governance proposals call for the registration, evaluation or
+prohibition of training runs above a compute threshold
+\citep{shavit2023chinchilla,sastry2024computing,baker2025verifying,heim2024thresholds},
+and U.S.~Executive Order 14110 briefly operationalised one, requiring reports of
+runs above $10^{26}$\,FLOP \citep{whitehouse2023eo14110}. Every such scheme
+presupposes that a regulator can tell when training is happening on monitored
+hardware. Three channels could tell it. Prover-owned telemetry is informative
+but conditional on tamper-resistant read paths that do not yet exist
+\citep{rahman2026telemetry,ogara2025hardware}; challenge--response protocols
+remove that trust anchor but require the prover's participation
+\citep{monfared2026timing}; and a verifier-owned probe on an accelerator's
+supply conductors requires neither, at the price of physical access to the
+board and continuous on-site presence \citep{gargiulo2026workload}. A power
+meter outside the prover's control, read at the rack or facility rather than
+at the board, is the one passive channel a verifier can read today against an
+uncooperative prover to whose hardware it has no access.
 
-Compute governance proposals call for evaluations, audits, and the
-registration or prohibition of training runs above specified compute
-thresholds
-\citep{shavit2023chinchilla,sastry2024computing,baker2025verifying,heim2024thresholds};
-U.S.~Executive Order 14110 briefly operationalised one such threshold,
-requiring the reporting of training runs above $10^{26}$ FLOP
-\citep{whitehouse2023eo14110}. Every such scheme presupposes that a regulator
-can tell when training occurs on monitored hardware. Detection from
-prover-owned telemetry is feasible but conditional on tamper-resistant read
-paths that do not yet exist
-\citep{rahman2026telemetry,ogara2025hardware}; active challenge-response
-protocols remove the trust anchor but require the prover's participation
-\citep{monfared2026timing}. A verifier-owned probe clamped around an
-accelerator's own supply conductors removes the trust anchor without needing
-the prover's cooperation, and separates training from inference and from
-non-AI work at $97\%$ accuracy on a single H200 --- at the price of physical
-access to the monitored hardware and continuous on-site monitoring
-\citep{gargiulo2026workload}. A power meter outside the prover's control, read
-at the facility rather than at the board, is the one passive channel a
-verifier can read today against an uncooperative prover to whose hardware it
-has no access. This paper asks, as a theory-and-methods question: what can
-such a meter certify, with what methods, at what cost in verifier information, and
-against an adversary who knows the detector?
+% ---------- [2a] LITERATURE: what is established about the physical signature ----------
+That the signature exists is no longer in doubt. Synchronous distributed
+training alternates a compute phase with a communication barrier, and the
+alternation imprints a line at the iteration cadence on the aggregate power
+draw; operators of large clusters report the resulting cluster-wide swings as an
+engineering problem in their own right \citep{patel2023polca,ko2025widearea}.
+% CITE-PROPOSED (verify with /check-refs before adding to references.bib):
+% Vercellino et al. 2026, multi-node H100 power traces, arXiv:2604.07345 --
+% synchronous aggregate fluctuations at 8-64 GPUs, growing with node count.
+At the board, a $10$\,MHz probe separates training from
+inference and from non-AI work at $97\%$ accuracy from the spectral signature
+of the optimizer-update phase, and the separation survives decimation to about
+$38$\,kS/s \citep{gargiulo2026workload}. At $1$\,Hz, prover-reported GPU
+telemetry classifies training on real multi-GPU hardware, including some
+adversarial configurations \citep{rahman2026telemetry}. What neither result
+speaks to is the remote case: a meter three to four orders of magnitude slower
+than the probe, behind a power-delivery path that low-passes and dilutes the
+signal, reading a prover who knows it is being read.
 
-The tools this requires are not new, and we do not claim them. Inferring which
-activities are running from a single aggregate meter is the founding problem of
-non-intrusive load monitoring \citep{hart1992nilm}, with three decades of
-disaggregation technique behind it \citep{zoha2012nilm} and a power-side-channel
-malware detector as its closest security-flavoured descendant
-\citep{clark2013wattsupdoc}; certifying training from one datacentre meter is
-that problem lifted from the household scale. Deciding whether a source is
-active from noisy observations, explicitly against a transmitter trying to stay
-below the detection floor, is the subject of spectrum sensing in cognitive
-radio, whose canonical detector taxonomy --- the energy detector against the
-matched filter against the cyclostationary feature detector, and the known
-trade-offs between them --- is the structure of our own detector comparison
-\citep{yucek2009spectrum}. And that computation is legible in power at all is
-the founding premise of hardware-security power analysis, from differential
-power analysis \citep{kocher1999dpa} and its correlation refinement
-\citep{brier2004cpa} to profiled template attacks \citep{chari2002template},
-with a parallel corpus attacking the inverse problem of recovering model
-architecture or execution from GPU side channels
-\citep{maia2022magnetic,naghibijouybari2018rendered,hu2020deepsniffer,liu2016codeexecution}.
+% ---------- [2b] LITERATURE: the signal-processing tools, and what each assumes ----------
+The tools for that case are not new, and we do not claim them. Inferring which
+activities are running from one aggregate meter is the founding problem of
+non-intrusive load monitoring \citep{hart1992nilm,zoha2012nilm}, with a
+power-side-channel malware detector as its closest security-flavoured
+descendant \citep{clark2013wattsupdoc}. Deciding whether a source is active
+against a transmitter trying to stay below the detection floor is spectrum
+sensing, whose taxonomy of energy, matched-filter and cyclostationary detectors
+structures our own comparison \citep{yucek2009spectrum}. Tracking a narrowband
+line whose frequency wanders is passive sonar's lofargram problem
+\citep{streit1990frequency}, carried into continuous-gravitational-wave
+searches \citep{suvorova2016hmm,bayley2019soap}, and undoing that wander before
+testing is tacholess order tracking \citep{bonnardot2005tacholess}. Each of
+these literatures assumes something the governance setting removes: load
+monitoring assumes indifferent appliances with clean switching edges;
+side-channel analysis, from differential power analysis onward
+\citep{kocher1999dpa,chari2002template}, assumes a proximate high-bandwidth
+probe and a cooperative target; the line trackers assume a stationary noise
+floor with no adversary behind it. None of them supplies a calibrated test for
+a quasi-periodic, frequency-wandering signature observed through a low-rate
+filtered meter, and none prices what it costs the source to remove it.
 
-What changes here is the question, the adversary, and the channel. Classical
-load monitoring assumes cooperative or indifferent appliances and reads their
-switching edges and steady-state signatures; side-channel analysis assumes a
-proximate, high-bandwidth probe and a cooperative target running a known
-computation, and extracts a fine-grained secret. That proximate case has
-already been carried into compute governance: a $10$\,MHz probe on one
-accelerator's supply conductors classifies training against inference from the
-spectral signature of the memory-bound optimizer-update phase, and holds up
-under decimation to about $38$\,kS/s \citep{gargiulo2026workload} --- three
-to four orders of magnitude above the meter rates studied here. We assume a
-remote, filtered, low-rate meter and a target that actively hides, and we
-extract only the coarse structural fact of whether efficient iteration-structured training is present.
-The signature we exploit is accordingly neither a switching edge nor a
-key-dependent transient but a quasi-periodic, frequency-wandering second-order
-structure, which needs an order-tracking front end
-\citep{dandawate1994cyclostationarity,bonnardot2005tacholess} that none of those
-literatures supplies. The template-attack idea --- build a generative model of
-the trace and test against it --- is nonetheless the honest precedent for the
-optimality ceiling we benchmark our detectors against.
+% ---------- [2c] LITERATURE: the adversarial half (covert comms / steganography) ----------
+The adversarial half does have an owner. Pricing concealment against
+detectability is the warden-versus-covert-transmitter game of covert
+communication \citep{bash2013covert} and the relative-entropy security measure
+of information-theoretic steganography \citep{cachin2004steganography}: both
+bound how detectable a hidden activity remains as a function of how constrained
+it is, and both do so for \emph{every} verifier at once rather than for one
+detector. Their results assume a transmitter free to shape its signal. A
+training schedule is not free: its communication phase has a physical duration
+that does not shrink when the compute phase does, and each distortion of the
+cadence costs throughput or learning efficiency. That constraint is what makes
+a cost-of-hiding bound possible here, and no existing bound covers it.
 
-One literature does own the adversarial half of the problem. Pricing hiding
-against detectability is formally the warden-versus-covert-transmitter game:
-covert communication theory, from the square-root law of \citet{bash2013covert}
-onward, and the information-theoretic model of steganography
-\citep{cachin2004steganography}, which measures a stegosystem's security by the
-relative entropy between cover and stego distributions, study exactly the
-trade-off between how constrained a hidden activity is and how detectable it
-remains. This is the literature that turns an empirical frontier into a
-statement about \emph{every} verifier, by bounding a distributional distance
-between the training-trace and null-trace laws as a function of the adversary's
-distortion. Its existing results do not cover our object --- a
-physics-constrained training schedule observed through a filtered, low-rate
-meter --- so the bound is not inherited but has to be derived, which
-\cref{subsec:identifiability} does for one attack family.
+% ---------- [3] THE GAP (one sentence) + why it matters ----------
+What is missing is a method that turns a low-rate external power trace into a
+calibrated test for iteration-structured training, prices its evasion against
+an adversary who knows the test, and states what the channel cannot certify at
+any price. Without one, ``power monitoring'' enters policy proposals as a
+binary capability: no one can write the meter specification a regulator would
+have to procure, budget the evasions a prover would actually attempt, or say
+which governance claims a positive detection does and does not support.
 
-Our answer is that a passive external power trace can provide calibrated
-structural evidence, and conditional evidence of efficient
-iteration-structured training, but not universal semantic identification. An
-adaptive prover can attack the exposed cadence, and the empirical question is
-what detection--utility frontier erasing it requires. Stronger work
-verification is possible only conditionally, on additional challenge and
-transcript primitives.
+% ---------- [4] THE AIM: what this paper does, as refutable claims with pointers ----------
+In this paper we build that method and characterise its limits. We specify an
+off-chip observation model and a literature-parameterised generator of
+datacentre training and inference power, with the adversary's attacks
+implemented inside the generator so that they obey the same physical constraints
+as honest execution (\cref{sec:scenario}). We construct a detector for the
+cadence that tracks the wandering line, resamples the trace to constant phase,
+and tests for cyclostationary coherence at the tracked order, and we show why the
+adaptive pipeline admits no analytic calibration and calibrate it instead by
+per-trace surrogates validated in a staged false-alarm campaign
+(\cref{sec:methods,sec:results}). We define the de-periodicisation frontier,
+the trade-off between how much of the cadence an adaptive prover removes and
+what that removal costs in measured throughput, and derive an identifiability
+lower bound on the cost of hiding to a stated detectability
+(\cref{sec:frontier,subsec:identifiability}). From the same apparatus we derive a
+minimum meter specification, the sampling rate, integration time and in-band
+transfer below which no detector in our bank sees an honest workload
+(\cref{subsec:meter_spec}). And we prove that the passive channel certifies a
+physical schedule rather than training semantics, and specify, without running,
+the active challenge protocol that escapes that ceiling (\cref{sec:threat},
+\cref{app:active}). We restrict attention to synchronous, iteration-structured
+training observed through a time-resolved trace; the integrated-energy channel,
+asynchronous schedules and the calibration of the generator to distributed
+hardware are outside scope, and \cref{sec:reality,sec:discussion} say what that
+costs.
 
-That answer is not a single yes or no, so we do not organise the paper around a
-single test. We organise it as a \emph{claim ladder} (\cref{tab:ladder}): four
-claims of increasing governance relevance, each bought at a stated cost in
-verifier information, and each with a hard ceiling that motivates the next.
-Rung~1 establishes that order-coherent power structure is present, which is
-evidence rather than identification. Rung~2 converts that structure into
-training-likeness, at the price of committing to an inference null; its ceiling
-is semantic non-identifiability. Rung~3 escapes both the null and that ceiling by
-binding the physical response to an unpredictable challenge, at the price of the
-prover's cooperation; its ceiling is a challenge-aware dummy load. Rung~4 ties
-the response to declared work, but only given a transcript primitive we assume
-rather than build. Each rung is the principled response to the previous rung's
-ceiling, and part of the contribution is mapping the ladder honestly ---
-including where each rung stops. The ladder is analogous in spirit to an
-attestation ladder in which more verifier information permits a stronger claim at
-greater institutional cost, but it is a ladder of claims and assumptions, not a
-quantitative bound on unidentified compute. Within every rung we run two
-adversary settings: a \textbf{benign} (non-adaptive) prover who runs its
-workload without regard to the meter, and an \textbf{adaptive} (hiding) prover
-who knows the detector and reshapes its schedule to evade it. Most of what is
-interesting lies in the gap between them.
+% ---------- [5] ROADMAP ----------
+The paper follows the physical chain. \Cref{sec:threat} fixes the threat and
+measurement model and organises the claims a meter can support as a ladder of
+increasing governance relevance and increasing verifier cost
+(\cref{tab:ladder}); \cref{sec:scenario} gives the workload and observation
+model that generates every trace below. \Cref{sec:methods} develops the
+detectors and their calibration, \cref{sec:results} reports their level and
+power against the structural, confounder and inference nulls, and
+\cref{sec:frontier} prices what it costs an adaptive prover to defeat them.
+\Cref{sec:reality} holds the model against measured single-GPU hardware, where
+it fails, and \cref{sec:discussion} reads the ladder back for a regulator.
 
-The body of the paper treats the two passive rungs, which is where the meter
-alone can be made to do work. Rungs~3 and~4 leave the passive channel for an
-active protocol --- authenticating a physical device by its response to an
-unpredictable query, the premise of distance-bounding protocols
-\citep{brands1994distance}, physical unclonable functions \citep{pappu2002puf},
-and, in compute governance specifically, of challenge-response telemetry
-\citep{monfared2026timing} --- and we specify that protocol without running it, in
-\cref{app:active}.
+% ============================================================================
+\section{Threat and measurement model}
+\label{sec:threat}
+% ============================================================================
 
-Three restrictions fix the scope. First, the observable: we use the
-time-resolved power trace and exclude the integrated-energy channel, so there is
-no bounding of how much compute was performed and no energy-per-token pricing as
-a verification instrument. This is a restriction on the observable, not a claim
-that everything lives in the spectrum --- cyclostationary structure is expressed
-spectrally, but the challenge correlation of Rung~3 is a time-domain operation on
-the same trace. Second, the population: we do not claim a recoverable cadence is
-universally necessary for training, and some conceivable execution can be made
-fully aperiodic. We target instead efficient, synchronous, iteration-structured
-training that exposes a recoverable cadence --- an expected physical signature of
-that regime, especially where distributed synchronisation makes the modulation
-deep and coherent. Destroying that cadence is then an adversarial action with a
-measurable budget, not a counterexample to the method, and measuring that budget
-is what \cref{sec:frontier} does.
-
-The third restriction is the least comfortable, so we state it plainly: we do
-not have hardware that can test the real question, and all the evidence here
-lives on a synthetic generator. The iteration cadence exists on a single GPU,
-and our measurements find the corresponding ripple at about $0.40\%$ of board
-power, but a single saturated card has no communication phase, so the modulation
-is shallow and easily washed out, and a single-node rig matches neither a
-datacentre nor the aggregate regime of the workload model we adopt. The
-generator (\cref{sec:scenario}) is therefore literature-parameterised, which we
-are careful not to call calibrated: a factor of roughly $75$ separates the
-modulation depth that model assumes from what we measure on one A100. Real
-hardware enters as a negative transport case (\cref{sec:reality}), not as a
-pillar, and the prediction that distributed synchronisation deepens and coheres
-the signature is stated as falsifiable rather than claimed as a result.
-
-The rest of the paper follows the physical chain. \Cref{sec:threat} fixes the
-threat and measurement model, including the two things about this channel that
-can be argued rather than measured: that no passive detector can identify
-training semantics, and that hiding to a stated detectability must be paid for
-in throughput or learning efficiency. \Cref{sec:scenario} gives the workload and
-observation model that generates every number below. \Cref{sec:methods} develops
-the detectors, \cref{sec:results} reports what they do, and \cref{sec:frontier}
-prices what it costs an adaptive prover to defeat them. \Cref{sec:reality}
-reports the one place we hold the model against measured hardware and it fails.
+This section fixes what the verifier sees, who is trying to hide from it, and
+what can be argued about the channel before any detector is run. It also fixes
+the vocabulary for the claims a meter can support. We organise those claims as
+a \emph{claim ladder} (\cref{tab:ladder}): four claims of increasing governance
+relevance, each bought at a stated cost in verifier information, and each with
+a hard ceiling that motivates the next. Rung~1 establishes that order-coherent
+power structure is present, which is evidence rather than identification.
+Rung~2 converts that structure into training-likeness at the price of
+committing to an inference null; its ceiling is semantic non-identifiability.
+Rungs~3 and~4 leave the passive channel for an active protocol and a transcript
+primitive, and are specified but not run (\cref{app:active}). The ladder is a
+ladder of claims and assumptions, not a quantitative bound on unidentified
+compute. Within every rung we consider two provers: a \textbf{benign}
+(non-adaptive) prover who runs its workload without regard to the meter, and an
+\textbf{adaptive} (hiding) prover who knows the detector and reshapes its
+schedule to evade it. Most of what is interesting lies in the gap between them.
 
 \begin{table*}[t]
 	\centering
@@ -326,10 +271,6 @@ reports the one place we hold the model against measured hardware and it fails.
 		\bottomrule
 	\end{tabular}
 \end{table*}
-
-\section{Threat and measurement model}
-\label{sec:threat}
-% ============================================================================
 
 \subsection{The observation channel}
 \label{subsec:channel}
@@ -1503,13 +1444,25 @@ the paper's evidence attached to each rung.
 	\end{tabular}
 \end{table*}
 
-\paragraph{Scope.} The results are fixed-horizon: we make no claim that the
-$\chi^2$ statistic supports anytime-valid monitoring, and defer sequential
-e-process treatment. We use only the temporal-structure channel, excluding the
-amount-of-computation and energy channels. The cryptographic binding of Rung~4 is
-assumed as an ideal functionality, not built. Real distributed hardware enters
-only as the falsifiable predictions and the negative transport case of
-\cref{sec:reality}.
+\paragraph{Scope.} Three restrictions fix what the results cover. First, the
+observable: we use the time-resolved power trace and exclude the
+integrated-energy channel, so there is no bounding of how much compute was
+performed and no energy-per-token pricing as a verification instrument. This is
+a restriction on the observable, not a claim that everything lives in the
+spectrum; cyclostationary structure is expressed spectrally, but the challenge
+correlation of Rung~3 is a time-domain operation on the same trace. Second, the
+population: we do not claim a recoverable cadence is universally necessary for
+training, and some conceivable execution can be made fully aperiodic. We target
+efficient, synchronous, iteration-structured training that exposes a recoverable
+cadence, the expected physical signature of that regime where distributed
+synchronisation makes the modulation deep and coherent. Destroying that cadence
+is then an adversarial action with a measurable budget, not a counterexample to
+the method, and measuring that budget is what \cref{sec:frontier} does. Third,
+the horizon: the results are fixed-horizon, and we make no claim that the
+$\chi^2$ statistic supports anytime-valid monitoring, deferring sequential
+e-process treatment. The cryptographic binding of Rung~4 is assumed as an ideal
+functionality, not built. Real distributed hardware enters only as the
+falsifiable predictions and the negative transport case of \cref{sec:reality}.
 
 \paragraph{Limitations.} The scenario model is literature-parameterised, not
 calibrated to measured hardware, so every quantitative result is a sensitivity
@@ -1974,7 +1927,11 @@ sees only the schedule and the mimic copies the schedule. The discarded-update
 decoy is the sharpest instance --- \cref{subsec:identifiability} rules out any passive
 detector that separates it --- even though a concealing prover would never mount
 one (\cref{subsec:adversary}). The way past a passive ceiling is to stop watching
-and start asking. If the verifier perturbs the machine and the machine must react,
+and start asking: authenticate a physical device by its response to an
+unpredictable query, the premise of distance-bounding protocols
+\citep{brands1994distance}, physical unclonable functions \citep{pappu2002puf}
+and, in compute governance, of challenge--response telemetry
+\citep{monfared2026timing}. If the verifier perturbs the machine and the machine must react,
 a mimic that merely replays a recording cannot follow: it does not know what it
 was asked.
 
