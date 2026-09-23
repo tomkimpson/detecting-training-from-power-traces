@@ -98,44 +98,21 @@ run.
 % ============================================================================
 
 % ---------- [1] HOOK: the concrete governance problem and the one passive channel ----------
-Compute-governance proposals call for the registration, evaluation or
-prohibition of training runs above a compute threshold
-\citep{shavit2023chinchilla,sastry2024computing,baker2025verifying,heim2024thresholds},
-and U.S.~Executive Order 14110 briefly operationalised one, requiring reports of
-runs above $10^{26}$\,FLOP \citep{whitehouse2023eo14110}. Every such scheme
-presupposes that a regulator can tell when training is happening on monitored
-hardware. Three channels could tell it. Prover-owned telemetry is informative
-but conditional on tamper-resistant read paths that do not yet exist
-\citep{rahman2026telemetry,ogara2025hardware}; challenge--response protocols
-remove that trust anchor but require the prover's participation
-\citep{monfared2026timing}; and a verifier-owned probe on an accelerator's
-supply conductors requires neither, at the price of physical access to the
-board and continuous on-site presence \citep{gargiulo2026workload}. A power
-meter outside the prover's control, read at the rack or facility rather than
-at the board, is the one passive channel a verifier can read today against an
-uncooperative prover to whose hardware it has no access.
+AI governance agreements will require regulating training runs \citep{shavit2023chinchilla,sastry2024computing,baker2025verifying,heim2024thresholds}. This will require an external verifier to identify when training is occurring on a monitored cluster, against an operator who is trying to hide their training. There are multiple channels that could provide the verifier with diagnostic information to identify hidden training. These include on-chip mechanisms that log activities for later analysis, network taps that monitor data exchanged between chips, or human-centred approaches such as whistleblower programs or interviews of operator personnel. However each of these channels requires trusting either hardware that is under the control of the operator, or the operator personnel themselves. Conversely, off-chip sensors that take analog, physical measurements of the cluster (e.g. power or electromagnetic emissions) do not require trusting the operator. Such sensors could be retrofitted to existing datacentres (e.g. clamping a power meter on an input cable) and secured against tampering by the operator. 
+
 
 % ---------- [2a] LITERATURE: what is established about the physical signature ----------
-That the signature exists is no longer in doubt. Synchronous distributed
-training alternates a compute phase with a communication barrier, and the
-alternation imprints a line at the iteration cadence on the aggregate power
-draw; operators of large clusters report the resulting cluster-wide swings as an
-engineering problem in their own right \citep{patel2023polca,ko2025widearea}.
-% CITE-PROPOSED (verify with /check-refs before adding to references.bib):
-% Vercellino et al. 2026, multi-node H100 power traces, arXiv:2604.07345 --
-% synchronous aggregate fluctuations at 8-64 GPUs, growing with node count.
-At the board, a $10$\,MHz probe separates training from
-inference and from non-AI work at $97\%$ accuracy from the spectral signature
-of the optimizer-update phase, and the separation survives decimation to about
-$38$\,kS/s \citep{gargiulo2026workload}. At $1$\,Hz, prover-reported GPU
-telemetry classifies training on real multi-GPU hardware, including some
-adversarial configurations \citep{rahman2026telemetry}. What neither result
-speaks to is the remote case: a meter three to four orders of magnitude slower
-than the probe, behind a power-delivery path that low-passes and dilutes the
-signal, reading a prover who knows it is being read.
+AI training has already been shown to leave a signature in the power drawn by the hardware that can serve as a diagnostic to identify and separate training from inference. A $10$\,MHz current probe clamped around the GPU's PCIe power supply cables can separate training from
+inference and from non-AI work at $97\%$ accuracy \citep{gargiulo2026workload}, a result robust against many but not all adversarial strategies. On-chip $1$\,Hz telemetry counters that measure power (among other telemetry: utilisation, memory, etc.) can classify training at $95\%$ accuracy, again a result robust against many but not all adversarial strategies \citep{rahman2026telemetry}. In practice, any realistic AI governance agreements that use off-chip sensors will rarely have such fine-grained access to the GPU hardware. Power meters that can be retrofitted to existing facilities and secured against tampering are likely to sit at the level of the rack or facility input, with sampling frequencies ${\sim}10$\,Hz (i.e. three to four orders of magnitude slower than the board probe) and behind a power-delivery path that low-passes and dilutes the signal. At this level training can be identified and it is large enough that datacentre and grid operators treat it as an engineering control problem to be dealt with~\citep{patel2023polca,ko2025widearea}. We now want to explore if it can be used as a signal to be tested for by a verifier.
+
+
 
 % ---------- [2b] LITERATURE: the signal-processing tools, and what each assumes ----------
-The tools for that case are not new, and we do not claim them. Inferring which
+
+
+The problem of X is well establihsed 
+
+Inferring which
 activities are running from one aggregate meter is the founding problem of
 non-intrusive load monitoring \citep{hart1992nilm,zoha2012nilm}, with a
 power-side-channel malware detector as its closest security-flavoured
@@ -215,6 +192,36 @@ power against the structural, confounder and inference nulls, and
 \cref{sec:frontier} prices what it costs an adaptive prover to defeat them.
 \Cref{sec:reality} holds the model against measured single-GPU hardware, where
 it fails, and \cref{sec:discussion} reads the ladder back for a regulator.
+
+
+
+
+
+
+%---------stuff i have cut from the intro that could be useful
+
+and U.S.~Executive Order 14110 briefly operationalised one, requiring reports of
+runs above $10^{26}$\,FLOP \citep{whitehouse2023eo14110}. 
+
+
+
+Every such scheme
+presupposes that a regulator can tell when training is happening on monitored
+hardware. Three channels could tell it. Prover-owned telemetry is informative
+but conditional on tamper-resistant read paths that do not yet exist
+\citep{rahman2026telemetry,ogara2025hardware}; challenge--response protocols
+remove that trust anchor but require the prover's participation
+\citep{monfared2026timing}; and a verifier-owned probe on an accelerator's
+supply conductors requires neither, at the price of physical access to the
+board and continuous on-site presence \citep{gargiulo2026workload}. 
+
+
+
+Multi GPU synchronous AI training of the type that typifies frontier AI models alternates a compute phase, a forward backward pass with high power requirements, with a communication gradient all reduce phase where the GPUs all sync and power requirements drop. [what about async training? maybe we need to mention this somewhere? perhaps in limitations? ]
+
+
+In practice the problem is harder as the probe is at a higher level i.e. more remote a meter three to four orders of magnitude slower than the probe, behind a power-delivery path that low-passes and dilutes the
+signal, reading a prover who knows it is being read.
 
 % ============================================================================
 \section{Threat and measurement model}
