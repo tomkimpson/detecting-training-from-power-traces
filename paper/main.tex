@@ -103,86 +103,44 @@ AI governance agreements will require regulating training runs \citep{shavit2023
 
 % ---------- [2a] LITERATURE: what is established about the physical signature ----------
 AI training has already been shown to leave a signature in the power drawn by the hardware that can serve as a diagnostic to identify and separate training from inference. A $10$\,MHz current probe clamped around the GPU's PCIe power supply cables can separate training from
-inference and from non-AI work at $97\%$ accuracy \citep{gargiulo2026workload}, a result robust against many but not all adversarial strategies. On-chip $1$\,Hz telemetry counters that measure power (among other telemetry: utilisation, memory, etc.) can classify training at $95\%$ accuracy, again a result robust against many but not all adversarial strategies \citep{rahman2026telemetry}. In practice, any realistic AI governance agreements that use off-chip sensors will rarely have such fine-grained access to the GPU hardware. Power meters that can be retrofitted to existing facilities and secured against tampering are likely to sit at the level of the rack or facility input, with sampling frequencies ${\sim}10$\,Hz (i.e. three to four orders of magnitude slower than the board probe) and behind a power-delivery path that low-passes and dilutes the signal. At this level training can be identified and it is large enough that datacentre and grid operators treat it as an engineering control problem to be dealt with~\citep{patel2023polca,ko2025widearea}. We now want to explore if it can be used as a signal to be tested for by a verifier.
-
-
-
-% ---------- [2b] LITERATURE: the signal-processing tools, and what each assumes ----------
-
-
-The problem of X is well establihsed 
-
-Inferring which
-activities are running from one aggregate meter is the founding problem of
-non-intrusive load monitoring \citep{hart1992nilm,zoha2012nilm}, with a
-power-side-channel malware detector as its closest security-flavoured
-descendant \citep{clark2013wattsupdoc}. Deciding whether a source is active
-against a transmitter trying to stay below the detection floor is spectrum
-sensing, whose taxonomy of energy, matched-filter and cyclostationary detectors
-structures our own comparison \citep{yucek2009spectrum}. Tracking a narrowband
-line whose frequency wanders is passive sonar's lofargram problem
-\citep{streit1990frequency}, carried into continuous-gravitational-wave
-searches \citep{suvorova2016hmm,bayley2019soap}, and undoing that wander before
-testing is tacholess order tracking \citep{bonnardot2005tacholess}. Each of
-these literatures assumes something the governance setting removes: load
-monitoring assumes indifferent appliances with clean switching edges;
-side-channel analysis, from differential power analysis onward
-\citep{kocher1999dpa,chari2002template}, assumes a proximate high-bandwidth
-probe and a cooperative target; the line trackers assume a stationary noise
-floor with no adversary behind it. None of them supplies a calibrated test for
-a quasi-periodic, frequency-wandering signature observed through a low-rate
-filtered meter, and none prices what it costs the source to remove it.
-
-% ---------- [2c] LITERATURE: the adversarial half (covert comms / steganography) ----------
-The adversarial half does have an owner. Pricing concealment against
-detectability is the warden-versus-covert-transmitter game of covert
-communication \citep{bash2013covert} and the relative-entropy security measure
-of information-theoretic steganography \citep{cachin2004steganography}: both
-bound how detectable a hidden activity remains as a function of how constrained
-it is, and both do so for \emph{every} verifier at once rather than for one
-detector. Their results assume a transmitter free to shape its signal. A
-training schedule is not free: its communication phase has a physical duration
-that does not shrink when the compute phase does, and each distortion of the
-cadence costs throughput or learning efficiency. That constraint is what makes
-a cost-of-hiding bound possible here, and no existing bound covers it.
-
-% ---------- [3] THE GAP (one sentence) + why it matters ----------
-What is missing is a method that turns a low-rate external power trace into a
-calibrated test for iteration-structured training, prices its evasion against
-an adversary who knows the test, and states what the channel cannot certify at
-any price. Without one, ``power monitoring'' enters policy proposals as a
-binary capability: no one can write the meter specification a regulator would
-have to procure, budget the evasions a prover would actually attempt, or say
-which governance claims a positive detection does and does not support.
+inference and from non-AI work at $97\%$ accuracy \citep{gargiulo2026workload}, a result robust against many but not all adversarial strategies. On-chip $1$\,Hz telemetry counters that measure power (among other telemetry: utilisation, memory, etc.) can classify training at $95\%$ accuracy, again a result robust against many but not all adversarial strategies \citep{rahman2026telemetry}. In practice, any realistic AI governance agreements that use off-chip sensors will rarely have such fine-grained access to the GPU hardware. Power meters that can be retrofitted to existing facilities and secured against tampering are likely to sit at the level of the rack or facility input, with sampling frequencies ${\sim}10$\,Hz (i.e. three to four orders of magnitude slower than the board probe) and behind a power-delivery path that low-passes and dilutes the signal. At this level training can be identified and it is large enough that datacentre and grid operators treat it as an engineering control problem to be dealt with~\citep{patel2023polca,ko2025widearea}. 
 
 % ---------- [4] THE AIM: what this paper does, as refutable claims with pointers ----------
-In this paper we build that method and characterise its limits. We specify an
-off-chip observation model and a literature-parameterised generator of
-datacentre training and inference power, with the adversary's attacks
-implemented inside the generator so that they obey the same physical constraints
-as honest execution (\cref{sec:scenario}). We construct a detector for the
-cadence that tracks the wandering line, resamples the trace to constant phase,
-and tests for cyclostationary coherence at the tracked order, and we show why the
-adaptive pipeline admits no analytic calibration and calibrate it instead by
-per-trace surrogates validated in a staged false-alarm campaign
-(\cref{sec:methods,sec:results}). We define the de-periodicisation frontier,
-the trade-off between how much of the cadence an adaptive prover removes and
+In this paper we develop a new method for detecting training signatures given noisy facility level power measurements, against an adversarial operator who is trying to hide their training. 
+
+
+%to be done once the paper scrop/strucutre is better established
+We do:
+
+* specify anoff-chip observation model and a literature-parameterised generator of
+datacentre training and inference power, 
+
+* construct a detector  a detector for the cadence that tracks the wandering line, borrowing thehcniqus ffrom signal analysis and GW astrophysics
+
+* We construct the Pareto frontier and show the trade-off between how much of the cadence an adaptive prover removes and
 what that removal costs in measured throughput, and derive an identifiability
 lower bound on the cost of hiding to a stated detectability
-(\cref{sec:frontier,subsec:identifiability}). From the same apparatus we derive a
-minimum meter specification, the sampling rate, integration time and in-band
-transfer below which no detector in our bank sees an honest workload
-(\cref{subsec:meter_spec}). And we prove that the passive channel certifies a
-physical schedule rather than training semantics, and specify, without running,
-the active challenge protocol that escapes that ceiling (\cref{sec:threat},
-\cref{app:active}). We restrict attention to synchronous, iteration-structured
+(\cref{sec:frontier,subsec:identifiability}). 
+
+*We derive a minimum meter specification, the sampling rate, integration time and in-band
+transfer i.e. the specs needed for a meter to work 
+
+
+
+* We restrict attention to synchronous, iteration-structured
 training observed through a time-resolved trace; the integrated-energy channel,
 asynchronous schedules and the calibration of the generator to distributed
 hardware are outside scope, and \cref{sec:reality,sec:discussion} say what that
 costs.
 
+
+
+ Unlike a covert transmitter, a training operator cannot freely reshape its signal: the communication phase has a fixed physical duration, and every distortion of the cadence costs throughput. It is this constraint that makes a cost-of-hiding bound possible.
+
+
+
 % ---------- [5] ROADMAP ----------
-The paper follows the physical chain. \Cref{sec:threat} fixes the threat and
+This paper is organised as follows... \Cref{sec:threat} fixes the threat and
 measurement model and organises the claims a meter can support as a ladder of
 increasing governance relevance and increasing verifier cost
 (\cref{tab:ladder}); \cref{sec:scenario} gives the workload and observation
@@ -192,36 +150,6 @@ power against the structural, confounder and inference nulls, and
 \cref{sec:frontier} prices what it costs an adaptive prover to defeat them.
 \Cref{sec:reality} holds the model against measured single-GPU hardware, where
 it fails, and \cref{sec:discussion} reads the ladder back for a regulator.
-
-
-
-
-
-
-%---------stuff i have cut from the intro that could be useful
-
-and U.S.~Executive Order 14110 briefly operationalised one, requiring reports of
-runs above $10^{26}$\,FLOP \citep{whitehouse2023eo14110}. 
-
-
-
-Every such scheme
-presupposes that a regulator can tell when training is happening on monitored
-hardware. Three channels could tell it. Prover-owned telemetry is informative
-but conditional on tamper-resistant read paths that do not yet exist
-\citep{rahman2026telemetry,ogara2025hardware}; challenge--response protocols
-remove that trust anchor but require the prover's participation
-\citep{monfared2026timing}; and a verifier-owned probe on an accelerator's
-supply conductors requires neither, at the price of physical access to the
-board and continuous on-site presence \citep{gargiulo2026workload}. 
-
-
-
-Multi GPU synchronous AI training of the type that typifies frontier AI models alternates a compute phase, a forward backward pass with high power requirements, with a communication gradient all reduce phase where the GPUs all sync and power requirements drop. [what about async training? maybe we need to mention this somewhere? perhaps in limitations? ]
-
-
-In practice the problem is harder as the probe is at a higher level i.e. more remote a meter three to four orders of magnitude slower than the probe, behind a power-delivery path that low-passes and dilutes the
-signal, reading a prover who knows it is being read.
 
 % ============================================================================
 \section{Threat and measurement model}
@@ -2007,5 +1935,92 @@ results here motivate but cannot reach --- the response to the ceiling that
 % ----------------------------------------------------------------------
 % Parked material; drop this \input before submission.
 \input{scratch}
+
+% ============================================================================
+\section{Scratch}
+\label{app:scratch}
+% Temporary holding area for text cut from the introduction. Remove before submission.
+% ============================================================================
+
+% ---------- [2b] LITERATURE: the signal-processing tools, and what each assumes ----------
+
+
+The problem of 
+
+The problem of X is well establihsed 
+
+Inferring which
+activities are running from one aggregate meter is the founding problem of
+non-intrusive load monitoring \citep{hart1992nilm,zoha2012nilm}, with a
+power-side-channel malware detector as its closest security-flavoured
+descendant \citep{clark2013wattsupdoc}. Deciding whether a source is active
+against a transmitter trying to stay below the detection floor is spectrum
+sensing, whose taxonomy of energy, matched-filter and cyclostationary detectors
+structures our own comparison \citep{yucek2009spectrum}. 
+
+Tracking a narrowbandline whose frequency wanders is passive sonar's lofargram problem
+\citep{streit1990frequency}, carried into continuous-gravitational-wave
+searches \citep{suvorova2016hmm,bayley2019soap}, and undoing that wander before
+testing is tacholess order tracking \citep{bonnardot2005tacholess}. 
+
+Each of these literatures assumes something the governance setting removes: 
+
+load monitoring assumes indifferent appliances with clean switching edges;
+
+side-channel analysis, from differential power analysis onward
+\citep{kocher1999dpa,chari2002template}, assumes a proximate high-bandwidth
+probe and a cooperative target; 
+
+the line trackers assume a stationary noise floor with no adversary behind it. 
+
+None of them supplies a calibrated test for a quasi-periodic, frequency-wandering signature observed through a low-rate
+filtered meter, and none prices what it costs the source to remove it.
+
+% ---------- [2c] LITERATURE: the adversarial half (covert comms / steganography) ----------
+The adversarial half does have an owner. Pricing concealment against
+detectability is the warden-versus-covert-transmitter game of covert
+communication \citep{bash2013covert} and the relative-entropy security measure
+of information-theoretic steganography \citep{cachin2004steganography}: both
+bound how detectable a hidden activity remains as a function of how constrained
+it is, and both do so for \emph{every} verifier at once rather than for one
+detector. Their results assume a transmitter free to shape its signal. A
+training schedule is not free: its communication phase has a physical duration
+that does not shrink when the compute phase does, and each distortion of the
+cadence costs throughput or learning efficiency. That constraint is what makes
+a cost-of-hiding bound possible here, and no existing bound covers it.
+
+% ---------- [3] THE GAP (one sentence) + why it matters ----------
+What is missing is a method that turns a low-rate external power trace into a
+calibrated test for iteration-structured training, prices its evasion against
+an adversary who knows the test, and states what the channel cannot certify at
+any price. Without one, ``power monitoring'' enters policy proposals as a
+binary capability: no one can write the meter specification a regulator would
+have to procure, budget the evasions a prover would actually attempt, or say
+which governance claims a positive detection does and does not support.
+
+
+
+and U.S.~Executive Order 14110 briefly operationalised one, requiring reports of
+runs above $10^{26}$\,FLOP \citep{whitehouse2023eo14110}. 
+
+
+
+Every such scheme
+presupposes that a regulator can tell when training is happening on monitored
+hardware. Three channels could tell it. Prover-owned telemetry is informative
+but conditional on tamper-resistant read paths that do not yet exist
+\citep{rahman2026telemetry,ogara2025hardware}; challenge--response protocols
+remove that trust anchor but require the prover's participation
+\citep{monfared2026timing}; and a verifier-owned probe on an accelerator's
+supply conductors requires neither, at the price of physical access to the
+board and continuous on-site presence \citep{gargiulo2026workload}. 
+
+
+
+Multi GPU synchronous AI training of the type that typifies frontier AI models alternates a compute phase, a forward backward pass with high power requirements, with a communication gradient all reduce phase where the GPUs all sync and power requirements drop. [what about async training? maybe we need to mention this somewhere? perhaps in limitations? ]
+
+
+In practice the problem is harder as the probe is at a higher level i.e. more remote a meter three to four orders of magnitude slower than the probe, behind a power-delivery path that low-passes and dilutes the
+signal, reading a prover who knows it is being read.
 
 \end{document}
