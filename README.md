@@ -63,6 +63,7 @@ Only the Pareto re-plot is safe to run locally — it reads `frontier_summary.js
 writes no results artefact (~1 s):
 ```
 python scripts/plot_st2_pareto.py    # -> figures/st2_cost_pareto.*
+python scripts/plot_money_pareto.py  # -> figures/money_pareto.* (main-text Viterbi vs fixed overlay)
 ```
 
 **Scenario models — example traces and observation-map sensitivity (local, CPU-only,
@@ -135,6 +136,7 @@ sbatch --dependency=afterok:$sw scripts/slurm/st2_frontier.sbatch
 ```
 sbatch scripts/slurm/st1_np_ceiling.sbatch   # -> results/st1/np_ceiling_summary.json + figures/st1_np_ceiling.*
 python scripts/plot_st1_np_ceiling.py         # re-draw the figure from the summary
+python scripts/plot_drift_ceiling.py          # -> figures/drift_ceiling.* (main-text Viterbi vs drift)
 ```
 The single ~10–15 min task builds the shared Whittle template bank, fits the three
 ceilings, and reports each bake-off detector as a fraction of the NP-optimal power. Local
