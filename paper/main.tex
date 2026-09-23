@@ -151,252 +151,6 @@ power against the structural, confounder and inference nulls, and
 \Cref{sec:reality} holds the model against measured single-GPU hardware, where
 it fails, and \cref{sec:discussion} reads the ladder back for a regulator.
 
-% ============================================================================
-\section{Threat and measurement model}
-\label{sec:threat}
-% ============================================================================
-
-This section fixes what the verifier sees, who is trying to hide from it, and
-what can be argued about the channel before any detector is run. It also fixes
-the vocabulary for the claims a meter can support. We organise those claims as
-a \emph{claim ladder} (\cref{tab:ladder}): four claims of increasing governance
-relevance, each bought at a stated cost in verifier information, and each with
-a hard ceiling that motivates the next. Rung~1 establishes that order-coherent
-power structure is present, which is evidence rather than identification.
-Rung~2 converts that structure into training-likeness at the price of
-committing to an inference null; its ceiling is semantic non-identifiability.
-Rungs~3 and~4 leave the passive channel for an active protocol and a transcript
-primitive, and are specified but not run (\cref{app:active}). The ladder is a
-ladder of claims and assumptions, not a quantitative bound on unidentified
-compute. Within every rung we consider two provers: a \textbf{benign}
-(non-adaptive) prover who runs its workload without regard to the meter, and an
-\textbf{adaptive} (hiding) prover who knows the detector and reshapes its
-schedule to evade it. Most of what is interesting lies in the gap between them.
-
-\begin{table*}[t]
-	\centering
-	\small
-	\caption{The claim ladder. Each rung answers a
-	strictly more governance-relevant question at a stated cost in verifier
-	information; each rung's hard ceiling motivates the next. Within each rung
-	we consider a benign (non-adaptive) and an adaptive (hiding) prover.
-	\Cref{tab:closeout} closes each rung out against the evidence.}
-	\label{tab:ladder}
-	\begin{tabular}{@{}p{2.6cm}p{4.2cm}p{3.4cm}p{4.6cm}@{}}
-		\toprule
-		Rung & Claim & Additional requirement & Hard ceiling \\
-		\midrule
-		1. Structural evidence & Order-coherent power variation exists under a
-		specified structural null & External time-resolved trace only &
-		Periodic physical confounds; structural-null misspecification; strong
-		superposition or dilution; active power shaping; cadence moved outside
-		the searched family; die-to-meter attenuation \\
-		2. Conditional classification & The trace is more training-like than
-		the stated inference population & A representative or explicitly
-		modelled inference null & Domain shift; semantic non-identifiability
-		(training-shaped execution, benign or deliberate, without training) \\
-		3. Active physical authentication & A load behind the meter responded
-		to an unpredictable verifier challenge & Prover participation; a
-		challenge-bound schedule & A challenge-aware dummy load; no semantic
-		binding by power alone \\
-		4. Work verification & The physical response is tied to declared
-		training state transitions & A sound, fresh transcript/proof and an
-		explicit binding assumption & The remote-proof / co-location gap,
-		unless the assumed primitive closes it \\
-		\bottomrule
-	\end{tabular}
-\end{table*}
-
-\subsection{The observation channel}
-\label{subsec:channel}
-
-% Plan §2: the device equation alone describes the device, not the meter.
-% Extends eq:obs/eq:forward IMPORTED from paper-verification/main.tex §3.1.
-The verifier holds one scalar time series from a meter outside the prover's
-control. The minimum model separates the device from the channel:
-\begin{align}
-	P_{\mathrm{meter}}(t) &= (h * P_{\mathrm{device}})(t) + P_{\mathrm{other}}(t) + \eta(t),
-	\label{eq:meter}\\
-	P_{\mathrm{device}}(t) &= r(t)\,F(t) + P_0(t),
-	\label{eq:device}
-\end{align}
-where $F(t)$ is the instantaneous operation rate, $r(t)$ the energy cost per
-operation, $P_0(t)$ the non-compute overhead, $h$ collects power-delivery
-dynamics, meter integration, reporting filters, and sampling,
-$P_{\mathrm{other}}(t)$ is co-resident load behind the same meter, and
-$\eta(t)$ is measurement noise the prover cannot forge. The linear
-time-invariant form of $h$ is an explicit first approximation; $h$ may be
-operating-point dependent. Until simultaneous on-device and external-meter
-measurement is performed, claims about what reaches an off-chip sensor are
-predictions (\cref{sec:reality}).
-
-\subsection{The adversary: operators and budgets}
-\label{subsec:adversary}
-
-% Plan §4: attack families as operators, each with a reported budget.
-Across the passive rungs the prover's objective is \emph{concealment}: to train
-while the trace reaching the meter stays consistent with the null. To that end it
-may apply, singly or in composition:
-\begin{itemize}
-	\item \textbf{phase attack}: jitter, drift, or randomised work per iteration;
-	\item \textbf{frequency relocation}: move the cadence toward or outside the search family;
-	\item \textbf{additive burial}: independent workload superposition / spectral-floor jamming;
-	\item \textbf{amplitude shaping}: added load flattening the compute/communication swing;
-	\item \textbf{dilution}: reduce the training duty fraction among other work.
-\end{itemize}
-With unlimited superposition, dilution, shaping power, time, or freedom to
-restructure work, the prover can drive the signal-to-noise ratio arbitrarily
-low or synthesise the null; robustness claims are therefore made only over
-specified attack families at specified budgets.
-
-One construction that recurs below is deliberately absent from that list. A
-\emph{semantic decoy} --- a load reproducing the physical schedule of training
-without retaining a trained model --- is not an attack a concealing prover would
-mount, since manufacturing evidence of the activity it is hiding buys it nothing.
-It enters this paper instead as a non-training control (\cref{subsec:rung2})
-and as the construction behind the non-identifiability argument of
-\cref{subsec:identifiability}, and it carries weight for two
-reasons that need no motivated decoy-runner: its benign counterparts occur in
-ordinary datacentre operation, and the active protocol of \cref{app:active}
-inverts the prover's objective, at which point a \emph{challenge-aware decoy} ---
-a correlated dummy response mimicking the prescribed reaction without training ---
-does become a live attack.
-
-
-\subsection{Identifiability and the cost of hiding}
-\label{subsec:identifiability}
-
-Two questions have to be kept apart. \emph{Detection} asks whether this trace is
-training rather than the null, and its tools are likelihood-ratio and
-cyclostationary tests. \emph{Cost of hiding} asks how far the prover must distort
-its schedule before the training-trace \emph{distribution} becomes
-indistinguishable from the null \emph{distribution}, and its tools are
-distributional distances. The distinction matters because our empirical results
-bound the wrong direction for a governance claim: a detection sweep says how much
-can be hidden from \emph{our} detector, which a better detector moves. This
-subsection states what can be argued in the other direction. It is the one part
-of the paper that does not come from the generator, and the derivations behind it
-are in \cref{app:identifiability}.
-
-The first point is negative, and it sets the ceiling for the whole passive
-channel. Write $w$ for a computational execution, $h$ for the hardware and
-power-delivery path, and $K_h(w)$ for the law of the observed trace that
-\cref{eq:meter,eq:device} induce. Call two executions \emph{observationally
-equivalent} when $K_{h_0}(w_0) = K_{h_1}(w_1)$. A passive verifier sees only the
-trace, so its decision is some measurable function of it, and on an
-observationally equivalent pair every such function fires with the same
-probability under both. No passive scalar-power detector can therefore certify
-the semantic content of a computation against an unrestricted adversary. A
-non-vacuous guarantee has to put the equivalent pairs out of scope, and there are
-four ways to do that within the passive channel --- restricting the admissible
-non-training workload class, the adversary's freedom to add or restructure
-computation, the hardware and power-transfer family, or the physical property
-claimed --- alongside a fifth route that leaves the passive channel altogether by
-changing the protocol (\cref{app:active}). We do not claim the list is exhaustive.
-
-The construction behind this is nearly available on the prover's own hardware. A
-program can execute the same forward, backward, and optimiser kernels as training
-and discard each updated state, making its trace arbitrarily close to genuine
-training while its semantic classification differs. This is not a hypothetical
-weakness; it is what \cref{subsec:rung2} measures, where five non-training loads,
-the discarded-update decoy among them, score as training under all three decision
-rules. That outcome is a property of the channel rather than of our classifier,
-which is why the Rung-2 ceiling cannot be removed by a better detector and why
-Rung~3 has to add a challenge.
-
-The argument binds even where no adversary is present. A concealing prover has no
-reason to run a decoy (\cref{subsec:adversary}), but most of the equivalence class
-is not adversarial at all: a training-shaped non-ML kernel loop, a controller
-limit cycle, and a periodic inference request generator all sit inside it, and all
-arise in ordinary operation. The consequence is two-sided. A rule phrased
-semantically --- training rather than serving, which model, whose weights ---
-cannot be adjudicated from the schedule alone in either direction, so the same
-equivalence that would let a decoy counterfeit training also caps the evidentiary
-weight a verifier can attach to a positive detection.
-
-What can be argued quantitatively concerns the \emph{cost} of hiding, and it is
-stated over the population this paper scopes itself to: efficient, synchronous,
-iteration-structured training whose compute/communication alternation exposes a
-recoverable cadence $f_0$, and in which the synchronous exchange occupies a
-down-phase whose duration does not scale with the work accumulated in the
-preceding up-phase. Call an attack $\varepsilon$-\emph{covert} against a class of
-verifiers if no test in the class attains detection advantage --- true-positive
-minus false-positive rate --- above $\varepsilon$. Any single test's advantage is
-at most the total variation $\mathrm{TV}(P_{\mathrm{train}},P_{\mathrm{null}})$
-between the two laws \citep{tsybakov2009nonparametric}, so covertness against
-\emph{every} verifier requires that total variation to be at most $\varepsilon$.
-
-Consider the concrete attack the frontier prices: i.i.d.\ fractional period
-jitter of scale $\sigma$, so iteration $i$ has period
-$1/\!\left(f_0(1+\xi_i)\right)$ with $\xi_i \sim \mathcal{N}(0,\sigma^2)$. Such
-jitter \emph{accumulates} --- the iteration-boundary phase performs a random walk
-with diffusion coefficient $D \approx (2\pi)^2\sigma^2 f_0$ --- so the spectral
-line broadens into a Lorentzian and the coherent power retained in one frequency
-bin of a record of length $T$ falls off as
-\begin{equation}
-	\frac{P_c(\sigma)}{P_c(0)} \;\approx\; \frac{1}{1+\kappa\sigma^2},
-	\qquad \kappa = \pi^2 f_0 T,
-	\label{eq:rolloff}
-\end{equation}
-a parameter-free prediction that the generator reproduces to within several
-percent (\cref{app:identifiability}). Now let $J(\sigma)$ be the advantage
-attained by a fixed-bin threshold test at the nominal cadence, which decreases in
-$\sigma$ through \cref{eq:rolloff}. Because $J \leq \mathrm{TV}$, any $\sigma$
-with $J(\sigma) > \varepsilon$ is not $\varepsilon$-covert, so
-$\varepsilon$-covertness requires a distortion at least
-$\sigma^{*}(\varepsilon)$, the solution of $J(\sigma^{*}) = \varepsilon$. It is
-strictly positive and grows as $\varepsilon$ falls; measured through the full
-generator and meter it is $\sigma^{*}(0.5) = 0.18$ and $\sigma^{*}(0.2) = 0.36$,
-which the anchors of \cref{sec:frontier} price at tens of percent of throughput
-and at order $100\%$ respectively.
-
-Running the argument through an \emph{explicit} verifier is essential, and it is
-worth saying why, because the familiar covert-communication route goes the other
-way. Pinsker's inequality $\mathrm{TV} \leq \sqrt{\mathrm{KL}/2}$
-\citep{tsybakov2009nonparametric,cover2006elements} bounds total variation from
-above, so forcing that bound below $\varepsilon$ would establish that some
-distortion \emph{suffices} for covertness, not that any is \emph{necessary}. Only
-a verifier that demonstrably attains advantage $J$ certifies that smaller
-distortions fail.
-
-Distortion is not yet cost, and the bridge is a physical property of the
-admissible family that we state as an \emph{assumption} rather than a result,
-because two steps in its justification are not closed. The
-\emph{cost-of-hiding assumption} is that within that family, and at fixed total
-useful work, reaching $\sigma^{*}(\varepsilon)$ costs throughput or learning
-efficiency and cannot be free in both. The reasoning is that period jitter then
-has only two realisations. Inserting idle time inflates the mean period and pays
-in throughput. Varying the real work per iteration avoids idling, but the
-down-phase duration does not scale with the accumulated work and that work is
-quantised, so a component at the exchange cadence survives; removing it requires
-either idling or desynchronising the exchange, and the latter changes the
-optimisation being performed.
-
-Three limits fix how far all of this travels, and they are the reason the
-assumption is labelled as one. First, the surviving exchange-cadence component is
-recovered by the order-tracking class, not by the fixed-bin verifier that supplies
-$\sigma^{*}$: under variable real work \cref{sec:frontier} measures the fixed
-tests below chance. Read strictly, the argument shows that a work-varying prover
-stays visible to a \emph{tracker}, not that it must pay to become
-$\varepsilon$-covert against the verifier whose $\sigma^{*}$ we computed. What the
-numbers do support is the comparative claim --- at matched total distortion, work
-variation is the more detectable of the two at every $\sigma \geq 0.05$, the two
-being indistinguishable within sampling error below that
-(\cref{fig:lower_bound}). Second, fixing total useful work is a real restriction:
-substituting useful non-training work, the additive-burial and dilution families
-above, modulates the period while idling nothing and degrading no optimisation.
-The disjunction is therefore asserted over timing attacks at fixed work. Third,
-$\sigma^{*}$ is read off one exhibited verifier and $J$ is measured between the
-two laws of our own generator. Because $J \leq \mathrm{TV}$, a $\sigma$ ruled out
-by the fixed-bin test is ruled out against any verifier class containing that
-test --- including the five-detector bank of \cref{sec:frontier}, order tracker
-and all --- but a stronger verifier attains a larger advantage at each $\sigma$
-and so yields a larger $\sigma^{*}$. Since our own experiments show the tracking
-class to be the stronger one, the threshold we report is a loose reading of the
-true requirement. And the claim throughout is that hiding \emph{to a stated
-$\varepsilon$} must be paid for, expressly not that de-periodicisation is
-inefficient in general, which \cref{sec:frontier} refutes by exhibiting a
-near-free attack that defeats every fixed test.
 
 \section{A model of datacentre training power}
 \label{sec:scenario}
@@ -501,23 +255,6 @@ $g_i - 1$ mean-reverting at rate $\theta$ and a stationary excursion set in Hz.
 This is distinct from $\xi_i$ in \cref{eq:period}, which is redrawn
 independently each iteration and so broadens the line without moving it.
 
-The second implements the adversary operators of \cref{subsec:adversary} inside
-the generator, so that each attack costs what the physics says it costs rather
-than being applied as a post-hoc filter. \emph{Work variation} quantises the
-up-phase into an integer number $G_i \geq 1$ of gradient-accumulation
-micro-steps of duration $t_\mu = \rho\,T_{\mathrm{base}}/G_0$, so that
-$T^{\mathrm{up}}_i = G_i t_\mu$, and varies $G_i$ about its honest value
-$G_0 = 8$; crucially the down-phase keeps its honest draw, because a synchronous
-exchange does not shrink because the preceding compute phase was shorter. This
-moves real work rather than inserting idle time, and it is the reason the
-attack is nearly free. \emph{Phase slip} diffuses iteration boundaries by a
-Brownian increment while holding the target period fixed --- distinct again from
-$\xi_i$, which ties boundary diffusion to the period variance. \emph{Harmonic
-smoothing} convolves the level waveform of \cref{eq:ko} with a raised cosine,
-ramping the transitions so the harmonic comb dies while the fundamental
-survives. \emph{Shape filling} raises the down-phase level toward the up-phase,
-collapsing the swing at matched mean power. \Cref{sec:frontier} prices each of
-these against measured hardware anchors.
 
 \subsection{The inference null}
 \label{subsec:null}
@@ -554,6 +291,34 @@ a detector must find the \emph{dominant} line, not merely any line. Everything
 downstream inherits the conditionality this creates: Rung-2 conclusions
 (\cref{subsec:rung2}) hold against this null, and a prover running an inference
 workload with structure we have not modelled is outside what they cover.
+
+% ============================================================================
+\section{Threat and measurement model}
+\label{sec:threat}
+% ============================================================================
+
+\subsection{The observation channel}
+\label{subsec:channel}
+
+% Plan §2: the device equation alone describes the device, not the meter.
+% Extends eq:obs/eq:forward IMPORTED from paper-verification/main.tex §3.1.
+The verifier holds one scalar time series from a meter outside the prover's
+control. The minimum model separates the device from the channel:
+\begin{align}
+	P_{\mathrm{meter}}(t) &= (h * P_{\mathrm{device}})(t) + P_{\mathrm{other}}(t) + \eta(t),
+	\label{eq:meter}\\
+	P_{\mathrm{device}}(t) &= r(t)\,F(t) + P_0(t),
+	\label{eq:device}
+\end{align}
+where $F(t)$ is the instantaneous operation rate, $r(t)$ the energy cost per
+operation, $P_0(t)$ the non-compute overhead, $h$ collects power-delivery
+dynamics, meter integration, reporting filters, and sampling,
+$P_{\mathrm{other}}(t)$ is co-resident load behind the same meter, and
+$\eta(t)$ is measurement noise the prover cannot forge. The linear
+time-invariant form of $h$ is an explicit first approximation; $h$ may be
+operating-point dependent. Until simultaneous on-device and external-meter
+measurement is performed, claims about what reaches an off-chip sensor are
+predictions (\cref{sec:reality}).
 
 \subsection{The observation map}
 \label{subsec:obsmap}
@@ -600,6 +365,43 @@ the minimum meter specification, is \cref{subsec:meter_spec}.
 	\label{fig:scenario_meter}
 \end{figure*}
 
+\subsection{The adversary: operators and budgets}
+\label{subsec:adversary}
+
+% Plan §4: attack families as operators, each with a reported budget.
+Across the passive rungs the prover's objective is \emph{concealment}: to train
+while the trace reaching the meter stays consistent with the null. To that end it
+may apply, singly or in composition:
+\begin{itemize}
+	\item \textbf{phase attack}: jitter, drift, or randomised work per iteration;
+	\item \textbf{frequency relocation}: move the cadence toward or outside the search family;
+	\item \textbf{additive burial}: independent workload superposition / spectral-floor jamming;
+	\item \textbf{amplitude shaping}: added load flattening the compute/communication swing;
+	\item \textbf{dilution}: reduce the training duty fraction among other work.
+\end{itemize}
+With unlimited superposition, dilution, shaping power, time, or freedom to
+restructure work, the prover can drive the signal-to-noise ratio arbitrarily
+low or synthesise the null; robustness claims are therefore made only over
+specified attack families at specified budgets.
+
+The second implements the adversary operators of \cref{subsec:adversary} inside
+the generator, so that each attack costs what the physics says it costs rather
+than being applied as a post-hoc filter. \emph{Work variation} quantises the
+up-phase into an integer number $G_i \geq 1$ of gradient-accumulation
+micro-steps of duration $t_\mu = \rho\,T_{\mathrm{base}}/G_0$, so that
+$T^{\mathrm{up}}_i = G_i t_\mu$, and varies $G_i$ about its honest value
+$G_0 = 8$; crucially the down-phase keeps its honest draw, because a synchronous
+exchange does not shrink because the preceding compute phase was shorter. This
+moves real work rather than inserting idle time, and it is the reason the
+attack is nearly free. \emph{Phase slip} diffuses iteration boundaries by a
+Brownian increment while holding the target period fixed --- distinct again from
+$\xi_i$, which ties boundary diffusion to the period variance. \emph{Harmonic
+smoothing} convolves the level waveform of \cref{eq:ko} with a raised cosine,
+ramping the transitions so the harmonic comb dies while the fundamental
+survives. \emph{Shape filling} raises the down-phase level toward the up-phase,
+collapsing the swing at matched mean power. \Cref{sec:frontier} prices each of
+these against measured hardware anchors.
+
 % ============================================================================
 \section{Detection methods}
 \label{sec:methods}
@@ -621,7 +423,529 @@ benign case is easy and the paper is not about the benign case; the adaptive
 case is the methodological heart, and the burden here is to give its detector a
 defensible null.
 
-\subsection{Fixed-frequency baselines}
+% ============================================================================
+\section{Detection results}
+\label{sec:results}
+% ============================================================================
+
+We report three things in turn: whether the adaptive pipeline has a null we can
+defend, how much power it has and how far that sits below what is achievable,
+and how well the resulting features separate training from the stated inference
+null.
+
+\subsection{Detector power and how far it sits below optimal}
+\label{subsec:power}
+
+Which detector to use is an \emph{outcome} here, not an assumption. Before
+scoring any signal we fixed the detector set, the conditions, and the metric, and
+ran a pre-registered comparison across a cadence-drift axis
+$f_0^{\mathrm{drift}} \in \{0, \dots, 1.5\}$~Hz against two negative classes: the
+modelled inference null, and a mixed structural population of AR(1),
+heavy-tailed AR(1), and the measured controller. \Cref{app:bakeoff} reports the
+full grid; three findings from it carry into everything below.
+
+Tracking is necessary. The fixed-$\alpha$ Dandawat\'e--Giannakis statistic,
+handed the \emph{true} $f_0$ as an oracle, collapses from detection rate $0.34$
+at zero drift to $\leq 0.1$ under any wander --- even the true frequency is
+useless to a coherent fixed-$\alpha$ test once the line moves --- and the fixed
+multitaper F-test has essentially no usable power against either negative class
+at empirical thresholds. Only the tracked order family separates the wandering
+line from structural confounds: against the mixed structural negatives the
+matched filter and the raw Viterbi score have detection rate zero at every drift,
+because the controller third of the mixture fires them harder than the signal
+does. Phase-coherent cyclic structure at the tracked order is the one signature
+the confuser cannot fake, and this is the attribution boundary of Rung~1 drawn
+with power rather than with false-alarm rate. The honest limit is fast wander:
+beyond drift $0.8$~Hz every calibratable detector fades, and a $300$~s record
+simply does not resolve fast cadence wander against an honest null.
+
+That ranks the detectors against each other but says nothing about how good the
+winner is. Because we own the generators we can also benchmark against an
+optimality ceiling. No closed-form likelihood exists --- both classes are
+black-box samplers --- so we use a Whittle spectral likelihood ratio on the
+in-band periodogram with a Monte-Carlo training template bank marginalised over
+cadence, fitted on a disjoint stream and applied to the exact evaluation
+populations. The ceiling is perfect: area under the curve and detection rate are
+$1.0$ in every column at every drift. The training comb and the line-free nulls
+are separable in principle from a $300$~s trace, so all the difficulty the
+comparison exposes lives in the detector, not in the problem.
+
+Read as a fraction of that ceiling, the picture sharpens in a way the frontier of
+\cref{sec:frontier} depends on. Against the inference null the Viterbi tracker is
+essentially Neyman--Pearson optimal, holding the ceiling's power across the whole
+wander axis, while the fixed matched filter's fraction of attainable power
+collapses from $1.0$ at zero drift through $0.78$ and $0.38$ to below zero by
+drift $0.4$~Hz. Against the structural confusers the tracker is \emph{not}
+enough: only the tracked order family approaches the ceiling, reaching $0.93$ of
+it at low drift and fading to $0.10$ at the fastest wander. The widening gap at
+high drift is honest headroom above today's detectors rather than a limit of the
+channel, and the one caveat runs in our favour --- the Whittle ceiling discards
+harmonic-phase coherence and non-Gaussian structure, so the true optimum can only
+exceed it.
+
+
+\subsection{A minimum meter specification}
+\label{subsec:meter_spec}
+
+The frontier above assumes a meter that resolves the cadence band. The
+verifier's instrument is itself an attack surface: a prover who cannot
+de-periodicise cheaply may instead argue for, or be handed, a meter too coarse
+to see the line. We therefore sweep the meter rather than the schedule --- sample
+rate and integration window between the nominal $20$~Hz channel and a $1$~Hz
+integrating sampler, plus transfer-function notch depth and position near the
+cadence --- with honest training against the hard inference null, and locate where
+each detector class dies.\footnote{Frozen on the MATS compute cluster (slurm
+array 5498), $48$ cells, $n=200$, $300$~s traces;
+\texttt{results/st2/meter\_boundary\_summary.json}. Marginal and dead-cell
+\textsc{auc}s are sensitive to the BLAS build, but the live-region boundary is
+not.} The result is a minimum specification the channel must meet for the Rung-1
+and Rung-2 claims to hold, which we state as a channel requirement, not an attack
+cost.
+
+\paragraph{The specification.} The tracking class holds full power (detection
+rate ${\gtrsim}0.9$ at nominal $0.05$) if and only if the meter satisfies three
+conditions together (\cref{fig:meter_boundary}). First, a sample rate of at least
+about $2$~Hz: rates of $20$, $10$, $5$, and $2$~Hz all hold the Viterbi tracker
+near $1.0$, $1$~Hz collapses it to $0.36$ as the Nyquist edge crosses the band,
+and $0.5$~Hz is dead (every detector at chance). Second, an integration window no
+longer than about $0.5$~s: at $20$~Hz sampling a window of $0.5$~s still holds
+($0.99$), but a $1$~s boxcar sinc-nulls the $1$~Hz band centre and collapses the
+tracker to $0.25$ even at full sample rate. Third, no deep transfer-function
+notch at the cadence: an off-band or shallow notch is tolerable (tracker
+${\approx}1.0$), but a full-depth notch at $1.0$--$1.2$~Hz roughly halves tracker
+power (to $0.48$--$0.55$) without erasing it (\cref{fig:meter_boundary_notch}).
+The robustness ordering across the grid is Viterbi $\ge$ spectral $>$ the DG order
+family, which is the most sensitive detector at the reference channel but the
+first to die as the channel degrades; the multitaper F-test is at its floor
+throughout.
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\linewidth]{st2_meter_boundary}
+	\caption{Minimum meter specification: detector power at nominal false-alarm
+	rate $0.05$ over sample rate $\times$ integration window, one panel per
+	detector, honest training against the hard inference null. The live region
+	is sample rate ${\ge}2$~Hz \emph{and} integration window ${\le}0.5$~s; below
+	either edge the tracking class collapses toward chance.}
+	\label{fig:meter_boundary}
+\end{figure*}
+
+
+% ============================================================================
+\section{The de-periodicisation frontier}
+\label{sec:frontier}
+% ============================================================================
+
+Rungs 1 and 2 assume the prover leaves a recoverable cadence. An adaptive
+prover need not: it can de-periodicise its schedule to smear that cadence away.
+The question this section answers is not whether de-periodicisation is possible
+--- it always is --- but how far a prover must go before the meter loses the
+signal, and what that costs. This is a central result of the paper, not a
+caveat, and its shape is not the naive one. De-periodicising is not
+automatically cheap: some ways of doing it cost throughput without buying any
+concealment, and the interesting question is whether \emph{any} way is both
+cheap and effective.
+
+We sweep six attack families as operators on the training schedule
+(\cref{subsec:adversary}) --- per-iteration duration jitter, slowly drifting
+cadence, variable real work per iteration, cadence relocation toward the
+search-band edge, harmonic suppression, and dilution by co-resident load --- plus
+a meter-degradation family treated separately in \cref{subsec:meter_spec}. For
+each family we step an attack level and, at every level, measure the physical
+de-periodicisation it induces (cadence coefficient of variation, phase
+diffusion) against detector power for the tracking class (the Viterbi tracker
+and the tracked Dandawat\'e--Giannakis order statistics) and for the fixed class
+(the spectral matched filter and the multitaper F-test), all at nominal
+false-alarm rate $0.05$ with $n=200$ traces per class. Where an attack has a
+measured systems cost we attach it from the single-A100 throughput anchors
+(\cref{sec:reality}); the plausible \emph{learning-efficiency} penalty
+--- batch-size, accumulation, or update-timing changes that preserve tokens per
+second while worsening progress per token or per joule --- is not something a
+synthetic power model can measure, and we carry it as the standing open
+empirical question rather than a result.\footnote{Frozen on the MATS compute
+cluster (slurm array 5635), $n=200$ per class over $50$ cells, seed $0$, the full
+five-detector set; \texttt{results/st2/frontier\_summary.json}
+(\texttt{provisional=false}). The systems-cost axis reads only the clean
+throughput-overhead field of the measured campaign, not its signature-B line-band
+arrays, so the frontier is unaffected by the transport caveat of
+\cref{sec:reality}.}
+
+\paragraph{The costly attacks are the wrong ones.} The de-periodicisations that
+degrade the line most are exactly the ones a rational prover would not pay for.
+Idle-insertion jitter buys no concealment: it costs $15$--$375\%$ throughput and
+leaves the tracked line detectable. Slowly drifting the cadence costs up to
+${\sim}140\%$ and is precisely the regime the order tracker was built to survive
+(\cref{subsec:power}). Power shaping costs $170$--$230\%$. Against every one of
+these the tracking class holds while the prover pays a throughput tax that a
+compute-governance regime would itself flag. Measured work on real hardware
+points the same way from a different channel: four evasion strategies run on a
+single H200 --- chunked optimizer updates, dilution with decoy inference,
+throttling, and diluted LoRA --- cost between $28$ and $69\%$ of throughput
+\citep{gargiulo2026workload}. Each of them inserts or substitutes work, which is
+what makes it expensive, and none varies the real computation per iteration ---
+the family we turn to next.
+
+\paragraph{The cheap attack collapses the fixed tests but not the tracker.} The
+dangerous family is variable real work. Varying the useful computation performed
+per iteration moves the cadence without inserting idle time, so its throughput
+cost is essentially zero: at work-variation level $0.35$ and $0.5$ the measured
+overhead is $-0.10\%$ and $-0.36\%$ --- zero within noise. At that price the
+fixed tests are gone. The spectral matched filter falls to detection rate $0.26$
+and $0.27$ (its \textsc{auc} collapses to $0.44$ and $0.41$, below chance), and
+the multitaper F-test sits at its floor. Yet the Viterbi tracker holds detection
+rate $1.0$ at both levels (\cref{fig:frontier,fig:st2_work}). This is the genuine
+scope boundary of the passive channel: a prover willing to vary real work evades
+every cheap, fixed detector at no measurable systems cost, and only an
+order-tracking detector still sees the schedule.
+
+
+\paragraph{The tracker's own boundary is unmeasured.} The Viterbi tracker does
+eventually bend --- at work-variation level $0.7$ its detection rate falls to
+$0.59$ --- but we do not report that as a defeat, because we cannot price it. The
+throughput cost of driving work variation that hard is not in the measured
+anchors, and the learning-efficiency cost is the open question above. The honest
+statement is therefore asymmetric: within the regime whose cost we can measure
+(overhead within noise) the tracker wins outright, and the far end of the
+frontier, where the tracker finally fails, is a cost we could not quantify rather
+than a cost shown to be small. That the tracker's advantage here is real and not
+a tuning artefact is established independently in \cref{subsec:power}: against the
+inference null the Viterbi tracker is essentially Neyman--Pearson optimal, so the
+fixed tests' collapse under variable work is a genuine loss of information from
+the schedule, not a deficiency of a particular detector.
+
+\paragraph{The trade-off itself.} Plotting hiding directly against measured cost
+(\cref{fig:st2_cost_pareto}) separates the two detector classes sharply. Against
+the fixed class the Pareto staircase reaches hiding $0.74$ at essentially zero
+overhead and climbs only to $0.79$ at $159\%$ and $0.82$ at $375\%$ however much
+the prover spends: the cheapest attack is within $0.08$ of the best one. Against the tracking class the
+staircase never leaves the floor, rising only to $0.16$ and doing so at $159\%$
+overhead, so no attack in the anchored set buys meaningful concealment from the
+tracker at any price we can measure. Reading the two panels together is the
+paper's central empirical claim in one figure: what the fixed tests lose for free,
+the tracker keeps at every measured cost. The figure also shows the boundary of
+that claim honestly. Only $16$ of the $50$ swept cells have a measured hardware
+cost anchor, and the rest --- including work-variation level $0.7$, where the
+tracker finally bends --- carry no price at all, so they appear in a separate
+unpriced strip rather than being dropped.
+
+% ============================================================================
+\section{Discussion and conclusion}
+\label{sec:discussion}
+% ============================================================================
+
+We set out to ask what a passive power meter can certify about AI training, and
+organised the answer as a claim ladder in which each rung answers a more
+governance-relevant question at a higher cost in verifier information, and each
+rung's ceiling motivates the next. \Cref{tab:closeout} closes the ladder out with
+the paper's evidence attached to each rung.
+
+\subsection{What a detection certifies}
+\label{subsec:identifiability}
+
+One construction that recurs below is deliberately absent from that list. A
+\emph{semantic decoy} --- a load reproducing the physical schedule of training
+without retaining a trained model --- is not an attack a concealing prover would
+mount, since manufacturing evidence of the activity it is hiding buys it nothing.
+It enters this paper instead as a non-training control (\cref{subsec:rung2})
+and as the construction behind the non-identifiability argument of
+\cref{subsec:identifiability}, and it carries weight for two
+reasons that need no motivated decoy-runner: its benign counterparts occur in
+ordinary datacentre operation, and the active protocol of \cref{app:active}
+inverts the prover's objective, at which point a \emph{challenge-aware decoy} ---
+a correlated dummy response mimicking the prescribed reaction without training ---
+does become a live attack.
+
+The first point is negative, and it sets the ceiling for the whole passive
+channel. Write $w$ for a computational execution, $h$ for the hardware and
+power-delivery path, and $K_h(w)$ for the law of the observed trace that
+\cref{eq:meter,eq:device} induce. Call two executions \emph{observationally
+equivalent} when $K_{h_0}(w_0) = K_{h_1}(w_1)$. A passive verifier sees only the
+trace, so its decision is some measurable function of it, and on an
+observationally equivalent pair every such function fires with the same
+probability under both. No passive scalar-power detector can therefore certify
+the semantic content of a computation against an unrestricted adversary. A
+non-vacuous guarantee has to put the equivalent pairs out of scope, and there are
+four ways to do that within the passive channel --- restricting the admissible
+non-training workload class, the adversary's freedom to add or restructure
+computation, the hardware and power-transfer family, or the physical property
+claimed --- alongside a fifth route that leaves the passive channel altogether by
+changing the protocol (\cref{app:active}). We do not claim the list is exhaustive.
+
+The construction behind this is nearly available on the prover's own hardware. A
+program can execute the same forward, backward, and optimiser kernels as training
+and discard each updated state, making its trace arbitrarily close to genuine
+training while its semantic classification differs. This is not a hypothetical
+weakness; it is what \cref{subsec:rung2} measures, where five non-training loads,
+the discarded-update decoy among them, score as training under all three decision
+rules. That outcome is a property of the channel rather than of our classifier,
+which is why the Rung-2 ceiling cannot be removed by a better detector and why
+Rung~3 has to add a challenge.
+
+The argument binds even where no adversary is present. A concealing prover has no
+reason to run a decoy (\cref{subsec:adversary}), but most of the equivalence class
+is not adversarial at all: a training-shaped non-ML kernel loop, a controller
+limit cycle, and a periodic inference request generator all sit inside it, and all
+arise in ordinary operation. The consequence is two-sided. A rule phrased
+semantically --- training rather than serving, which model, whose weights ---
+cannot be adjudicated from the schedule alone in either direction, so the same
+equivalence that would let a decoy counterfeit training also caps the evidentiary
+weight a verifier can attach to a positive detection.
+
+\begin{table*}[t]
+	\centering
+	\small
+	\caption{Semantic-control outcomes: fraction of each load scored as training
+	at a false-positive rate of $0.05$, per decision rule. Five non-training
+	loads all score as training; the only control the tracked rules degrade on is
+	asynchronous (de-periodicised) genuine training, which they nonetheless
+	mostly catch.}
+	\label{tab:rung2_controls}
+	\begin{tabular}{@{}lcccc@{}}
+		\toprule
+		Control load & Training? & Physics & Fitted & Learned \\
+		\midrule
+		Discarded-update decoy & no & 1.00 & 1.00 & 1.00 \\
+		Gradient-only & no & 1.00 & 1.00 & 1.00 \\
+		Non-ML kernel loop & no & 1.00 & 1.00 & 1.00 \\
+		Controller cycle & no & 1.00 & 1.00 & 1.00 \\
+		Periodic inference & no & 1.00 & 1.00 & 1.00 \\
+		Co-resident mixture & yes & 1.00 & 1.00 & 1.00 \\
+		Asynchronous training & yes & 0.72 & 0.55 & 1.00 \\
+		\bottomrule
+	\end{tabular}
+\end{table*}
+
+% ============================================================================
+\subsection{Reality check and transfer limits}
+\label{sec:reality}
+% ============================================================================
+
+Every result above is synthetic. The one place we hold the scenario model
+against measured hardware, it fails in an instructive way, and we report that
+failure as a result rather than a closing nod.
+
+\paragraph{The negative transport case.} On measured single-A100 traces the
+iteration cadence is present but shallow: a saturated card has no communication
+phase, so the iteration structure modulates a ${\sim}370$\,W draw by only a few
+watts (${\sim}0.4\%$ of board power). Worse for the naive reading, the spectra
+contain a $0.31$--$0.45$\,Hz component, roughly ten times stronger than the
+training line, that appears whenever the load varies in time but not at idle or
+under constant load --- the signature of the card's own power-management loop. It
+is a hardware line that says ``time-varying load,'' not ``training,'' and it is
+the standing counterexample that Rung~1 (\cref{sec:methods}) and the Rung-2
+controller control (\cref{subsec:rung2}) are built to exclude.
+
+\paragraph{Why this is the honest outcome.} Two things make the single-card
+signature shallow. One saturated card has no synchronous communication barrier,
+so the deep compute--communication contrast the scenario model assumes is absent;
+and the generator is literature-parameterised, not calibrated to the measured
+channel, a gap of about $75\times$ in modulation depth. The synthetic results are
+therefore a sensitivity analysis over a plausible parameter family, not a
+prediction calibrated to this hardware --- which is why the paper's claims are
+scoped to the stated generator and its stated nulls throughout.
+
+\paragraph{The single-card gap is shared, and lands differently.} The measured
+side-channel corpus that separates training from inference at high bandwidth is
+also a single card, with cross-device generalisation left open
+\citep{gargiulo2026workload}. What differs is which observable the gap touches. A
+board-level probe reads the optimizer-update phase, which is present on one card,
+so the absent distributed setting costs that result little. The cadence is a
+collective effect of synchronisation, so a single card is exactly the case in
+which it is weakest --- which is why the same gap is a transport caveat there and a
+first-order limitation here.
+
+\paragraph{Falsifiable predictions.} The model makes two predictions we cannot
+test here but state as falsifiable. Distributed synchronisation should deepen the
+line: at cluster scale the periodic all-reduce barrier produces a deep, coherent,
+legible cadence rather than the shallow single-card ripple, which is precisely the
+physics the cost-of-hiding assumption leans on. And an
+external wall or rack meter should see a different, lower-passed trace than
+on-board NVML telemetry, shifting where the minimum meter specification of
+\cref{subsec:meter_spec} binds. Both are predictions, not results.
+
+\subsection{The claim ladder}
+\label{subsec:ladder}
+
+This section fixes what the verifier sees, who is trying to hide from it, and
+what can be argued about the channel before any detector is run. It also fixes
+the vocabulary for the claims a meter can support. We organise those claims as
+a \emph{claim ladder} (\cref{tab:ladder}): four claims of increasing governance
+relevance, each bought at a stated cost in verifier information, and each with
+a hard ceiling that motivates the next. Rung~1 establishes that order-coherent
+power structure is present, which is evidence rather than identification.
+Rung~2 converts that structure into training-likeness at the price of
+committing to an inference null; its ceiling is semantic non-identifiability.
+Rungs~3 and~4 leave the passive channel for an active protocol and a transcript
+primitive, and are specified but not run (\cref{app:active}). The ladder is a
+ladder of claims and assumptions, not a quantitative bound on unidentified
+compute. Within every rung we consider two provers: a \textbf{benign}
+(non-adaptive) prover who runs its workload without regard to the meter, and an
+\textbf{adaptive} (hiding) prover who knows the detector and reshapes its
+schedule to evade it. Most of what is interesting lies in the gap between them.
+
+\begin{table*}[t]
+	\centering
+	\small
+	\caption{The claim ladder. Each rung answers a
+	strictly more governance-relevant question at a stated cost in verifier
+	information; each rung's hard ceiling motivates the next. Within each rung
+	we consider a benign (non-adaptive) and an adaptive (hiding) prover.
+	\Cref{tab:closeout} closes each rung out against the evidence.}
+	\label{tab:ladder}
+	\begin{tabular}{@{}p{2.6cm}p{4.2cm}p{3.4cm}p{4.6cm}@{}}
+		\toprule
+		Rung & Claim & Additional requirement & Hard ceiling \\
+		\midrule
+		1. Structural evidence & Order-coherent power variation exists under a
+		specified structural null & External time-resolved trace only &
+		Periodic physical confounds; structural-null misspecification; strong
+		superposition or dilution; active power shaping; cadence moved outside
+		the searched family; die-to-meter attenuation \\
+		2. Conditional classification & The trace is more training-like than
+		the stated inference population & A representative or explicitly
+		modelled inference null & Domain shift; semantic non-identifiability
+		(training-shaped execution, benign or deliberate, without training) \\
+		3. Active physical authentication & A load behind the meter responded
+		to an unpredictable verifier challenge & Prover participation; a
+		challenge-bound schedule & A challenge-aware dummy load; no semantic
+		binding by power alone \\
+		4. Work verification & The physical response is tied to declared
+		training state transitions & A sound, fresh transcript/proof and an
+		explicit binding assumption & The remote-proof / co-location gap,
+		unless the assumed primitive closes it \\
+		\bottomrule
+	\end{tabular}
+\end{table*}
+
+\begin{table*}[t]
+	\centering
+	\small
+	\caption{The claim ladder closed out: what this paper establishes at each
+	rung, where, and the hard ceiling it hits. Mirrors \cref{tab:ladder}.}
+	\label{tab:closeout}
+	\begin{tabular}{@{}p{2.4cm}p{5.0cm}p{2.2cm}p{4.6cm}@{}}
+		\toprule
+		Rung & What the paper establishes & Evidence & Demonstrated ceiling \\
+		\midrule
+		1. Structural evidence & Order-tracked cyclic structure is detected
+		against stationary and controller-like nulls; the tracker is
+		Neyman--Pearson optimal against the inference null &
+		\cref{sec:results}, \cref{app:bakeoff} & Fast cadence wander
+		(${>}0.8$~Hz on $300$~s); attributing structure to training needs the
+		nuisance model; the meter must meet \cref{subsec:meter_spec} \\
+		2. Conditional classification & The trace is more training-like than the
+		stated inference null (area under the curve $1.00$, stable across domain
+		shift) & \cref{subsec:rung2} & Semantic non-identifiability:
+		non-training loads with a training-shaped schedule score as training,
+		benign ones included; \cref{subsec:identifiability} shows no passive detector can
+		do better \\
+		Frontier & Fixed tests collapse under ${\approx}$zero-cost variable real
+		work while the tracker holds; costly de-periodicisations buy no
+		concealment & \cref{sec:frontier} & The tracker's far end, at a systems
+		and learning cost we could not measure \\
+		Cost of hiding & Hiding to detectability $\varepsilon$ requires a
+		distortion $\sigma^*(\varepsilon)$ that the measured anchors price at tens
+		of percent of throughput, rising above $100\%$ (i.i.d.\ period jitter) &
+		\cref{subsec:identifiability}, \cref{app:identifiability} & Read off a
+		fixed-bin verifier, so valid against any class containing it, but loose;
+		one attack family;
+		internal to the stated generator; the throughput-or-learning disjunction is
+		an assumption, not a result \\
+		3--4. Active authentication & A challenge-synchronous protocol and an
+		assumed binding primitive, specified but not run & \cref{app:active} &
+		Challenge-aware dummy load; the co-location gap \\
+		\bottomrule
+	\end{tabular}
+\end{table*}
+
+\paragraph{Governance reading.} A passive meter certifies efficient
+iteration-structured training against cheap, fixed tests only within a bounded
+de-periodicisation budget; a prover free to vary real work escapes those tests
+for nothing. Defeating the order tracker on top of that requires either a systems
+and learning cost we could not measure or a degradation of the meter channel
+itself (\cref{subsec:meter_spec}). The results of this section are therefore
+necessary conditions and an upper bound on hideability rather than a proof of
+training: they bound what a prover can hide from a fixed detector cheaply. The
+complementary direction --- a lower bound on what hiding must cost, which no
+detection sweep can supply --- is available for one attack family against a fixed
+verifier (\cref{subsec:identifiability}) under the cost-of-hiding assumption,
+and the distortion it requires can be priced against the same anchors used here.
+The tracking class dominates the fixed class at every cell we measured, so that
+threshold is a valid --- but loose --- reading of what a tracker would require: it is
+read off the weaker detector, so it understates the true requirement. Establishing it
+against the tracking class directly, rather than inheriting it from the measured
+dominance, remains open.
+
+\paragraph{Scope.} Three restrictions fix what the results cover. First, the
+observable: we use the time-resolved power trace and exclude the
+integrated-energy channel, so there is no bounding of how much compute was
+performed and no energy-per-token pricing as a verification instrument. This is
+a restriction on the observable, not a claim that everything lives in the
+spectrum; cyclostationary structure is expressed spectrally, but the challenge
+correlation of Rung~3 is a time-domain operation on the same trace. Second, the
+population: we do not claim a recoverable cadence is universally necessary for
+training, and some conceivable execution can be made fully aperiodic. We target
+efficient, synchronous, iteration-structured training that exposes a recoverable
+cadence, the expected physical signature of that regime where distributed
+synchronisation makes the modulation deep and coherent. Destroying that cadence
+is then an adversarial action with a measurable budget, not a counterexample to
+the method, and measuring that budget is what \cref{sec:frontier} does. Third,
+the horizon: the results are fixed-horizon, and we make no claim that the
+$\chi^2$ statistic supports anytime-valid monitoring, deferring sequential
+e-process treatment. The cryptographic binding of Rung~4 is assumed as an ideal
+functionality, not built. Real distributed hardware enters only as the
+falsifiable predictions and the negative transport case of \cref{sec:reality}.
+
+\paragraph{Limitations.} The scenario model is literature-parameterised, not
+calibrated to measured hardware, so every quantitative result is a sensitivity
+analysis over a stated parameter family; the ${\sim}75\times$ modulation gap of
+\cref{sec:reality} is the standing reminder. The observation map is a
+linear time-invariant first approximation. The optimality ceiling of
+\cref{app:bakeoff} is optimal only under the Whittle model, hence a lower bound on
+the true optimum. Every robustness claim is bounded by the attack families and
+budgets we specified; a family we did not model is outside it. The cost bound of
+\cref{subsec:identifiability} shares that limit: it covers i.i.d.\ period jitter,
+and while it holds against any verifier class containing the test it exhibits, it is
+obtained from a fixed-bin test and so reads loose against the order tracker our own
+experiments show to be stronger --- it does not yet close the frontier's far end. Its cost leg is an
+assumption, not a result, for the reasons set out in
+\cref{subsec:identifiability}. And the learning-efficiency leg of that bound --- the axis that would
+turn it into a single priced statement rather than a disjunction --- is argued,
+not measured, and remains the central open empirical question.
+
+\paragraph{Governance reading.} What a regulator can buy today is graded. Rung~1
+buys physical evidence of an efficient iteration-structured compute schedule from
+an external meter alone, robust to a wander-and-drift adversary but not to a
+prover who varies real work or degrades the meter. Rung~2 buys the further claim
+that the schedule is more training-like than a stated inference baseline --- but
+not that the computation is training rather than a schedule-matched mimic, benign
+or deliberate, which is a limit of the passive channel, not of the method. That
+limit runs both ways: it caps what a positive detection proves as well as what a
+counterfeit could fake. Separating training from a
+mimic, and binding a physical response to declared work, both require moving off
+the passive channel to the active protocol of \cref{app:active} and the
+cryptographic primitive it assumes. The passive meter is thus a cheap, deployable
+front line that narrows the question and prices the cheap evasions, not a
+stand-alone proof of training.
+
+
+% ============================================================================
+
+\bibliography{references}
+\bibliographystyle{icml2026}
+
+\newpage
+\appendix
+% Make cleveref render appendix section labels as "Appendix A" rather than
+% "Section A"; the appendix body runs single-column.
+\crefalias{section}{appendix}
+\crefname{appendix}{Appendix}{Appendices}
+\Crefname{appendix}{Appendix}{Appendices}
+\onecolumn
+
+\section{Fixed-frequency baselines}
+\label{app:baselines}
+
 \label{subsec:benign}
 
 When the cadence is stationary, a repeated iteration structure appears as a
@@ -650,6 +974,9 @@ for a stationary line, and both fail the moment the line wanders: as the
 comparison of \cref{subsec:power} shows, the fixed multitaper F-test retains
 essentially no usable detection power once the cadence drifts, which is exactly
 why the adaptive setting needs a different detector.
+
+\section{Order-tracked cyclostationary attribution and null validity}
+\label{app:attribution}
 
 \subsection{Tracked cyclostationary detection}
 \label{subsec:tracked}
@@ -717,49 +1044,6 @@ cyclostationary is not covered --- and a controller limit cycle is exactly such 
 null. And it is expensive: each trace costs $S$ additional full pipeline
 evaluations, which is why the surrogate campaigns below are sized smaller than
 the analytic ones.
-
-\subsection{From detection to classification}
-\label{subsec:rules}
-
-Rung~2 sharpens the structural question into a decision: is a trace more
-training-like than a stated inference population? A decision needs a reference,
-and ours is the modelled continuous-batching null of \cref{eq:null}; every
-Rung-2 conclusion is conditional on it. We fix the task in advance --- the
-feature vector, the decision rules, and the reporting --- so that the result is
-not retrofitted to the answer.
-
-Each trace is reduced to an eight-dimensional physics feature vector estimated
-\emph{from the trace alone}, with no oracle knowledge of the cadence: the six
-Rung-1 detector scores (multitaper F, harmonic comb, spectral matched filter,
-Viterbi, fixed-$\alpha$ DG, and tracked-order DG), plus two stability features
-read off the estimated Viterbi path --- its frequency-path stability and its
-phase-folded waveform repeatability. On this fixed vector we compare three
-decision rules of increasing freedom: (i) a prespecified \emph{physics} score, a
-fixed linear combination with the fixed-cadence comparators pre-registered out;
-(ii) a logistic discriminant \emph{fitted} to the scenario generator and scored
-out-of-fold; and (iii) a random-forest \emph{learned} reference, included to
-expose how much separation comes from the chosen null rather than from the
-structural method. We report area under the ROC curve and the false-negative
-rate at a false-positive rate of $0.05$, kept separate throughout from the
-Rung-1 structural false alarms.
-
-The population the rules are evaluated on is fixed in advance too. They are
-fitted on the nominal setting and evaluated zero-shot on six domain shifts, each
-moving one factor: device headroom down to $0.70$ and up to $0.95$ of peak;
-observation duration halved to $150$\,s, which halves the frequency resolution;
-the cadence band shifted up to $0.8$--$1.8$\,Hz, so that its top now lies
-outside the $0.3$--$1.7$\,Hz search band; a meter carrying the controller limit
-cycle; and a meter with heavy coloured noise and baseline wander.
-
-% ============================================================================
-\section{Detection results}
-\label{sec:results}
-% ============================================================================
-
-We report three things in turn: whether the adaptive pipeline has a null we can
-defend, how much power it has and how far that sits below what is achievable,
-and how well the resulting features separate training from the stated inference
-null.
 
 \subsection{Null validity of the complete pipeline}
 \label{subsec:st1}
@@ -886,565 +1170,6 @@ false-alarm behaviour is exactly the ceiling the claim ladder assigns to this
 rung. The separation that Rung~1 \emph{can} deliver --- power against this
 confuser class, not merely against inference --- is the subject of the next
 subsection.
-\subsection{Detector power and how far it sits below optimal}
-\label{subsec:power}
-
-Which detector to use is an \emph{outcome} here, not an assumption. Before
-scoring any signal we fixed the detector set, the conditions, and the metric, and
-ran a pre-registered comparison across a cadence-drift axis
-$f_0^{\mathrm{drift}} \in \{0, \dots, 1.5\}$~Hz against two negative classes: the
-modelled inference null, and a mixed structural population of AR(1),
-heavy-tailed AR(1), and the measured controller. \Cref{app:bakeoff} reports the
-full grid; three findings from it carry into everything below.
-
-Tracking is necessary. The fixed-$\alpha$ Dandawat\'e--Giannakis statistic,
-handed the \emph{true} $f_0$ as an oracle, collapses from detection rate $0.34$
-at zero drift to $\leq 0.1$ under any wander --- even the true frequency is
-useless to a coherent fixed-$\alpha$ test once the line moves --- and the fixed
-multitaper F-test has essentially no usable power against either negative class
-at empirical thresholds. Only the tracked order family separates the wandering
-line from structural confounds: against the mixed structural negatives the
-matched filter and the raw Viterbi score have detection rate zero at every drift,
-because the controller third of the mixture fires them harder than the signal
-does. Phase-coherent cyclic structure at the tracked order is the one signature
-the confuser cannot fake, and this is the attribution boundary of Rung~1 drawn
-with power rather than with false-alarm rate. The honest limit is fast wander:
-beyond drift $0.8$~Hz every calibratable detector fades, and a $300$~s record
-simply does not resolve fast cadence wander against an honest null.
-
-That ranks the detectors against each other but says nothing about how good the
-winner is. Because we own the generators we can also benchmark against an
-optimality ceiling. No closed-form likelihood exists --- both classes are
-black-box samplers --- so we use a Whittle spectral likelihood ratio on the
-in-band periodogram with a Monte-Carlo training template bank marginalised over
-cadence, fitted on a disjoint stream and applied to the exact evaluation
-populations. The ceiling is perfect: area under the curve and detection rate are
-$1.0$ in every column at every drift. The training comb and the line-free nulls
-are separable in principle from a $300$~s trace, so all the difficulty the
-comparison exposes lives in the detector, not in the problem.
-
-Read as a fraction of that ceiling, the picture sharpens in a way the frontier of
-\cref{sec:frontier} depends on. Against the inference null the Viterbi tracker is
-essentially Neyman--Pearson optimal, holding the ceiling's power across the whole
-wander axis, while the fixed matched filter's fraction of attainable power
-collapses from $1.0$ at zero drift through $0.78$ and $0.38$ to below zero by
-drift $0.4$~Hz. Against the structural confusers the tracker is \emph{not}
-enough: only the tracked order family approaches the ceiling, reaching $0.93$ of
-it at low drift and fading to $0.10$ at the fastest wander. The widening gap at
-high drift is honest headroom above today's detectors rather than a limit of the
-channel, and the one caveat runs in our favour --- the Whittle ceiling discards
-harmonic-phase coherence and non-Gaussian structure, so the true optimum can only
-exceed it.
-
-
-\subsection{Classification against the inference null}
-\label{subsec:rung2}
-
-We now apply the three decision rules of \cref{subsec:rules} to the stated
-population, the six domain shifts, and a set of semantic controls whose training
-status we know.\footnote{Frozen on the MATS compute cluster (slurm array 5612),
-$n=200$ per class, $300$~s traces, band $0.3$--$1.7$~Hz, $14$ cells (the stated
-population, six transfer shifts, and seven semantic controls);
-\texttt{results/rung2/rung2\_summary.json}.}
-
-\paragraph{Stated population and transfer.} On the stated population all three
-rules separate training from the hard inference null perfectly: area under the
-curve $1.00$ with zero false negatives at a false-positive rate of $0.05$
-(\cref{fig:rung2_stated}). The separation is not brittle to the population:
-across all six domain shifts of \cref{subsec:rules}, evaluated zero-shot, the
-area under the curve stays $1.00$. The
-physical schedule of efficient training is far enough from the inference null that
-leaving the stated parameter box does not close the gap.
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{rung2_stated_transfer}
-	\caption{Rung-2 classification on the stated population (ROC / operating
-	points for the three decision rules) and across the transfer shifts. All
-	three rules reach area under the curve $1.00$ on the stated population and
-	hold it under every domain shift.}
-	\label{fig:rung2_stated}
-\end{figure*}
-
-\paragraph{The semantic controls set the ceiling.} The controls are the point of
-the rung. We built seven loads whose training status we know and asked what each
-rule scores (\cref{tab:rung2_controls}). Five non-training loads --- a
-training-shaped non-ML kernel loop, a controller limit cycle, a periodic inference
-request generator, a gradient-only computation, and a discarded-update decoy that
-runs the full forward/backward/optimizer step and throws the update away ---
-\emph{all} score as training, at fraction $1.00$ under every rule. A genuine
-training run diluted by an unrelated co-resident load is still caught ($1.00$).
-The reading is the one the claim ladder assigns to this rung: from power alone the
-verifier can certify a \emph{training-shaped periodic compute schedule}, not that
-the computation is gradient-descent training rather than a mimic. The first three
-loads are the practically binding ones, because they need no adversary: the
-controller cycle scoring as training is the same attribution boundary Rung~1 met
-in \cref{subsec:st1}, and calling structure training needs the nuisance model of
-\cref{sec:threat}. The decoy is the extremal member of the same class and the one
-that cannot be engineered away --- \cref{subsec:identifiability} rules out any
-passive detector that separates it --- which is why this ceiling motivates the active
-protocol of \cref{app:active} rather than a better classifier. The ceiling is a
-property of the observable rather than of the meter's bandwidth. A learned
-classifier reading a board-level probe at $10$~MHz separates training from
-inference by the spectral signature of the memory-bound optimizer-update phase
-\citep{gargiulo2026workload}; the discarded-update decoy runs exactly that phase
-and discards only its result, so the mechanism such a classifier keys on is
-present in a load that is not training. More bandwidth resolves the physical
-schedule more sharply, and it is the schedule, not the semantics, that a passive
-meter reads.
-
-\begin{table*}[t]
-	\centering
-	\small
-	\caption{Semantic-control outcomes: fraction of each load scored as training
-	at a false-positive rate of $0.05$, per decision rule. Five non-training
-	loads all score as training; the only control the tracked rules degrade on is
-	asynchronous (de-periodicised) genuine training, which they nonetheless
-	mostly catch.}
-	\label{tab:rung2_controls}
-	\begin{tabular}{@{}lcccc@{}}
-		\toprule
-		Control load & Training? & Physics & Fitted & Learned \\
-		\midrule
-		Discarded-update decoy & no & 1.00 & 1.00 & 1.00 \\
-		Gradient-only & no & 1.00 & 1.00 & 1.00 \\
-		Non-ML kernel loop & no & 1.00 & 1.00 & 1.00 \\
-		Controller cycle & no & 1.00 & 1.00 & 1.00 \\
-		Periodic inference & no & 1.00 & 1.00 & 1.00 \\
-		Co-resident mixture & yes & 1.00 & 1.00 & 1.00 \\
-		Asynchronous training & yes & 0.72 & 0.55 & 1.00 \\
-		\bottomrule
-	\end{tabular}
-\end{table*}
-
-\paragraph{Asynchronous training: a robustness result, not a miss.} One control,
-strongly de-periodicised genuine training, was pre-registered as an expected miss
---- the case scoped out of Rung 2. At $n=200$ it is not missed. The tracked
-physics rule catches it (area under the curve $0.89$, $72\%$ flagged) and the
-learned reference catches all of it ($100\%$); only the fitted linear discriminant
-is weak ($0.75$, $55\%$). This is consistent with the tracker-robustness story of
-Rungs 1 and 2: the asynchronous control de-periodicises by drifting the cadence
-centre and slipping the phase, which leaves a wandering but still coherent line
---- exactly the regime order tracking was built to survive. We therefore report it
-as a robustness result rather than the boundary. The genuine evasion is not slow
-wander but the ${\approx}$zero-cost variable-real-work attack of
-\cref{sec:frontier}, which moves the cadence \emph{without} leaving a coherent
-line, and which is where the tracker actually bends.
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{rung2_controls}
-	\caption{Semantic controls: fraction scored as training per decision rule.
-	The non-training decoys are indistinguishable from training under every rule
-	(the semantic-decoy ceiling); only asynchronous genuine training separates
-	the rules, and the tracked physics rule still catches most of it.}
-	\label{fig:rung2_controls}
-\end{figure*}
-
-
-
-% ============================================================================
-\section{The de-periodicisation frontier}
-\label{sec:frontier}
-% ============================================================================
-
-Rungs 1 and 2 assume the prover leaves a recoverable cadence. An adaptive
-prover need not: it can de-periodicise its schedule to smear that cadence away.
-The question this section answers is not whether de-periodicisation is possible
---- it always is --- but how far a prover must go before the meter loses the
-signal, and what that costs. This is a central result of the paper, not a
-caveat, and its shape is not the naive one. De-periodicising is not
-automatically cheap: some ways of doing it cost throughput without buying any
-concealment, and the interesting question is whether \emph{any} way is both
-cheap and effective.
-
-We sweep six attack families as operators on the training schedule
-(\cref{subsec:adversary}) --- per-iteration duration jitter, slowly drifting
-cadence, variable real work per iteration, cadence relocation toward the
-search-band edge, harmonic suppression, and dilution by co-resident load --- plus
-a meter-degradation family treated separately in \cref{subsec:meter_spec}. For
-each family we step an attack level and, at every level, measure the physical
-de-periodicisation it induces (cadence coefficient of variation, phase
-diffusion) against detector power for the tracking class (the Viterbi tracker
-and the tracked Dandawat\'e--Giannakis order statistics) and for the fixed class
-(the spectral matched filter and the multitaper F-test), all at nominal
-false-alarm rate $0.05$ with $n=200$ traces per class. Where an attack has a
-measured systems cost we attach it from the single-A100 throughput anchors
-(\cref{sec:reality}); the plausible \emph{learning-efficiency} penalty
---- batch-size, accumulation, or update-timing changes that preserve tokens per
-second while worsening progress per token or per joule --- is not something a
-synthetic power model can measure, and we carry it as the standing open
-empirical question rather than a result.\footnote{Frozen on the MATS compute
-cluster (slurm array 5635), $n=200$ per class over $50$ cells, seed $0$, the full
-five-detector set; \texttt{results/st2/frontier\_summary.json}
-(\texttt{provisional=false}). The systems-cost axis reads only the clean
-throughput-overhead field of the measured campaign, not its signature-B line-band
-arrays, so the frontier is unaffected by the transport caveat of
-\cref{sec:reality}.}
-
-\paragraph{The costly attacks are the wrong ones.} The de-periodicisations that
-degrade the line most are exactly the ones a rational prover would not pay for.
-Idle-insertion jitter buys no concealment: it costs $15$--$375\%$ throughput and
-leaves the tracked line detectable. Slowly drifting the cadence costs up to
-${\sim}140\%$ and is precisely the regime the order tracker was built to survive
-(\cref{subsec:power}). Power shaping costs $170$--$230\%$. Against every one of
-these the tracking class holds while the prover pays a throughput tax that a
-compute-governance regime would itself flag. Measured work on real hardware
-points the same way from a different channel: four evasion strategies run on a
-single H200 --- chunked optimizer updates, dilution with decoy inference,
-throttling, and diluted LoRA --- cost between $28$ and $69\%$ of throughput
-\citep{gargiulo2026workload}. Each of them inserts or substitutes work, which is
-what makes it expensive, and none varies the real computation per iteration ---
-the family we turn to next.
-
-\paragraph{The cheap attack collapses the fixed tests but not the tracker.} The
-dangerous family is variable real work. Varying the useful computation performed
-per iteration moves the cadence without inserting idle time, so its throughput
-cost is essentially zero: at work-variation level $0.35$ and $0.5$ the measured
-overhead is $-0.10\%$ and $-0.36\%$ --- zero within noise. At that price the
-fixed tests are gone. The spectral matched filter falls to detection rate $0.26$
-and $0.27$ (its \textsc{auc} collapses to $0.44$ and $0.41$, below chance), and
-the multitaper F-test sits at its floor. Yet the Viterbi tracker holds detection
-rate $1.0$ at both levels (\cref{fig:frontier,fig:st2_work}). This is the genuine
-scope boundary of the passive channel: a prover willing to vary real work evades
-every cheap, fixed detector at no measurable systems cost, and only an
-order-tracking detector still sees the schedule.
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{st2_frontier}
-	\caption{The de-periodicisation frontier: physical de-periodicisation
-	(cadence coefficient of variation) against best tracking and best fixed
-	detector power at nominal false-alarm rate $0.05$, over all attack families.
-	The near-vertical drop of the fixed class at the variable-real-work family,
-	at essentially zero throughput cost, while the tracking class holds, is the
-	scope boundary; costlier families (idle jitter, drift, shaping) sit at high
-	throughput overhead without erasing the tracked line.}
-	\label{fig:frontier}
-\end{figure*}
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{st2_work}
-	\caption{Detector power versus variable-real-work level for each detector.
-	The fixed matched filter and multitaper F-test cross below chance by level
-	$0.35$; the tracked order statistics degrade more slowly; the Viterbi
-	tracker holds full power until it finally bends at level $0.7$ (detection
-	rate $0.59$) --- a level whose throughput and learning cost we do not
-	measure.}
-	\label{fig:st2_work}
-\end{figure*}
-
-\paragraph{The tracker's own boundary is unmeasured.} The Viterbi tracker does
-eventually bend --- at work-variation level $0.7$ its detection rate falls to
-$0.59$ --- but we do not report that as a defeat, because we cannot price it. The
-throughput cost of driving work variation that hard is not in the measured
-anchors, and the learning-efficiency cost is the open question above. The honest
-statement is therefore asymmetric: within the regime whose cost we can measure
-(overhead within noise) the tracker wins outright, and the far end of the
-frontier, where the tracker finally fails, is a cost we could not quantify rather
-than a cost shown to be small. That the tracker's advantage here is real and not
-a tuning artefact is established independently in \cref{subsec:power}: against the
-inference null the Viterbi tracker is essentially Neyman--Pearson optimal, so the
-fixed tests' collapse under variable work is a genuine loss of information from
-the schedule, not a deficiency of a particular detector.
-
-\paragraph{The trade-off itself.} Plotting hiding directly against measured cost
-(\cref{fig:st2_cost_pareto}) separates the two detector classes sharply. Against
-the fixed class the Pareto staircase reaches hiding $0.74$ at essentially zero
-overhead and climbs only to $0.79$ at $159\%$ and $0.82$ at $375\%$ however much
-the prover spends: the cheapest attack is within $0.08$ of the best one. Against the tracking class the
-staircase never leaves the floor, rising only to $0.16$ and doing so at $159\%$
-overhead, so no attack in the anchored set buys meaningful concealment from the
-tracker at any price we can measure. Reading the two panels together is the
-paper's central empirical claim in one figure: what the fixed tests lose for free,
-the tracker keeps at every measured cost. The figure also shows the boundary of
-that claim honestly. Only $16$ of the $50$ swept cells have a measured hardware
-cost anchor, and the rest --- including work-variation level $0.7$, where the
-tracker finally bends --- carry no price at all, so they appear in a separate
-unpriced strip rather than being dropped.
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{st2_cost_pareto}
-	\caption{Cost of hiding: measured throughput overhead against hiding
-	($1-$ detection rate at false-alarm rate $0.05$) for the four cost-anchored
-	attack families, with the Pareto staircase --- the best hiding available at or
-	below a given cost. Against the tracking class (left) the staircase stays on
-	the floor across the whole measured cost axis; against the fixed class (right)
-	the variable-real-work family reaches hiding ${\sim}0.74$ at zero cost. Cells
-	whose attack level has no hardware cost anchor cannot be placed on the cost
-	axis and are shown in the hatched strip, among them the level at which the
-	tracker itself begins to fail. Attack levels are labelled where they hide
-	something; the rest sit on the floor.}
-	\label{fig:st2_cost_pareto}
-\end{figure*}
-
-\paragraph{Governance reading.} A passive meter certifies efficient
-iteration-structured training against cheap, fixed tests only within a bounded
-de-periodicisation budget; a prover free to vary real work escapes those tests
-for nothing. Defeating the order tracker on top of that requires either a systems
-and learning cost we could not measure or a degradation of the meter channel
-itself (\cref{subsec:meter_spec}). The results of this section are therefore
-necessary conditions and an upper bound on hideability rather than a proof of
-training: they bound what a prover can hide from a fixed detector cheaply. The
-complementary direction --- a lower bound on what hiding must cost, which no
-detection sweep can supply --- is available for one attack family against a fixed
-verifier (\cref{subsec:identifiability}) under the cost-of-hiding assumption,
-and the distortion it requires can be priced against the same anchors used here.
-The tracking class dominates the fixed class at every cell we measured, so that
-threshold is a valid --- but loose --- reading of what a tracker would require: it is
-read off the weaker detector, so it understates the true requirement. Establishing it
-against the tracking class directly, rather than inheriting it from the measured
-dominance, remains open.
-
-\subsection{A minimum meter specification}
-\label{subsec:meter_spec}
-
-The frontier above assumes a meter that resolves the cadence band. The
-verifier's instrument is itself an attack surface: a prover who cannot
-de-periodicise cheaply may instead argue for, or be handed, a meter too coarse
-to see the line. We therefore sweep the meter rather than the schedule --- sample
-rate and integration window between the nominal $20$~Hz channel and a $1$~Hz
-integrating sampler, plus transfer-function notch depth and position near the
-cadence --- with honest training against the hard inference null, and locate where
-each detector class dies.\footnote{Frozen on the MATS compute cluster (slurm
-array 5498), $48$ cells, $n=200$, $300$~s traces;
-\texttt{results/st2/meter\_boundary\_summary.json}. Marginal and dead-cell
-\textsc{auc}s are sensitive to the BLAS build, but the live-region boundary is
-not.} The result is a minimum specification the channel must meet for the Rung-1
-and Rung-2 claims to hold, which we state as a channel requirement, not an attack
-cost.
-
-\paragraph{The specification.} The tracking class holds full power (detection
-rate ${\gtrsim}0.9$ at nominal $0.05$) if and only if the meter satisfies three
-conditions together (\cref{fig:meter_boundary}). First, a sample rate of at least
-about $2$~Hz: rates of $20$, $10$, $5$, and $2$~Hz all hold the Viterbi tracker
-near $1.0$, $1$~Hz collapses it to $0.36$ as the Nyquist edge crosses the band,
-and $0.5$~Hz is dead (every detector at chance). Second, an integration window no
-longer than about $0.5$~s: at $20$~Hz sampling a window of $0.5$~s still holds
-($0.99$), but a $1$~s boxcar sinc-nulls the $1$~Hz band centre and collapses the
-tracker to $0.25$ even at full sample rate. Third, no deep transfer-function
-notch at the cadence: an off-band or shallow notch is tolerable (tracker
-${\approx}1.0$), but a full-depth notch at $1.0$--$1.2$~Hz roughly halves tracker
-power (to $0.48$--$0.55$) without erasing it (\cref{fig:meter_boundary_notch}).
-The robustness ordering across the grid is Viterbi $\ge$ spectral $>$ the DG order
-family, which is the most sensitive detector at the reference channel but the
-first to die as the channel degrades; the multitaper F-test is at its floor
-throughout.
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{st2_meter_boundary}
-	\caption{Minimum meter specification: detector power at nominal false-alarm
-	rate $0.05$ over sample rate $\times$ integration window, one panel per
-	detector, honest training against the hard inference null. The live region
-	is sample rate ${\ge}2$~Hz \emph{and} integration window ${\le}0.5$~s; below
-	either edge the tracking class collapses toward chance.}
-	\label{fig:meter_boundary}
-\end{figure*}
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{st2_meter_boundary_notch}
-	\caption{Transfer-function notch sub-sweep at $20$~Hz sampling: tracker power
-	versus notch centre frequency and depth. Only a deep notch placed at the
-	cadence centre ($1.0$--$1.2$~Hz) materially degrades detection, and it halves
-	rather than erases it.}
-	\label{fig:meter_boundary_notch}
-\end{figure*}
-
-\paragraph{The frontier's meter-erasure point, decomposed.} This sweep also
-resolves the single integrating-$1$~Hz point reported on the frontier, where even
-the tracker degrades (Viterbi detection rate $0.32$, every other detector near
-chance). That point superposes two independent channel defects, and the boundary
-map shows either one suffices: at the reference channel the tracker is at $1.0$;
-adding the $1$~s integration alone drops it to $0.25$; the $1$~Hz sampling alone
-drops it to $0.36$; the two together give $0.30$. The meter-erasure regime is
-over-determined --- it is a statement about the instrument, and a demand on it,
-rather than a de-periodicisation attack the prover can mount for free.
-
-\paragraph{The specification against measured hardware.} Work at the other end
-of the bandwidth range puts this requirement in perspective. A verifier-owned
-probe on a single H200's supply conductors finds the training signature
-concentrated below about $20$~kHz and still classifiable after decimation to
-about $38$~kS/s, where that study stops \citep{gargiulo2026workload} --- three to
-four orders of magnitude above the rates swept here. The two specifications are
-complementary rather than comparable, because they are requirements on different
-observables: theirs is the single-card optimizer-update phase, ours the
-collective iteration cadence. What the measured result does supply is
-real-hardware support for the direction of the collapse we find, since the fine
-structure a board-level probe exploits is long gone by the time a facility meter
-reads, and whatever survives at a few hertz must therefore be a slower and more
-collective observable than the one a probe sees.
-
-
-% ============================================================================
-\section{Reality check and transfer limits}
-\label{sec:reality}
-% ============================================================================
-
-Every result above is synthetic. The one place we hold the scenario model
-against measured hardware, it fails in an instructive way, and we report that
-failure as a result rather than a closing nod.
-
-\paragraph{The negative transport case.} On measured single-A100 traces the
-iteration cadence is present but shallow: a saturated card has no communication
-phase, so the iteration structure modulates a ${\sim}370$\,W draw by only a few
-watts (${\sim}0.4\%$ of board power). Worse for the naive reading, the spectra
-contain a $0.31$--$0.45$\,Hz component, roughly ten times stronger than the
-training line, that appears whenever the load varies in time but not at idle or
-under constant load --- the signature of the card's own power-management loop. It
-is a hardware line that says ``time-varying load,'' not ``training,'' and it is
-the standing counterexample that Rung~1 (\cref{sec:methods}) and the Rung-2
-controller control (\cref{subsec:rung2}) are built to exclude.
-
-\paragraph{Why this is the honest outcome.} Two things make the single-card
-signature shallow. One saturated card has no synchronous communication barrier,
-so the deep compute--communication contrast the scenario model assumes is absent;
-and the generator is literature-parameterised, not calibrated to the measured
-channel, a gap of about $75\times$ in modulation depth. The synthetic results are
-therefore a sensitivity analysis over a plausible parameter family, not a
-prediction calibrated to this hardware --- which is why the paper's claims are
-scoped to the stated generator and its stated nulls throughout.
-
-\paragraph{The single-card gap is shared, and lands differently.} The measured
-side-channel corpus that separates training from inference at high bandwidth is
-also a single card, with cross-device generalisation left open
-\citep{gargiulo2026workload}. What differs is which observable the gap touches. A
-board-level probe reads the optimizer-update phase, which is present on one card,
-so the absent distributed setting costs that result little. The cadence is a
-collective effect of synchronisation, so a single card is exactly the case in
-which it is weakest --- which is why the same gap is a transport caveat there and a
-first-order limitation here.
-
-\paragraph{Falsifiable predictions.} The model makes two predictions we cannot
-test here but state as falsifiable. Distributed synchronisation should deepen the
-line: at cluster scale the periodic all-reduce barrier produces a deep, coherent,
-legible cadence rather than the shallow single-card ripple, which is precisely the
-physics the cost-of-hiding assumption leans on. And an
-external wall or rack meter should see a different, lower-passed trace than
-on-board NVML telemetry, shifting where the minimum meter specification of
-\cref{subsec:meter_spec} binds. Both are predictions, not results.
-
-% ============================================================================
-\section{Discussion and conclusion}
-\label{sec:discussion}
-% ============================================================================
-
-We set out to ask what a passive power meter can certify about AI training, and
-organised the answer as a claim ladder in which each rung answers a more
-governance-relevant question at a higher cost in verifier information, and each
-rung's ceiling motivates the next. \Cref{tab:closeout} closes the ladder out with
-the paper's evidence attached to each rung.
-
-\begin{table*}[t]
-	\centering
-	\small
-	\caption{The claim ladder closed out: what this paper establishes at each
-	rung, where, and the hard ceiling it hits. Mirrors \cref{tab:ladder}.}
-	\label{tab:closeout}
-	\begin{tabular}{@{}p{2.4cm}p{5.0cm}p{2.2cm}p{4.6cm}@{}}
-		\toprule
-		Rung & What the paper establishes & Evidence & Demonstrated ceiling \\
-		\midrule
-		1. Structural evidence & Order-tracked cyclic structure is detected
-		against stationary and controller-like nulls; the tracker is
-		Neyman--Pearson optimal against the inference null &
-		\cref{sec:results}, \cref{app:bakeoff} & Fast cadence wander
-		(${>}0.8$~Hz on $300$~s); attributing structure to training needs the
-		nuisance model; the meter must meet \cref{subsec:meter_spec} \\
-		2. Conditional classification & The trace is more training-like than the
-		stated inference null (area under the curve $1.00$, stable across domain
-		shift) & \cref{subsec:rung2} & Semantic non-identifiability:
-		non-training loads with a training-shaped schedule score as training,
-		benign ones included; \cref{subsec:identifiability} shows no passive detector can
-		do better \\
-		Frontier & Fixed tests collapse under ${\approx}$zero-cost variable real
-		work while the tracker holds; costly de-periodicisations buy no
-		concealment & \cref{sec:frontier} & The tracker's far end, at a systems
-		and learning cost we could not measure \\
-		Cost of hiding & Hiding to detectability $\varepsilon$ requires a
-		distortion $\sigma^*(\varepsilon)$ that the measured anchors price at tens
-		of percent of throughput, rising above $100\%$ (i.i.d.\ period jitter) &
-		\cref{subsec:identifiability}, \cref{app:identifiability} & Read off a
-		fixed-bin verifier, so valid against any class containing it, but loose;
-		one attack family;
-		internal to the stated generator; the throughput-or-learning disjunction is
-		an assumption, not a result \\
-		3--4. Active authentication & A challenge-synchronous protocol and an
-		assumed binding primitive, specified but not run & \cref{app:active} &
-		Challenge-aware dummy load; the co-location gap \\
-		\bottomrule
-	\end{tabular}
-\end{table*}
-
-\paragraph{Scope.} Three restrictions fix what the results cover. First, the
-observable: we use the time-resolved power trace and exclude the
-integrated-energy channel, so there is no bounding of how much compute was
-performed and no energy-per-token pricing as a verification instrument. This is
-a restriction on the observable, not a claim that everything lives in the
-spectrum; cyclostationary structure is expressed spectrally, but the challenge
-correlation of Rung~3 is a time-domain operation on the same trace. Second, the
-population: we do not claim a recoverable cadence is universally necessary for
-training, and some conceivable execution can be made fully aperiodic. We target
-efficient, synchronous, iteration-structured training that exposes a recoverable
-cadence, the expected physical signature of that regime where distributed
-synchronisation makes the modulation deep and coherent. Destroying that cadence
-is then an adversarial action with a measurable budget, not a counterexample to
-the method, and measuring that budget is what \cref{sec:frontier} does. Third,
-the horizon: the results are fixed-horizon, and we make no claim that the
-$\chi^2$ statistic supports anytime-valid monitoring, deferring sequential
-e-process treatment. The cryptographic binding of Rung~4 is assumed as an ideal
-functionality, not built. Real distributed hardware enters only as the
-falsifiable predictions and the negative transport case of \cref{sec:reality}.
-
-\paragraph{Limitations.} The scenario model is literature-parameterised, not
-calibrated to measured hardware, so every quantitative result is a sensitivity
-analysis over a stated parameter family; the ${\sim}75\times$ modulation gap of
-\cref{sec:reality} is the standing reminder. The observation map is a
-linear time-invariant first approximation. The optimality ceiling of
-\cref{app:bakeoff} is optimal only under the Whittle model, hence a lower bound on
-the true optimum. Every robustness claim is bounded by the attack families and
-budgets we specified; a family we did not model is outside it. The cost bound of
-\cref{subsec:identifiability} shares that limit: it covers i.i.d.\ period jitter,
-and while it holds against any verifier class containing the test it exhibits, it is
-obtained from a fixed-bin test and so reads loose against the order tracker our own
-experiments show to be stronger --- it does not yet close the frontier's far end. Its cost leg is an
-assumption, not a result, for the reasons set out in
-\cref{subsec:identifiability}. And the learning-efficiency leg of that bound --- the axis that would
-turn it into a single priced statement rather than a disjunction --- is argued,
-not measured, and remains the central open empirical question.
-
-\paragraph{Governance reading.} What a regulator can buy today is graded. Rung~1
-buys physical evidence of an efficient iteration-structured compute schedule from
-an external meter alone, robust to a wander-and-drift adversary but not to a
-prover who varies real work or degrades the meter. Rung~2 buys the further claim
-that the schedule is more training-like than a stated inference baseline --- but
-not that the computation is training rather than a schedule-matched mimic, benign
-or deliberate, which is a limit of the passive channel, not of the method. That
-limit runs both ways: it caps what a positive detection proves as well as what a
-counterfeit could fake. Separating training from a
-mimic, and binding a physical response to declared work, both require moving off
-the passive channel to the active protocol of \cref{app:active} and the
-cryptographic primitive it assumes. The passive meter is thus a cheap, deployable
-front line that narrows the question and prices the cheap evasions, not a
-stand-alone proof of training.
-
-
-% ============================================================================
-
-\bibliography{references}
-\bibliographystyle{icml2026}
-
-\newpage
-\appendix
-% Make cleveref render appendix section labels as "Appendix A" rather than
-% "Section A"; the appendix body runs single-column.
-\crefalias{section}{appendix}
-\crefname{appendix}{Appendix}{Appendices}
-\Crefname{appendix}{Appendix}{Appendices}
-\onecolumn
 
 \section{Detector bake-off}
 \label{app:bakeoff}
@@ -1571,11 +1296,310 @@ conservative in the right direction.
 	\label{fig:np_ceiling}
 \end{figure*}
 
+\section{Full attack sweep}
+\label{app:sweep}
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\linewidth]{st2_frontier}
+	\caption{The de-periodicisation frontier: physical de-periodicisation
+	(cadence coefficient of variation) against best tracking and best fixed
+	detector power at nominal false-alarm rate $0.05$, over all attack families.
+	The near-vertical drop of the fixed class at the variable-real-work family,
+	at essentially zero throughput cost, while the tracking class holds, is the
+	scope boundary; costlier families (idle jitter, drift, shaping) sit at high
+	throughput overhead without erasing the tracked line.}
+	\label{fig:frontier}
+\end{figure*}
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\linewidth]{st2_work}
+	\caption{Detector power versus variable-real-work level for each detector.
+	The fixed matched filter and multitaper F-test cross below chance by level
+	$0.35$; the tracked order statistics degrade more slowly; the Viterbi
+	tracker holds full power until it finally bends at level $0.7$ (detection
+	rate $0.59$) --- a level whose throughput and learning cost we do not
+	measure.}
+	\label{fig:st2_work}
+\end{figure*}
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\linewidth]{st2_cost_pareto}
+	\caption{Cost of hiding: measured throughput overhead against hiding
+	($1-$ detection rate at false-alarm rate $0.05$) for the four cost-anchored
+	attack families, with the Pareto staircase --- the best hiding available at or
+	below a given cost. Against the tracking class (left) the staircase stays on
+	the floor across the whole measured cost axis; against the fixed class (right)
+	the variable-real-work family reaches hiding ${\sim}0.74$ at zero cost. Cells
+	whose attack level has no hardware cost anchor cannot be placed on the cost
+	axis and are shown in the hatched strip, among them the level at which the
+	tracker itself begins to fail. Attack levels are labelled where they hide
+	something; the rest sit on the floor.}
+	\label{fig:st2_cost_pareto}
+\end{figure*}
+
+\section{Meter boundary details}
+\label{app:meter}
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\linewidth]{st2_meter_boundary_notch}
+	\caption{Transfer-function notch sub-sweep at $20$~Hz sampling: tracker power
+	versus notch centre frequency and depth. Only a deep notch placed at the
+	cadence centre ($1.0$--$1.2$~Hz) materially degrades detection, and it halves
+	rather than erases it.}
+	\label{fig:meter_boundary_notch}
+\end{figure*}
+
+\paragraph{The frontier's meter-erasure point, decomposed.} This sweep also
+resolves the single integrating-$1$~Hz point reported on the frontier, where even
+the tracker degrades (Viterbi detection rate $0.32$, every other detector near
+chance). That point superposes two independent channel defects, and the boundary
+map shows either one suffices: at the reference channel the tracker is at $1.0$;
+adding the $1$~s integration alone drops it to $0.25$; the $1$~Hz sampling alone
+drops it to $0.36$; the two together give $0.30$. The meter-erasure regime is
+over-determined --- it is a statement about the instrument, and a demand on it,
+rather than a de-periodicisation attack the prover can mount for free.
+
+\paragraph{The specification against measured hardware.} Work at the other end
+of the bandwidth range puts this requirement in perspective. A verifier-owned
+probe on a single H200's supply conductors finds the training signature
+concentrated below about $20$~kHz and still classifiable after decimation to
+about $38$~kS/s, where that study stops \citep{gargiulo2026workload} --- three to
+four orders of magnitude above the rates swept here. The two specifications are
+complementary rather than comparable, because they are requirements on different
+observables: theirs is the single-card optimizer-update phase, ours the
+collective iteration cadence. What the measured result does supply is
+real-hardware support for the direction of the collapse we find, since the fine
+structure a board-level probe exploits is long gone by the time a facility meter
+reads, and whatever survives at a few hertz must therefore be a slower and more
+collective observable than the one a probe sees.
+
+
+\section{Conditional classification against the inference null}
+\label{app:rung2}
+
+\subsection{From detection to classification}
+\label{subsec:rules}
+
+Rung~2 sharpens the structural question into a decision: is a trace more
+training-like than a stated inference population? A decision needs a reference,
+and ours is the modelled continuous-batching null of \cref{eq:null}; every
+Rung-2 conclusion is conditional on it. We fix the task in advance --- the
+feature vector, the decision rules, and the reporting --- so that the result is
+not retrofitted to the answer.
+
+Each trace is reduced to an eight-dimensional physics feature vector estimated
+\emph{from the trace alone}, with no oracle knowledge of the cadence: the six
+Rung-1 detector scores (multitaper F, harmonic comb, spectral matched filter,
+Viterbi, fixed-$\alpha$ DG, and tracked-order DG), plus two stability features
+read off the estimated Viterbi path --- its frequency-path stability and its
+phase-folded waveform repeatability. On this fixed vector we compare three
+decision rules of increasing freedom: (i) a prespecified \emph{physics} score, a
+fixed linear combination with the fixed-cadence comparators pre-registered out;
+(ii) a logistic discriminant \emph{fitted} to the scenario generator and scored
+out-of-fold; and (iii) a random-forest \emph{learned} reference, included to
+expose how much separation comes from the chosen null rather than from the
+structural method. We report area under the ROC curve and the false-negative
+rate at a false-positive rate of $0.05$, kept separate throughout from the
+Rung-1 structural false alarms.
+
+The population the rules are evaluated on is fixed in advance too. They are
+fitted on the nominal setting and evaluated zero-shot on six domain shifts, each
+moving one factor: device headroom down to $0.70$ and up to $0.95$ of peak;
+observation duration halved to $150$\,s, which halves the frequency resolution;
+the cadence band shifted up to $0.8$--$1.8$\,Hz, so that its top now lies
+outside the $0.3$--$1.7$\,Hz search band; a meter carrying the controller limit
+cycle; and a meter with heavy coloured noise and baseline wander.
+
+\subsection{Classification against the inference null}
+\label{subsec:rung2}
+
+We now apply the three decision rules of \cref{subsec:rules} to the stated
+population, the six domain shifts, and a set of semantic controls whose training
+status we know.\footnote{Frozen on the MATS compute cluster (slurm array 5612),
+$n=200$ per class, $300$~s traces, band $0.3$--$1.7$~Hz, $14$ cells (the stated
+population, six transfer shifts, and seven semantic controls);
+\texttt{results/rung2/rung2\_summary.json}.}
+
+\paragraph{Stated population and transfer.} On the stated population all three
+rules separate training from the hard inference null perfectly: area under the
+curve $1.00$ with zero false negatives at a false-positive rate of $0.05$
+(\cref{fig:rung2_stated}). The separation is not brittle to the population:
+across all six domain shifts of \cref{subsec:rules}, evaluated zero-shot, the
+area under the curve stays $1.00$. The
+physical schedule of efficient training is far enough from the inference null that
+leaving the stated parameter box does not close the gap.
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\linewidth]{rung2_stated_transfer}
+	\caption{Rung-2 classification on the stated population (ROC / operating
+	points for the three decision rules) and across the transfer shifts. All
+	three rules reach area under the curve $1.00$ on the stated population and
+	hold it under every domain shift.}
+	\label{fig:rung2_stated}
+\end{figure*}
+
+\paragraph{The semantic controls set the ceiling.} The controls are the point of
+the rung. We built seven loads whose training status we know and asked what each
+rule scores (\cref{tab:rung2_controls}). Five non-training loads --- a
+training-shaped non-ML kernel loop, a controller limit cycle, a periodic inference
+request generator, a gradient-only computation, and a discarded-update decoy that
+runs the full forward/backward/optimizer step and throws the update away ---
+\emph{all} score as training, at fraction $1.00$ under every rule. A genuine
+training run diluted by an unrelated co-resident load is still caught ($1.00$).
+The reading is the one the claim ladder assigns to this rung: from power alone the
+verifier can certify a \emph{training-shaped periodic compute schedule}, not that
+the computation is gradient-descent training rather than a mimic. The first three
+loads are the practically binding ones, because they need no adversary: the
+controller cycle scoring as training is the same attribution boundary Rung~1 met
+in \cref{subsec:st1}, and calling structure training needs the nuisance model of
+\cref{sec:threat}. The decoy is the extremal member of the same class and the one
+that cannot be engineered away --- \cref{subsec:identifiability} rules out any
+passive detector that separates it --- which is why this ceiling motivates the active
+protocol of \cref{app:active} rather than a better classifier. The ceiling is a
+property of the observable rather than of the meter's bandwidth. A learned
+classifier reading a board-level probe at $10$~MHz separates training from
+inference by the spectral signature of the memory-bound optimizer-update phase
+\citep{gargiulo2026workload}; the discarded-update decoy runs exactly that phase
+and discards only its result, so the mechanism such a classifier keys on is
+present in a load that is not training. More bandwidth resolves the physical
+schedule more sharply, and it is the schedule, not the semantics, that a passive
+meter reads.
+
+\paragraph{Asynchronous training: a robustness result, not a miss.} One control,
+strongly de-periodicised genuine training, was pre-registered as an expected miss
+--- the case scoped out of Rung 2. At $n=200$ it is not missed. The tracked
+physics rule catches it (area under the curve $0.89$, $72\%$ flagged) and the
+learned reference catches all of it ($100\%$); only the fitted linear discriminant
+is weak ($0.75$, $55\%$). This is consistent with the tracker-robustness story of
+Rungs 1 and 2: the asynchronous control de-periodicises by drifting the cadence
+centre and slipping the phase, which leaves a wandering but still coherent line
+--- exactly the regime order tracking was built to survive. We therefore report it
+as a robustness result rather than the boundary. The genuine evasion is not slow
+wander but the ${\approx}$zero-cost variable-real-work attack of
+\cref{sec:frontier}, which moves the cadence \emph{without} leaving a coherent
+line, and which is where the tracker actually bends.
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\linewidth]{rung2_controls}
+	\caption{Semantic controls: fraction scored as training per decision rule.
+	The non-training decoys are indistinguishable from training under every rule
+	(the semantic-decoy ceiling); only asynchronous genuine training separates
+	the rules, and the tracked physics rule still catches most of it.}
+	\label{fig:rung2_controls}
+\end{figure*}
+
+
 \section{Identifiability details}
 \label{app:identifiability}
 
 This appendix proves the results stated in \cref{subsec:identifiability} and
 reports the numerical check that fixes their constants.
+
+\subsection{The cost of hiding}
+\label{subsec:costbound}
+
+
+Two questions have to be kept apart. \emph{Detection} asks whether this trace is
+training rather than the null, and its tools are likelihood-ratio and
+cyclostationary tests. \emph{Cost of hiding} asks how far the prover must distort
+its schedule before the training-trace \emph{distribution} becomes
+indistinguishable from the null \emph{distribution}, and its tools are
+distributional distances. The distinction matters because our empirical results
+bound the wrong direction for a governance claim: a detection sweep says how much
+can be hidden from \emph{our} detector, which a better detector moves. This
+subsection states what can be argued in the other direction. It is the one part
+of the paper that does not come from the generator, and the derivations behind it
+are in \cref{app:identifiability}.
+
+What can be argued quantitatively concerns the \emph{cost} of hiding, and it is
+stated over the population this paper scopes itself to: efficient, synchronous,
+iteration-structured training whose compute/communication alternation exposes a
+recoverable cadence $f_0$, and in which the synchronous exchange occupies a
+down-phase whose duration does not scale with the work accumulated in the
+preceding up-phase. Call an attack $\varepsilon$-\emph{covert} against a class of
+verifiers if no test in the class attains detection advantage --- true-positive
+minus false-positive rate --- above $\varepsilon$. Any single test's advantage is
+at most the total variation $\mathrm{TV}(P_{\mathrm{train}},P_{\mathrm{null}})$
+between the two laws \citep{tsybakov2009nonparametric}, so covertness against
+\emph{every} verifier requires that total variation to be at most $\varepsilon$.
+
+Consider the concrete attack the frontier prices: i.i.d.\ fractional period
+jitter of scale $\sigma$, so iteration $i$ has period
+$1/\!\left(f_0(1+\xi_i)\right)$ with $\xi_i \sim \mathcal{N}(0,\sigma^2)$. Such
+jitter \emph{accumulates} --- the iteration-boundary phase performs a random walk
+with diffusion coefficient $D \approx (2\pi)^2\sigma^2 f_0$ --- so the spectral
+line broadens into a Lorentzian and the coherent power retained in one frequency
+bin of a record of length $T$ falls off as
+\begin{equation}
+	\frac{P_c(\sigma)}{P_c(0)} \;\approx\; \frac{1}{1+\kappa\sigma^2},
+	\qquad \kappa = \pi^2 f_0 T,
+	\label{eq:rolloff}
+\end{equation}
+a parameter-free prediction that the generator reproduces to within several
+percent (\cref{app:identifiability}). Now let $J(\sigma)$ be the advantage
+attained by a fixed-bin threshold test at the nominal cadence, which decreases in
+$\sigma$ through \cref{eq:rolloff}. Because $J \leq \mathrm{TV}$, any $\sigma$
+with $J(\sigma) > \varepsilon$ is not $\varepsilon$-covert, so
+$\varepsilon$-covertness requires a distortion at least
+$\sigma^{*}(\varepsilon)$, the solution of $J(\sigma^{*}) = \varepsilon$. It is
+strictly positive and grows as $\varepsilon$ falls; measured through the full
+generator and meter it is $\sigma^{*}(0.5) = 0.18$ and $\sigma^{*}(0.2) = 0.36$,
+which the anchors of \cref{sec:frontier} price at tens of percent of throughput
+and at order $100\%$ respectively.
+
+Running the argument through an \emph{explicit} verifier is essential, and it is
+worth saying why, because the familiar covert-communication route goes the other
+way. Pinsker's inequality $\mathrm{TV} \leq \sqrt{\mathrm{KL}/2}$
+\citep{tsybakov2009nonparametric,cover2006elements} bounds total variation from
+above, so forcing that bound below $\varepsilon$ would establish that some
+distortion \emph{suffices} for covertness, not that any is \emph{necessary}. Only
+a verifier that demonstrably attains advantage $J$ certifies that smaller
+distortions fail.
+
+Distortion is not yet cost, and the bridge is a physical property of the
+admissible family that we state as an \emph{assumption} rather than a result,
+because two steps in its justification are not closed. The
+\emph{cost-of-hiding assumption} is that within that family, and at fixed total
+useful work, reaching $\sigma^{*}(\varepsilon)$ costs throughput or learning
+efficiency and cannot be free in both. The reasoning is that period jitter then
+has only two realisations. Inserting idle time inflates the mean period and pays
+in throughput. Varying the real work per iteration avoids idling, but the
+down-phase duration does not scale with the accumulated work and that work is
+quantised, so a component at the exchange cadence survives; removing it requires
+either idling or desynchronising the exchange, and the latter changes the
+optimisation being performed.
+
+Three limits fix how far all of this travels, and they are the reason the
+assumption is labelled as one. First, the surviving exchange-cadence component is
+recovered by the order-tracking class, not by the fixed-bin verifier that supplies
+$\sigma^{*}$: under variable real work \cref{sec:frontier} measures the fixed
+tests below chance. Read strictly, the argument shows that a work-varying prover
+stays visible to a \emph{tracker}, not that it must pay to become
+$\varepsilon$-covert against the verifier whose $\sigma^{*}$ we computed. What the
+numbers do support is the comparative claim --- at matched total distortion, work
+variation is the more detectable of the two at every $\sigma \geq 0.05$, the two
+being indistinguishable within sampling error below that
+(\cref{fig:lower_bound}). Second, fixing total useful work is a real restriction:
+substituting useful non-training work, the additive-burial and dilution families
+above, modulates the period while idling nothing and degrading no optimisation.
+The disjunction is therefore asserted over timing attacks at fixed work. Third,
+$\sigma^{*}$ is read off one exhibited verifier and $J$ is measured between the
+two laws of our own generator. Because $J \leq \mathrm{TV}$, a $\sigma$ ruled out
+by the fixed-bin test is ruled out against any verifier class containing that
+test --- including the five-detector bank of \cref{sec:frontier}, order tracker
+and all --- but a stronger verifier attains a larger advantage at each $\sigma$
+and so yields a larger $\sigma^{*}$. Since our own experiments show the tracking
+class to be the stronger one, the threshold we report is a loose reading of the
+true requirement. And the claim throughout is that hiding \emph{to a stated
+$\varepsilon$} must be paid for, expressly not that de-periodicisation is
+inefficient in general, which \cref{sec:frontier} refutes by exhibiting a
+near-free attack that defeats every fixed test.
 
 \paragraph{Why no passive detector identifies semantics.}
 A passive verifier observes only $P_{\mathrm{obs}}$, so its decision is a

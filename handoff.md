@@ -49,6 +49,28 @@ applied the result on branch **`restructure`**:
    compress synthetic classification; async control; power stabilisation in the
    threat model) is untouched.
 
+## Experiment TODOs from the 2026-09-23 restructure (Viterbi-led main text)
+
+The paper was restructured around the Viterbi line tracker as *the* method
+(plan: `~/.claude/plans/consider-the-manuscript-paper-main-tex-rosy-star.md`).
+Two experiments are needed to back that framing; neither is run yet.
+
+6. **Known-line veto.** Viterbi alone scores 0.00 vs the mixed structural
+   nulls because it locks onto the controller limit cycle. Borrow the CW-GW
+   known-lines veto: extend Viterbi to multi-candidate extraction
+   (peel-and-rerun via `viterbi_best_path`, `powerladder/typeb/detectors.py:266`,
+   or sub-banding), veto candidates near catalogued instrument lines (A100
+   controller 0.31-0.45 Hz), re-score the bake-off vs mixed structural nulls,
+   and add the veto band's relocation blind spot to the frontier
+   (frequency-relocation family). Caveats to state: the adversary knows the
+   veto list; lines need per-facility characterisation; load-coupled
+   controller lines are not handled by a frequency veto.
+7. **Surrogate-calibrated Viterbi.** Viterbi thresholds are Monte Carlo on the
+   modelled null; the surrogate campaign only ever calibrated DG's Q_alpha.
+   Run the Viterbi score through the Fourier-phase surrogate + FAR harness in
+   `powerladder/st1/` over the null suite, to give the headline detector a
+   deployable per-trace threshold.
+
 (Previous handoff follows.)
 
 ---
