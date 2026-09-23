@@ -6,6 +6,8 @@ Reads results/st2/meter_boundary_summary.json and renders:
       over the sample_hz x integ_window_s main grid, with a "death" contour
       (TPR = 0.5) marking where that detector stops separating training from
       inference — the boundary of the region in which the rung is available.
+  figures/st2_meter_boundary_viterbi.{pdf,png}  the Viterbi panel alone, sized
+      for one ICML column -- the main-text view of the minimum meter spec.
   figures/st2_meter_boundary_notch.{pdf,png}  TPR@0.05 vs notch centre for each
       blend depth (the in-band transfer-function sub-sweep at the 20 Hz sampler).
 
@@ -30,7 +32,8 @@ import numpy as np  # noqa: E402
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from powerladder.plotstyle import C, WIDTH_WIDE, apply_house_style, save  # noqa: E402
+from powerladder.plotstyle import (C, WIDTH_ICML_COL, WIDTH_WIDE,  # noqa: E402
+                                   apply_house_style, save)
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _SUMMARY = _ROOT / "results" / "st2" / "meter_boundary_summary.json"
@@ -100,6 +103,38 @@ def plot_main(summary: dict, fig_dir_stem: str = "st2_meter_boundary") -> None:
     plt.close(fig)
 
 
+def plot_single(summary: dict, detector: str = "viterbi",
+                fig_dir_stem: str = "st2_meter_boundary_viterbi") -> None:
+    """One detector's TPR heatmap, annotated per cell, for a single column."""
+    apply_house_style()
+    far = _far_key(summary)
+    Z, fs_axis, iw_axis = _main_grid(summary, detector, far)
+    fig, ax = plt.subplots(figsize=(WIDTH_ICML_COL, 2.2))
+    im = ax.imshow(Z, origin="lower", aspect="auto", vmin=0.0, vmax=1.0,
+                   cmap="viridis")
+    # No interpolated death contour here: on a 6x6 grid it cuts through cells;
+    # the per-cell values mark the live region directly.
+    for i in range(len(iw_axis)):
+        for j in range(len(fs_axis)):
+            if np.isfinite(Z[i, j]):
+                ax.text(j, i, f"{Z[i, j]:.2f}", ha="center", va="center",
+                        fontsize=4.5,
+                        color="black" if Z[i, j] > 0.6 else "white")
+    ax.set_xticks(range(len(fs_axis)))
+    ax.set_xticklabels([f"{v:g}" for v in fs_axis], fontsize=6)
+    ax.set_yticks(range(len(iw_axis)))
+    ax.set_yticklabels([f"{v:g}" for v in iw_axis], fontsize=6)
+    ax.minorticks_off()
+    ax.set_xlabel("sample rate (Hz)")
+    ax.set_ylabel("integration window (s)")
+    cb = fig.colorbar(im, ax=ax, fraction=0.05, pad=0.02)
+    cb.set_label(f"detection rate at FAR {far}", fontsize=6)
+    cb.ax.tick_params(labelsize=5)
+    fig.tight_layout()
+    save(fig, fig_dir_stem)
+    plt.close(fig)
+
+
 def plot_notch(summary: dict,
                fig_dir_stem: str = "st2_meter_boundary_notch") -> None:
     """TPR vs notch centre for each blend depth, per detector class rep."""
@@ -148,6 +183,7 @@ def main(argv=None) -> None:
                          f"scripts/st2_meter_boundary.py first")
     summary = json.loads(args.summary.read_text())
     plot_main(summary)
+    plot_single(summary)
     plot_notch(summary)
     print(f"wrote figures/st2_meter_boundary*.pdf from {args.summary}")
 
