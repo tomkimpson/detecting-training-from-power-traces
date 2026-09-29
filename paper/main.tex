@@ -155,13 +155,11 @@ a regulator can buy.
 \section{A model of datacentre training power}
 \label{sec:scenario}
 % ============================================================================
-In this section we build a model of the power draw from a data centre running AI workloads. This model will serve as a synthetic data generator to test our methods, in lieu of having access to real empirical data. We adopt the stochastic model of AI training power from \citet{ko2025widearea}, developed for the analysis of grid stability.  The reader is referred to \citet{ko2025widearea} for the full training model and its context. We modify the model with an Ornstein-Uhlenbeck drift on the training frequency for added realism. We also develop a model of power draw for inference.
+In this section we build a model of the power draw from a data centre running AI workloads. This model will serve as a synthetic data generator to test our methods, in lieu of having access to real empirical data. We adopt the stochastic model of AI training power from \citet{ko2025widearea}, developed for the analysis of grid stability, modified to add an Ornstein-Uhlenbeck drift on the training frequency. The reader is referred to \citet{ko2025widearea} for the full training model and its context.
 
-This section is organised as follows. \Cref{subsec:ko} describes a single
-training run, following \citet{ko2025widearea}, and adds our drift of its cadence.
-\Cref{subsec:finetune} describes fine-tuning, which uses the same waveform with
-a different parameter set. \Cref{subsec:null} constructs the inference
-workload. \Cref{subsec:aggregate} combines these into the load of a whole
+This section is organised as follows. \Cref{subsec:ko} describes the power draw from a
+training workload, following \citet{ko2025widearea}, and adds our drift of its cadence.
+\Cref{subsec:finetune} describes the power draw from a fine-tuning workload. \Cref{subsec:null} describes the power draw from an inference workload. \Cref{subsec:aggregate} combines these workloads into the load of a whole
 datacentre: one dominant workload, either training or inference, over a
 background of smaller trainings and fine-tunings. \Cref{tab:params} collects
 every parameter value of the model. 
@@ -179,8 +177,8 @@ Iteration $i$ has period
 where $f_0$ is the baseline fluctuation frequency. For a given training run $f_0$ is fixed. Between training runs $f_0$ can vary depending on model size, batch size, parallelism layout, interconnect and hardware \citep{patel2024characterizing,jain2024pal}. To describe the inter-workload variation, we take  $f_0 \sim \mathcal{U}(f^{\mathrm{lo}}, f^{\mathrm{hi}})$ . The period splits into an up-phase of duration
 $\rho_i T_i$ and a down-phase of duration $(1-\rho_i) T_i$, with the phase ratio
 $\rho_i \sim \mathcal{U}(\rho^{\mathrm{lo}}, \rho^{\mathrm{hi}})$ redrawn each iteration. Writing $t$ for time
-within iteration $i$, $P(t)$ for the power the run draws above the static
-overhead $P_0$, and $P_{\mathrm{peak}}$ for its peak,
+within iteration $i$, $P(t)$ for the power the run draws above the facility's static
+overhead (added in \cref{subsec:obsmap}), and $P_{\mathrm{peak}}$ for its peak,
 \begin{equation}
 	\frac{P(t)}{P_{\mathrm{peak}}} =
 	\begin{cases}
@@ -205,16 +203,15 @@ of every parameter in this section.
 each iteration, the cadence averaged over many iterations is still $f_0$. The
 timing errors accumulate as a random walk in phase, which broadens the spectral
 line into a Lorentzian of full width $\approx 2\pi\sigma_\xi^2 f_0$ (to leading
-order in $\sigma_\xi$) but leaves its centre at $f_0$. Real runs vary differently: their iteration time changes in ways that persist.
-In a five-month trace of a production LLM cluster, the slowdowns caused by
-sequence-length imbalance, pipeline-stage imbalance, and garbage-collection
-pauses are persistent rather than step-to-step, with most steps of a job slowed
-by about the job's overall slowdown \citep{lin2025stragglers}. Slow workers and
-congested links produce fail-slow episodes lasting from tens of seconds to
-nearly ten hours \citep{wu2024falcon}. And at the scale of a frontier run,
-throughput varies by $1$--$2\%$ over the day as temperature changes the GPUs'
-voltage and frequency scaling \citep{grattafiori2024llama3}. Variation that is
-correlated in time moves the centre of the line instead of widening it.
+order in $\sigma_\xi$) but leaves its centre at $f_0$. Real runs vary differently. Specifically, the iteration time changes in ways that persist.
+Every training step waits for the slowest GPU, so one slow component slows the
+whole run. In a production LLM cluster, these slowdowns last for the whole job
+rather than varying from step to step \citep{lin2025stragglers}. Hardware can
+also keep running but degrade: CPU contention, overheating GPUs and congested
+network links cut throughput by tens of percent for periods of tens of seconds
+to hours \citep{wu2024falcon}. Over a day,
+temperature shifts throughput by a further $1$--$2\%$
+\citep{grattafiori2024llama3}. 
 
 We model this by letting the cadence of iteration $i$ be $f_0 g_i$, where $g_i$
 is a discrete Ornstein--Uhlenbeck (first-order autoregressive) process that
@@ -237,59 +234,51 @@ of \cref{eq:ou} is $\sigma_g^2/(2\theta - \theta^2)$, so we set
 \end{equation}
 which makes the stationary standard deviation of the instantaneous cadence
 $f_0 g_i$ equal to $\sigma_f$, in Hz. The autocorrelation of $g_i$ at lag $k$
-is $(1-\theta)^k$, so the cadence stays correlated over about $1/\theta$
+is $(1-\theta)^k$, so the cadence stays correlated over  $\sim 1/\theta$
 iterations. Over that span it wanders by $\sigma_f$, which can exceed both the
 line width set by $\xi_i$ and the frequency resolution of a trace. We clip
-$g_i$ from below at $g_{\min}$ so the period stays finite. The sources above show that iteration-time variation is correlated in time. They do not fix $\theta$ or $\sigma_f$. We therefore hold $\theta$ fixed and
-treat $\sigma_f$ as a free parameter, sweeping it in \cref{sec:results}.
+$g_i$ from below at $g_{\min}$ so the period stays finite. We hold $\theta$ fixed and treat $\sigma_f$ as a free
+parameter, sweeping it in \cref{sec:results}.
 
 
 
 \subsection{Fine-tuning}
 \label{subsec:finetune}
-
-Fine-tuning is the same engine on a second parameter set (\cref{tab:params}).
-We write its cadence as $f_1$. Compared with training, it has a lower cadence
+Fine-tuning workloads can be represented using the same structure as in Section \ref{subsec:ko}, with different parameters (\cref{tab:params}). We denote the fine-tuning frequency as $f_1$. Compared with training, it has a lower cadence
 band, a longer tail phase (larger $\rho_i$), a deeper tail-to-idle swing (larger
 $\mu_\Delta$), and slightly smaller level offsets and intra-phase noise.
+We apply the cadence drift of \cref{eq:ou} only to the dominant run;
+fine-tuning and background training runs keep a fixed cadence ($\sigma_f = 0$).
 
 \subsection{Inference}
 \label{subsec:null}
-
-
-\citet{ko2025widearea} do not present a model for power draw of inference workloads. We now construct one. 
-
-
-We superposr three structures on a constant
-decode level $B$, parameterised from
-the LLM-serving literature,
+\citet{ko2025widearea} do not present a model for power draw of inference workloads. We now construct one. We superpose three structures on a constant mean serving power load $B$. First, token generation (decode). Serving systems use continuous batching,
+which adds and removes requests from the batch at every step
+\citep{yu2022orca,kwon2023vllm}. A per-step cadence exists, but the batch
+composition reshuffles every step. Unlike training, there is therefore no
+characteristic frequency: decode power smears across a broad band with no
+coherent frequency path. We model it as band-limited noise $b(t)$ of unit RMS
+over $[f_b^{\mathrm{lo}}, f_b^{\mathrm{hi}}]$, scaled by an amplitude $A$. Second, expert-load imbalance. Under sparse mixture-of-experts routing, tokens
+are not spread evenly across the experts \citep{shazeer2017moe}, so the work per
+step varies with the mix of requests. We model this as a slow envelope on the
+decode power: a unit-variance Ornstein--Uhlenbeck process $u(t)$ with
+correlation time $\tau_u$, entering at depth $m$. Amplitude modulation spreads
+the decode energy into sidebands, which makes the null harder, not easier. Third, prompt processing (prefill). Each request begins with a prompt phase that
+is brief, compute-bound, and draws more power than token generation
+\citep{patel2024characterizing,patel2024splitwise}. We model these phases as box
+pulses $s(\cdot)$ of duration $d_p$ and height $a$, arriving at times $\tau_k$
+from a Poisson process of rate $\lambda_p$. These memoryless arrivals carry no
+line and simply raise the broadband in-band level. Together,
 \begin{equation}
 	\frac{P^{\mathrm{inf}}(t)}{P_{\mathrm{peak}}} \;=\;
-	B \;+\; A\,\bigl[1 + m\,u(t)\bigr]\,b(t) \;+\; \sum_k a\,s(t - \tau_k),
+	B \;+\; A\,\bigl[1 + m\,u(t)\bigr]\,b(t) \;+\; \sum_k a\,s(t - \tau_k).
 	\label{eq:null}
 \end{equation}
-The decode floor $b(t)$ is unit-RMS band-limited
-noise over $[f_b^{\mathrm{lo}}, f_b^{\mathrm{hi}}]$, standing for continuous batching
-\citep{yu2022orca,kwon2023vllm}. The envelope $u(t)$ is a unit-variance
-Ornstein--Uhlenbeck process with correlation time $\tau_u$, entering at depth
-$m$, standing for
-expert-load imbalance under sparse routing \citep{shazeer2017moe}; amplitude
-modulation spreads the decode energy into sidebands, which makes the null
-\emph{harder}, not easier. The prefill bursts $s(\cdot)$ are box pulses of
-duration $d_p$ and height $a$, arriving at times $\tau_k$ from a Poisson process
-of rate $\lambda_p$; 
-
-
-
-The model is designed with the intent to make inference a loud cofound rather than quiet. As seen in it delivers more in-band power
-than training while showing an order of magnitude less spectral contrast.
-
-
-Note that unlike training there is no characteristic frequency: the per-step cadence exists, but the batch
-composition reshuffles every step, so it smears into broadband in-band power
-with no coherent frequency path. 
-memoryless arrivals carry no line and simply raise the
-broadband in-band level.
+The forms of these structures follow how LLM serving systems schedule work;
+their amplitudes are our choice (\cref{tab:params}). We set them so that
+inference is a loud confound rather than a quiet one. As
+\cref{fig:scenario_traces} shows, it delivers more in-band power than training
+but an order of magnitude less spectral contrast.
 
 
 
@@ -297,10 +286,7 @@ broadband in-band level.
 
 \subsection{Aggregate}
 \label{subsec:aggregate}
-
-
-A datacentre rarely runs one job at a time. Following Ko and Zhu, we write the
-AI load behind a single meter as one dominant training run over a background of
+A datacentre rarely runs one job at a time. Following \citet{ko2025widearea} we write the load behind a single meter as the aggregate of one dominant training run over a background of
 smaller trainings and fine-tunings,
 \begin{equation}
 	P_{\mathrm{AI}}(t) \;=\; P^{\mathrm{main}}(t)
@@ -308,20 +294,22 @@ smaller trainings and fine-tunings,
 	\;+\; \sum_{k=1}^{N_{\mathrm{ft}}} P^{\mathrm{ft}}_k(t).
 	\label{eq:aggregate}
 \end{equation}
-Each term is an independent draw of \cref{eq:ko}, with its own cadence, phase
-ratios, and level offsets. $P^{\mathrm{main}}$ and the $P^{\mathrm{tr}}_j$ use the training
-parameters and the $P^{\mathrm{ft}}_k$ use the fine-tuning parameters. The
-static overhead $P_0$ is added once, for the facility, not once per
-workload. Peak power is split between the dominant run, the
-$N_{\mathrm{tr}}$ small trainings, and the $N_{\mathrm{ft}}$ fine-tunings in the
-ratio $w_{\mathrm{main}} : w_{\mathrm{tr}} : w_{\mathrm{ft}}$, and each
-background share is divided equally among its members. Each small training draws its cadence from the same
+where $P^{\mathrm{main}}$ is the power of the dominant training run,
+$P^{\mathrm{tr}}_j$ that of the $j$-th of $N_{\mathrm{tr}}$ smaller training
+runs, and $P^{\mathrm{ft}}_k$ that of the $k$-th of $N_{\mathrm{ft}}$
+fine-tuning runs. Each term is an independent draw of \cref{eq:ko}, with its own
+cadence, phase ratios, and level offsets. $P^{\mathrm{main}}$ and the
+$P^{\mathrm{tr}}_j$ use the training parameters and the $P^{\mathrm{ft}}_k$ use
+the fine-tuning parameters; only $P^{\mathrm{main}}$ carries the cadence drift
+of \cref{eq:ou}. Peak power is split between the dominant run, the small
+trainings, and the fine-tunings in the ratio
+$w_{\mathrm{main}} : w_{\mathrm{tr}} : w_{\mathrm{ft}}$, and each background
+share is divided equally among its members. Each small training draws its cadence from the same
 band as the dominant run, so the background carries weak lines of its own
 inside the search band.
 
-The aggregate has a null counterpart. It is not training plus inference: the
-inference workload of \cref{subsec:null} takes the dominant slot in place of
-the main training run, over the same background,
+We define the null aggregate as the same datacentre with the dominant training
+run replaced by inference (\cref{subsec:null}). The background is unchanged,
 \begin{equation}
 	P^{\mathrm{null}}_{\mathrm{AI}}(t) \;=\; P^{\mathrm{inf}}(t)
 	\;+\; \sum_{j=1}^{N_{\mathrm{tr}}} P^{\mathrm{tr}}_j(t)
@@ -330,53 +318,25 @@ the main training run, over the same background,
 \end{equation}
 with $P^{\mathrm{inf}}$ from \cref{eq:null} at the same
 share $w_{\mathrm{main}}$. The two aggregate classes are then power-matched and
-both contain the background's weak lines, so a detector must find the
-\emph{dominant} line, not merely any line.
-
-The aggregate is the harder and more realistic case, but most of our results
-do not use it. The headline detection results of \cref{sec:results} compare a
-single training run against the single inference null, with no background.
-\Cref{eq:aggregate} enters in three places: the aggregate panel of
-\cref{fig:scenario_traces}; the dilution attack of \cref{sec:frontier}, which
-sweeps the dominant share
-$w_{\mathrm{main}}/(w_{\mathrm{main}}+w_{\mathrm{tr}}+w_{\mathrm{ft}})$ from
-$0.2$ to $0.9$; and the co-resident control of \cref{app:rung2}, which fixes it
-at $0.5$.
-
-\Cref{fig:scenario_traces} shows the four resulting workload classes as
+both contain the background's weak lines. \Cref{fig:scenario_traces} shows the four resulting workload classes as
 a verifier would see them.
 
 \begin{figure*}[t]
 	\centering
 	\includegraphics[width=\linewidth]{scenario_traces}
-	\caption{The four workload classes at the meter, on the nominal channel
+	\caption{The four workload classes at the power meter, on the nominal channel
 	(20\,Hz sampling, no filtering or decimation, $\sigma_\eta = 4$\,W). Top:
 	a 20\,s excerpt. Bottom: the multitaper spectrum over the
 	$0.3$--$1.7$\,Hz search band, with the true cadence marked. Training,
 	fine-tuning, and the aggregate carry a line at $f_0$; the inference null
-	does not. It is not quiet --- it puts roughly three times the training
-	in-band power into the same band --- but that power is spread, so its
-	peak-to-median contrast is $3.2$ against $44$ for training. A matched
-	filter sees a raised floor and a tracker finds no path to follow. Cadences
+	does not. Cadences
 	are pinned for legibility ($f_0 = 0.9$\,Hz training, $0.5$\,Hz
-	fine-tuning); elsewhere they are drawn from the Ko bands.
-	Reproduced by \texttt{scripts/plot\_scenario\_traces.py}.}
+	fine-tuning); elsewhere they are drawn from the Ko bands.}
 	\label{fig:scenario_traces}
 \end{figure*}
 
 \begin{table}[t]
 	\centering
-	\caption{Workload-model parameters of \cref{sec:scenario}. Training and
-	fine-tuning values are Ko and Zhu's \citep{ko2025widearea}, except
-	$\kappa_\nu$, the drift parameters, and $\sigma_\xi$ for fine-tuning (Ko and
-	Zhu list it for training only; we reuse it). The inference null is ours.
-	Ko and Zhu's intra-phase noise is a sub-millisecond fluctuation, and each
-	sample of our tens-of-hertz generator averages over many of them, so we
-	scale its standard deviation by $\kappa_\nu$; the $s$ ranges are Ko and
-	Zhu's values before scaling.
-	Amplitudes are fractions of the peak power $P_{\mathrm{peak}}$. The drift
-	excursion $\sigma_f$ is swept in \cref{sec:results}.}
-	\label{tab:params}
 	\footnotesize
 	\setlength{\tabcolsep}{3pt}
 	\begin{tabular}{@{}llcc@{}}
@@ -402,7 +362,7 @@ a verifier would see them.
 		Power shares & $w_{\mathrm{main}}{:}w_{\mathrm{tr}}{:}w_{\mathrm{ft}}$ & \multicolumn{2}{c}{$9 : 0.5 : 0.5$} \\
 		\midrule
 		\multicolumn{4}{@{}l}{\emph{Inference null}} \\
-		Decode level & $B$ & \multicolumn{2}{c}{$0.5$} \\
+		Mean serving load & $B$ & \multicolumn{2}{c}{$0.5$} \\
 		Decode RMS & $A$ & \multicolumn{2}{c}{$0.40$} \\
 		Decode band [Hz] & $[f_b^{\mathrm{lo}}, f_b^{\mathrm{hi}}]$ & \multicolumn{2}{c}{$[0.1, 4]$} \\
 		MoE corr.\ time [s] & $\tau_u$ & \multicolumn{2}{c}{$5$} \\
@@ -412,6 +372,17 @@ a verifier would see them.
 		Prefill duration [s] & $d_p$ & \multicolumn{2}{c}{$0.1$} \\
 		\bottomrule
 	\end{tabular}
+	\caption{Workload-model parameters of \cref{sec:scenario}. Training and
+	fine-tuning values are Ko and Zhu's \citep{ko2025widearea}, except
+	$\kappa_\nu$, the drift parameters, and $\sigma_\xi$ for fine-tuning (Ko and
+	Zhu list it for training only; we reuse it). The inference null is ours.
+	Ko and Zhu's intra-phase noise is a sub-millisecond fluctuation, and each
+	sample of our tens-of-hertz generator averages over many of them, so we
+	scale its standard deviation by $\kappa_\nu$; the $s$ ranges are Ko and
+	Zhu's values before scaling.
+	Amplitudes are fractions of the peak power $P_{\mathrm{peak}}$. The drift
+	excursion $\sigma_f$ is swept in \cref{sec:results}.}
+	\label{tab:params}
 \end{table}
 
 % ============================================================================
