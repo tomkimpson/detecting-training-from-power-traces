@@ -33,6 +33,12 @@
 \usepackage[capitalize,noabbrev]{cleveref}  % smart cross-referencing
 
 \usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,decorations.pathreplacing}
+% Okabe-Ito colours, matching powerladder/plotstyle.py
+\definecolor{okorange}{HTML}{E69F00}
+\definecolor{okblue}{HTML}{0072B2}
+\definecolor{okverm}{HTML}{D55E00}
 
 % Short form of the title for the running header:
 \icmltitlerunning{Detecting AI Training in Datacentre Power}
@@ -370,6 +376,10 @@ a verifier would see them.
 		Prefill rate [Hz] & $\lambda_p$ & \multicolumn{2}{c}{$0.08$} \\
 		Prefill height & $a$ & \multicolumn{2}{c}{$0.15$} \\
 		Prefill duration [s] & $d_p$ & \multicolumn{2}{c}{$0.1$} \\
+		\midrule
+		\multicolumn{4}{@{}l}{\emph{Scale}} \\
+		Peak power [W] & $P_{\mathrm{peak}}$ & \multicolumn{2}{c}{$850$} \\
+		Static overhead [W] & $P_0$ & \multicolumn{2}{c}{$250$} \\
 		\bottomrule
 	\end{tabular}
 	\caption{Workload-model parameters of \cref{sec:scenario}. Training and
@@ -381,69 +391,178 @@ a verifier would see them.
 	scale its standard deviation by $\kappa_\nu$; the $s$ ranges are Ko and
 	Zhu's values before scaling.
 	Amplitudes are fractions of the peak power $P_{\mathrm{peak}}$. The drift
-	excursion $\sigma_f$ is swept in \cref{sec:results}.}
+	excursion $\sigma_f$ is swept in \cref{sec:results}. The scale values are
+	ours, and are those of a single accelerator board; only the workload's size
+	relative to the meter's additive terms affects detection
+	(\cref{subsec:channel}).}
 	\label{tab:params}
 \end{table}
 
 % ============================================================================
-\section{Threat and measurement model}
+\section{Measurement and threat model}
 \label{sec:threat}
 % ============================================================================
 
-This section fixes what the verifier sees and who is trying to hide from it.
-The question a governance regime needs answered is whether a monitored facility
-is running training it has not declared. For a monitored cluster the declared
-workload is overwhelmingly inference, so the population against which training
-must be detected is the inference null of \cref{subsec:null}. We consider two
-provers: a \textbf{benign} (non-adaptive) prover who runs its workload without
-regard to the meter, and an \textbf{adaptive} (hiding) prover who knows the
-detector and reshapes its schedule to evade it. Most of what is interesting
-lies in the gap between them.
+This section specifies how the power drawn by the data centre reaches the verifier (i.e. the measurement model), and what the facility operator can control (i.e. the threat model). The verifier wants to know whether a monitored facility is running undeclared training. We frame this as a hypothesis test. Under the null hypothesis $\mathcal{H}_0$ the facility runs its declared workload, which for a monitored cluster is dominated by inference: the inference model of \cref{subsec:null}, alone or
+over the background of \cref{eq:aggregate_null}. Under the alternative hypothesis $\mathcal{H}_1$ a training run of \cref{subsec:ko} takes the place of that inference, alone or over the same background (\cref{eq:aggregate}). \Cref{subsec:channel} outlines the channel through which either hypothesis reaches the verifier. \Cref{subsec:adversary} outlines who controls the load, what they know, and what
+they may change. 
 
 \subsection{The measurement model}
 \label{subsec:channel}
 \label{subsec:obsmap}
 
-The verifier holds one scalar time series from a meter outside the prover's
-control. Writing $P_{\mathrm{fac}}(t)$ for the total power drawn behind that
-meter --- the static overhead $P_0$ plus either a single workload of
-\cref{sec:scenario} or the aggregate of \cref{eq:aggregate} --- the meter reads
+\Cref{sec:scenario} gives the power $P_{\mathrm{AI}}(t)$ drawn by the AI
+workload above the facility's static overhead, in units of
+$P_{\mathrm{peak}}$. The total power behind the meter is
 \begin{equation}
-	P_{\mathrm{meter}}(t) \;=\; (h * P_{\mathrm{fac}})(t) + \eta(t),
+	P_{\mathrm{fac}}(t) \;=\; P_0 + P_{\mathrm{AI}}(t),
+	\label{eq:fac}
+\end{equation}
+with $P_{\mathrm{AI}}$ given by \cref{eq:aggregate} under $\mathcal{H}_1$, by
+\cref{eq:aggregate_null} under $\mathcal{H}_0$, or by a single workload of
+\cref{sec:scenario} when a result drops the background. The verifier holds one scalar time series from a meter outside the operator's
+control. The meter reads
+\begin{equation}
+	\begin{gathered}
+		P_{\mathrm{meter}}[n] \;=\; (h * P_{\mathrm{fac}})(t_n) + \eta[n],\\
+		t_n = n/f_s, \qquad h \;=\; h_{\mathrm{ins}} * h_{\mathrm{del}}.
+	\end{gathered}
 	\label{eq:meter}
 \end{equation}
-where $h$ collects power-delivery dynamics, meter integration, reporting
-filters, and sampling, and $\eta(t)$ is measurement noise the prover cannot
-forge. Co-resident load needs no separate term: it is the background of the
-aggregate, and it passes through the same channel as the dominant workload. The
-linear time-invariant form of $h$ is an explicit first approximation; $h$ may be
-operating-point dependent. Until simultaneous on-device and external-meter
-measurement is performed, claims about what reaches an off-chip sensor are
-predictions (\cref{sec:reality}).
+The meter filters the facility power, samples it at rate $f_s$, and adds
+interference and measurement noise $\eta[n]$ on its own sample grid. Round
+brackets denote continuous time and square brackets index the meter's
+samples.The filter is a linear time-invariant system with impulse response $h$, which has
+two parts. The delivery path $h_{\mathrm{del}}$ is everything between the
+accelerators and the meter: power supplies, distribution, and any conversion
+or storage. The instrument $h_{\mathrm{ins}}$ is the meter's own filtering:
+its integration window and calibration gain.  \Cref{fig:power_chain} traces
+the power from the workloads to the verifier.
+\begin{figure*}[t]
+	\centering
+	\resizebox{\linewidth}{!}{\input{fig_power_chain}}
+	\caption{The measurement chain. The workloads of \cref{sec:scenario} and a
+	static overhead sum to the facility power $P_{\mathrm{fac}}$
+	(\cref{eq:fac}), which passes through the delivery path and the meter
+	before additive terms are added (\cref{eq:meter}). Sketches show one
+	training cadence as it is smoothed, sampled, and made noisy; they are
+	illustrative. Everything left of the dashed line is under the prover's
+	control (\cref{subsec:adversary}). Red labels mark where the adversarial
+	strategies of \cref{tab:attacks} act. $\eta$ lumps instrument noise with
+	interference that physically originates behind the meter, such as the
+	power-controller line. In the nominal channel the delivery path
+	passes the power through unchanged ($h_{\mathrm{del}} = \delta$) and the meter samples at $20$\,Hz with no integration
+	(\cref{tab:meter}).}
+	\label{fig:power_chain}
+\end{figure*}
 
-The implemented axes
-of $h$ are a Butterworth low-pass standing for power-delivery and reporting
-bandwidth; a trailing boxcar integration window; zero-order-hold decimation onto
-a slower sample grid, deliberately without an anti-alias filter so that aliasing
-is representable; an in-band notch of tunable depth and $Q$ for a
-transfer-function anti-resonance near the cadence; and a stable gain. The
-additive terms are white or AR(1) meter noise, Ornstein--Uhlenbeck baseline
-wander, and a square-wave controller limit cycle whose instantaneous frequency
-itself wanders. One honest limitation: the realised quantisation is temporal ---
-the integration window and the sample grid --- as the model has no
-amplitude-quantisation knob.
 
-The default configuration is an exact identity: with every axis off, the map
-returns $P_{\mathrm{fac}}$ unchanged and consumes no randomness. That is what
-makes a one-axis-at-a-time sweep interpretable, since any movement is
-attributable to the axis being swept. \Cref{fig:scenario_meter} runs that sweep
-on a fixed honest training workload, reporting how much of the cadence survives
-as the ratio of spectral power at the known $f_0$ to the in-band power the meter
-itself contributes. All six axes degrade it, and two extinguish it outright
-within the range a real instrument might occupy: a $1$\,s integration window and
-a $1$\,Hz sample rate. This is a statement about the signal in the channel, not
-about any detector; what each detector class does with what survives, and hence
-the minimum meter specification, is \cref{subsec:meter_spec}.
+
+Following \citet{ko2025widearea} we assume the delivery path passes the power
+through unchanged, such that $h_{\mathrm{del}}$ is a delta function and
+$h_{\mathrm{del}} * P_{\mathrm{fac}} = P_{\mathrm{fac}}$. The low-pass and
+notch of \cref{tab:meter} relax this assumption in our sweeps. The notch
+stands for an anti-resonance of the delivery network that happens to sit near
+the cadence; it is the one stage that removes signal in-band while leaving the
+rest of the spectrum intact.
+
+The instrument $h_{\mathrm{ins}}$ is the meter's own response
+(\cref{tab:meter}). We model it as a calibration gain $g$ followed by a
+trailing boxcar, so that each reading is the mean power over the preceding
+window $\tau$: $h_{\mathrm{ins}}(t) = g/\tau$ for $0 \le t < \tau$ and zero
+otherwise. Its frequency response has magnitude
+\begin{equation}
+	\lvert H_{\mathrm{ins}}(f) \rvert \;=\; g\,
+	\left\lvert \frac{\sin(\pi f \tau)}{\pi f \tau} \right\rvert,
+	\label{eq:boxcar}
+\end{equation}
+which passes slow variations and attenuates fast ones, with a zero at every
+multiple of $1/\tau$. A window longer than about $0.6$\,s puts the first zero
+inside the $0.3$--$1.7$\,Hz search band, and a $1$\,s window puts it at the
+band centre. In the nominal channel $g = 1$ and $\tau \to 0$, so
+$h_{\mathrm{ins}}$ is also a delta function, and the meter samples at
+$f_s = 20$\,Hz. Unlike the delivery path, the instrument is the verifier's to
+choose, and \cref{subsec:meter_spec} asks what $\tau$ and $f_s$ must be for
+detection to hold.
+
+The additive term $\eta[n]$ collects everything that reaches the readings
+without passing through $h$ (\cref{tab:meter}). In the nominal channel it is
+white meter noise of $\sigma_\eta = 4$\,W. Two further terms are available: a
+slowly wandering baseline, standing for a drifting operating point such as
+cooling load, and a controller limit cycle, a square wave whose frequency
+itself wanders, modelled on the power-management oscillation measured on an
+A100 (\cref{sec:reality}). The controller is the first appearance of an
+instrument line: a persistent, slowly wandering spectral line that the
+facility's hardware produces with no training present.
+\Cref{subsec:viterbi,subsec:identifiability} return to it.
+
+Three numbers carry units. The peak power $P_{\mathrm{peak}} = 850$\,W and
+overhead $P_0 = 250$\,W (\cref{tab:params}) are those of a single accelerator
+board, and the meter noise $\sigma_\eta = 4$\,W is an illustrative choice,
+about $0.5\%$ of the mean reading, not a measured value. None of the three is
+critical. $P_0$ is constant, so it lies at zero frequency, outside the search
+band. What sets detectability is the training line against everything else in
+the band, and at the nominal setting that is dominated by the workloads
+themselves: in the search band the inference null's power spectral density
+exceeds that of the meter noise by about four orders of magnitude, and the
+training trace's own off-line floor exceeds it by about three. Meter noise
+binds only when it is raised far above $4$\,W, which
+\cref{fig:scenario_meter} does over two decades.
+
+
+Each trace lasts $T = 300$\,s, a frequency resolution of
+$1/T \approx 3$\,mHz. In the nominal channel every stage of
+\cref{tab:meter} is off except the white meter noise. With the noise also
+off, the
+map returns $P_{\mathrm{fac}}$ unchanged and consumes no randomness. Two limits apply. The linear time-invariant form of $h$ is a first
+approximation; a real delivery path may be operating-point dependent. And the
+model quantises only in time, through the integration window and the sample
+grid; it has no amplitude quantisation. Until simultaneous on-device and
+external-meter measurement is performed, claims about what reaches an
+off-chip sensor are predictions (\cref{sec:reality}).
+
+\begin{table*}[t]
+	\centering
+	\footnotesize
+	\begin{tabular}{@{}llccl@{}}
+		\toprule
+		Stage & Parameter & Nominal & Swept & Stands for \\
+		\midrule
+		\multicolumn{5}{@{}l}{\emph{Delivery path ($h_{\mathrm{del}}$; the identity in the workload model)}} \\
+		Butterworth low-pass (order 2) & cutoff [Hz] & off & $8$--$0.5$ & PSU/PDU bandwidth, smoothing \\
+		In-band notch & depth; centre [Hz]; $Q$ & off & $0.5$--$1$; $0.6$--$1.2$; $1.5$ & delivery-path anti-resonance \\
+		\midrule
+		\multicolumn{5}{@{}l}{\emph{Instrument ($h_{\mathrm{ins}}$ and sampling; chosen by the verifier)}} \\
+		Trailing boxcar integration & window [s] & $0$ & $0.1$--$2$ & meter averaging \\
+		Gain & $g$ & $1$ & --- & calibration factor \\
+		Sampling (no anti-alias filter) & $f_s$ [Hz] & $20$ & $10$--$0.5$ & meter reporting rate \\
+		\midrule
+		\multicolumn{5}{@{}l}{\emph{Additive terms ($\eta$)}} \\
+		Meter noise (white or AR(1)) & $\sigma_\eta$ [W]; $\tau_\eta$ [s] & $4$; white & $1$--$120$; $2$ & instrument noise \\
+		Baseline wander (OU) & std [W]; corr.\ time [s] & off & $20$; $60$ & drifting operating point \\
+		Controller limit cycle & amplitude [W pk-pk] & off & $10$--$120$ at $0.38$\,Hz & power-management loop \\
+		\bottomrule
+	\end{tabular}
+	\caption{Stages of the observation map (\cref{eq:meter}). Nominal values
+	define the channel used everywhere unless stated. The swept ranges are those
+	of \cref{fig:scenario_meter} and the minimum-meter sweep of
+	\cref{subsec:meter_spec}; the hostile channels of the meter strategy
+	(\cref{tab:attacks}) are drawn from the same ranges. Every stage off except
+	$\eta$ is the nominal channel; every stage off including $\eta$ is the
+	identity.}
+	\label{tab:meter}
+\end{table*}
+
+\Cref{fig:scenario_meter} shows how the channel attenuates the training
+line. For a fixed training workload we vary one axis of \cref{tab:meter} at a
+time and measure an effective signal-to-noise ratio at the cadence: the
+spectral power at $f_0$ over the in-band power the meter itself adds,
+relative to the nominal channel. Every axis lowers it, and two remove the line
+entirely within the range a real meter might occupy: a $1$\,s integration
+window, whose first zero falls at $1$\,Hz (\cref{eq:boxcar}), and a $1$\,Hz
+sample rate. This concerns the signal reaching the verifier, not any
+detector; what each detector does with what survives, and hence the minimum
+meter specification, is \cref{subsec:meter_spec}.
 
 \begin{figure*}[t]
 	\centering
@@ -457,64 +576,83 @@ the minimum meter specification, is \cref{subsec:meter_spec}.
 	reads the same way: down is worse for the verifier. Crosses mark settings
 	where the cadence is not observable at all. Note $f_0$ is pinned away from
 	$1.0$\,Hz, which would coincide with both the $2$\,Hz Nyquist frequency and
-	the first sinc null of a $1$\,s boxcar. Reproduced by
-	\texttt{scripts/plot\_scenario\_meter.py}.}
+	the first sinc null of a $1$\,s boxcar.}
 	\label{fig:scenario_meter}
 \end{figure*}
 
-\subsection{The adversary: operators and budgets}
+\subsection{The threat model}
 \label{subsec:adversary}
 
-% Plan §4: attack families as operators, each with a reported budget.
-The verifier sees power, but the prover's costs are counted in computation. The
-two are linked by
-\begin{equation}
-	P_{\mathrm{fac}}(t) \;=\; r(t)\,F(t) + P_0(t),
-	\label{eq:device}
-\end{equation}
-where $F(t)$ is the operation rate, $r(t)$ the energy cost per operation, and
-$P_0(t)$ the non-compute overhead. In all our simulations $r$ and $P_0$ are
-constant, so the power waveforms of \cref{sec:scenario} are operation-rate
-waveforms up to an offset and a scale. The distinction still matters, for two
-reasons. First, the cost of hiding is paid in $F$: an attack that reshapes the
-power trace by idling or reorganising work lowers throughput, and
-\cref{sec:frontier} measures that loss. Second, the meter constrains only the
-product $r(t)F(t)$, so a different operation rate with a compensating energy
-cost per operation produces the same trace; \cref{subsec:identifiability}
-returns to this.
+%\paragraph{Parties and trust.} 
+The verifier installs and owns the power meter.
+The meter is tamper-evident, the verifier chooses its specification, and the
+operator cannot forge the meter noise $\eta$. The operator controls everything behind the meter, e.g. which jobs run, how they
+are scheduled, what else shares the facility, and the power-delivery path
+itself. Energy storage or
+power smoothing between the accelerators and the meter can low-pass or notch
+the load, and datacentre and grid operators already treat smoothing training
+load as an engineering problem \citep{ko2025widearea}. We represent partial
+smoothing by the filtering stages of \cref{tab:meter}, and
+\cref{subsec:meter_spec} asks how much of it the verifier can tolerate. A
+store large enough to flatten the load entirely would erase any passive
+signature; we do not model it, and discuss it among the limitations
+(\cref{subsec:scope}). The operator knows the
+detector, its parameters, its threshold, and the meter specification. It does
+not know the realisation of $\eta$. %Kerckhoffs' principle
 
-The adaptive prover's objective is \emph{concealment}: to train
-while the trace reaching the meter stays consistent with the null. To that end it
-may apply, singly or in composition:
-\begin{itemize}
-	\item \textbf{phase attack}: jitter, drift, or randomised work per iteration;
-	\item \textbf{frequency relocation}: move the cadence toward or outside the search family;
-	\item \textbf{additive burial}: independent workload superposition / spectral-floor jamming;
-	\item \textbf{amplitude shaping}: added load flattening the compute/communication swing;
-	\item \textbf{dilution}: reduce the training duty fraction among other work.
-\end{itemize}
-With unlimited superposition, dilution, shaping power, time, or freedom to
-restructure work, the prover can drive the signal-to-noise ratio arbitrarily
-low or synthesise the null; robustness claims are therefore made only over
-specified attack families at specified budgets.
+%\paragraph{Three provers.} 
+We consider three types of facility operator. First a \emph{compliant} operator runs only its declared inference. A \emph{benign} operator trains without regard to being caught by the power meter.  A \emph{concealing} operator trains, knows the detector, and reshapes its workload to try to evade it. The concealing prover's objective is to train
+without the being detected by the verifier. They use different adversarial strategies to try to subvert the verifier's detection. \Cref{tab:attacks} lists the adversarial strategies considered in this work. They
+fall into five classes: disturbing the timing of iterations, relocating the
+cadence, reshaping the power waveform within an iteration, mixing the run with
+other load, and degrading the channel. In principle the strategies may be composed, but we treat them individually. Adversarial strategies have a cost to the operator in terms of training throughput. Each strategy therefore trades concealment against cost. 
 
-We implement these operators inside the generator of \cref{sec:scenario}, so
-that each attack costs what the physics says it costs rather
-than being applied as a post-hoc filter. \emph{Work variation} quantises the
-up-phase into an integer number $G_i \geq 1$ of gradient-accumulation
-micro-steps of duration $t_\mu = \rho\,T_{\mathrm{base}}/G_0$, so that
-$T^{\mathrm{up}}_i = G_i t_\mu$, and varies $G_i$ about its honest value
-$G_0 = 8$; crucially the down-phase keeps its honest draw, because a synchronous
-exchange does not shrink because the preceding compute phase was shorter. This
-moves real work rather than inserting idle time, and it is the reason the
-attack is nearly free. \emph{Phase slip} diffuses iteration boundaries by a
-Brownian increment while holding the target period fixed --- distinct again from
-$\xi_i$, which ties boundary diffusion to the period variance. \emph{Harmonic
-smoothing} convolves the level waveform of \cref{eq:ko} with a raised cosine,
-ramping the transitions so the harmonic comb dies while the fundamental
-survives. \emph{Shape filling} raises the down-phase level toward the up-phase,
-collapsing the swing at matched mean power. \Cref{sec:frontier} prices each of
-these against measured hardware anchors.
+\begin{table*}[t]
+	\centering
+	\footnotesize
+	\begin{tabular}{@{}p{2.3cm}p{7.4cm}p{4.3cm}c@{}}
+		\toprule
+		Strategy & What the prover changes & Budget knob (range) & Cost anchor \\
+		\midrule
+		\multicolumn{4}{@{}l}{\emph{Timing}} \\
+		Period jitter & i.i.d.\ period jitter $\sigma_\xi$ of \cref{eq:period}, by inserting idle time & $\sigma_\xi \in [0.05, 0.7]$ & measured \\
+		Cadence drift & OU excursion $\sigma_f$ of \cref{eq:ou} & $\sigma_f \in [0, 1.5]$\,Hz & measured \\
+		Work variation & micro-steps per iteration, $G_i$ about $G_0 = 8$; down-phase unchanged & fractional spread $\in [0.05, 0.7]$ & measured \\
+		Phase slip & Brownian slip of iteration boundaries at fixed mean period & slip std $\in [0.01, 0.2]$ periods & --- \\
+		\midrule
+		\multicolumn{4}{@{}l}{\emph{Frequency}} \\
+		Relocation & cadence $f_0$ moved toward the search-band edges & $f_0 \in [0.35, 1.65]$\,Hz & --- \\
+		\midrule
+		\multicolumn{4}{@{}l}{\emph{Waveform}} \\
+		Harmonic smoothing & raised-cosine ramp on phase transitions; comb dies, fundamental survives & ramp width $\in [0.1, 1]$\,s & --- \\
+		Shape filling & down-phase level raised toward the up-phase at matched mean power & fill fraction $\in [0, 1]$ & measured \\
+		\midrule
+		\multicolumn{4}{@{}l}{\emph{Mixing}} \\
+		Dilution & training's share of the aggregate (\cref{eq:aggregate}) lowered & share $\in [0.2, 0.9]$ & --- \\
+		\midrule
+		\multicolumn{4}{@{}l}{\emph{Channel}} \\
+		Meter & hostile $h$ and $\eta$: notch at the cadence; $1$\,s/$1$\,Hz integrating sampler; in-band controller; heavy coloured noise & four named channels & --- \\
+		\bottomrule
+	\end{tabular}
+	\caption{Adversarial strategies available to the concealing prover. Each is
+	implemented inside the generator of \cref{sec:scenario} and swept singly over
+	the stated budget range in \cref{sec:frontier}. ``Measured'' marks strategies
+	with a throughput-overhead anchor from the single-A100 campaign
+	(\cref{sec:reality}); the others enter the frontier unpriced. The meter strategy
+	degrades the channel rather than the schedule and is read as a channel
+	requirement (\cref{subsec:meter_spec}), not priced.}
+	\label{tab:attacks}
+\end{table*}
+
+%\paragraph{Out of scope.} 
+Three things lie outside this threat model. First, the
+prover does not tamper with the meter or forge its noise. Second tt does not run a
+semantic decoy, that is a load that reproduces the physical schedule of
+training without training,  since manufacturing evidence of the activity it
+is hiding buys a concealing prover nothing. Finally, it does not
+move the training cadence outside the searched band or abandon synchronous iteration
+altogether; both are scope restrictions on the population we target
+(\cref{subsec:scope}). 
 
 % ============================================================================
 \section{Detection method}
@@ -682,14 +820,14 @@ hold, which we state as a channel requirement, not an attack cost.
 
 \paragraph{The specification.} The Viterbi tracker holds full power (detection
 rate ${\gtrsim}0.9$ at nominal $0.05$) if and only if the meter satisfies three
-conditions together (\cref{fig:meter_boundary_viterbi}). First, a sample rate of at least
-about $2$~Hz: rates of $20$, $10$, $5$, and $2$~Hz all hold the Viterbi tracker
+conditions together (\cref{fig:meter_boundary_viterbi}), one on each part of
+\cref{eq:meter}. First, on the sampling, a rate of at least about $2$~Hz: rates of $20$, $10$, $5$, and $2$~Hz all hold the Viterbi tracker
 near $1.0$, $1$~Hz collapses it to $0.36$ as the Nyquist edge crosses the band,
-and $0.5$~Hz is dead (every detector at chance). Second, an integration window no
-longer than about $0.5$~s: at $20$~Hz sampling a window of $0.5$~s still holds
+and $0.5$~Hz is dead (every detector at chance). Second, on the instrument's
+impulse response, an integration window no longer than about $0.5$~s: at $20$~Hz sampling a window of $0.5$~s still holds
 ($0.99$), but a $1$~s boxcar sinc-nulls the $1$~Hz band centre and collapses the
-tracker to $0.25$ even at full sample rate. Third, no deep transfer-function
-notch at the cadence: an off-band or shallow notch is tolerable (tracker
+tracker to $0.25$ even at full sample rate. Third, on the delivery path, no
+deep transfer-function notch at the cadence: an off-band or shallow notch is tolerable (tracker
 ${\approx}1.0$), but a full-depth notch at $1.0$--$1.2$~Hz roughly halves tracker
 power (to $0.48$--$0.55$) without erasing it (\cref{fig:meter_boundary_notch}).
 
@@ -721,12 +859,9 @@ automatically cheap: some ways of doing it cost throughput without buying any
 concealment, and the interesting question is whether \emph{any} way is both
 cheap and effective.
 
-We sweep six attack families as operators on the training schedule
-(\cref{subsec:adversary}) --- per-iteration duration jitter, slowly drifting
-cadence, variable real work per iteration, cadence relocation toward the
-search-band edge, harmonic suppression, and dilution by co-resident load --- plus
-a meter-degradation family treated separately in \cref{subsec:meter_spec}. For
-each family we step an attack level and, at every level, measure the physical
+We sweep the eight schedule strategies of \cref{tab:attacks}; the ninth,
+meter degradation, is treated separately in \cref{subsec:meter_spec}. For
+each strategy we step an attack level and, at every level, measure the physical
 de-periodicisation it induces (cadence coefficient of variation, phase
 diffusion) against the power of the Viterbi tracker and of the fixed tests (the
 spectral matched filter and the multitaper F-test, taking the better of the two
@@ -760,12 +895,13 @@ single H200 --- chunked optimizer updates, dilution with decoy inference,
 throttling, and diluted LoRA --- cost between $28$ and $69\%$ of throughput
 \citep{gargiulo2026workload}. Each of them inserts or substitutes work, which is
 what makes it expensive, and none varies the real computation per iteration ---
-the family we turn to next.
+the strategy we turn to next.
 
 \paragraph{The cheap attack collapses the fixed tests but not the tracker.} The
-dangerous family is variable real work. Varying the useful computation performed
-per iteration moves the cadence without inserting idle time, so its throughput
-cost is essentially zero: at work-variation level $0.35$ and $0.5$ the measured
+dangerous strategy is variable real work. Varying the useful computation performed
+per iteration moves the cadence without inserting idle time, and leaves the
+synchronous exchange, which does not shrink with the compute phase, untouched,
+so its throughput cost is essentially zero: at work-variation level $0.35$ and $0.5$ the measured
 overhead is $-0.10\%$ and $-0.36\%$ --- zero within noise. At that price the
 fixed tests are gone. The spectral matched filter falls to detection rate $0.26$
 and $0.27$ (its \textsc{auc} collapses to $0.44$ and $0.41$, below chance), and
@@ -809,7 +945,7 @@ unpriced strip rather than being dropped.
 	\centering
 	\includegraphics[width=\columnwidth]{money_pareto}
 	\caption{Cost of hiding. Measured throughput overhead against hiding ($1-$
-	detection rate at false-alarm rate $0.05$) for the four attack families with
+	detection rate at false-alarm rate $0.05$) for the four adversarial strategies with
 	a hardware cost anchor, with the Pareto staircase --- the best hiding
 	available at or below a given cost --- against the fixed tests (orange; the
 	better of the matched filter and multitaper F-test per cell) and the Viterbi
@@ -824,7 +960,7 @@ unpriced strip rather than being dropped.
 \paragraph{A lower bound on the price of hiding.} The frontier bounds hiding
 from above: it says what a prover can hide from our detectors, which a better
 detector would move. The complementary direction --- what hiding must cost ---
-can be argued for one attack family (\cref{subsec:costbound}). For i.i.d.\
+can be argued for one adversarial strategy (\cref{subsec:costbound}). For i.i.d.\
 period jitter of scale $\sigma$, no test's detection advantage exceeds the total
 variation between the training and null laws, so a verifier that demonstrably
 attains advantage $J(\sigma) > \varepsilon$ rules out $\varepsilon$-covertness at
@@ -833,7 +969,7 @@ nominal cadence, $\varepsilon$-covertness requires $\sigma^{*}(0.5) = 0.18$ and
 $\sigma^{*}(0.2) = 0.36$, which the measured anchors price at tens of percent of
 throughput and at order $100\%$ respectively. Three limits apply. The bound is
 read off the weakest verifier, so it is loose against the tracker, which
-\cref{fig:money_pareto} shows to be stronger; it covers one attack family; and
+\cref{fig:money_pareto} shows to be stronger; it covers one adversarial strategy; and
 turning distortion into cost rests on an assumption --- that at fixed useful work,
 jitter costs throughput or learning efficiency --- rather than a result.
 
@@ -883,7 +1019,7 @@ does become a live attack.
 
 The ceiling is a property of the channel, not of our classifiers. Write $w$ for a computational execution, $h$ for the hardware and
 power-delivery path, and $K_h(w)$ for the law of the observed trace that
-\cref{eq:meter,eq:device} induce. Call two executions \emph{observationally
+\cref{eq:meter} induces. Call two executions \emph{observationally
 equivalent} when $K_{h_0}(w_0) = K_{h_1}(w_1)$. A passive verifier sees only the
 trace, so its decision is some measurable function of it, and on an
 observationally equivalent pair every such function fires with the same
@@ -1100,8 +1236,18 @@ analysis over a stated parameter family; the ${\sim}75\times$ modulation gap of
 \cref{sec:reality} is the standing reminder. The observation map is a
 linear time-invariant first approximation. The optimality ceiling of
 \cref{app:bakeoff} is optimal only under the Whittle model, hence a lower bound on
-the true optimum. Every robustness claim is bounded by the attack families and
-budgets we specified; a family we did not model is outside it. The cost bound of
+the true optimum. Every robustness claim is bounded by the adversarial strategies
+and budgets we specified; a strategy we did not model is outside it. The most
+important such strategy is energy storage between the accelerators and the
+meter. A store sized to the cadence swing can discharge during each compute
+phase and recharge during each communication phase, so that the meter sees a
+flat load. This costs the prover no throughput, so our frontier cannot price
+it; its costs are converters rated for the full swing, wear from cycling at
+the cadence, and conversion losses. Power smoothing of this kind is a grid
+mitigation for training load in its own right \citep{ko2025widearea}, so it
+may be installed for reasons unrelated to concealment. The verifier's remedy
+is placement: a meter between any storage and the accelerators sees the
+unsmoothed load. The cost bound of
 \cref{subsec:costbound} shares that limit: it covers i.i.d.\ period jitter,
 and while it holds against any verifier class containing the test it exhibits, it is
 obtained from a fixed-bin test and so reads loose against the Viterbi tracker our own
@@ -1516,7 +1662,7 @@ conservative in the right direction.
 
 The main text reports the frontier as a single cost-of-hiding overlay
 (\cref{fig:money_pareto}). This appendix gives the full sweep: detection against
-physical de-periodicisation for all seven attack families and both detector
+physical de-periodicisation for all seven adversarial strategies and both detector
 classes (\cref{fig:frontier}), the per-detector response to variable real work
 (\cref{fig:st2_work}), and the cost-of-hiding view against each detector class
 (\cref{fig:st2_cost_pareto}). Here the tracking class is the best of the Viterbi
@@ -1529,10 +1675,10 @@ the Viterbi tracker's alone.
 	\includegraphics[width=\linewidth]{st2_frontier}
 	\caption{The de-periodicisation frontier: physical de-periodicisation
 	(cadence coefficient of variation) against best tracking and best fixed
-	detector power at nominal false-alarm rate $0.05$, over all attack families.
-	The near-vertical drop of the fixed class at the variable-real-work family,
+	detector power at nominal false-alarm rate $0.05$, over all adversarial strategies.
+	The near-vertical drop of the fixed class at the variable-real-work strategy,
 	at essentially zero throughput cost, while the tracking class holds, is the
-	scope boundary; costlier families (idle jitter, drift, shaping) sit at high
+	scope boundary; costlier strategies (idle jitter, drift, shaping) sit at high
 	throughput overhead without erasing the tracked line.}
 	\label{fig:frontier}
 \end{figure*}
@@ -1554,10 +1700,10 @@ the Viterbi tracker's alone.
 	\includegraphics[width=\linewidth]{st2_cost_pareto}
 	\caption{Cost of hiding: measured throughput overhead against hiding
 	($1-$ detection rate at false-alarm rate $0.05$) for the four cost-anchored
-	attack families, with the Pareto staircase --- the best hiding available at or
+	adversarial strategies, with the Pareto staircase --- the best hiding available at or
 	below a given cost. Against the tracking class (left) the staircase stays on
 	the floor across the whole measured cost axis; against the fixed class (right)
-	the variable-real-work family reaches hiding ${\sim}0.74$ at zero cost. Cells
+	the variable-real-work strategy reaches hiding ${\sim}0.74$ at zero cost. Cells
 	whose attack level has no hardware cost anchor cannot be placed on the cost
 	axis and are shown in the hatched strip, among them the level at which the
 	tracker itself begins to fail. Attack levels are labelled where they hide
@@ -1839,7 +1985,7 @@ numbers do support is the comparative claim --- at matched total distortion, wor
 variation is the more detectable of the two at every $\sigma \geq 0.05$, the two
 being indistinguishable within sampling error below that
 (\cref{fig:lower_bound}). Second, fixing total useful work is a real restriction:
-substituting useful non-training work, the additive-burial and dilution families
+substituting useful non-training work, the additive-burial and dilution strategies
 above, modulates the period while idling nothing and degrading no optimisation.
 The disjunction is therefore asserted over timing attacks at fixed work. Third,
 $\sigma^{*}$ is read off one exhibited verifier and $J$ is measured between the
@@ -1865,9 +2011,10 @@ expectations coincide for every $\phi$, so no test separates the pair, and no
 post-processing of the trace can (data processing cannot create distinguishability
 that the laws do not contain). The claim about restrictions follows by
 contraposition: a non-vacuous guarantee must exclude the equivalent pairs, and
-each listed lever excludes some of them. The amplitude degeneracy of
-\cref{eq:device} shows the pairs are not exotic. The meter constrains only the
-product $r(t)F(t)$, so a workload with a different operation rate and a
+each listed lever excludes some of them. An amplitude degeneracy shows the pairs are not exotic. Write the power a
+workload draws as $r(t)F(t)$, where $F$ is its operation rate and $r$ the
+energy cost per operation. The meter constrains only the product, so a
+workload with a different operation rate and a
 compensating energy cost per operation is already observationally equivalent, and
 temporal structure --- not amplitude --- is what the trace identifies. The
 near-constructive same-hardware case is the discarded-update decoy: forward,
@@ -1990,7 +2137,7 @@ class, which we do not have.
 
 The second is that fixing total useful work is a real restriction. A prover free
 to substitute useful \emph{non-training} work --- the additive-burial and dilution
-families of \cref{subsec:adversary} --- can modulate the period while idling
+strategies of \cref{subsec:adversary} --- can modulate the period while idling
 neither the device nor the training job, and pays in neither training throughput
 nor learning efficiency. Frequency scaling is a further route the two-realisation
 dichotomy does not cover. So the disjunction holds over timing attacks at fixed
@@ -2116,7 +2263,7 @@ detector bank that includes the tracker, whose $\sigma^*$ we never computed. The
 are read side by side, not on shared axes.
 
 \paragraph{What the bound does not cover.}
-The propositions above concern one attack family. Making the measured frontier a
+The propositions above concern one adversarial strategy. Making the measured frontier a
 statement about hiding in general would need one of two further arguments: that
 the swept families span what a hiding adversary can do, or a bound of the kind
 above for each of them. We have the second for i.i.d.\ period jitter and make no
