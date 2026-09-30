@@ -3,6 +3,71 @@
 Dated narrative of work sessions, newest at top. Append-only historical record
 (forward-looking state lives in `handoff.md`).
 
+## 2026-09-30 — §5 flow pass, bake-off appendix dissolved, meter spec moved to FAR 1e-2
+
+**Goal.** Make §5 (Detection results) make its two points cleanly, and strip its
+supporting appendices down to what the main text actually cites.
+
+**What was tried.** Flow review of §5, then edits: "In this section we …" opener
+plus organisation paragraph (matching §§2–4); §5.1 split into design → ceiling →
+result, overclaim "sits on the ceiling" replaced by "within 0.04"; the moot
+ceiling caveat (true optimum can only exceed a ceiling already at 1.0) and the
+dangling periodic-confound paragraph cut, the latter folded into the section
+intro. The undefined symbol `f_0^{\mathrm{drift}}` turned out to be the code name
+`f0_drift_hz`, which is exactly σ_f of `eq:ou_sigma`; replaced everywhere and on
+the `plot_drift_ceiling.py` axis. The NP-ceiling explanation was reduced to one
+sentence in §5.1 and written out plainly in the appendix, including why it is
+not a usable detector (it is fitted to our own generators, so it knows both
+classes' exact spectra).
+
+The "Detector bake-off" appendix was dissolved. The main text relied on it for
+only three facts: the ceiling, the background ablation (≤0.02), and "Viterbi
+cannot tell a controller limit cycle from training". It became `app:ceiling`
+(ceiling + background paragraph), and the confound result moved into
+`app:attribution` as `subsec:confound` with `tab:confound`. The 7-detector
+framing, `fig:st1_bakeoff`, `fig:np_ceiling`, `tab:bakeoff` and the fast-wander
+paragraph were cut.
+
+§5.2: new opener stating the nominal meter (f_s = 20 Hz, τ → 0, no delivery
+filter, σ_η = 4 W), the exact swept grid, a plain definition of the notch, and τ
+introduced for the integration window. The sweep was switched from FAR 0.05 to
+1e-2 to match §5.1. No rerun was needed, because every ST2 summary already stores
+`tpr_at_far` at both 0.05 and 0.01; only a `--far` flag (default 0.01) on
+`plot_st2_meter_boundary.py` and a replot were required. App. E (`app:meter`) was
+cut to a provenance footnote, a Viterbi-only notch figure and paragraph, and a
+background check (≤0.09 at 1e-2).
+
+**What was learned.**
+- At 1e-2 the meter boundary is unchanged: every live cell ≥ 0.945 and every dead
+  cell < 0.35.
+- The per-cell numbers drop slightly (1 Hz: 0.41 → 0.33; τ = 0.5 s: 0.97 → 0.94).
+- The deep-notch range was misquoted before. The true range is 0.45–0.63 at 1e-2
+  (0.47–0.64 at 0.05), and the 90% notch at 1.2 Hz hurts more than the full-depth
+  one.
+- The training cadence band is 0.5–1.5 Hz, so a 0.6 Hz notch is inside the band,
+  not "below" it.
+- The old App. E "frontier meter-erasure point" paragraph decomposed a point that
+  §6 no longer reports (§6 defers meter degradation to §5.2). It was orphaned.
+
+**Decisions / dead ends.**
+- The semi-coherent DG row was dropped from the confound table. Its numbers have
+  no committed results file: the `--semicoh` run wrote to the same
+  `bakeoff_summary.json` that the default run later overwrote.
+- The per-detector meter grid, the "robustness ordering" claim (false at 1e-2:
+  DG-full is 0.71 at the reference channel vs 1.00 for Viterbi), and the
+  BLAS/AUC note (no AUCs reported) were all cut.
+- The Gargiulo hardware-comparison paragraph was reduced to one sentence in §7.2.
+
+**Open threads.**
+- §5.2's "full power (≳0.9) iff …" is contradicted by the 0.8 Hz full-depth
+  notch (0.80). Either loosen the threshold or define "at the cadence" as
+  0.8–1.2 Hz.
+- §6 is still reported at FAR 0.05. The data at 1e-2 exists in every ST2
+  summary.
+- The next appendix paragraph's "reading summarised in §5.1" pointer was removed
+  along with the bake-off, but the Scratch section still describes the
+  pre-registered bake-off.
+
 ---
 
 ## 2026-08-31 — the tracker is track-before-detect, and Viterbi was the approximation

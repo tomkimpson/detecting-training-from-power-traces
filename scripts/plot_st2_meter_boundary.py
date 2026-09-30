@@ -2,22 +2,26 @@
 
 Reads results/st2/meter_boundary_summary.json and renders:
 
-  figures/st2_meter_boundary.{pdf,png}        one TPR@0.05 heatmap per detector
+  figures/st2_meter_boundary.{pdf,png}        one TPR@FAR heatmap per detector
       over the sample_hz x integ_window_s main grid, with a "death" contour
       (TPR = 0.5) marking where that detector stops separating training from
       inference — the boundary of the region in which the rung is available.
   figures/st2_meter_boundary_viterbi.{pdf,png}  the Viterbi panel alone, sized
       for one ICML column -- the main-text view of the minimum meter spec.
-  figures/st2_meter_boundary_notch.{pdf,png}  TPR@0.05 vs notch centre for each
-      blend depth (the in-band transfer-function sub-sweep at the 20 Hz sampler).
+  figures/st2_meter_boundary_notch.{pdf,png}  Viterbi TPR@FAR vs notch centre for
+      each blend depth (the in-band transfer-function sub-sweep at the 20 Hz
+      sampler), sized for one ICML column.
 
 Compute-free: run scripts/st2_meter_boundary.py first.
 
 With --scenario aggregate it reads meter_boundary_aggregate_summary.json and
 writes the same three figures under the st2_meter_boundary_aggregate* stem.
 
+--far picks the operating false-alarm rate from the summary's target_fars
+(default 0.01, matching the drift-ceiling figure of section 5.1).
+
 Usage:
-    python scripts/plot_st2_meter_boundary.py [--scenario aggregate]
+    python scripts/plot_st2_meter_boundary.py [--scenario aggregate] [--far 0.01]
 """
 
 from __future__ import annotations
@@ -51,9 +55,15 @@ _LABEL = {"spectral": "spectral (matched filter)", "viterbi": "Viterbi (tracker)
 _NOTCH_COL = (C["blue"], C["orange"], C["vermillion"], C["green"], C["purple"])
 
 
-def _far_key(summary: dict) -> str:
-    """The primary operating FAR as its summary key (first of target_fars)."""
-    return f"{summary['target_fars'][0]:g}"
+def _far_key(summary: dict, far: float | None = None) -> str:
+    """The operating FAR as its summary key: ``far`` if given (it must be one of
+    the summary's target_fars), else the first of target_fars."""
+    if far is None:
+        return f"{summary['target_fars'][0]:g}"
+    if far not in summary["target_fars"]:
+        raise SystemExit(f"FAR {far:g} not in summary target_fars "
+                         f"{summary['target_fars']}")
+    return f"{far:g}"
 
 
 def _main_grid(summary: dict, detector: str, far: str):
@@ -74,10 +84,11 @@ def _main_grid(summary: dict, detector: str, far: str):
     return Z, fs_axis, iw_axis
 
 
-def plot_main(summary: dict, fig_dir_stem: str = "st2_meter_boundary") -> None:
+def plot_main(summary: dict, fig_dir_stem: str = "st2_meter_boundary",
+              far: float | None = None) -> None:
     """One TPR heatmap per detector over the sample_hz x integ_window grid."""
     apply_house_style()
-    far = _far_key(summary)
+    far = _far_key(summary, far)
     detectors = summary["detectors"]
     ncol = len(detectors)
     fig, axes = plt.subplots(1, ncol, figsize=(WIDTH_WIDE * 1.9, 2.4),
@@ -95,9 +106,9 @@ def plot_main(summary: dict, fig_dir_stem: str = "st2_meter_boundary") -> None:
         ax.set_xticklabels([f"{v:g}" for v in fs_axis], fontsize=5, rotation=45)
         ax.set_yticks(range(len(iw_axis)))
         ax.set_yticklabels([f"{v:g}" for v in iw_axis], fontsize=5)
-        ax.set_xlabel("sample rate (Hz)", fontsize=6)
+        ax.set_xlabel(r"sample rate $f_s$ (Hz)", fontsize=6)
         ax.set_title(_LABEL.get(det, det), fontsize=6)
-    axes[0][0].set_ylabel("integration window (s)", fontsize=6)
+    axes[0][0].set_ylabel(r"integration window $\tau$ (s)", fontsize=6)
     fig.suptitle(f"Detection rate (TPR @ FAR {far}); white line = death "
                  f"contour (TPR {_DEATH_TPR})", fontsize=7)
     if im is not None:
@@ -107,10 +118,11 @@ def plot_main(summary: dict, fig_dir_stem: str = "st2_meter_boundary") -> None:
 
 
 def plot_single(summary: dict, detector: str = "viterbi",
-                fig_dir_stem: str = "st2_meter_boundary_viterbi") -> None:
+                fig_dir_stem: str = "st2_meter_boundary_viterbi",
+                far: float | None = None) -> None:
     """One detector's TPR heatmap, annotated per cell, for a single column."""
     apply_house_style()
-    far = _far_key(summary)
+    far = _far_key(summary, far)
     Z, fs_axis, iw_axis = _main_grid(summary, detector, far)
     fig, ax = plt.subplots(figsize=(WIDTH_ICML_COL, 2.2))
     im = ax.imshow(Z, origin="lower", aspect="auto", vmin=0.0, vmax=1.0,
@@ -128,8 +140,8 @@ def plot_single(summary: dict, detector: str = "viterbi",
     ax.set_yticks(range(len(iw_axis)))
     ax.set_yticklabels([f"{v:g}" for v in iw_axis], fontsize=6)
     ax.minorticks_off()
-    ax.set_xlabel("sample rate (Hz)")
-    ax.set_ylabel("integration window (s)")
+    ax.set_xlabel(r"sample rate $f_s$ (Hz)")
+    ax.set_ylabel(r"integration window $\tau$ (s)")
     cb = fig.colorbar(im, ax=ax, fraction=0.05, pad=0.02)
     cb.set_label(f"detection rate at FAR {far}", fontsize=6)
     cb.ax.tick_params(labelsize=5)
@@ -139,39 +151,33 @@ def plot_single(summary: dict, detector: str = "viterbi",
 
 
 def plot_notch(summary: dict,
-               fig_dir_stem: str = "st2_meter_boundary_notch") -> None:
-    """TPR vs notch centre for each blend depth, per detector class rep."""
+               fig_dir_stem: str = "st2_meter_boundary_notch",
+               far: float | None = None, detector: str = "viterbi") -> None:
+    """One detector's TPR vs notch centre, one line per blend depth, sized for
+    one ICML column (the in-band transfer-function sub-sweep at 20 Hz)."""
     notch_cells = [c for c in summary["cells"] if c["notch_hz"] is not None]
     if not notch_cells:
         print("  (no notch cells in summary; skipping notch figure)")
         return
     apply_house_style()
-    far = _far_key(summary)
+    far = _far_key(summary, far)
     depths = sorted({c["notch_depth"] for c in notch_cells})
     centres = sorted({c["notch_hz"] for c in notch_cells})
-    # One panel per detector class representative: the strongest tracker and the
-    # strongest fixed test at the reference channel.
-    reps = ("dg_order_full", "viterbi", "mtf")
-    reps = [d for d in reps if d in summary["detectors"]]
-    fig, axes = plt.subplots(1, len(reps), figsize=(WIDTH_WIDE * 1.2, 2.2),
-                             squeeze=False, sharey=True)
-    for ax, det in zip(axes[0], reps):
-        for depth, col in zip(depths, _NOTCH_COL):
-            ys = []
-            for fn in centres:
-                c = next((c for c in notch_cells
-                          if c["notch_hz"] == fn and c["notch_depth"] == depth),
-                         None)
-                ys.append(c["tpr_at_far"][det][far] if c else np.nan)
-            ax.plot(centres, ys, marker="o", ms=3, lw=1.3, color=col,
-                    label=f"depth {depth:g}")
-        ax.set_ylim(0, 1.04)
-        ax.set_xlabel("notch centre (Hz)", fontsize=6)
-        ax.set_title(_LABEL.get(det, det), fontsize=6)
-    axes[0][0].set_ylabel(f"TPR @ FAR {far}", fontsize=6)
-    axes[0][-1].legend(frameon=False, fontsize=5.5, loc="lower left")
-    fig.suptitle("Notch sub-sweep (20 Hz sampler): detection vs in-band "
-                 "anti-resonance", fontsize=7)
+    fig, ax = plt.subplots(figsize=(WIDTH_ICML_COL, 2.0))
+    for depth, col in zip(depths, _NOTCH_COL):
+        ys = []
+        for fn in centres:
+            c = next((c for c in notch_cells
+                      if c["notch_hz"] == fn and c["notch_depth"] == depth),
+                     None)
+            ys.append(c["tpr_at_far"][detector][far] if c else np.nan)
+        ax.plot(centres, ys, marker="o", ms=3, lw=1.3, color=col,
+                label=f"depth {depth * 100:.0f}%")
+    ax.set_ylim(0, 1.04)
+    ax.set_xticks(centres)
+    ax.set_xlabel("notch centre (Hz)")
+    ax.set_ylabel(f"detection rate at FAR {far}")
+    ax.legend(frameon=False, loc="lower left")
     fig.tight_layout()
     save(fig, fig_dir_stem)
     plt.close(fig)
@@ -182,6 +188,8 @@ def main(argv=None) -> None:
     ap.add_argument("--scenario", choices=("single", "aggregate"), default="single",
                     help="which sweep to plot: single workload or section-2 aggregate")
     ap.add_argument("--summary", type=pathlib.Path, default=None)
+    ap.add_argument("--far", type=float, default=0.01,
+                    help="operating false-alarm rate (one of the summary's target_fars)")
     args = ap.parse_args(argv)
     stem = "st2_meter_boundary" + ("" if args.scenario == "single"
                                    else f"_{args.scenario}")
@@ -191,9 +199,9 @@ def main(argv=None) -> None:
         raise SystemExit(f"{args.summary} not found — run "
                          f"scripts/st2_meter_boundary.py first")
     summary = json.loads(args.summary.read_text())
-    plot_main(summary, stem)
-    plot_single(summary, fig_dir_stem=f"{stem}_viterbi")
-    plot_notch(summary, fig_dir_stem=f"{stem}_notch")
+    plot_main(summary, stem, far=args.far)
+    plot_single(summary, fig_dir_stem=f"{stem}_viterbi", far=args.far)
+    plot_notch(summary, fig_dir_stem=f"{stem}_notch", far=args.far)
     print(f"wrote figures/{stem}*.pdf from {args.summary}")
 
 

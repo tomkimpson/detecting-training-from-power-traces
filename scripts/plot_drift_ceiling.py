@@ -64,7 +64,7 @@ def plot(summary: dict, far: str, stem: str = "drift_ceiling") -> pathlib.Path:
         ax.plot(drift, block["detectors"][key]["tpr"][far], color=col, ls=ls,
                 lw=1.3, marker="o", ms=2.8, label=label, zorder=2)
 
-    ax.set_xlabel("cadence drift [Hz]")
+    ax.set_xlabel(r"cadence drift $\sigma_f$ [Hz]")
     ax.set_ylabel(f"detection rate at FAR {float(far):g}")
     ax.set_ylim(-0.03, 1.08)
     ax.legend(frameon=False, fontsize=5.5, loc="center right",

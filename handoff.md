@@ -1,3 +1,66 @@
+# Handoff — 2026-09-30 (later: §5 finished; §6 next)
+
+## Goal
+Get §5 (Detection results) and its supporting appendices into final shape, so
+the next session can start on §6 (the de-periodicisation frontier).
+
+## Status
+§5 is **done and approved by Tom**. The work is on branch `restructure`: flow
+pass, NP-ceiling appendix, bake-off appendix dissolved, and §5.2 moved to FAR
+1e-2. The paper builds clean at 37 pp, with 0 errors and 0 undefined references.
+See `log.md` (2026-09-30 entry) for what changed and why.
+
+## Next steps
+1. **§6 flow pass**, same treatment as §5:
+   - "In this section we …" opener plus an organisation paragraph;
+   - trace every appendix item (App. D "Full attack sweep") to a main-text
+     citation and cut leftovers;
+   - plain-language pass.
+2. **Move §6 to FAR 1e-2.** It is still at 0.05 (`sec:frontier` text,
+   `tab:attacks` notes, frontier figures, App. D). Every
+   `results/st2/*_summary.json` already stores `tpr_at_far` at `"0.01"`, so no
+   rerun is needed. It needs `--far` flags on the ST2 frontier/pareto plot
+   scripts, then renumbering. Attack costs will move: recheck every §6 number
+   against the JSONs.
+3. Resolve the open §5.2 question below.
+
+## Open questions
+- **§5.2 "holds full power (≳0.9) if and only if …"** is contradicted by the
+  full-depth notch at 0.8 Hz (tracker 0.80 at 1e-2; see
+  `fig:meter_boundary_notch`). Options: loosen the threshold to ≳0.8, or define
+  "at the cadence" as 0.8–1.2 Hz. Tom has not chosen yet.
+- The §5 intro still says the tracker "has to find the dominant line among" the
+  background's weak lines. That oversells the background as a hard case, given
+  it sits ~37 dB down. Carried from the earlier handoff.
+
+## Non-obvious context
+- **Frozen ST2 summaries hold both FARs.** Switching operating point is a replot,
+  not a slurm job. `plot_st2_meter_boundary.py` and `plot_drift_ceiling.py` take
+  `--far` (default 0.01). `_far_key` refuses a FAR the summary doesn't store.
+- **Labels renamed:**
+  - `app:bakeoff` → `app:ceiling` ("Optimality ceiling");
+  - the controller-confound result is now `subsec:confound` / `tab:confound`
+    inside `app:attribution`;
+  - `tab:bakeoff`, `fig:st1_bakeoff`, `fig:np_ceiling` and `fig:meter_boundary`
+    no longer exist.
+  - App. E is "Meter specification details" (`app:meter`).
+- **Orphaned figures, left on disk:** `figures/st1_bakeoff*`,
+  `figures/st1_np_ceiling*` and `figures/st2_meter_boundary_aggregate.*`
+  (per-detector grid). Single-workload `figures/st2_meter_boundary*` are still
+  at 0.05 and unused.
+- **Semi-coherent DG numbers have no committed results file.** The `--semicoh`
+  bake-off run shared the output path `results/st1/bakeoff_summary.json` with
+  the default run. Don't cite them without a rerun to a distinct file.
+- **Earlier TODOs 6–7 (below) now refer to `subsec:confound`.** These are the
+  known-line veto and the surrogate-calibrated Viterbi; they previously referred
+  to "the bake-off".
+- **Tom's WIP, still uncommitted:** `scripts/plot_scenario_aggregate.py` and
+  `figures/scenario_aggregate.*`.
+
+(Previous handoff follows.)
+
+---
+
 # Handoff — 2026-09-30 (section 5 moved onto the multi-workload aggregate)
 
 ## What happened this session
