@@ -26,11 +26,17 @@ The full number-freeze is a single Slurm task (~10–15 min; the shared bank dom
 splitting by negative class would rebuild it) — repo policy forbids expensive runs on the
 dev node, so local use is ``--smoke`` only.
 
+``--scenario aggregate`` runs the same pipeline on the section-2 aggregate (see
+``plot_st1_bakeoff.py``): the template bank pins the DOMINANT run's f0 over a random
+background, the inference S_neg is estimated from the aggregate null, and the eval
+populations and parity reference are the aggregate bake-off's.
+
 Usage:
     python scripts/st1_np_ceiling.py                 # full run (Slurm; ~10-15 min)
+    python scripts/st1_np_ceiling.py --scenario aggregate
     python scripts/st1_np_ceiling.py --smoke         # tiny end-to-end (-> *_smoke_*)
     python scripts/st1_np_ceiling.py --no-parity     # skip the bake-off TPR cross-check
-Outputs: results/st1/np_ceiling_summary.json  (or np_ceiling_smoke_summary.json)
+Outputs: results/st1/np_ceiling{,_aggregate}_summary.json  (or *_smoke_summary.json)
 """
 
 from __future__ import annotations
@@ -49,7 +55,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))  # sibling scri
 import plot_st1_bakeoff as bakeoff  # noqa: E402  (reuse the frozen eval builders)
 from powerladder.config import DEFAULT  # noqa: E402
 from powerladder.typeb import np_ceiling as npc  # noqa: E402
-from powerladder.typeb.ko_synth import ko_make_trace  # noqa: E402
+from powerladder.typeb.ko_synth import ko_make_aggregate_trace, ko_make_trace  # noqa: E402
 from powerladder.typeb.roc import auc  # noqa: E402
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -57,14 +63,6 @@ _RESULTS = _ROOT / "results" / "st1"
 
 # The three negative classes: (label, builder(n, rng)). inference/structural are the
 # two bake-off columns; controller_only backs the hard case at HARD_CASE_DRIFT_HZ.
-NEG_BUILDERS = {
-    "inference": lambda n, rng: bakeoff._make_inference_negatives(n, rng),
-    "structural": lambda n, rng: bakeoff._make_structural_negatives(n, rng),
-    "controller_only": lambda n, rng: bakeoff._make_structural_negatives(
-        n, rng, names=("controller",)),
-}
-
-
 def _structural_mix_sampler(r):
     """One structural-null trace, null type drawn UNIFORMLY from the mix.
 
@@ -78,20 +76,25 @@ def _structural_mix_sampler(r):
     return _tp(bakeoff._make_structural_negatives(1, r, names=(name,))[0])
 
 
-# MC samplers for the negative-class PSDs (drawn from the disjoint corpus stream).
-NEG_SAMPLERS = {
-    "inference": lambda r: _tp(ko_make_trace("infer", DEFAULT.ko, DEFAULT.ko_typeb, r)),
-    "structural": _structural_mix_sampler,
-    "controller_only": lambda r: _tp(
-        bakeoff._make_structural_negatives(1, r, names=("controller",))[0]),
-}
+def neg_samplers(scenario):
+    """MC samplers for the negative-class PSDs (drawn from the disjoint corpus stream).
+
+    Only the inference null depends on the scenario (single vs aggregate null).
+    """
+    make = {"single": ko_make_trace, "aggregate": ko_make_aggregate_trace}[scenario]
+    return {
+        "inference": lambda r: _tp(make("infer", DEFAULT.ko, DEFAULT.ko_typeb, r)),
+        "structural": _structural_mix_sampler,
+        "controller_only": lambda r: _tp(
+            bakeoff._make_structural_negatives(1, r, names=("controller",))[0]),
+    }
 
 
 def _tp(tr):
     return tr.t, tr.P_obs
 
 
-def build_eval_populations(n_each, drifts, eval_seed):
+def build_eval_populations(n_each, drifts, eval_seed, scenario="single"):
     """Reproduce the bake-off eval populations by replaying its RNG sequence.
 
     Order matches ``plot_st1_bakeoff.main``: the three negative classes (inference,
@@ -101,7 +104,7 @@ def build_eval_populations(n_each, drifts, eval_seed):
     """
     rng = np.random.default_rng(eval_seed)
     negatives = {
-        "inference": bakeoff._make_inference_negatives(n_each, rng),
+        "inference": bakeoff._make_inference_negatives(n_each, rng, scenario),
         "structural": bakeoff._make_structural_negatives(n_each, rng),
         "controller_only": bakeoff._make_structural_negatives(
             n_each, rng, names=("controller",)),
@@ -111,7 +114,7 @@ def build_eval_populations(n_each, drifts, eval_seed):
         cls: rng.uniform(DEFAULT.ko.f0_lo, DEFAULT.ko.f0_hi, size=len(tr))
         for cls, tr in negatives.items()
     }
-    positives = {d: bakeoff._make_positives(n_each, rng, d) for d in drifts}
+    positives = {d: bakeoff._make_positives(n_each, rng, d, scenario) for d in drifts}
     return negatives, oracle_alphas, positives
 
 
@@ -156,18 +159,21 @@ def main() -> None:
                     help="tiny sizes + disjoint *_smoke_* output (plumbing check)")
     ap.add_argument("--no-parity", action="store_true",
                     help="skip the bake-off TPR cross-check")
+    ap.add_argument("--scenario", choices=list(bakeoff.SCENARIOS), default="single",
+                    help="workload source: single workload or section-2 aggregate")
     args = ap.parse_args()
+    aggregate = args.scenario == "aggregate"
 
     lo, hi = DEFAULT.st1.band_lo, DEFAULT.st1.band_hi
     drifts = list(bakeoff.DRIFTS_HZ)
     fars = list(bakeoff.FARS)
 
     n_mc, f0_n, n_each = args.n_mc, args.f0_n, args.n_each
-    stem = "np_ceiling_summary.json"
+    stem = bakeoff._stem("np_ceiling", args.scenario)
     if args.smoke:
         n_mc, f0_n, n_each = 40, 9, 40
-        stem = "np_ceiling_smoke_summary.json"
-    out_path = _RESULTS / stem
+        stem = f"{stem}_smoke"
+    out_path = _RESULTS / f"{stem}_summary.json"
 
     f0_grid = np.linspace(DEFAULT.ko.f0_lo, DEFAULT.ko.f0_hi, f0_n)
     corpus_rng = np.random.default_rng(p.eval_seed + p.corpus_seed_offset)
@@ -176,11 +182,11 @@ def main() -> None:
     print(f"building training bank: {f0_n} templates x n_mc={n_mc} ...", flush=True)
     S_bank, bank_freqs = npc.build_training_bank(
         DEFAULT.ko, DEFAULT.ko_typeb, f0_grid=f0_grid, drift_grid=p.drift_grid,
-        n_mc=n_mc, rng=corpus_rng, band_lo=lo, band_hi=hi)
+        n_mc=n_mc, rng=corpus_rng, band_lo=lo, band_hi=hi, aggregate=aggregate)
     print(f"  bank done in {time.time()-t0:.0f} s", flush=True)
 
     ceilings = {}
-    for label, sampler in NEG_SAMPLERS.items():
+    for label, sampler in neg_samplers(args.scenario).items():
         t1 = time.time()
         ceilings[label] = npc.fit_ceiling(
             sampler, label, S_bank=S_bank, f0_grid=f0_grid, bank_freqs=bank_freqs,
@@ -189,7 +195,7 @@ def main() -> None:
 
     # ---- eval populations (byte-reproduced from the bake-off) --------------------
     negatives, oracle_alphas, positives = build_eval_populations(
-        n_each, drifts, p.eval_seed)
+        n_each, drifts, p.eval_seed, args.scenario)
     detectors = bakeoff._detectors(include_semicoh=False)
 
     neg_scores = {cls: bakeoff._score(tr, detectors, oracle_alphas[cls])
@@ -235,7 +241,7 @@ def main() -> None:
 
     # ---- parity guard: our reproduced detector TPRs vs the frozen bake-off -------
     parity = {"checked": False}
-    frozen = _RESULTS / "bakeoff_summary.json"
+    frozen = _RESULTS / f"{bakeoff._stem('bakeoff', args.scenario)}_summary.json"
     if not args.no_parity and not args.smoke and frozen.exists():
         ref = json.loads(frozen.read_text())
         deltas = []
@@ -251,7 +257,8 @@ def main() -> None:
               flush=True)
 
     summary = {
-        "n_each": n_each, "eval_seed": p.eval_seed, "drifts_hz": drifts, "fars": fars,
+        "n_each": n_each, "eval_seed": p.eval_seed, "scenario": args.scenario,
+        "drifts_hz": drifts, "fars": fars,
         "n_mc": n_mc, "f0_n": f0_n, "f0_grid_hz": [float(x) for x in f0_grid],
         "drift_grid_hz": list(p.drift_grid), "band": [lo, hi],
         "corpus_seed_offset": p.corpus_seed_offset,

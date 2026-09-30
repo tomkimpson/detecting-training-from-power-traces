@@ -32,9 +32,18 @@ the (1-FAR) quantile of that class's negative scores, method="higher" i.e.
 conservative; with n=200 negatives the 0.01 threshold sits on the 2nd-highest
 score — granularity stated, not hidden).
 
+--scenario aggregate swaps the workload source for the multi-workload aggregate
+of the paper's section 2: training positives are a dominant run over 4 small
+trainings + 4 fine-tunings (ko_make_aggregate_trace "train"), and the inference
+negatives are the inference-dominant aggregate null over the same kind of
+background ("infer"). The structural negatives are unchanged. The RNG sequence
+is otherwise identical, so the default --scenario single reproduces the frozen
+summary numbers exactly.
+
 Reproduce:
-    python scripts/plot_st1_bakeoff.py [--n-each 200] [--semicoh]
-Outputs: figures/st1_bakeoff.png/.pdf ; results/st1/bakeoff_summary.json
+    python scripts/plot_st1_bakeoff.py [--n-each 200] [--semicoh] [--scenario aggregate]
+Outputs: figures/st1_bakeoff{,_aggregate}.png/.pdf ;
+         results/st1/bakeoff{,_aggregate}_summary.json
 """
 
 from __future__ import annotations
@@ -61,7 +70,7 @@ from powerladder.st1.nulls import NULLS  # noqa: E402
 from powerladder.st1.pipeline import (stage1_fixed_alpha, stage3_heldout_phase,  # noqa: E402
                                stage4_full_adaptive, stage4_semicoherent)
 from powerladder.typeb.detectors import spectral_statistic, viterbi_statistic  # noqa: E402
-from powerladder.typeb.ko_synth import ko_make_trace  # noqa: E402
+from powerladder.typeb.ko_synth import ko_make_aggregate_trace, ko_make_trace  # noqa: E402
 
 apply_house_style()
 
@@ -124,13 +133,24 @@ def _tpr_at_far(pos: np.ndarray, neg: np.ndarray, far: float) -> float:
     return float(np.mean(pos > thr))
 
 
-def _make_positives(n_each, rng, drift):
-    return [ko_make_trace("train", DEFAULT.ko, DEFAULT.ko_typeb, rng,
-                          f0_drift_hz=drift) for _ in range(n_each)]
+# Workload source per scenario: the single workload, or the section-2 aggregate.
+SCENARIOS = {"single": ko_make_trace, "aggregate": ko_make_aggregate_trace}
 
 
-def _make_inference_negatives(n_each, rng):
-    return [ko_make_trace("infer", DEFAULT.ko, DEFAULT.ko_typeb, rng)
+def _stem(base, scenario):
+    """Output stem: the single scenario keeps the frozen, unsuffixed names."""
+    return base if scenario == "single" else f"{base}_{scenario}"
+
+
+def _make_positives(n_each, rng, drift, scenario="single"):
+    make = SCENARIOS[scenario]
+    return [make("train", DEFAULT.ko, DEFAULT.ko_typeb, rng,
+                 f0_drift_hz=drift) for _ in range(n_each)]
+
+
+def _make_inference_negatives(n_each, rng, scenario="single"):
+    make = SCENARIOS[scenario]
+    return [make("infer", DEFAULT.ko, DEFAULT.ko_typeb, rng)
             for _ in range(n_each)]
 
 
@@ -155,6 +175,8 @@ def main() -> None:
     ap.add_argument("--semicoh", action="store_true",
                     help="include the semi-coherent DG variant")
     ap.add_argument("--drifts", default=",".join(f"{d:g}" for d in DRIFTS_HZ))
+    ap.add_argument("--scenario", choices=list(SCENARIOS), default="single",
+                    help="workload source: single workload or section-2 aggregate")
     args = ap.parse_args()
     drifts = tuple(float(s) for s in args.drifts.split(","))
 
@@ -168,7 +190,7 @@ def main() -> None:
     t0 = time.time()
     # Negative classes (drift-independent) and their scores.
     negatives = {
-        "inference": _make_inference_negatives(args.n_each, rng),
+        "inference": _make_inference_negatives(args.n_each, rng, args.scenario),
         "structural": _make_structural_negatives(args.n_each, rng),
         "controller_only": _make_structural_negatives(
             args.n_each, rng, names=("controller",)),
@@ -185,7 +207,7 @@ def main() -> None:
     hard = {}
     for drift in drifts:
         t1 = time.time()
-        pos = _make_positives(args.n_each, rng, drift)
+        pos = _make_positives(args.n_each, rng, drift, args.scenario)
         pos_scores = _score(pos, detectors,
                             np.array([tr.f0 for tr in pos]))
         for cls in ("inference", "structural"):
@@ -238,12 +260,13 @@ def main() -> None:
                   "controller-only nulls", fontsize=7)
     axH.legend(frameon=False, fontsize=5.4)
     fig.tight_layout()
-    fig_pdf = save(fig, "st1_bakeoff")
+    fig_pdf = save(fig, _stem("st1_bakeoff", args.scenario))
 
     # ---- summary ------------------------------------------------------------
     summary = {
         "n_each": args.n_each,
         "seed": args.seed,
+        "scenario": args.scenario,
         "drifts_hz": list(drifts),
         "fars": list(FARS),
         "structural_mix": list(STRUCTURAL_MIX),
@@ -260,10 +283,9 @@ def main() -> None:
         ),
     }
     _RESULTS.mkdir(parents=True, exist_ok=True)
-    (_RESULTS / "bakeoff_summary.json").write_text(
-        json.dumps(summary, indent=2) + "\n")
-    print(f"-> {fig_pdf.with_suffix('')}.* ; "
-          f"{_RESULTS / 'bakeoff_summary.json'}")
+    out = _RESULTS / f"{_stem('bakeoff', args.scenario)}_summary.json"
+    out.write_text(json.dumps(summary, indent=2) + "\n")
+    print(f"-> {fig_pdf.with_suffix('')}.* ; {out}")
 
 
 if __name__ == "__main__":

@@ -9,6 +9,8 @@
 #     python scripts/st2_meter_boundary.py --list        # -> "<N> cells"
 # then submit with the range 0..N-1 (override the #SBATCH default if it drifts):
 #     sbatch --array=0-47 scripts/slurm/st2_meter_boundary.sbatch
+# For the section-2 aggregate (-> meter_boundary_aggregate_summary.json):
+#     sbatch --export=ALL,SCENARIO=aggregate scripts/slurm/st2_meter_boundary.sbatch
 #
 #SBATCH --job-name=st2meter
 #SBATCH --partition=compute
@@ -35,4 +37,5 @@ mkdir -p results/st2/slurm
 source .venv/bin/activate
 
 echo "cell ${SLURM_ARRAY_TASK_ID} on $(hostname) at $(date)"
-python scripts/st2_meter_boundary.py --array-id "${SLURM_ARRAY_TASK_ID}"
+python scripts/st2_meter_boundary.py --array-id "${SLURM_ARRAY_TASK_ID}" \
+    --scenario "${SCENARIO:-single}"

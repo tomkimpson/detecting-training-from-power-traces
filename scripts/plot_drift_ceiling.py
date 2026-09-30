@@ -14,10 +14,15 @@ READ-ONLY: a pure reader of the tracked results/st1/np_ceiling_summary.json,
 whose detector rows replay the bake-off evaluation populations exactly
 (parity_check.max_tpr_delta_vs_bakeoff = 0).
 
+--scenario aggregate reads the section-2 aggregate run
+(results/st1/np_ceiling_aggregate_summary.json): dominant training over the
+small-training + fine-tuning background, against the inference-dominant
+aggregate null. That is the main-text view.
+
 Reproduce:
-    python scripts/plot_drift_ceiling.py [--summary PATH] [--far 0.01]
+    python scripts/plot_drift_ceiling.py [--scenario aggregate] [--far 0.01]
 Outputs:
-    figures/drift_ceiling.{pdf,png}
+    figures/drift_ceiling{,_aggregate}.{pdf,png}
 """
 
 from __future__ import annotations
@@ -47,7 +52,7 @@ _SERIES = [  # (summary key, label, colour, linestyle)
 ]
 
 
-def plot(summary: dict, far: str) -> pathlib.Path:
+def plot(summary: dict, far: str, stem: str = "drift_ceiling") -> pathlib.Path:
     apply_house_style()
     drift = summary["drifts_hz"]
     block = summary["by_negative"][_NEGATIVE]
@@ -65,20 +70,23 @@ def plot(summary: dict, far: str) -> pathlib.Path:
     ax.legend(frameon=False, fontsize=5.5, loc="center right",
               bbox_to_anchor=(1.0, 0.62))
     fig.tight_layout()
-    return save(fig, "drift_ceiling")
+    return save(fig, stem)
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--summary", type=pathlib.Path, default=_SUMMARY)
+    ap.add_argument("--scenario", choices=("single", "aggregate"), default="single")
+    ap.add_argument("--summary", type=pathlib.Path, default=None)
     ap.add_argument("--far", default="0.01", choices=["0.05", "0.01"])
     args = ap.parse_args()
-    summary = json.loads(args.summary.read_text())
+    suffix = "" if args.scenario == "single" else f"_{args.scenario}"
+    path = args.summary or _SUMMARY.with_name(f"np_ceiling{suffix}_summary.json")
+    summary = json.loads(path.read_text())
     block = summary["by_negative"][_NEGATIVE]
     print(f"drift {summary['drifts_hz']}")
     for key, *_ in _SERIES:
         print(f"  {key:9s} tpr@{args.far} {block['detectors'][key]['tpr'][args.far]}")
-    out = plot(summary, args.far)
+    out = plot(summary, args.far, stem=f"drift_ceiling{suffix}")
     print(f"-> {out.with_suffix('')}.*")
 
 
