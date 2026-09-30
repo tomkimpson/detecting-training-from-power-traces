@@ -123,7 +123,7 @@ def test_structural_neg_sampler_covers_the_full_mix(monkeypatch):
     monkeypatch.setattr(driver.bakeoff, "_make_structural_negatives", spy)
     rng = np.random.default_rng(0)
     for _ in range(200):
-        driver.NEG_SAMPLERS["structural"](rng)
+        driver.neg_samplers("single")["structural"](rng)
     drawn = {nm for names in seen for nm in names}
     assert drawn == set(driver.bakeoff.STRUCTURAL_MIX)
 

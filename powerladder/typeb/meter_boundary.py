@@ -35,6 +35,7 @@ import numpy as np
 
 from ..config import DEFAULT, KoTypeBParams, KoWorkloadParams, MeterParams, St2MeterBoundaryParams
 from .gate import score_population
+from .ko_synth import ko_make_aggregate_trace
 from .roc import auc, tpr_at_far
 from .st2_attacks import make_negative_population, make_positive_population
 
@@ -105,6 +106,7 @@ def run_meter_cell(
     *,
     detectors: dict | None = None,
     base_seed: int | None = None,
+    aggregate: bool = False,
 ) -> dict:
     """Score honest-training-vs-inference through one channel ``mp``.
 
@@ -114,6 +116,10 @@ def run_meter_cell(
     — distinct streams, both nominal HONEST training / inference (the attack is
     entirely in the channel).
 
+    ``aggregate=True`` swaps both classes for the section-2 aggregate: a dominant
+    training run vs the inference-dominant aggregate null, each over a background
+    of small trainings and fine-tunings, at ``ko_params.aggregate_ratio``.
+
     Returns the cell record: the channel parameters plus, per detector, AUC and
     TPR at each ``p.target_fars``.
     """
@@ -122,11 +128,17 @@ def run_meter_cell(
     crc = zlib.crc32(cell_name.encode())
 
     rng_neg = np.random.default_rng([base, crc])
-    negs = make_negative_population("meter", p.n_each, ko_params, glue,
-                                    rng_neg, meter=mp)
     rng_pos = np.random.default_rng([base, crc, 1])
-    pos = make_positive_population("meter", None, p.n_each, ko_params, glue,
-                                   rng_pos, meter=mp)
+    if aggregate:
+        negs = [ko_make_aggregate_trace("infer", ko_params, glue, rng_neg, meter=mp)
+                for _ in range(p.n_each)]
+        pos = [ko_make_aggregate_trace("train", ko_params, glue, rng_pos, meter=mp)
+               for _ in range(p.n_each)]
+    else:
+        negs = make_negative_population("meter", p.n_each, ko_params, glue,
+                                        rng_neg, meter=mp)
+        pos = make_positive_population("meter", None, p.n_each, ko_params, glue,
+                                       rng_pos, meter=mp)
 
     auc_d: dict[str, float] = {}
     tpr_d: dict[str, dict[str, float]] = {}

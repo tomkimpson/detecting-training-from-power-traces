@@ -52,7 +52,7 @@ from scipy.special import logsumexp
 
 from ..config import DEFAULT, KoTypeBParams, KoWorkloadParams
 from ..forward import TraceSpec, make_time_grid, simulate
-from ..ko_workload import training_F
+from ..ko_workload import aggregate_F, training_F
 from ..noise import WhiteNoise
 
 # A sampler yields one observed trace as (t, P_obs); the corpus streams through these
@@ -124,6 +124,7 @@ def train_obs_at_f0(
     ko_p: KoWorkloadParams,
     glue: KoTypeBParams,
     rng: np.random.Generator,
+    aggregate: bool = False,
 ) -> tuple[np.ndarray, np.ndarray]:
     """One observed TRAINING power trace with the line frequency pinned to ``f0``.
 
@@ -131,11 +132,15 @@ def train_obs_at_f0(
     :func:`powerladder.typeb.ko_synth.ko_make_trace` (``P = r·F + P0 + white η``,
     ``η`` owned by the glue) EXACTLY, except it fixes ``f0`` instead of drawing it —
     the template bank needs the class-conditional periodogram at a known ``f0``.
+    ``aggregate=True`` does the same for
+    :func:`powerladder.typeb.ko_synth.ko_make_aggregate_trace`: ``f0`` pins the
+    dominant run, and the background draws its own cadences.
     """
     f_max = DEFAULT.floor.F_max
     f_peak = glue.f_peak_frac * f_max
     t = make_time_grid(glue.duration_s, 1.0 / glue.fs)
-    F = training_F(
+    make_F = aggregate_F if aggregate else training_F
+    F = make_F(
         t, ko_p, rng, f_peak=f_peak, f0=f0,
         eta_scale=glue.eta_scale, f0_drift_hz=f0_drift_hz,
     )
@@ -220,12 +225,14 @@ def build_training_bank(
     rng: np.random.Generator,
     band_lo: float,
     band_hi: float,
+    aggregate: bool = False,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Per-f₀ training template bank, pooled over ``drift_grid``.
 
     For each ``f0_k`` the template is the MC mean periodogram of ``n_mc`` training
     traces at that fixed ``f0_k``, each drawing its drift level uniformly from
-    ``drift_grid`` (so the bank is drift-agnostic). Returns ``(S_bank[K,F], freqs)``.
+    ``drift_grid`` (so the bank is drift-agnostic). ``aggregate`` selects the aggregate
+    generator (see :func:`train_obs_at_f0`). Returns ``(S_bank[K,F], freqs)``.
     """
     drift_grid = np.asarray(drift_grid, dtype=float)
     bank = []
@@ -233,7 +240,7 @@ def build_training_bank(
     for f0 in f0_grid:
         def sampler(r: np.random.Generator, _f0=float(f0)) -> tuple[np.ndarray, np.ndarray]:
             drift = float(drift_grid[r.integers(drift_grid.size)])
-            return train_obs_at_f0(_f0, drift, ko_p, glue, r)
+            return train_obs_at_f0(_f0, drift, ko_p, glue, r, aggregate=aggregate)
         S, f = mean_periodogram(sampler, n_mc, rng, band_lo=band_lo, band_hi=band_hi)
         bank.append(S)
         freqs = f
