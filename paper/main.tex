@@ -74,12 +74,12 @@
 \begin{abstract}
 Compute-governance regimes that restrict large training runs presuppose that a
 regulator can tell when training happens on monitored hardware, and a power
-meter outside the prover's control is the one passive channel available
-against a prover who does not cooperate. We ask what such a meter can certify,
+meter outside the operator's control is the one passive channel available
+against an operator who does not cooperate. We ask what such a meter can certify,
 and answer with a ladder of four claims, each with a stated information cost
 and a hard ceiling. Evidence comes from a literature-parameterized scenario
 model of datacentre AI workloads and an explicit off-chip observation model,
-against both a benign prover and an adaptive one who knows the detector. The
+against both a benign operator and a concealing one who knows the detector. The
 iteration cadence of synchronous training is recoverable by a tracked
 cyclostationary detector, but the complete pipeline admits no analytic
 calibration, so we report it as an effective score with per-trace surrogate
@@ -123,7 +123,7 @@ datacentre training and inference power,
 
 * construct a detector  a detector for the cadence that tracks the wandering line, borrowing thehcniqus ffrom signal analysis and GW astrophysics
 
-* We construct the Pareto frontier and show the trade-off between how much of the cadence an adaptive prover removes and
+* We construct the Pareto frontier and show the trade-off between how much of the cadence an concealing operator removes and
 what that removal costs in measured throughput, and derive an identifiability
 lower bound on the cost of hiding to a stated detectability
 (\cref{sec:frontier,subsec:costbound}). 
@@ -149,10 +149,10 @@ costs.
 This paper is organised as follows. \Cref{sec:scenario} gives the model of
 datacentre training and inference power that generates every trace below, and
 \cref{sec:threat} fixes what the verifier sees through an off-chip meter and
-what an adaptive prover may do to hide from it. \Cref{sec:methods} develops the
+what an concealing operator may do to hide from it. \Cref{sec:methods} develops the
 detector, a Viterbi line tracker; \cref{sec:results} reports its power against
 the inference null and the minimum meter it needs; and \cref{sec:frontier}
-prices what it costs an adaptive prover to defeat it. \Cref{sec:discussion}
+prices what it costs an concealing operator to defeat it. \Cref{sec:discussion}
 states what a detection does and does not certify, holds the model against
 measured single-GPU hardware, and reads the results back as a ladder of claims
 a regulator can buy.
@@ -446,7 +446,7 @@ the power from the workloads to the verifier.
 	(\cref{eq:fac}), which passes through the delivery path and the meter
 	before additive terms are added (\cref{eq:meter}). Sketches show one
 	training cadence as it is smoothed, sampled, and made noisy; they are
-	illustrative. Everything left of the dashed line is under the prover's
+	illustrative. Everything left of the dashed line is under the operator's
 	control (\cref{subsec:adversary}). Red labels mark where the adversarial
 	strategies of \cref{tab:attacks} act. $\eta$ lumps instrument noise with
 	interference that physically originates behind the meter, such as the
@@ -494,7 +494,7 @@ itself wanders, modelled on the power-management oscillation measured on an
 A100 (\cref{sec:reality}). The controller is the first appearance of an
 instrument line: a persistent, slowly wandering spectral line that the
 facility's hardware produces with no training present.
-\Cref{subsec:viterbi,subsec:identifiability} return to it.
+\Cref{subsec:identifiability} returns to it.
 
 Three numbers carry units. The peak power $P_{\mathrm{peak}} = 850$\,W and
 overhead $P_0 = 250$\,W (\cref{tab:params}) are those of a single accelerator
@@ -600,8 +600,8 @@ signature; we do not model it, and discuss it among the limitations
 detector, its parameters, its threshold, and the meter specification. It does
 not know the realisation of $\eta$. %Kerckhoffs' principle
 
-%\paragraph{Three provers.} 
-We consider three types of facility operator. First a \emph{compliant} operator runs only its declared inference. A \emph{benign} operator trains without regard to being caught by the power meter.  A \emph{concealing} operator trains, knows the detector, and reshapes its workload to try to evade it. The concealing prover's objective is to train
+%\paragraph{Three operators.} 
+We consider three types of facility operator. First a \emph{compliant} operator runs only its declared inference. A \emph{benign} operator trains without regard to being caught by the power meter.  A \emph{concealing} operator trains, knows the detector, and reshapes its workload to try to evade it. The concealing operator's objective is to train
 without the being detected by the verifier. They use different adversarial strategies to try to subvert the verifier's detection. \Cref{tab:attacks} lists the adversarial strategies considered in this work. They
 fall into five classes: disturbing the timing of iterations, relocating the
 cadence, reshaping the power waveform within an iteration, mixing the run with
@@ -612,7 +612,7 @@ other load, and degrading the channel. In principle the strategies may be compos
 	\footnotesize
 	\begin{tabular}{@{}p{2.3cm}p{7.4cm}p{4.3cm}c@{}}
 		\toprule
-		Strategy & What the prover changes & Budget knob (range) & Cost anchor \\
+		Strategy & What the operator changes & Budget knob (range) & Cost anchor \\
 		\midrule
 		\multicolumn{4}{@{}l}{\emph{Timing}} \\
 		Period jitter & i.i.d.\ period jitter $\sigma_\xi$ of \cref{eq:period}, by inserting idle time & $\sigma_\xi \in [0.05, 0.7]$ & measured \\
@@ -634,7 +634,7 @@ other load, and degrading the channel. In principle the strategies may be compos
 		Meter & hostile $h$ and $\eta$: notch at the cadence; $1$\,s/$1$\,Hz integrating sampler; in-band controller; heavy coloured noise & four named channels & --- \\
 		\bottomrule
 	\end{tabular}
-	\caption{Adversarial strategies available to the concealing prover. Each is
+	\caption{Adversarial strategies available to the concealing operator. Each is
 	implemented inside the generator of \cref{sec:scenario} and swept singly over
 	the stated budget range in \cref{sec:frontier}. ``Measured'' marks strategies
 	with a throughput-overhead anchor from the single-A100 campaign
@@ -646,10 +646,10 @@ other load, and degrading the channel. In principle the strategies may be compos
 
 %\paragraph{Out of scope.} 
 Three things lie outside this threat model. First, the
-prover does not tamper with the meter or forge its noise. Second tt does not run a
+operator does not tamper with the meter or forge its noise. Second tt does not run a
 semantic decoy, that is a load that reproduces the physical schedule of
 training without training,  since manufacturing evidence of the activity it
-is hiding buys a concealing prover nothing. Finally, it does not
+is hiding buys a concealing operator nothing. Finally, it does not
 move the training cadence outside the searched band or abandon synchronous iteration
 altogether; both are scope restrictions on the population we target
 (\cref{subsec:scope}). 
@@ -659,16 +659,29 @@ altogether; both are scope restrictions on the population we target
 \label{sec:methods}
 % ============================================================================
 
-The question is whether the trace carries the iteration cadence of synchronous
-training --- a narrow spectral line at $f_0$, with its harmonics --- that the
-inference null does not. A benign prover's cadence is stationary, and a
-stationary line has classical tests. But a real run's cadence drifts even
-without an adversary (\cref{subsec:ko}), and an adaptive prover can make it
-wander further or vary the work per iteration, which breaks a fixed-frequency
-test cheaply (\cref{sec:frontier}). The detector therefore has to follow the
-line. A detection establishes coherent repeated power structure, not training
-semantics; what it does and does not certify is taken up in
-\cref{subsec:identifiability}.
+In this section we present a detection method that ingests  $P_{\mathrm{meter}}[n]$, \cref{eq:meter}, and decides between $\mathcal{H}_0$ and $\mathcal{H}_1$ (\cref{sec:threat}).
+
+The two hypotheses are separated by the iteration cadence of synchronous training.
+
+Under $\mathcal{H}_1$ the two-phase cycle of the dominant run (\cref{eq:ko})
+puts a strong, narrow spectral line at its cadence $f_0$. 
+
+Under $\mathcal{H}_0$ the inference that replaces it spreads its power across the band with no line
+(\cref{subsec:null}), and the only lines left are the background's weak ones
+(\cref{subsec:aggregate}). 
+
+A line at a fixed frequency has classical tests. But
+the cadence of a real run wanders by $\sigma_f$ even without an adversary
+(\cref{eq:ou}), and a concealing operator can make it wander further or vary
+the work per iteration, which defeats a fixed-frequency test cheaply
+(see \cref{sec:frontier}). The detector therefore has to follow the line as it
+moves.
+
+This section is organised as follows. \Cref{subsec:viterbi} defines the
+detector, a Viterbi line tracker borrowed from passive sonar and
+continuous-gravitational-wave searches. \Cref{subsec:threshold} sets the threshold at which the detector declares training.
+\Cref{subsec:comparators} defines the two fixed-frequency tests we compare it
+against.
 
 \subsection{Viterbi line tracking}
 \label{subsec:viterbi}
@@ -676,64 +689,116 @@ semantics; what it does and does not certify is taken up in
 We follow the line with the hidden-Markov frequency tracking developed for
 passive sonar \citep{streit1990frequency} and carried into
 continuous-gravitational-wave searches
-\citep{suvorova2016hmm,bayley2019soap,djurovic2011viterbi}. The trace is cut
-into a spectrogram over the search band $0.3$--$1.7$\,Hz, with $16$\,s windows
-overlapping by half, and each time frame $j$ is normalised by its median over
-the band, giving a log-contrast $L_{kj}$ in frequency bin $k$. The hidden state
-is the frequency bin; the prior that a real cadence wanders slowly enters as a
-penalty $\lambda$ per bin of frequency change between frames. The detection
-statistic is the best path score, averaged over the $N_t$ frames,
+\citep{suvorova2016hmm,bayley2019soap,djurovic2011viterbi}. The tracker has
+three parts: a spectrogram of the trace, a contrast map built from it, and a
+search for the best slowly varying path through that map.
+
+Let $x[n] = P_{\mathrm{meter}}[n] - \bar
+P_{\mathrm{meter}}$ be the mean-removed meter trace, $N = f_s T$ samples long.
+We cut it into frames of $M$ samples that overlap by half, a hop of $H = M/2$,
+and take the power spectrum of each:
 \begin{equation}
-	V \;=\; \frac{1}{N_t}\,\max_{k_1,\dots,k_{N_t}}
-	\sum_{j=1}^{N_t}\Bigl[L_{k_j j} - \lambda\,\lvert k_j - k_{j-1}\rvert\Bigr],
+	S_{kj} \;=\; \Bigl\lvert \sum_{m=0}^{M-1} w[m]\,x[jH + m]\,
+	e^{-2\pi i k m / M} \Bigr\rvert^2,
+	\label{eq:spectrogram}
+\end{equation}
+for frames $j = 0, \dots, N_t - 1$, where $w$ is a tapered (Tukey) window and $N_t = \lfloor (N - M)/H \rfloor + 1$
+is the number of frames. Bin $k$ sits at frequency $f_k = k f_s / M$. We
+choose $M$ so that each frame lasts $M/f_s = 16$\,s, which gives bins
+$\Delta f = 1/16 = 62.5$\,mHz wide, fine enough to resolve a line near $1$\,Hz,
+while leaving many frames to track over: a $300$\,s trace gives $N_t = 36$
+frames, $8$\,s apart. Only the bins with $f_k \in \mathcal{B}$ enter the
+tracker, $23$ of them in the nominal channel. Every detector in this paper searches the band
+$\mathcal{B} = [0.3, 1.7]$\,Hz. This is the training cadence band
+$[f^{\mathrm{lo}}, f^{\mathrm{hi}}] = [0.5, 1.5]$\,Hz of \cref{tab:params},
+widened by $0.2$\,Hz on each side so that a cadence drawn near either edge
+stays in the band as it wanders.
+
+We normalise each frame by its median over the band,
+\begin{equation}
+	L_{kj} \;=\; \ln S_{kj} \;-\; \ln \tilde S_j,
+	\label{eq:contrast}
+\end{equation}
+where $\tilde S_j$ is the median of $S_{kj}$ over the in-band bins of frame
+$j$. $L_{kj}$ measures how far bin $k$ stands above the typical in-band level of
+its own frame. The normalisation keeps a slow change in overall power from masquerading as a line.
+
+The hidden state is the frequency bin occupied by the
+cadence in each frame. The prior that a real cadence wanders slowly enters as
+a penalty $\lambda$ per bin of frequency change between consecutive frames. The
+detection statistic is the score of the best path, averaged over frames,
+\begin{equation}
+	V \;=\; \frac{1}{N_t}\,\max_{k_0,\dots,k_{N_t-1}}
+	\Biggl[\,\sum_{j=0}^{N_t-1} L_{k_j j}
+	\;-\; \lambda \sum_{j=1}^{N_t-1} \lvert k_j - k_{j-1}\rvert\Biggr],
 	\label{eq:viterbi}
 \end{equation}
-with no penalty on the first frame and $\lambda = 1$ throughout. Dynamic
-programming evaluates the maximum over all paths in time linear in $N_t$. A
-drifting line keeps a high score because the path bends to follow it.
-Broadband power --- the continuous-batching floor of the inference null --- does
-not, because no single slowly varying path stays on top of it, and the
-per-frame median normalisation keeps the null's raised broadband level from
-masquerading as a line. The recovered path is also an estimate $\hat f_0(t)$ of
-the instantaneous cadence, which \cref{app:attribution} uses to de-warp the
-trace.
+with $\lambda = 1$ throughout. A path pays one unit of log-contrast for each
+$62.5$\,mHz step it takes between frames, so it can follow a drift of about
+one bin per frame (about $8$\,mHz\,s$^{-1}$) if the line it follows is bright
+enough to pay for it. Dynamic programming evaluates the maximum over all
+$23^{N_t}$ paths exactly, in time linear in $N_t$. A drifting line keeps a high
+score because the path bends to follow it. Broadband power, such as the
+continuous-batching floor of the inference null, does not, because no single
+slowly varying path stays on top of it. Averaging over frames makes $V$
+comparable across traces of different length. Note that $V$ tests whether a
+persistent, slowly wandering line is present, not what produced it. Accordingly, strong lines that do not have a training provenance may also trigger the detector; this is addressed in
+\cref{subsec:identifiability} 
 
-\paragraph{Setting the threshold.} $V$ has no analytic null distribution: the
-maximisation over paths is a search, with the look-elsewhere effect that
-implies. We set thresholds empirically, at the quantile of $V$ over the null
-population that gives the target false-alarm rate. This calibrates $V$ against
-the modelled inference null. A deployed verifier has to obtain the same
-threshold from data it holds: from background traces known to be free of
-training, as continuous-wave searches set their tracking thresholds from
-noise-only realisations \citep{suvorova2016hmm}, or from a per-trace surrogate
-null of the kind we construct for the order-tracked statistic in
-\cref{app:attribution}. We have not yet run $V$ through that surrogate
-calibration.
+\subsection{Setting the threshold}
+\label{subsec:threshold}
 
-\paragraph{Instrument lines.} $V$ answers whether a persistent, slowly wandering
-line is present, not what produced it. A periodic physical confound --- the
-power-controller oscillation measured on an A100 (\cref{sec:reality}) --- is
-such a line, and against a population containing it the tracker has no power
-(\cref{app:bakeoff}). Continuous-wave searches meet the same problem in
-instrumental lines, and handle it with a veto: lines catalogued from detector
-characterisation data are excluded, and candidates coincident with them
-discarded.
-% TODO(cite): a LIGO known-lines / line-veto reference, e.g. Covas et al. 2018,
-% PRD 97, 082002 -- verify with /check-refs before adding to references.bib.
-The analogue here is to extract several candidate paths from the spectrogram
-and discard those consistent with the facility's catalogued lines. We state it
-as the deployment procedure but have not evaluated it; its limits are discussed
-in \cref{subsec:identifiability}. \Cref{app:attribution} reports a
-waveform-level alternative, an order-tracked cyclostationary test, that partly
-separates a modelled controller from training.
+The tracker declares training when $V$ exceeds a threshold $v_\alpha$, chosen
+so that the false-alarm rate is $\alpha$:
+\begin{equation}
+	\Pr\bigl(V > v_\alpha \mid \mathcal{H}_0\bigr) \;=\; \alpha.
+	\label{eq:far}
+\end{equation}
+We use $\alpha = 10^{-2}$ unless stated. $V$ has no analytic null
+distribution. We therefore set $v_\alpha$ empirically, as the
+$(1-\alpha)$ quantile of $V$ over simulated traces drawn under
+$\mathcal{H}_0$, and measure detection rate as the fraction of $\mathcal{H}_1$
+traces above it. The baseline methods of \cref{subsec:comparators} are thresholded
+the same way.
 
-\paragraph{Comparators.} Two fixed-frequency tests serve as baselines: a
-spectral matched filter (peak power spectral density at the searched cadence)
-and the Thomson multitaper harmonic F-test
-\citep{thomson1982multitaper,percival1993spectral}. Both are honest tests for a
-stationary line. The multitaper test's analytic search correction proves
-anti-conservative by a factor of $3.6$--$6$, so it too is thresholded
-empirically; \cref{app:baselines} gives the details.
+{\color{red} TODO: say which $\mathcal{H}_0$ population sets $v_\alpha$.
+\Cref{sec:threat} defines $\mathcal{H}_0$ as inference alone \emph{or} over the
+background of \cref{eq:aggregate_null}, but every threshold and detection rate
+in \cref{sec:results} uses the single inference null with no background, so
+the tracker is never asked to find the dominant line among the background's
+weak ones. Resolve together with the TODO at the head of \cref{sec:results}.}
+
+This calibrates $V$ against the modelled inference null. A deployed verifier
+has to obtain the same threshold from data it holds: from background traces
+known to be free of training, as continuous-wave searches set their tracking
+thresholds from noise-only realisations \citep{suvorova2016hmm}, or from a
+per-trace surrogate, e.g. \cref{app:attribution}. 
+
+\subsection{Baseline method}
+\label{subsec:comparators}
+
+Two simple fixed-frequency tests serve as baselines to compare our Viterbi method against. The first is a
+spectral matched filter, which uses the peak of the power spectral density in the band,
+relative to its median over all frequencies,
+\begin{equation}
+	D_{\mathrm{MF}} \;=\;
+	\frac{\max_{f \in \mathcal{B}} \hat S(f)}{\operatorname{median}_f \hat S(f)},
+	\label{eq:matched}
+\end{equation}
+where $\hat S$ is a Welch estimate of the spectrum of $x[n]$ from half-overlapping
+Hann-windowed segments of $1024$ samples ($51.2$\,s at $f_s = 20$\,Hz). The
+long segments concentrate a stationary line into one bin, which is the
+test's strength; a wandering line smears across many bins and the peak
+collapses. The second is the Thomson multitaper harmonic F-test
+\citep{thomson1982multitaper,percival1993spectral}, maximised over the band,
+\begin{equation}
+	D_{\mathrm{F}} \;=\; \max_{f \in \mathcal{B}} F(f),
+	\label{eq:ftest}
+\end{equation}
+where, at any fixed $f$ under a stationary, locally smooth null, $F(f) \sim
+F(2, 2K-2)$, with $K = 7$ tapers of time--bandwidth product $NW = 4$. $F(f)$ is the ratio of
+the power in a line at $f$ to the power left around it
+(\cref{eq:thomson_f}, \cref{app:baselines}). 
 
 % ============================================================================
 \section{Detection results}
@@ -805,7 +870,7 @@ training and has no power against a population containing one
 \label{subsec:meter_spec}
 
 The detection result assumes a meter that resolves the cadence band. The
-verifier's instrument is itself an attack surface: a prover who cannot
+verifier's instrument is itself an attack surface: an operator who cannot
 de-periodicise cheaply may instead argue for, or be handed, a meter too coarse
 to see the line. We therefore sweep the meter rather than the schedule --- sample
 rate and integration window between the nominal $20$~Hz channel and a $1$~Hz
@@ -849,10 +914,10 @@ power (to $0.48$--$0.55$) without erasing it (\cref{fig:meter_boundary_notch}).
 \label{sec:frontier}
 % ============================================================================
 
-The detection results assume the prover leaves a recoverable cadence. An adaptive
-prover need not: it can de-periodicise its schedule to smear that cadence away.
+The detection results assume the operator leaves a recoverable cadence. A concealing
+operator need not: it can de-periodicise its schedule to smear that cadence away.
 The question this section answers is not whether de-periodicisation is possible
---- it always is --- but how far a prover must go before the meter loses the
+--- it always is --- but how far an operator must go before the meter loses the
 signal, and what that costs. This is a central result of the paper, not a
 caveat, and its shape is not the naive one. De-periodicising is not
 automatically cheap: some ways of doing it cost throughput without buying any
@@ -883,12 +948,12 @@ arrays, so the frontier is unaffected by the transport caveat of
 \cref{sec:reality}.}
 
 \paragraph{The costly attacks are the wrong ones.} The de-periodicisations that
-degrade the line most are exactly the ones a rational prover would not pay for.
+degrade the line most are exactly the ones a rational operator would not pay for.
 Idle-insertion jitter buys no concealment: it costs $15$--$375\%$ throughput and
 leaves the tracked line detectable. Slowly drifting the cadence costs up to
 ${\sim}140\%$ and is precisely the regime the tracker was built to survive
 (\cref{subsec:power}). Power shaping costs $170$--$230\%$. Against every one of
-these the tracker holds while the prover pays a throughput tax that a
+these the tracker holds while the operator pays a throughput tax that a
 compute-governance regime would itself flag. Measured work on real hardware
 points the same way from a different channel: four evasion strategies run on a
 single H200 --- chunked optimizer updates, dilution with decoy inference,
@@ -908,7 +973,7 @@ and $0.27$ (its \textsc{auc} collapses to $0.44$ and $0.41$, below chance), and
 the multitaper F-test sits at its floor. Yet the Viterbi tracker holds detection
 rate $1.0$ at both levels (\cref{fig:money_pareto}; per-detector curves in
 \cref{app:sweep}). This is the genuine scope boundary of the passive channel: a
-prover willing to vary real work evades every cheap, fixed detector at no
+operator willing to vary real work evades every cheap, fixed detector at no
 measurable systems cost, and only a tracking detector still sees the schedule.
 
 
@@ -930,7 +995,7 @@ the schedule, not a deficiency of a particular detector.
 (\cref{fig:money_pareto}) separates the two detectors sharply. Against the
 fixed tests the Pareto staircase reaches hiding $0.74$ at essentially zero
 overhead and climbs only to $0.79$ at $159\%$ and $0.82$ at $375\%$ however much
-the prover spends: the cheapest attack is within $0.08$ of the best one. Against
+the operator spends: the cheapest attack is within $0.08$ of the best one. Against
 the Viterbi tracker the staircase never leaves the floor, rising only to $0.16$ and doing so at $159\%$
 overhead, so no attack in the anchored set buys meaningful concealment from the
 tracker at any price we can measure. The two staircases together are the
@@ -958,7 +1023,7 @@ unpriced strip rather than being dropped.
 \end{figure}
 
 \paragraph{A lower bound on the price of hiding.} The frontier bounds hiding
-from above: it says what a prover can hide from our detectors, which a better
+from above: it says what an operator can hide from our detectors, which a better
 detector would move. The complementary direction --- what hiding must cost ---
 can be argued for one adversarial strategy (\cref{subsec:costbound}). For i.i.d.\
 period jitter of scale $\sigma$, no test's detection advantage exceeds the total
@@ -979,14 +1044,14 @@ jitter costs throughput or learning efficiency --- rather than a result.
 % ============================================================================
 
 We set out to build a method that turns a low-rate external power trace into a
-test for iteration-structured training, to price its evasion against a prover
+test for iteration-structured training, to price its evasion against an operator
 who knows the test, and to state what the channel cannot certify at any price.
 The method is a Viterbi line tracker. Against the inference null that stands for
 a facility's declared workload it is essentially Neyman--Pearson optimal across
 cadence wander (\cref{subsec:power}), provided the meter samples at ${\geq}2$~Hz
 with ${\leq}0.5$~s integration (\cref{subsec:meter_spec}). Varying real work per
 iteration evades every fixed-frequency test at no measurable throughput cost,
-but no cost-anchored attack buys the prover more than $0.16$ hiding from the
+but no cost-anchored attack buys the operator more than $0.16$ hiding from the
 tracker (\cref{sec:frontier}). This section says what such a detection
 certifies, where the synthetic evidence stops, and how the result reads for a
 regulator.
@@ -1006,14 +1071,14 @@ training under every rule (\cref{tab:rung2_controls}).
 
 The adversary operators of \cref{subsec:adversary} deliberately omit the
 extremal member of this class. A \emph{semantic decoy} --- a load reproducing the physical schedule of training
-without retaining a trained model --- is not an attack a concealing prover would
+without retaining a trained model --- is not an attack a concealing operator would
 mount, since manufacturing evidence of the activity it is hiding buys it nothing.
 It enters this paper instead as a non-training control
 (\cref{tab:rung2_controls}) and as the construction behind the
 non-identifiability argument below, and it carries weight for two
 reasons that need no motivated decoy-runner: its benign counterparts occur in
 ordinary datacentre operation, and the active protocol of \cref{app:active}
-inverts the prover's objective, at which point a \emph{challenge-aware decoy} ---
+inverts the operator's objective, at which point a \emph{challenge-aware decoy} ---
 a correlated dummy response mimicking the prescribed reaction without training ---
 does become a live attack.
 
@@ -1032,7 +1097,7 @@ computation, the hardware and power-transfer family, or the physical property
 claimed --- alongside a fifth route that leaves the passive channel altogether by
 changing the protocol (\cref{app:active}). We do not claim the list is exhaustive.
 
-The construction behind this is nearly available on the prover's own hardware. A
+The construction behind this is nearly available on the operator's own hardware. A
 program can execute the same forward, backward, and optimiser kernels as training
 and discard each updated state, making its trace arbitrarily close to genuine
 training while its semantic classification differs. This is not a hypothetical
@@ -1041,7 +1106,7 @@ property of the channel rather than of our classifiers, which is why this ceilin
 cannot be removed by a better detector and why escaping it requires an active
 challenge (\cref{app:active}).
 
-The argument binds even where no adversary is present. A concealing prover has no
+The argument binds even where no adversary is present. A concealing operator has no
 reason to run a decoy (\cref{subsec:adversary}), but most of the equivalence class
 is not adversarial at all: a training-shaped non-ML kernel loop, a controller
 limit cycle, and a periodic inference request generator all sit inside it, and all
@@ -1056,11 +1121,16 @@ tracker's one systematic failure. A periodic physical confound, such as the
 power-controller oscillation measured on an A100 (\cref{sec:reality}), is a
 persistent wandering line, and the Viterbi score cannot tell it from training
 (\cref{app:bakeoff}). The failure matters for honest operators rather than
-concealing ones: a controller line does not help a prover hide training, but it
+concealing ones: a controller line does not help an operator hide training, but it
 can flag a compliant inference facility. Three things bound it. First, a
-known-line veto (\cref{subsec:viterbi}) discards candidate paths that coincide
-with lines catalogued from the facility's own characterisation data. We have not
-evaluated it, and it carries a cost a gravitational-wave veto does not: the
+known-line veto. Continuous-wave searches meet the same problem in instrumental
+lines, and handle it by cataloguing lines from detector characterisation data
+and discarding candidates coincident with them.
+% TODO(cite): a LIGO known-lines / line-veto reference, e.g. Covas et al. 2018,
+% PRD 97, 082002 -- verify with /check-refs before adding to references.bib.
+The analogue here is to extract several candidate paths from the contrast map
+(\cref{eq:contrast}) and discard those that coincide with lines catalogued from
+the facility's own characterisation data. We have not evaluated it, and it carries a cost a gravitational-wave veto does not: the
 adversary knows the veto list, and can relocate its cadence into a vetoed band.
 Second, per-card controllers need not add coherently at a facility meter
 (\cref{sec:reality}). Third, a positive detection is a trigger for escalation
@@ -1191,7 +1261,7 @@ assumptions, not a quantitative bound on unidentified compute.
 		shaping; cadence moved outside the searched family; semantic
 		non-identifiability (\cref{tab:rung2_controls}) \\
 		3. Active physical authentication & A load behind the meter responded to
-		an unpredictable verifier challenge & Prover participation; a
+		an unpredictable verifier challenge & Operator participation; a
 		challenge-bound schedule & Specified, not run (\cref{app:active}) & A
 		challenge-aware dummy load; no semantic binding by power alone \\
 		4. Work verification & The physical response is tied to declared training
@@ -1241,7 +1311,7 @@ and budgets we specified; a strategy we did not model is outside it. The most
 important such strategy is energy storage between the accelerators and the
 meter. A store sized to the cadence swing can discharge during each compute
 phase and recharge during each communication phase, so that the meter sees a
-flat load. This costs the prover no throughput, so our frontier cannot price
+flat load. This costs the operator no throughput, so our frontier cannot price
 it; its costs are converters rated for the full swing, wear from cycling at
 the cadence, and conversion losses. Power smoothing of this kind is a grid
 mitigation for training load in its own right \citep{ko2025widearea}, so it
@@ -1301,13 +1371,27 @@ in full.
 When the cadence is stationary, a repeated iteration structure appears as a
 line, or a harmonic comb, in the power spectrum, and the natural test is the
 Thomson multitaper harmonic F-test \citep{thomson1982multitaper,
-percival1993spectral}. At a fixed frequency $f$ the statistic $F(f)$ is
-distributed as $F(2, 2K-2)$ under a locally smooth Gaussian spectral null with
+percival1993spectral}. Taper the mean-removed trace with $K$ discrete prolate
+spheroidal sequences $v_k[n]$ of time--bandwidth product $NW$, and let $y_k(f)$
+be the Fourier transform of $v_k[n]\,x[n]$ and $U_k = \sum_n v_k[n]$ the $k$-th
+taper's gain at zero frequency. The least-squares amplitude of a line at $f$
+and the harmonic F statistic are
+\begin{equation}
+	\hat\mu(f) \;=\; \frac{\sum_k U_k\, y_k(f)}{\sum_k U_k^2},
+	\qquad
+	F(f) \;=\; (K-1)\,
+	\frac{\lvert\hat\mu(f)\rvert^2 \sum_k U_k^2}
+	{\sum_k \bigl\lvert y_k(f) - \hat\mu(f)\,U_k \bigr\rvert^2},
+	\label{eq:thomson_f}
+\end{equation}
+the power in the fitted line over the power the tapers see around it. We use
+$K = 7$ and $NW = 4$, on a zero-padded frequency grid. At a fixed frequency
+$f$ the statistic $F(f)$ is distributed as $F(2, 2K-2)$ under a locally smooth Gaussian spectral null with
 $K$ tapers, so the test is \emph{approximately pivotal under a stationary,
 locally smooth spectral null}. It is not an exact false-alarm guarantee across
 arbitrary external power traces: coloured baselines, controller interference,
 and co-resident load all violate the local-smoothness premise. Because the
-prover's cadence is not known a priori, the test must search a band of
+operator's cadence is not known a priori, the test must search a band of
 candidate frequencies and harmonics, which requires a search correction.
 
 The analytic correction is itself unreliable. Sweeping the padded frequency
@@ -1342,16 +1426,13 @@ false-alarm rate (\cref{subsec:st1}).
 \subsection{Tracked cyclostationary detection}
 \label{subsec:tracked}
 
-An adaptive prover breaks the benign baselines cheaply by letting the cycle
+A concealing operator breaks the benign baselines cheaply by letting the cycle
 frequency wander, smearing the line across the searched band. We restore
 coherence by estimating the wander and undoing it before testing. The detector
-has three components, each with one job. First, a tracker estimates the
-instantaneous cycle frequency $\hat f_0(t)$ from the time--frequency plane by
-Viterbi dynamic programming under a slow-wander transition penalty --- the
-hidden-Markov frequency-line tracking developed for passive sonar
-\citep{streit1990frequency} and carried into continuous-gravitational-wave
-searches \citep{suvorova2016hmm,bayley2019soap,djurovic2011viterbi}; the
-tracker is a nuisance-parameter estimator, \emph{not} the detector. Second, the
+has three components, each with one job. First, the best
+path of the Viterbi tracker (\cref{eq:viterbi}), read as a function of time,
+estimates the instantaneous cycle frequency $\hat f_0(t)$; here the tracker is
+a nuisance-parameter estimator, \emph{not} the detector. Second, the
 phase estimate
 \begin{equation}
 	\hat\theta(t) \;=\; 2\pi \int_0^t \hat f_0(s)\,\mathrm{d}s
@@ -1752,7 +1833,7 @@ map shows either one suffices: at the reference channel the tracker is at $1.0$;
 adding the $1$~s integration alone drops it to $0.25$; the $1$~Hz sampling alone
 drops it to $0.36$; the two together give $0.30$. The meter-erasure regime is
 over-determined --- it is a statement about the instrument, and a demand on it,
-rather than a de-periodicisation attack the prover can mount for free.
+rather than a de-periodicisation attack the operator can mount for free.
 
 \paragraph{The specification against measured hardware.} Work at the other end
 of the bandwidth range puts this requirement in perspective. A verifier-owned
@@ -1906,7 +1987,7 @@ constants.
 
 Two questions have to be kept apart. \emph{Detection} asks whether this trace is
 training rather than the null, and its tools are likelihood-ratio and
-cyclostationary tests. \emph{Cost of hiding} asks how far the prover must distort
+cyclostationary tests. \emph{Cost of hiding} asks how far the operator must distort
 its schedule before the training-trace \emph{distribution} becomes
 indistinguishable from the null \emph{distribution}, and its tools are
 distributional distances. The distinction matters because our empirical results
@@ -1978,7 +2059,7 @@ Three limits fix how far all of this travels, and they are the reason the
 assumption is labelled as one. First, the surviving exchange-cadence component is
 recovered by the order-tracking class, not by the fixed-bin verifier that supplies
 $\sigma^{*}$: under variable real work \cref{sec:frontier} measures the fixed
-tests below chance. Read strictly, the argument shows that a work-varying prover
+tests below chance. Read strictly, the argument shows that a work-varying operator
 stays visible to a \emph{tracker}, not that it must pay to become
 $\varepsilon$-covert against the verifier whose $\sigma^{*}$ we computed. What the
 numbers do support is the comparative claim --- at matched total distortion, work
@@ -2021,7 +2102,7 @@ near-constructive same-hardware case is the discarded-update decoy: forward,
 backward, and optimiser kernels executed on the declared schedule with each
 updated state discarded reproduces the compute/communication alternation, hence
 the trace, without retaining a model. The converse direction is equally open to
-the prover: genuine training can be run asynchronously, diluted among other
+the operator: genuine training can be run asynchronously, diluted among other
 loads, or actively power-shaped, so the equivalence classes are populated from
 both sides.
 
@@ -2107,7 +2188,7 @@ of any single-trace test and cannot appear in \cref{eq:sigmastar}. Both are
 reported in the summary artefact; only $J$ carries the bound.
 
 \paragraph{The cost-of-hiding assumption, and why it is an assumption.}
-Hold the prover's total useful work fixed. Then a period is occupied either by
+Hold the operator's total useful work fixed. Then a period is occupied either by
 training work or by idling, and period jitter has two realisations. Padding with
 idle time holds the real work per iteration fixed, so every period must be at
 least as long as the compute it contains and the mean period inflates with
@@ -2130,12 +2211,12 @@ to detection rate $0.26$ with area under the curve $0.44$ --- below chance --- a
 the multitaper F-test at its floor. So the residual at the exchange cadence is
 recovered only by the order-tracking class, which is precisely the class
 the fixed-bin argument does \emph{not} instantiate. Read strictly, then, the
-argument shows that a work-varying prover remains detectable \emph{by a tracker},
+argument shows that a work-varying operator remains detectable \emph{by a tracker},
 not that it must pay to become $\varepsilon$-covert against the fixed-bin verifier
 whose $\sigma^*$ we computed. Closing that gap needs $\sigma^*$ for the tracking
 class, which we do not have.
 
-The second is that fixing total useful work is a real restriction. A prover free
+The second is that fixing total useful work is a real restriction. An operator free
 to substitute useful \emph{non-training} work --- the additive-burial and dilution
 strategies of \cref{subsec:adversary} --- can modulate the period while idling
 neither the device nor the training job, and pays in neither training throughput
@@ -2287,7 +2368,7 @@ cadence of training without training score as training under every passive rule
 (\cref{subsec:rung2}), and no passive test separates them, because the meter
 sees only the schedule and the mimic copies the schedule. The discarded-update
 decoy is the sharpest instance --- \cref{subsec:identifiability} rules out any passive
-detector that separates it --- even though a concealing prover would never mount
+detector that separates it --- even though a concealing operator would never mount
 one (\cref{subsec:adversary}). The way past a passive ceiling is to stop watching
 and start asking: authenticate a physical device by its response to an
 unpredictable query, the premise of distance-bounding protocols
@@ -2298,7 +2379,7 @@ a mimic that merely replays a recording cannot follow: it does not know what it
 was asked.
 
 Rung 3 makes this concrete with a challenge-synchronous protocol. The verifier
-emits an unpredictable balanced challenge sequence $c_k \in \{-1,+1\}$; the prover
+emits an unpredictable balanced challenge sequence $c_k \in \{-1,+1\}$; the operator
 runs a committed, semantically-equivalent variation of its training schedule keyed
 to $c_k$ --- for instance a small pre-agreed shift in the boundary between two
 iterations that leaves the computation performed unchanged. The verifier
@@ -2311,7 +2392,7 @@ could not have predicted. This escapes the semantic decoy, whose passive schedul
 is by construction uncorrelated with the fresh challenge (\cref{subsec:adversary}).
 Its own ceiling is the challenge-aware dummy load: a device that receives the
 challenge and mimics the prescribed response without training. Unlike the passive
-decoy, this one is an attack a prover has reason to mount, because Rung~3 asks it
+decoy, this one is an attack an operator has reason to mount, because Rung~3 asks it
 to demonstrate training rather than to hide it.
 
 The correlation test is exact under the sharp null that the challenge has no
@@ -2320,7 +2401,7 @@ design, and the guarantee is fragile to the usual abuses
 \citep{fisher1935design}. Any maximisation the verifier performs, over causal
 lags, candidate impulse responses, or preprocessing choices, must be repeated
 inside every re-randomised replicate, or the reported level is optimistic.
-Carryover between challenge periods, any adaptivity in the prover's schedule
+Carryover between challenge periods, any adaptivity in the operator's schedule
 choices, and balance constraints on the challenge sequence all belong in the
 design that the re-randomisation samples from. We also flag the weaker reading a
 careless protocol invites: over a long enough record a correlation detector
