@@ -781,12 +781,12 @@ $\mathcal{H}_0$, and measure detection rate as the fraction of $\mathcal{H}_1$
 traces above it. The baseline methods of \cref{subsec:comparators} are thresholded
 the same way.
 
-{\color{red} TODO: say which $\mathcal{H}_0$ population sets $v_\alpha$.
-\Cref{sec:threat} defines $\mathcal{H}_0$ as inference alone \emph{or} over the
-background of \cref{eq:aggregate_null}, but every threshold and detection rate
-in \cref{sec:results} uses the single inference null with no background, so
-the tracker is never asked to find the dominant line among the background's
-weak ones. Resolve together with the TODO at the head of \cref{sec:results}.}
+In \cref{sec:results} the $\mathcal{H}_0$ population is the null aggregate of
+\cref{eq:aggregate_null}. Its background carries the weak lines of the small
+trainings and fine-tunings, so the threshold already accounts for any line
+that is not the dominant run's. Calibrating on inference alone, with no
+background, changes the tracker's detection rates by at most $0.02$
+(\cref{app:bakeoff}).
 
 This calibrates $V$ against the modelled inference null. A deployed verifier
 has to obtain the same threshold from data it holds: from background traces
@@ -829,44 +829,56 @@ We report two things: the tracker's power against the inference null as the
 cadence wanders, measured against an optimality ceiling, and the minimum meter
 that result requires.
 
-{\color{red} TODO: every result in this section compares a \emph{single}
-training run against the \emph{single} inference null, with no background load
-(the NP ceiling and drift figure call \texttt{training\_F} directly; the meter
-boundary uses the single-workload generator). The multi-workload aggregate of
-\cref{eq:aggregate} appears only in the dilution attack and the co-resident
-control. We may want to make the hard case the headline: a dominant training run
-over small trainings and fine-tunings, against the inference-dominant aggregate
-null, so the tracker must find the \emph{dominant} line among weak background
-lines.}
+Every result in this section uses the aggregate of \cref{subsec:aggregate}.
+Under $\mathcal{H}_1$ the meter sees a dominant training run over
+$N_{\mathrm{tr}} = 4$ small trainings and $N_{\mathrm{ft}} = 4$ fine-tunings
+(\cref{eq:aggregate}). Under $\mathcal{H}_0$ it sees the null aggregate, with
+inference in the dominant slot over the same kind of background
+(\cref{eq:aggregate_null}). The shares are the defaults of \cref{tab:params},
+$9 : 0.5 : 0.5$. Both classes therefore carry the background's weak lines, and
+the tracker has to find the dominant one among them.
 
 \subsection{Power under cadence wander}
 \label{subsec:power}
 
 We fixed the detector set, the conditions, and the metric before scoring any
 signal, and compared the tracker with the two fixed-frequency comparators on a
-cadence-drift axis $f_0^{\mathrm{drift}} \in \{0, 0.1, 0.2, 0.4, 0.8, 1.5\}$~Hz,
-against the modelled inference null, with $n=200$ traces of $300$~s per class and
+cadence-drift axis $f_0^{\mathrm{drift}} \in \{0, 0.1, 0.2, 0.4, 0.8, 1.5\}$~Hz
+of the dominant run,
+against the null aggregate, with $n=200$ traces of $300$~s per class and
 thresholds set at an empirical false-alarm rate of $10^{-2}$. Because we own the
 generators we can also benchmark against an optimality ceiling. No closed-form
 likelihood exists --- both classes are black-box samplers --- so we use a Whittle
 spectral likelihood ratio on the in-band periodogram, with a Monte-Carlo training
 template bank marginalised over cadence and fitted on a disjoint stream
-(\cref{app:bakeoff}). The ceiling is perfect: detection rate $1.0$ at every drift.
+(\cref{app:bakeoff}).\footnote{Frozen on the MATS compute cluster (slurm job
+14048); \texttt{results/st1/bakeoff\_aggregate\_summary.json} and
+\texttt{np\_ceiling\_aggregate\_summary.json}.} The ceiling is perfect:
+detection rate $1.0$ at every drift.
 The training line and the line-free null are separable in principle from a
 $300$~s trace, so any shortfall is the detector's.
 
 \Cref{fig:drift_ceiling} shows the result. The Viterbi tracker sits on the
-ceiling across the whole wander axis, with detection rate $1.00$ up to $0.8$~Hz
-of drift and $0.98$ at $1.5$~Hz: against the inference null it is essentially
-Neyman--Pearson optimal. The fixed tests are not. The spectral matched filter
-detects a stationary line ($0.94$ at zero drift) but falls to $0.53$ at
-$0.1$~Hz and $0.21$ at $0.4$~Hz, and the multitaper F-test has essentially no
-power at empirical thresholds at any drift (${\leq}\,0.02$). Since a real run's
+ceiling across the whole wander axis, with detection rate $1.00$ up to $0.4$~Hz
+of drift, $0.99$ at $0.8$~Hz and $0.96$ at $1.5$~Hz: against the null aggregate
+it is essentially Neyman--Pearson optimal. The fixed tests are not. The spectral
+matched filter detects a stationary line ($0.98$ at zero drift) but falls to
+$0.59$ at $0.1$~Hz and $0.23$ at $0.4$~Hz, and the multitaper F-test has
+essentially no power at empirical thresholds at any drift (${\leq}\,0.03$). Since a real run's
 cadence drifts without any adversary, tracking is needed before an attack is
 even mounted. The one caveat on the ceiling runs in our favour: it discards
 harmonic-phase coherence and non-Gaussian structure, so the true optimum can
 only exceed it --- which leaves the tracker's position unchanged and the
 comparators further below.
+
+The background barely matters at these shares. Each of its eight members draws
+$1.25\%$ of peak power against the dominant slot's $90\%$, so its line sits about
+$37$\,dB below the dominant line in power and under the dominant slot's
+broadband floor. Removing the background entirely, and testing a single
+training run against inference alone, changes the tracker's detection rate by
+at most $0.02$ at any drift (\cref{tab:bakeoff}). The background starts to matter only
+when the dominant share falls. That is the dilution strategy of
+\cref{tab:attacks}, which we take up in \cref{sec:frontier}.
 
 Against periodic physical confounds rather than the inference null the picture
 is different. The tracker scores a power-controller limit cycle as highly as
@@ -875,14 +887,16 @@ training and has no power against a population containing one
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=\columnwidth]{drift_ceiling}
+	\includegraphics[width=\columnwidth]{drift_ceiling_aggregate}
 	\caption{Detection rate at empirical false-alarm rate $10^{-2}$ against the
-	inference null, versus cadence drift ($n=200$ per class, $300$~s traces).
+	null aggregate, versus cadence drift of the dominant training run ($n=200$
+	per class, $300$~s traces, shares $9 : 0.5 : 0.5$).
 	The Viterbi tracker holds the Whittle Neyman--Pearson ceiling across the
 	wander axis; the spectral matched filter collapses once the line moves and
 	the multitaper F-test has no usable power. The full bake-off, including the
 	order-tracked statistics and structural-confuser negatives, is in
-	\cref{app:bakeoff}. Reproduced by \texttt{scripts/plot\_drift\_ceiling.py}.}
+	\cref{app:bakeoff}. Reproduced by
+	\texttt{scripts/plot\_drift\_ceiling.py -{}-scenario aggregate}.}
 	\label{fig:drift_ceiling}
 \end{figure}
 
@@ -895,10 +909,12 @@ de-periodicise cheaply may instead argue for, or be handed, a meter too coarse
 to see the line. We therefore sweep the meter rather than the schedule --- sample
 rate and integration window between the nominal $20$~Hz channel and a $1$~Hz
 integrating sampler, plus transfer-function notch depth and position near the
-cadence --- with honest training against the hard inference null, and locate where
+cadence --- with the honest aggregate against the null aggregate, and locate where
 each detector class dies.\footnote{Frozen on the MATS compute cluster (slurm
-array 5498), $48$ cells, $n=200$, $300$~s traces;
-\texttt{results/st2/meter\_boundary\_summary.json}. Marginal and dead-cell
+array 14049), $48$ cells, $n=200$, $300$~s traces;
+\texttt{results/st2/meter\_\allowbreak boundary\_\allowbreak aggregate\_\allowbreak summary.json}. The same sweep
+on a single workload (array 5498) gives the same live region
+(\cref{app:meter}). Marginal and dead-cell
 \textsc{auc}s are sensitive to the BLAS build, but the live-region boundary is
 not.} The result is a minimum specification the channel must meet for detection to
 hold, which we state as a channel requirement, not an attack cost.
@@ -907,24 +923,24 @@ hold, which we state as a channel requirement, not an attack cost.
 rate ${\gtrsim}0.9$ at nominal $0.05$) if and only if the meter satisfies three
 conditions together (\cref{fig:meter_boundary_viterbi}), one on each part of
 \cref{eq:meter}. First, on the sampling, a rate of at least about $2$~Hz: rates of $20$, $10$, $5$, and $2$~Hz all hold the Viterbi tracker
-near $1.0$, $1$~Hz collapses it to $0.36$ as the Nyquist edge crosses the band,
+near $1.0$, $1$~Hz collapses it to $0.41$ as the Nyquist edge crosses the band,
 and $0.5$~Hz is dead (every detector at chance). Second, on the instrument's
 impulse response, an integration window no longer than about $0.5$~s: at $20$~Hz sampling a window of $0.5$~s still holds
-($0.99$), but a $1$~s boxcar sinc-nulls the $1$~Hz band centre and collapses the
-tracker to $0.25$ even at full sample rate. Third, on the delivery path, no
+($0.97$), but a $1$~s boxcar sinc-nulls the $1$~Hz band centre and collapses the
+tracker to $0.33$ even at full sample rate. Third, on the delivery path, no
 deep transfer-function notch at the cadence: an off-band or shallow notch is tolerable (tracker
 ${\approx}1.0$), but a full-depth notch at $1.0$--$1.2$~Hz roughly halves tracker
-power (to $0.48$--$0.55$) without erasing it (\cref{fig:meter_boundary_notch}).
+power (to $0.55$--$0.58$) without erasing it (\cref{fig:meter_boundary_notch}).
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=\columnwidth]{st2_meter_boundary_viterbi}
+	\includegraphics[width=\columnwidth]{st2_meter_boundary_aggregate_viterbi}
 	\caption{Minimum meter specification: Viterbi detection rate at nominal
-	false-alarm rate $0.05$ over sample rate $\times$ integration window, honest
-	training against the inference null ($n=200$ per class). The live region is
+	false-alarm rate $0.05$ over sample rate $\times$ integration window, the
+	honest aggregate against the null aggregate ($n=200$ per class). The live region is
 	sample rate ${\ge}2$~Hz \emph{and} integration window ${\le}0.5$~s. The
 	per-detector grid is in \cref{app:meter}. Reproduced by
-	\texttt{scripts/plot\_st2\_meter\_boundary.py}.}
+	\texttt{scripts/plot\_st2\_meter\_boundary.py -{}-scenario aggregate}.}
 	\label{fig:meter_boundary_viterbi}
 \end{figure}
 
@@ -1652,6 +1668,14 @@ second-highest negative score --- a granularity we state rather than hide.
 \Cref{fig:st1_bakeoff} plots the power curves; \cref{tab:bakeoff} gives the
 detection rates at nominal false-alarm rate $10^{-2}$.
 
+The grid here is for a single training run against inference alone, with no
+background load. The main text uses the aggregate of \cref{subsec:aggregate}
+instead. We reran the bake-off on the aggregate with the same seed and
+detectors, and the last block of \cref{tab:bakeoff} gives the result. The
+Viterbi tracker moves by at most $0.02$. The largest change for any detector is
+$0.12$, for the pooled DG order statistic at $0.1$~Hz of drift. The comparisons
+below therefore carry over to the aggregate.
+
 \begin{figure*}[t]
 	\centering
 	\includegraphics[width=\linewidth]{st1_bakeoff}
@@ -1668,7 +1692,10 @@ detection rates at nominal false-alarm rate $10^{-2}$.
 	\small
 	\caption{Bake-off detection rate at nominal false-alarm rate $10^{-2}$,
 	by detector and cadence drift (Hz), against the inference null and the
-	mixed structural population ($n=200$ per class).}
+	mixed structural population, for a single training run with no background
+	($n=200$ per class). The last block is the aggregate of the main text: the
+	dominant run over the background of \cref{subsec:aggregate}, against the
+	null aggregate.}
 	\label{tab:bakeoff}
 	\begin{tabular}{@{}lcccccc@{}}
 		\toprule
@@ -1691,6 +1718,14 @@ detection rates at nominal false-alarm rate $10^{-2}$.
 		DG order (full) & 0.80 & 0.70 & 0.61 & 0.31 & 0.10 & 0.01 \\
 		DG order (semi-coherent) & 1.00 & 1.00 & 0.99 & 0.69 & 0.14 & 0.03 \\
 		DG fixed-$\alpha$ (oracle $f_0$) & 0.36 & 0.10 & 0.03 & 0.01 & 0.01 & 0.00 \\
+		\midrule
+		\multicolumn{7}{@{}l}{\emph{vs.\ null aggregate (main text; single run over background)}}\\
+		\texttt{mtf} & 0.03 & 0.01 & 0.01 & 0.00 & 0.01 & 0.01 \\
+		spectral matched filter & 0.98 & 0.59 & 0.41 & 0.23 & 0.33 & 0.33 \\
+		Viterbi tracker & 1.00 & 1.00 & 1.00 & 1.00 & 0.99 & 0.96 \\
+		DG order (split) & 0.21 & 0.10 & 0.01 & 0.01 & 0.00 & 0.00 \\
+		DG order (full) & 0.76 & 0.74 & 0.51 & 0.20 & 0.05 & 0.00 \\
+		DG fixed-$\alpha$ (oracle $f_0$) & 0.37 & 0.10 & 0.04 & 0.03 & 0.00 & 0.01 \\
 		\bottomrule
 	\end{tabular}
 \end{table*}
@@ -1818,7 +1853,10 @@ the Viterbi tracker's alone.
 This appendix collects the meter-boundary material behind
 \cref{subsec:meter_spec}: the full per-detector grid (\cref{fig:meter_boundary}),
 the transfer-function notch sub-sweep, the decomposition of the frontier's
-meter-erasure point, and a comparison with measured board-level work.
+meter-erasure point, and a comparison with measured board-level work. The
+figures show the aggregate sweep of the main text. The same sweep on a single
+training run against inference alone moves no cell by more than $0.16$ in
+detection rate and leaves the live region unchanged.
 The robustness ordering across the grid is Viterbi $\ge$ spectral $>$ the DG order
 family, which is the most sensitive detector at the reference channel but the
 first to die as the channel degrades; the multitaper F-test is at its floor
@@ -1826,10 +1864,10 @@ throughout.
 
 \begin{figure*}[t]
 	\centering
-	\includegraphics[width=\linewidth]{st2_meter_boundary}
+	\includegraphics[width=\linewidth]{st2_meter_boundary_aggregate}
 	\caption{Minimum meter specification: detector power at nominal false-alarm
 	rate $0.05$ over sample rate $\times$ integration window, one panel per
-	detector, honest training against the hard inference null. The live region
+	detector, the honest aggregate against the null aggregate. The live region
 	is sample rate ${\ge}2$~Hz \emph{and} integration window ${\le}0.5$~s; below
 	either edge the tracking class collapses toward chance.}
 	\label{fig:meter_boundary}
@@ -1837,7 +1875,7 @@ throughout.
 
 \begin{figure*}[t]
 	\centering
-	\includegraphics[width=\linewidth]{st2_meter_boundary_notch}
+	\includegraphics[width=\linewidth]{st2_meter_boundary_aggregate_notch}
 	\caption{Transfer-function notch sub-sweep at $20$~Hz sampling: tracker power
 	versus notch centre frequency and depth. Only a deep notch placed at the
 	cadence centre ($1.0$--$1.2$~Hz) materially degrades detection, and it halves
@@ -1848,8 +1886,9 @@ throughout.
 \paragraph{The frontier's meter-erasure point, decomposed.} This sweep also
 resolves the single integrating-$1$~Hz point reported on the frontier, where even
 the tracker degrades (Viterbi detection rate $0.32$, every other detector near
-chance). That point superposes two independent channel defects, and the boundary
-map shows either one suffices: at the reference channel the tracker is at $1.0$;
+chance). That point superposes two independent channel defects. The frontier uses a
+single workload, so we decompose it on the single-workload sweep, which shows
+either defect suffices: at the reference channel the tracker is at $1.0$;
 adding the $1$~s integration alone drops it to $0.25$; the $1$~Hz sampling alone
 drops it to $0.36$; the two together give $0.30$. The meter-erasure regime is
 over-determined --- it is a statement about the instrument, and a demand on it,
