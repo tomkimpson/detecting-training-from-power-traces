@@ -1,4 +1,53 @@
-# Handoff — 2026-09-23 (introduction restructured as a methods paper)
+# Handoff — 2026-09-30 (section 5 moved onto the multi-workload aggregate)
+
+## What happened this session
+
+Branch **`feat/aggregate-headline`** (off `restructure`, merged back into it).
+Resolved the two red TODOs (§4.2 threshold population, head of §5). §5 now tests
+the §2.4 aggregate: dominant training over 4 small trainings + 4 fine-tunings,
+against the null aggregate (inference in the dominant slot), shares 9:0.5:0.5.
+
+- **Answer: the method still works.** Viterbi on the aggregate at FAR 1e-2 gets
+  1.00/1.00/1.00/1.00/0.99/0.96 over drift 0–1.5 Hz. The Whittle NP ceiling is 1.0
+  everywhere, and its parity vs the aggregate bake-off is exact (0).
+  Single-workload vs aggregate: Viterbi moves ≤0.02; the largest move for any
+  detector is 0.12 (DG-full at 0.1 Hz).
+- **Why:** each background member has 1.25% of peak vs 90%, so its line is
+  ~37 dB down and buried. The background only matters at low dominant share,
+  which is the dilution attack (§6). The existing `dilute_summary.json` already
+  shows Viterbi 1.00 down to share 0.2 (no drift).
+- **Code:** `--scenario {single,aggregate}` on `plot_st1_bakeoff.py`,
+  `st1_np_ceiling.py`, `st2_meter_boundary.py`, `plot_drift_ceiling.py`,
+  `plot_st2_meter_boundary.py`. Library: `train_obs_at_f0`/`build_training_bank`
+  (`aggregate=`) and `run_meter_cell(aggregate=)`. Single defaults keep the frozen
+  names and numbers. New tests: `tests/test_aggregate_scenario.py`.
+- **Frozen on MATS:** job 14048 (aggregate bake-off + ceiling, ~40 min;
+  `scripts/slurm/st1_aggregate_headline.sbatch`) and array 14049 (aggregate meter
+  boundary; `sbatch --export=ALL,SCENARIO=aggregate scripts/slurm/st2_meter_boundary.sbatch`).
+  The branch was pushed straight into the MATS checkout over ssh (not GitHub);
+  that checkout was switched back to `phase-4`.
+- **Paper:** main-text figures are now `drift_ceiling_aggregate` and
+  `st2_meter_boundary_aggregate_viterbi`, and the appendix meter figures are aggregate too.
+  `tab:bakeoff` gains an aggregate block; the rest of the bake-off appendix
+  (structural confusers, semicoh) stays single-workload, as does the frontier's
+  meter-erasure decomposition (labelled). Builds clean (39 pp, 0 errors/overfull/undefined).
+
+## Open items from this pass
+
+1. **Tom's WIP left untracked:** `scripts/plot_scenario_aggregate.py` +
+   `figures/scenario_aggregate.*` (shares 0.9 / 0.5 / null). A natural §2.4 or
+   appendix figure to back the "37 dB down" paragraph in §5.1; not committed.
+2. The committed `figures/st2_meter_boundary{,_notch}.*` (single) are stale vs
+   their script: regenerating them changes the bytes even on the base commit.
+   Not touched.
+3. The §5 intro still says "the tracker has to find the dominant line"; consider
+   whether §2.4's "weak lines inside the search band" framing oversells the
+   background as a hard case, given the ~37 dB result.
+4. The frontier (§6) and rung-2 are still single-workload apart from dilution.
+
+---
+
+# Previous handoff — 2026-09-23 (introduction restructured as a methods paper)
 
 ## What happened this session
 
