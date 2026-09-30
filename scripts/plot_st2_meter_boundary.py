@@ -13,8 +13,11 @@ Reads results/st2/meter_boundary_summary.json and renders:
 
 Compute-free: run scripts/st2_meter_boundary.py first.
 
+With --scenario aggregate it reads meter_boundary_aggregate_summary.json and
+writes the same three figures under the st2_meter_boundary_aggregate* stem.
+
 Usage:
-    python scripts/plot_st2_meter_boundary.py
+    python scripts/plot_st2_meter_boundary.py [--scenario aggregate]
 """
 
 from __future__ import annotations
@@ -176,16 +179,22 @@ def plot_notch(summary: dict,
 
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--summary", type=pathlib.Path, default=_SUMMARY)
+    ap.add_argument("--scenario", choices=("single", "aggregate"), default="single",
+                    help="which sweep to plot: single workload or section-2 aggregate")
+    ap.add_argument("--summary", type=pathlib.Path, default=None)
     args = ap.parse_args(argv)
+    stem = "st2_meter_boundary" + ("" if args.scenario == "single"
+                                   else f"_{args.scenario}")
+    if args.summary is None:
+        args.summary = _SUMMARY.with_name(stem.removeprefix("st2_") + "_summary.json")
     if not args.summary.exists():
         raise SystemExit(f"{args.summary} not found — run "
                          f"scripts/st2_meter_boundary.py first")
     summary = json.loads(args.summary.read_text())
-    plot_main(summary)
-    plot_single(summary)
-    plot_notch(summary)
-    print(f"wrote figures/st2_meter_boundary*.pdf from {args.summary}")
+    plot_main(summary, stem)
+    plot_single(summary, fig_dir_stem=f"{stem}_viterbi")
+    plot_notch(summary, fig_dir_stem=f"{stem}_notch")
+    print(f"wrote figures/{stem}*.pdf from {args.summary}")
 
 
 if __name__ == "__main__":
