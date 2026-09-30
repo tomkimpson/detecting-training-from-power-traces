@@ -740,10 +740,30 @@ enough to pay for it. Dynamic programming evaluates the maximum over all
 $23^{N_t}$ paths exactly, in time linear in $N_t$. A drifting line keeps a high
 score because the path bends to follow it. Broadband power, such as the
 continuous-batching floor of the inference null, does not, because no single
-slowly varying path stays on top of it. Averaging over frames makes $V$
+slowly varying path stays on top of it. \Cref{fig:viterbi_track} shows both cases on
+the contrast map. Averaging over frames makes $V$
 comparable across traces of different length. Note that $V$ tests whether a
 persistent, slowly wandering line is present, not what produced it. Accordingly, strong lines that do not have a training provenance may also trigger the detector; this is addressed in
-\cref{subsec:identifiability} 
+\cref{subsec:identifiability}
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\linewidth]{viterbi_track}
+	\caption{The Viterbi tracker on three $300$\,s traces at the nominal channel.
+	Each panel is the contrast map $L_{kj}$ of \cref{eq:contrast} on the
+	tracker's own grid ($16$\,s frames at half overlap, $62.5$\,mHz bins over
+	$\mathcal{B}$), with the best path of \cref{eq:viterbi} in white and its
+	score $V$ inset. Dashed: the true cadence, $1/$(median iteration period)
+	in each frame, from the generator's iteration boundaries. Left: a
+	stationary training cadence ($f_0 = 0.9$\,Hz), which the path sits on.
+	Centre: the same run with $0.4$\,Hz of cadence wander, which the path
+	follows across most of the band; it cuts the corner off the brief
+	excursion near $150$\,s, where following the line costs more in jumps than
+	it gains in contrast. Right: the inference null, where no path finds
+	sustained contrast and $V$ falls to $0.73$. Reproduced by
+	\texttt{scripts/plot\_viterbi\_track.py}.}
+	\label{fig:viterbi_track}
+\end{figure*}
 
 \subsection{Setting the threshold}
 \label{subsec:threshold}

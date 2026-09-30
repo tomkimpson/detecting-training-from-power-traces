@@ -71,8 +71,9 @@ python scripts/plot_money_pareto.py  # -> figures/money_pareto.* (main-text Vite
 ```
 python scripts/plot_scenario_traces.py   # -> figures/scenario_traces.*
 python scripts/plot_scenario_meter.py    # -> figures/scenario_meter.*
+python scripts/plot_viterbi_track.py     # -> figures/viterbi_track.* (Sec. 4.1 tracker explainer)
 ```
-The two paper §4 figures. Both generate their own data and write no results artefact,
+Paper workload and tracker figures. All three generate their own data and write no results artefact,
 so they are safe to run locally. `plot_scenario_traces.py` renders the four workload
 classes (training, fine-tuning, inference null, aggregate) in time and frequency;
 `plot_scenario_meter.py` sweeps each `MeterParams` axis on one fixed honest training
