@@ -9,6 +9,15 @@ loss relative to honest training:
                    interpolation between evals); None if never reached
     cost           tokens_arm / tokens_honest - 1  (a lower bound if never reached)
 
+Because every attack arm missed that target in the pilot, the summary also
+reports (added after the runs, so not pre-registered):
+
+    equiv_cost     D / (tokens honest needed to reach the arm's FINAL loss) - 1
+
+It is conservative in the attacker's favour: the honest run at fewer tokens
+still has an undecayed learning rate, so it reaches a given loss later than an
+honest run with a shorter schedule would.
+
 It also estimates the gradient noise scale B_simple from the second half of the
 honest runs' probes (or, if they did not probe, the honest *_bnoise scan at this m) and puts it into the McCandlish penalty used in E0, to
 compare predicted with measured cost.
@@ -123,9 +132,12 @@ def main() -> None:
         t_h = tokens_to_target(h["tokens"], h["loss"], target)
         t_a = tokens_to_target(r["tokens"], r["loss"], target)
         cost = (t_a / t_h - 1) if t_a is not None else (r["tokens"][-1] / t_h - 1)
+        t_eq = tokens_to_target(h["tokens"], h["loss"], float(r["loss"][-1]))
+        equiv = (r["tokens"][-1] / t_eq - 1) if t_eq else None
         table.append(dict(
             arm=arm, seed=seed, target_loss=target, tokens_to_target=t_a,
             cost=cost, cost_is_lower_bound=t_a is None,
+            honest_tokens_to_final=t_eq, equiv_cost=equiv,
             final_loss=float(r["loss"][-1]), final_gap=float(r["loss"][-1] - h["loss"][-1]),
             tokens_per_s=r["done"]["tokens_per_s"] if r["done"] else None,
             mean_G=r["done"]["mean_G"] if r["done"] else None,
@@ -137,10 +149,13 @@ def main() -> None:
         if not rows:
             continue
         c = np.array([t["cost"] for t in rows])
+        e = np.array([t["equiv_cost"] for t in rows], dtype=float)
         per_arm[arm] = dict(
             n_seeds=len(rows), cost_mean=float(c.mean()),
             cost_sd=float(c.std(ddof=1)) if len(c) > 1 else None,
             any_lower_bound=any(t["cost_is_lower_bound"] for t in rows),
+            equiv_cost_mean=float(np.nanmean(e)),
+            equiv_cost_sd=float(np.nanstd(e, ddof=1)) if len(e) > 1 else None,
             final_gap_mean=float(np.mean([t["final_gap"] for t in rows])),
             tokens_per_s_mean=float(np.mean([t["tokens_per_s"] for t in rows
                                              if t["tokens_per_s"]] or [np.nan])),

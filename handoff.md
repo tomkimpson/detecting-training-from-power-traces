@@ -1,3 +1,68 @@
+# Handoff — 2026-10-01 (latest, OzSTAR: the "free" attack is tested, E0 spike + E1 pilot)
+
+## Goal
+Find out whether the work-variation attack, which is free in throughput and is §6's
+main failure point, has a hidden cost in learning efficiency.
+
+## Status
+- **E0 spike (CPU, synthetic):** `notes/results/e0-work-variation-spike-findings.md`.
+  - A mean-8 lognormal micro-step schedule hides **0.73** from the tracker (s = 1.0;
+    0.61 at s = 0.8), more than the shipped σ_G = 0.7 attack (0.53).
+  - **§6 therefore understates the threat.**
+- **E1 pilot (GPU, exploratory, outside `spec.md` scope by Tom's choice):**
+  `notes/results/e1-pilot-findings.md`, harness in `scripts/e1/`.
+  - Setup: a 30M-parameter GPT, 400M tokens of FineWeb-edu, 5 arms × 3 seeds.
+  - Measured extra compute to reach the same loss, against the noise-scale model's
+    prediction:
+
+    | Arm | Measured | Predicted |
+    |---|---|---|
+    | lognormal s = 0.8 | 61% ± 4 | 15% |
+    | lognormal s = 1.0 | 93% ± 6 | 24% |
+    | shipped σ_G = 0.7 | 267% ± 33 | 163% |
+
+  - The √lr best response made it worse (116%).
+  - **Under a standard recipe the free attack is expensive.** The attacker isn't
+    tuned yet, so this is not a lower bound.
+- **Branches:**
+  - `feat/frontier-aggregate-explore` (notes and E0) has **PR #25** open into
+    `feat/frontier-aggregate`.
+  - `feat/e1-learning-cost-pilot` (E1) was cut from it. It is **committed locally
+    and not pushed.**
+- **The paper is unchanged.** §6 still quotes the shipped attack.
+
+## Next steps
+1. **E1b: tune both sides** (about 15 minutes per run on `milan-gpu`):
+   - sweep the peak learning rate for honest and lognormal s = 1.0 (×0.5, ×1, ×2);
+   - try lognormal s = 1.0 with clipping off (or the threshold scaled with G), and
+     with β₂ = 0.99.
+
+   The attacker's best measured cost is the number that can rescue §6.
+2. **Mechanism:** log the clipping rate and update norms by G.
+3. **If E1b holds:** decide with Tom whether to amend `spec.md` and bring a
+   learning-cost column into §6. If it does, §6 must also adopt the stronger mean-8
+   attacker from E0.
+4. **Carried:** pick the Fig. 7 version, `/check-PR`, merge `feat/frontier-aggregate`
+   → `restructure`.
+
+## Non-obvious context
+- **E1 runs only on slurm.** Compute nodes have **no internet**. Run
+  `prep_data.py --download-only` on a login node, with `HF_HOME` and
+  `TIKTOKEN_CACHE_DIR` set as in `scripts/slurm/e1_prep.sbatch`. The data lives
+  outside the repo at `/fred/oz022/tkimpson/e1_data`.
+- **`.venv-gpu`** = the conda-base Python with `--system-site-packages`, plus
+  `requirements-gpu.txt`. Torch 2.5.1 comes from the conda base.
+- **Throughput varies 0.50–0.59M tokens/s by node,** so E1 can't price throughput.
+- **The E1 cost metric was chosen after the runs.** The pre-registered one saturated
+  at its "> 33%" floor for every arm. The replacement is conservative for the
+  attacker.
+- **The E0 probes broke the "no dev-node runs" rule** (about 10 CPU-minutes on the
+  login node). All E1 work went through slurm.
+
+---
+
+(Previous handoff follows.)
+
 # Handoff — 2026-10-01 (later, from OzSTAR: off-grid cells priced, work 0.7 is free, §6 rewritten)
 
 ## Goal
