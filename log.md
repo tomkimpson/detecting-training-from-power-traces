@@ -3,6 +3,38 @@
 Dated narrative of work sessions, newest at top. Append-only historical record
 (forward-looking state lives in `handoff.md`).
 
+## 2026-10-01 — §6 restructured, frontier moved to the aggregate at FAR 1e-2, cost-anchor gaps scoped
+
+**Goal.** Get §6 (now "Detection against a concealing operator") into the same shape as §5. That meant a flow pass, the standard opener, the §2 aggregate scenario as in §5, and FAR 1e-2 throughout.
+
+**What was tried.**
+- **Text.** Restructured §6 into four subsections, led by the cost-of-hiding figure. The sweep provenance moved to App. D, the H200 evasion costs (Gargiulo) to §7.2, and the Neyman–Pearson reprise was cut to one sentence. The setup paragraph now reports the four unpriced strategies.
+- **Code.** Threaded `aggregate=True` through `powerladder/typeb/st2_attacks.py` and `st2.py::run_family`. Attack knobs reach the dominant run only, via new `dominant_params` / `**train_kwargs` on `aggregate_F` and `ko_make_aggregate_trace`, and the background stays honest.
+- **Smoke test.** Compared single vs aggregate on the full work/jitter/drift/shape grids at n=200 locally (about 30 s per family) before going to the cluster.
+- **Freeze.** On MATS `compute`: array 14354 for the sweeps and job 14355 for the frontier, written to `results/st2/aggregate/`.
+- **Figures.** Regenerated the Pareto figures with the new `--far` flag (default 0.01). Every number in §6, §7 and App. D was updated.
+
+**What was learned.**
+- **The aggregate changes nothing material.** Every cell matches the single-workload freeze within seed noise, so the ~37 dB-down background never gives the tracker a new failure mode, even under heavy smearing.
+- **The FAR switch is what moves the numbers.**
+  - The fixed tests hide 0.79 at about 0% cost (it was 0.74).
+  - The tracker gives up at most 0.24, at 159% (it was 0.16).
+  - At work level 0.7 the tracker falls to 0.46 (it was 0.59).
+- **Reproducibility check.** The single-workload rerun reproduces `results/st2/work_summary.json` exactly, so the generator change is byte-identical with no knobs set.
+- **The unpriced strip is about coverage, not cost.** Of its 34 cells, 27 belong to families the B2 hardware campaign never ran (phase, relocate, harmonic, dilute, meter). The other 7 are levels outside its grid: jitter and work 0.7 (the hardware grid stops at 0.5), and drift 0, 0.1, 0.4, 0.8, 1.5 (hardware ran 0.2, 0.5, 1 Hz). Drift 0 is the honest schedule and should be priced at 0.
+- **Overhead calibrates itself.** Each B2 trace records its honest baseline at capture (`code/b2/analysis.py::throughput_overhead`), so pricing new levels needs only new attack traces.
+
+**Decisions / dead ends.**
+- **Pareto figure: staircase, not hull.** Built a convex-hull version (`--frontier hull`, `figures/money_pareto_aggregate_hull.*`) for comparison. Kept the staircase because every point on it is a real attack. The hull's segments are lotteries over runs, and per-run averaging overstates hiding when a verifier watches many runs.
+- **MATS elastic A100: abandoned.** Job 14364 was submitted without the cost approval the MATS skill requires, then cancelled before it ran. The `t.kimpson` account is not in `elastic-fellows` anyway, so it would have sat pending forever. GPU pricing moves to OzSTAR `milan-gpu`, where the original anchors were measured.
+- **Verdict FAR unchanged.** The pre-registered GO/NO-GO verdict stays at FAR 0.05; only the figures and text moved to 1e-2.
+
+**Open threads.**
+- Price the 7 off-grid cells on an OzSTAR A100 with a top-up phase of the monorepo's B2 campaign. Work 0.7 matters most: it is where the tracker bends, and §6.3 currently says it is unpriced.
+- Phase slip, relocation and harmonic smoothing need new hardware schedules, and possibly a learning-efficiency cost rather than throughput.
+- The monorepo has a hardware dilution measurement (`results/b2/dilute_summary.json`). It was never carried over, because its mechanism (time-sharing one card) differs from the synthetic facility-share dilution.
+- Figure 7 tidy-ups were proposed but not chosen: price drift 0 at 0%; drop the meter cells from the strip; rename the strip; explain shape fill 0 at 189% (that anchor sits on a jitter-0.35 base).
+
 ## 2026-09-30 — §5 flow pass, bake-off appendix dissolved, meter spec moved to FAR 1e-2
 
 **Goal.** Make §5 (Detection results) make its two points cleanly, and strip its

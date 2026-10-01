@@ -145,6 +145,33 @@ def pareto_envelope(points: list[dict]) -> list[tuple[float, float]]:
     return out
 
 
+def pareto_hull(points: list[dict]) -> list[tuple[float, float]]:
+    """The mixing frontier: the upper concave hull of the Pareto staircase corners.
+
+    An operator who runs attack A on a fraction p of runs and attack B on the
+    rest pays the p-weighted mean cost and gets the p-weighted mean detection
+    rate, so every point on the segment between two attacks is achievable.
+    The best hiding at or below each cost under such mixing is the upper hull
+    of the staircase corners (monotone, since the corners increase in both
+    coordinates). It lies on or above the staircase.
+    """
+    corners: list[tuple[float, float]] = []
+    for c, h in pareto_envelope(points):
+        if not corners or h > corners[-1][1]:
+            corners.append((c, h))
+    hull: list[tuple[float, float]] = []
+    for p in corners:
+        # pop the last vertex while it lies on or below the chord to p
+        while len(hull) >= 2:
+            (x1, y1), (x2, y2) = hull[-2], hull[-1]
+            if (x2 - x1) * (p[1] - y1) - (y2 - y1) * (p[0] - x1) >= 0:
+                hull.pop()
+            else:
+                break
+        hull.append(p)
+    return hull
+
+
 def plot(summary: dict, far: str = _FAR_KEY,
          name: str = "st2_cost_pareto") -> pathlib.Path:
     """Two panels: hiding vs measured cost, against each detector class."""

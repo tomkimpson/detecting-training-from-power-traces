@@ -64,7 +64,7 @@ def series(summary: dict) -> dict[str, tuple[tuple[str, ...], str]]:
 
 
 def plot(summary: dict, far: str = _pp._FAR_KEY,
-         name: str = "money_pareto") -> pathlib.Path:
+         name: str = "money_pareto", frontier: str = "staircase") -> pathlib.Path:
     apply_house_style()
     cells = summary["cells"]
     fig, ax = plt.subplots(figsize=(WIDTH_ICML_COL, 2.45))
@@ -82,11 +82,18 @@ def plot(summary: dict, far: str = _pp._FAR_KEY,
             # annotation: the most a ~zero-cost work-variation cell hides
             work_zero = max(p["hiding"] for p in anchored
                             if p["family"] == "work" and abs(p["cost"]) < 1.0)
-        env = _pp.pareto_envelope(anchored)
-        # extend the staircase to the edge of the measured range
-        xs = [p[0] for p in env] + [x_hi]
-        ys = [p[1] for p in env] + [env[-1][1]]
-        ax.step(xs, ys, where="post", color=col, lw=1.4, zorder=2)
+        if frontier == "hull":
+            # straight segments between corners: reachable by mixing attacks
+            env = _pp.pareto_hull(anchored)
+            xs = [p[0] for p in env] + [x_hi]
+            ys = [p[1] for p in env] + [env[-1][1]]
+            ax.plot(xs, ys, color=col, lw=1.4, zorder=2)
+        else:
+            env = _pp.pareto_envelope(anchored)
+            # extend the staircase to the edge of the measured range
+            xs = [p[0] for p in env] + [x_hi]
+            ys = [p[1] for p in env] + [env[-1][1]]
+            ax.step(xs, ys, where="post", color=col, lw=1.4, zorder=2)
         for p in anchored:
             ax.plot(p["cost"], p["hiding"], ls="none",
                     marker=_pp._FAMILY_MARKER[p["family"]], ms=3.2,
@@ -132,6 +139,10 @@ def main() -> None:
                     help="FAR the hiding axis is read at (must be stored)")
     ap.add_argument("--out", default="money_pareto",
                     help="figure stem under figures/")
+    ap.add_argument("--frontier", choices=("staircase", "hull"),
+                    default="staircase",
+                    help="staircase = best single attack; hull = best mix of "
+                         "attacks across runs (upper concave hull)")
     args = ap.parse_args()
     summary = json.loads(args.summary.read_text())
     far = _pp.far_key(summary, args.far)
@@ -142,7 +153,7 @@ def main() -> None:
         print("  unpriced hiding > 0.3: " + ", ".join(
             f"{p['family']}={p['level']} ({p['hiding']:.2f})"
             for p in unpriced if p["hiding"] > 0.3))
-    out = plot(summary, far, args.out)
+    out = plot(summary, far, args.out, args.frontier)
     print(f"-> {out.with_suffix('')}.*")
 
 

@@ -129,3 +129,17 @@ def test_far_key_refuses_unstored_far():
     assert pareto.far_key(summary, 0.01) == "0.01"
     with pytest.raises(SystemExit):
         pareto.far_key(summary, 0.1)
+
+
+def test_pareto_hull_joins_corners_and_dominates_staircase():
+    pts = [{"family": "work", "level": 0.5, "cost": 0.0, "hiding": 0.05},
+           {"family": "jitter", "level": 0.2, "cost": 60.0, "hiding": 0.0},
+           {"family": "jitter", "level": 0.35, "cost": 100.0, "hiding": 0.10},
+           {"family": "jitter", "level": 0.5, "cost": 200.0, "hiding": 0.30}]
+    hull = pareto.pareto_hull(pts)
+    # (100, 0.10) lies below the chord from (0, 0.05) to (200, 0.30)
+    assert hull == [(0.0, 0.05), (200.0, 0.30)]
+    stair = pareto.pareto_envelope(pts)
+    for c, h in stair:
+        y = 0.05 + (0.30 - 0.05) * c / 200.0
+        assert y >= h - 1e-12

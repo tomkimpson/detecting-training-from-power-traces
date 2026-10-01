@@ -1,3 +1,94 @@
+# Handoff — 2026-10-01 (§6 on the aggregate at FAR 1e-2; moving to OzSTAR to price missing cost cells)
+
+## Goal
+Price the frontier cells that have no measured throughput cost, starting with
+**work 0.7**, where the tracker bends and §6.3 calls it "unpriced". This needs a
+top-up of the monorepo's B2 A100 campaign on **OzSTAR**.
+
+## Status
+- §6 is restructured and on the aggregate at FAR 1e-2. Merged into the feature
+  branch `feat/frontier-aggregate` (branched off `restructure`), **not yet merged
+  to `restructure`**. Paper builds clean (37 pp); 251 tests pass.
+- GPU pricing hasn't started. Tom is resuming on OzSTAR with a fresh Claude
+  instance (see `machine-handoff.md`).
+
+## Next steps
+1. **On OzSTAR, in the monorepo** (`analogue-sensors-for-ai-verification`, not
+   this repo), check the B2 campaign still runs:
+   - `python scripts/run_b2_capture.py --phase smoke` and
+     `pytest -m gpu tests/test_b2_gpu.py`;
+   - run them on `milan-gpu` (A100, account `oz022`), conda base at
+     `/fred/oz022/tkimpson/miniconda3`.
+2. **Add a top-up phase** (new phase name, e.g. `workjitter_hi` / `spoof_hi`) for
+   the 7 off-grid levels:
+   - work 0.7 (real-work realisation; most important);
+   - jitter 0.7 (idle-pad);
+   - drift 0.1, 0.4, 0.8, 1.5 Hz (idle-pad).
+
+   **Don't** edit the existing level tuples in `B2Params`: `plan_phase` draws all
+   seeds from one RNG over the full plan, so changing the tuples reshuffles every
+   existing trace. Each trace carries its own honest baseline
+   (`code/b2/analysis.py::throughput_overhead`), so no new honest population is
+   needed. Budget: 8 traces per level at about 300 s, i.e. about 5 h on one A100.
+3. Analyse the new traces into overhead (mean, std), then append the new levels
+   to the anchor JSONs in this repo's `data/measured_cost_anchors/`. Keep the
+   existing keys and add a provenance note in its README. Re-run
+   `scripts/plot_st2_frontier.py --st2-dir results/st2/aggregate --fig-name
+   st2_frontier_aggregate --b2-dir data/measured_cost_anchors` (it only joins
+   costs, so detection numbers don't change), then the two Pareto plots at
+   `--far 0.01`.
+4. Price **drift 0 at 0%**: it's the honest schedule. This is a frontier-script
+   change, not a measurement.
+5. Rewrite §6.1 and §6.3 for whatever work 0.7 costs. If it's near zero, a cheap
+   attack beats the tracker too, and the §6 story changes; flag that to Tom. If
+   it's costly, the tracker's boundary is priced. Recheck "16 of 50 priced cells".
+6. Merge `feat/frontier-aggregate` → `restructure` once Tom is happy
+   (`/check-PR` first).
+
+## Open questions
+- **Figure 7 tidy-ups (Tom hasn't chosen):**
+  - drop the two meter cells from the unpriced strip (they belong to §5.2);
+  - rename the strip "no hardware cost measurement";
+  - explain why shape fill 0 sits at 189%: its anchor was taken on a jitter-0.35
+    base, so it is an upper bound.
+- **Phase slip / relocation / harmonic smoothing** have no hardware schedules.
+  Their cost may be learning efficiency rather than throughput. Leave them
+  unpriced for now?
+- **Monorepo hardware dilution** (`results/b2/dilute_summary.json`: overhead
+  ≈ fraction of time not training) measures single-card time-sharing, not the
+  synthetic facility-share dilution. Map it, or leave dilution unpriced?
+- **Tom's draft opener paragraph in §6** ("We construct the Pareto curve …") is
+  half-written. It was committed by mistake in `a3591f1`; Tom is still editing it.
+- Carried from 2026-09-30:
+  - §5.2's "holds full power (≳0.9) if and only if …" is contradicted by the
+    full-depth notch at 0.8 Hz (0.80 at 1e-2).
+  - The §5 intro oversells the background as a hard case (~37 dB down).
+
+## Non-obvious context
+- **Aggregate frontier artefacts:** `results/st2/aggregate/*.json`,
+  `figures/*_aggregate.*`, and §6/App. D now cite these. The single-workload
+  `results/st2/*_summary.json` freeze is kept but no longer cited.
+- **New flags:**
+  - `scripts/plot_st2_sweeps.py --scenario aggregate`;
+  - `SCENARIO=aggregate` for `st2_sweeps.sbatch` / `st2_frontier.sbatch`;
+  - `--far` / `--out` on `plot_st2_pareto.py` and `plot_money_pareto.py`;
+  - `--frontier hull` on `plot_money_pareto.py` (Tom chose the **staircase**).
+- **Verdict FAR:** the pre-registered GO/NO-GO verdict in `frontier_summary.json`
+  stays at FAR 0.05; only the figures and text use 1e-2.
+- **MATS:**
+  - The `~/certifying-training-from-power` checkout is on `feat/frontier-aggregate`
+    (not `phase-4`).
+  - Seven byte-identical job-14048 outputs were moved to
+    `~/mats-stash-job14048-20261001`.
+  - A torch venv `~/venvs/b2-torch` exists there but went unused: elastic A100s
+    are paid, and the account isn't in `elastic-fellows`.
+- **Tom's untracked WIP:** `scripts/plot_scenario_aggregate.py`,
+  `figures/scenario_aggregate.*`.
+
+---
+
+(Previous handoff follows.)
+
 # Handoff — 2026-09-30 (later: §5 finished; §6 next)
 
 ## Goal
