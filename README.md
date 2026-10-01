@@ -91,7 +91,7 @@ classes (training, fine-tuning, inference null, aggregate) in time and frequency
 `plot_scenario_meter.py` sweeps each `MeterParams` axis on one fixed honest training
 workload and reports how much of the cadence survives the channel.
 
-**Identifiability — covertness cost bound (lightweight CPU check, ~30 s):**
+**Covertness cost bound (lightweight CPU check, ~30 s; cut from the paper on 2026-10-01, kept for reference):**
 ```
 python scripts/lower_bound_spike.py
     # -> results/spike/lower_bound_spike.json, figures/lower_bound_spike.*

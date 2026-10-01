@@ -125,9 +125,7 @@ datacentre training and inference power,
 * construct a detector  a detector for the cadence that tracks the wandering line, borrowing thehcniqus ffrom signal analysis and GW astrophysics
 
 * We construct the Pareto frontier and show the trade-off between how much of the cadence an concealing operator removes and
-what that removal costs in measured throughput, and derive an identifiability
-lower bound on the cost of hiding to a stated detectability
-(\cref{sec:frontier,subsec:costbound}). 
+what that removal costs in measured throughput (\cref{sec:frontier}). 
 
 *We derive a minimum meter specification, the sampling rate, integration time and in-band
 transfer i.e. the specs needed for a meter to work 
@@ -930,173 +928,145 @@ cadence.
 % ============================================================================
 \Cref{sec:results} assumed a benign operator, who leaves the cadence for the tracker to find. A concealing
 operator can instead de-periodicise its schedule and smear the cadence away
-(\cref{subsec:adversary}). In principle this is always possible; the concealing operator can insert idle time at random between iterations, or varying the work done in each, to removes any frequency for the Viterbi detector to identify. The question is the cost in training throughput the operator must incur in order de-periodicise enough to hide from the Viterbi detector, and in particular whether any de-periodicisation strategy is both cheap and effective. 
+(\cref{subsec:adversary}). In principle this is always possible: the concealing operator can insert idle time at random between iterations, or vary the work done in each, to remove any frequency for the Viterbi detector to identify. The question is the cost in training throughput the operator must incur in order to de-periodicise enough to hide from the Viterbi detector, and in particular whether any de-periodicisation strategy is both cheap and effective.
+
+In this section we sweep all eight schedule strategies of \cref{tab:attacks}
+and measure how much each one hides from the detectors at each strength. The
+operator applies each strategy to its dominant training run, $P^{\mathrm{main}}$
+in the aggregate of \cref{eq:aggregate}. The background of small trainings and
+fine-tunings, $P^{\mathrm{tr}}_j$ and $P^{\mathrm{ft}}_k$, stays honest, and every cell is scored against the aggregate null of
+\cref{eq:aggregate_null}. For each strategy we step its budget knob over the
+range in \cref{tab:attacks}. We measure the detection rate of the Viterbi tracker and of the
+fixed tests of \cref{subsec:comparators}, taking the better of the two fixed
+tests at each cell. All rates are at false-alarm rate $10^{-2}$ with $n=200$
+traces per class.
+
+\textcolor{red}{this para to complete once we get results back on other ways to measure cost}
+Four strategies --- period jitter, cadence drift, work variation and shape
+filling --- were also run on a single A100, which gives each of their knob settings a
+measured throughput cost (\cref{sec:reality}). We write the throughput cost of
+a setting as
+\begin{equation}
+	c \;=\; \frac{r_{\mathrm{honest}}}{r} - 1,
+	\label{eq:throughput_cost}
+\end{equation}
+the fractional increase in wall-clock time per trained token, where $r$ is the
+training throughput in tokens per second under the attack and
+$r_{\mathrm{honest}}$ that of the same run without it, and quote it in percent.
+For the strategies that only insert idle time, $c$ is the stretch of the
+iteration period over its busy time; for work variation, which never idles, it
+is read from the tokens-per-second deficit $1 - r/r_{\mathrm{honest}}$, which
+agrees with \cref{eq:throughput_cost} to first order and is zero within noise.
+The other four (phase slip,
+relocation, harmonic smoothing and dilution) have no hardware implementation,
+so they have no measured cost. Throughput is the only cost we measure. An attack
+might keep tokens per second but worsen progress per token; this
+learning-efficiency penalty cannot be measured in a synthetic model and remains
+open (\cref{subsec:scope}). The full sweep and its provenance are in
+\cref{app:sweep}.
 
 
-We study four strategies from \cref{tab:attacks}: three timing strategies
-(period jitter, work variation and cadence drift) and one waveform strategy
-(shape filling). 
 
+This section is organised as follows. \Cref{subsec:frontier_cost} shows how
+much each strategy hides as its budget knob is turned up, against both
+detectors; it is the section's main result. \Cref{subsec:frontier_work}
+explains why varying the real work per iteration is the one strategy that
+hides for free, and why at its largest budget it also halves the tracker's
+detection rate.
 
-We measure the throughput overhead incurred by each strategy on a a single A100.
-
-The operator applies each strategy to its dominant training run on the aggregate
-of \cref{sec:results}, the background of small trainings and fine-tunings stays
-honest, and every cell is scored against the aggregate null of
-\cref{eq:aggregate_null}. 
-
-For each strategy we step its budget knob (\cref{tab:attacks}), which we
-call the attack level, over the stated range. At every level we measure the
-detection rate of the Viterbi tracker and of the fixed tests of
-\cref{subsec:comparators}, taking the better of the two fixed tests at each
-cell. All rates are at false-alarm rate $10^{-2}$ with
-$n=200$ traces per class. The cost axis is throughput only. A
-learning-efficiency penalty, in which an attack keeps tokens per second but
-worsens progress per token, cannot be measured in a synthetic model and remains
-open (\cref{subsec:scope}). The other four schedule strategies of
-\cref{tab:attacks} (phase slip, relocation, harmonic smoothing and dilution) have
-no hardware implementation and so no cost. The tracker detects every one of
-their cells. The full sweep, these four strategies included, and its
-provenance are in \cref{app:sweep}.
-
-
-We construct the Pareto curve 
-
-
-To answer it we trace a
-Pareto curve : at every throughput cost, the most an operator
-can hide at or below that cost. We call this trade-off the de-periodicisation
-frontier.
-
-
-
-This section is organised as follows. \Cref{subsec:frontier_cost} plots hiding
-against measured cost for both detectors, the section's main result.
-\Cref{subsec:frontier_costly} shows that the attacks which cost throughput do
-not hide the line from the tracker. \Cref{subsec:frontier_work} shows that
-varying the real work per iteration hides the line from the fixed tests at no
-measurable cost, and that at its strongest level it also halves the tracker's
-detection rate, again at no measurable throughput cost. \Cref{subsec:frontier_bound} bounds from below what hiding must
-cost, for one adversarial strategy.
-
-\subsection{The cost of hiding}
+\subsection{How much each strategy hides}
 \label{subsec:frontier_cost}
 
-\Cref{fig:attack_curves} plots hiding ($1-$ detection rate) against measured
-throughput overhead for each priced strategy, against the Viterbi tracker
-(top) and the fixed tests (bottom). Each line is one strategy's Pareto
-staircase: the best hiding that strategy buys at or below a given cost. Against the fixed tests
-every strategy hides a lot, but only varying the real work per iteration does so
-for free. It hides $0.88$ at zero cost, while jitter and drift need $159\%$ and
-$356\%$ overhead to reach $0.88$ and $0.71$. Against the tracker almost every
-strategy stays on the floor. Varying the real work is again the exception: at its
-strongest level, $0.7$, it hides $0.55$ at zero cost, although at every weaker
-level it hides at most $0.05$. Every attack that costs throughput does worse
-against the tracker than this free one. The best of them,
-idle-insertion jitter at $\sigma_\xi = 0.35$, hides $0.24$ for a $159\%$
-overhead. Throughput is therefore not what a concealing operator must pay to
-weaken the tracker. Whether the free attack has a price in learning efficiency
-instead is the open question of \cref{subsec:frontier_work}.
+\Cref{fig:attack_curves} plots hiding ($1-$ detection rate) against the
+budget knob of every schedule strategy, with the measured throughput cost of
+each knob setting where one exists. 
 
-The drift-free schedule is the honest one, so its cost is zero by
-definition.
+Against the fixed tests, seven of the eight strategies hide a large fraction of
+runs at their larger budgets; only harmonic smoothing hides nothing. Hiding
+mostly grows with the budget, up to $0.88$ under both jitter and work
+variation. Only work variation hides for free. It hides $0.88$ at $c \approx 0$,
+while jitter and drift need $c = 159\%$ and $356\%$ to reach $0.88$
+and $0.71$.
 
+Against the Viterbi tracker almost nothing hides. The tracker detects at least
+$95\%$ of runs in $43$ of the $46$ cells. It detects every run in every cell of
+phase slip, relocation, harmonic smoothing, shape filling and dilution, and at
+least $97\%$ under drift. The three exceptions are two jitter settings and the
+largest work variation. Jitter at $\sigma_\xi = 0.35$ hides $0.24$
+for $c = 159\%$, and at $0.5$ hides $0.12$ for $c = 375\%$; at $0.7$ it hides
+nothing. Work variation at $\sigma_G = 0.7$ hides $0.55$ at $c \approx 0$,
+though at every smaller $\sigma_G$ it hides at most $0.05$.
 \begin{figure*}[t]
 	\centering
 	\includegraphics[width=\linewidth]{attack_curves_aggregate}
-	\caption{Hiding against attack level for the eight schedule strategies of
-	\cref{tab:attacks}, in the order of that table. Hiding is $1-$ detection rate
-	at false-alarm rate $10^{-2}$ for the Viterbi tracker (solid) and the fixed
-	tests (dashed; the better of the matched filter and multitaper F-test per
-	cell). Each panel steps one strategy's budget knob, shown on the bottom axis;
-	the swept levels are evenly spaced, weakest on the left. Where the
-	single-A100 campaign measured a level's throughput overhead, it is given on
-	the top axis; panels with no top axis have no hardware cost measurement
-	(\cref{tab:attacks}). Costs below $1\%$ in magnitude, zero within noise, are
-	shown as $0$; the drift-free schedule is the honest one, so its cost is zero
-	by definition; the shape-filling costs were measured on a jittered base and
-	are upper bounds. The tracker detects almost every cell. The exception is work
-	variation at $\sigma_G = 0.7$, which hides $0.55$ from it at no measurable
-	throughput cost; idle-insertion jitter hides at most $0.24$, for $159\%$
-	overhead. The meter strategy degrades the channel rather than the schedule
-	and is treated in \cref{subsec:meter_spec}. Reproduced by
-	\texttt{scripts/plot\_attack\_curves.py}.
-	\textcolor{red}{[TODO: figure needs cleaning up before submission.]}}
+	\caption{How much each schedule strategy hides, and what it costs. Each panel
+	steps one strategy of \cref{tab:attacks} through its budget knob (bottom
+	axis; settings evenly spaced, weakest on the left) and plots hiding, $1-$
+	detection rate at false-alarm rate $10^{-2}$, for the Viterbi tracker (blue,
+	solid) and the fixed tests (grey, dashed; the better of the matched filter
+	and multitaper F-test per cell). Bands are Wilson $95\%$ intervals for
+	$n=200$ traces per class. \textbf{a--d}, the four strategies run on a
+	single A100. The top axis gives the measured throughput cost $c$ of each
+	setting (\cref{eq:throughput_cost}); costs below $1\%$ in magnitude, zero
+	within noise, are shown as $0$, and drift-free scheduling costs zero by
+	definition. Shape-filling costs were measured on a jittered base and are
+	upper bounds ($\leq$).
+	\textbf{e--h}, the four strategies with no hardware implementation and so no
+	measured cost. The tracker detects almost every cell. The exception, ringed in
+	\textbf{c}, is work variation at $\sigma_G = 0.7$, which hides $0.55$ from it
+	at $c \approx 0$; idle-insertion jitter hides at most $0.24$, for
+	$c = 159\%$. The meter strategy degrades the channel rather than the
+	schedule and is treated in \cref{subsec:meter_spec}. Reproduced by
+	\texttt{scripts/plot\_attack\_curves.py}.}
 	\label{fig:attack_curves}
 \end{figure*}
 
-\subsection{The costly attacks are the wrong ones}
-\label{subsec:frontier_costly}
 
-The de-periodicisations that degrade the line most are exactly the ones a
-rational operator would not pay for. Idle-insertion jitter buys little
-concealment: it costs $15$--$1027\%$ throughput, and the tracker detects at
-least $76\%$ of runs at every level. Slowly drifting the cadence costs
-$42$--$2127\%$ and leaves the tracker detecting at least $97\%$ of runs, because
-drift is precisely the regime the tracker was built to survive
-(\cref{subsec:power}). Power shaping costs
-$170$--$230\%$. Against every one of these the tracker holds while the operator
-pays a throughput tax that a compute-governance regime would itself flag.
-Evasion strategies measured on real hardware are similarly expensive
-(\cref{sec:reality}).
+The major challenge for the verifier and the Viterbi tracker is work variation at $\sigma_G = 0.7$. 
 
-\subsection{The free attack: varying real work}
-\label{subsec:frontier_work}
+Here a few iterations accumulate very many micro-steps: about one in ten
+accumulates $64$ or more, against the honest $G_0 = 8$. These long, unbroken
+compute blocks carry the hiding; capping the micro-step count at $32$ restores
+the tracker's detection rate to $84\%$. Because every micro-step is real work
+and the device never idles, the throughput cost $c$ is zero within noise at every
+$\sigma_G$ (\cref{fig:attack_curves}).
 
-The dangerous strategy is variable real work. Varying the useful computation
-performed per iteration moves the cadence without inserting idle time, and leaves
-the synchronous exchange, which does not shrink with the compute phase,
-untouched. Its throughput cost is therefore essentially zero: at work-variation
-levels $0.35$, $0.5$ and $0.7$ the measured overhead is $-0.10\%$, $-0.36\%$ and
-$-0.65\%$, zero within noise. At that price the fixed tests are gone. The spectral matched
-filter falls to detection rate $0.25$ and $0.22$ (its \textsc{auc} collapses to
-$0.46$ and $0.43$, below chance), and the multitaper F-test sits at its floor.
-Yet the Viterbi tracker holds detection rate $1.0$ and $0.96$. This is the
-genuine scope boundary of the passive channel: an operator willing to vary real
-work evades every cheap, fixed detector at no measurable systems cost, and up to
-level $0.5$ only a tracking detector still sees the schedule. Because the tracker sits near the
-Neyman--Pearson ceiling on the honest schedule (\cref{subsec:power}), the gap
-reflects information the fixed tests discard, not a well-tuned tracker.
+The attack is not free in learning efficiency, however. The same long blocks
+raise the mean micro-step count from $8$ to $25$, so the operator takes about a
+third as many optimiser steps per token as honest training. Larger batches
+make each step less efficient per token. \citet{mccandlish2018empirical} model
+an optimiser step on a batch of $B$ samples, with the learning rate tuned for
+that batch, as making a fraction
+\begin{equation}
+	h(B) \;=\; \frac{B}{B + B_{\mathrm{noise}}}
+	\label{eq:step_efficiency}
+\end{equation}
+of the progress of a full-gradient step, where the gradient noise scale
+$B_{\mathrm{noise}}$ sets the critical batch size. Progress per sample is then proportional to
+$h(B)/B = 1/(B + B_{\mathrm{noise}})$, which falls as the batch grows. For
+micro-step counts $G_i$ drawn independently, it is proportional to
+$\mathbb{E}[h(G)]/\mathbb{E}[G]$, so the attack needs a fraction
+\begin{equation}
+	\Delta \;=\; \frac{h(G_0)/G_0}{\mathbb{E}[h(G)]/\mathbb{E}[G]} \;-\; 1
+	\label{eq:token_penalty}
+\end{equation}
+more samples than honest training to reach the same loss, with $B$ and
+$B_{\mathrm{noise}}$ counted in micro-batches. For
+$B_{\mathrm{noise}}$ between $8$ and $128$ micro-batches,
+\cref{eq:token_penalty} gives $\Delta = 53$--$184\%$ at $\sigma_G = 0.7$, the
+larger penalty at the smaller noise scale. The attack moves its cost from
+throughput into learning efficiency rather than avoiding it.
 
-\paragraph{Where the tracker bends, and what it costs.} Pushed to level $0.7$,
-the same attack also weakens the tracker: its detection rate falls to $0.46$.
-The throughput cost of that level, measured on the same A100 as the other
-anchors, is $-0.65\%$, zero within noise. So one strategy halves the tracker's
-detection rate at false-alarm rate $10^{-2}$ without costing the operator any
-throughput. The mechanism is unsurprising. At level $0.7$ the iteration period
-varies by more than its own mean from step to step (cadence coefficient of
-variation $1.6$), so the line's power spreads over a band too wide for one
-track to collect; and because every micro-step is still real training, the
-device never idles.
 
-Two qualifications bound this result. First, the tracker is weakened, not
-blinded: it still detects about half of runs, and a longer observation window
-may recover more of the spread power. Second, throughput is the only cost we
-measure. At level $0.7$ the number of micro-steps accumulated per optimiser step
-varies widely, so the effective batch size changes from step to step. Under an
-unchanged learning-rate schedule that may slow convergence, in which case the
-operator pays in learning efficiency rather than throughput. We have not
-measured this (\cref{subsec:scope}). The far end of the frontier is therefore
-free in throughput, and its price in learning efficiency is open.
-
-\subsection{A lower bound on the price of hiding}
-\label{subsec:frontier_bound}
-
-The frontier bounds hiding
-from above: it says what an operator can hide from our detectors, which a better
-detector would move. The complementary direction --- what hiding must cost ---
-can be argued for one adversarial strategy (\cref{subsec:costbound}). For i.i.d.\
-period jitter of scale $\sigma$, no test's detection advantage exceeds the total
-variation between the training and null laws, so a verifier that demonstrably
-attains advantage $J(\sigma) > \varepsilon$ rules out $\varepsilon$-covertness at
-that $\sigma$. With the simplest such verifier, a fixed-bin threshold test at the
-nominal cadence, $\varepsilon$-covertness requires $\sigma^{*}(0.5) = 0.18$ and
-$\sigma^{*}(0.2) = 0.36$, which the measured anchors price at tens of percent of
-throughput and at order $100\%$ respectively. Three limits apply. The bound is
-read off the weakest verifier, so it is loose against the tracker, which
-\cref{fig:attack_curves} shows to be stronger; it covers one adversarial strategy; and
-turning distortion into cost rests on an assumption --- that at fixed useful work,
-jitter costs throughput or learning efficiency --- rather than a result.
+These learning costs are model predictions, not measurements. They assume a
+learning rate retuned at every step, and $B_{\mathrm{noise}}$ for a given
+training run is unknown. Measuring them requires training to a fixed loss under
+each schedule, which we leave open (\cref{subsec:scope}). A longer observation
+window may also recover more of the spread power for the tracker.
+\textcolor{red}{[TODO: the work-variation numbers in the last three paragraphs
+come from the exploratory E0 spike (the E0 findings note under notes/results
+on the frontier-aggregate-explore branch); promote it to a script with a
+committed results file before submission. Only the Viterbi tracker was run.]}
 
 % ============================================================================
 \section{Discussion and conclusion}
@@ -1276,13 +1246,12 @@ evasion strategies run on a single H200 --- chunked optimizer updates, dilution
 with decoy inference, throttling, and diluted LoRA --- cost between $28$ and
 $69\%$ of throughput \citep{gargiulo2026workload}. Each inserts or substitutes
 work, which is what makes it expensive, and none varies the real computation per
-iteration, the one strategy \cref{subsec:frontier_work} finds cheap.
+iteration, the one strategy \cref{sec:frontier} finds cheap.
 
 \paragraph{Falsifiable predictions.} The model makes three predictions we cannot
 test here but state as falsifiable. Distributed synchronisation should deepen the
 line: at cluster scale the periodic all-reduce barrier produces a deep, coherent,
-legible cadence rather than the shallow single-card ripple, which is precisely the
-physics the cost-of-hiding assumption leans on. And an
+legible cadence rather than the shallow single-card ripple. And an
 external wall or rack meter should see a different, lower-passed trace than
 on-board NVML telemetry, shifting where the minimum meter specification of
 \cref{subsec:meter_spec} binds. And per-card power-controller oscillations,
@@ -1392,19 +1361,13 @@ the cadence, and conversion losses. Power smoothing of this kind is a grid
 mitigation for training load in its own right \citep{ko2025widearea}, so it
 may be installed for reasons unrelated to concealment. The verifier's remedy
 is placement: a meter between any storage and the accelerators sees the
-unsmoothed load. The cost bound of
-\cref{subsec:costbound} shares that limit: it covers i.i.d.\ period jitter,
-and while it holds against any verifier class containing the test it exhibits, it is
-obtained from a fixed-bin test and so reads loose against the Viterbi tracker our own
-experiments show to be stronger --- it does not yet close the frontier's far end. Its cost leg is an
-assumption, not a result, for the reasons set out in
-\cref{subsec:costbound}. The tracker's thresholds are calibrated by Monte Carlo on
+unsmoothed load. The tracker's thresholds are calibrated by Monte Carlo on
 the modelled null, not per trace, and the known-line veto that would handle
-instrument lines is specified but not evaluated. And the learning-efficiency leg of that bound --- the axis that would
-turn it into a single priced statement rather than a disjunction --- is argued,
-not measured, and remains the central open empirical question. It now matters
-directly: the one attack that weakens the tracker is free in throughput, so
-learning efficiency is the only place it could be paid for.
+instrument lines is specified but not evaluated. Finally, throughput is the only
+cost we measure. Learning efficiency is argued, not measured, and remains the
+central open empirical question. It matters directly: the one attack that
+weakens the tracker is free in throughput, so learning efficiency is the only
+place it could be paid for.
 
 \paragraph{Governance reading.} What a regulator can buy today is a screen. From
 an external meter alone, meeting the specification of \cref{subsec:meter_spec}, a
@@ -1796,7 +1759,7 @@ tracker.
 \section{Full attack sweep}
 \label{app:sweep}
 
-The main text reports hiding against attack level for every schedule strategy,
+The main text reports hiding against budget knob for every schedule strategy,
 with measured costs where they exist (\cref{fig:attack_curves}). This appendix gives the full sweep: detection against
 physical de-periodicisation for every strategy of \cref{tab:attacks} and both
 detector classes (\cref{fig:frontier}), the per-detector response to variable real work
@@ -1807,7 +1770,7 @@ tracker and the two order-tracked Dandawat\'e--Giannakis statistics of
 the Viterbi tracker's alone.
 
 The sweep runs on the aggregate of \cref{sec:results}, with each strategy applied
-to the dominant training run only. At every attack level it also records the
+to the dominant training run only. At every knob setting it also records the
 physical de-periodicisation the attack induces, from the generator's
 ground-truth iteration boundaries: the cadence coefficient of variation, which
 \cref{fig:frontier} plots detection against, and the phase-diffusion
@@ -1874,7 +1837,7 @@ falls mainly on the training dynamics or on energy rather than on throughput.
 	variable real work at level $0.7$ hides $0.55$ from the tracking class (left)
 	and $0.88$ from the fixed class (right), and no costly attack does better.
 	The cost axis is linear within $\pm10\%$ and logarithmic beyond; the four
-	strategies without a hardware cost are not shown. Attack levels are labelled
+	strategies without a hardware cost are not shown. Knob settings are labelled
 	where they hide something; the rest sit on the floor.}
 	\label{fig:st2_cost_pareto}
 \end{figure*}
@@ -2046,115 +2009,9 @@ line, and which is where the tracker actually bends.
 \section{Identifiability details}
 \label{app:identifiability}
 
-This appendix states the cost-of-hiding bound summarised in
-\cref{sec:frontier}, proves it and the non-identifiability result of
-\cref{subsec:identifiability}, and reports the numerical check that fixes their
-constants.
+This appendix proves the non-identifiability result of
+\cref{subsec:identifiability}.
 
-\subsection{The cost of hiding}
-\label{subsec:costbound}
-
-
-Two questions have to be kept apart. \emph{Detection} asks whether this trace is
-training rather than the null, and its tools are likelihood-ratio and
-cyclostationary tests. \emph{Cost of hiding} asks how far the operator must distort
-its schedule before the training-trace \emph{distribution} becomes
-indistinguishable from the null \emph{distribution}, and its tools are
-distributional distances. The distinction matters because our empirical results
-bound the wrong direction for a governance claim: a detection sweep says how much
-can be hidden from \emph{our} detector, which a better detector moves. This
-subsection states what can be argued in the other direction. It is the one part
-of the paper that does not come from the generator; the derivations behind it
-follow in \cref{subsec:proofs}.
-
-What can be argued quantitatively concerns the \emph{cost} of hiding, and it is
-stated over the population this paper scopes itself to: efficient, synchronous,
-iteration-structured training whose compute/communication alternation exposes a
-recoverable cadence $f_0$, and in which the synchronous exchange occupies a
-down-phase whose duration does not scale with the work accumulated in the
-preceding up-phase. Call an attack $\varepsilon$-\emph{covert} against a class of
-verifiers if no test in the class attains detection advantage --- true-positive
-minus false-positive rate --- above $\varepsilon$. Any single test's advantage is
-at most the total variation $\mathrm{TV}(P_{\mathrm{train}},P_{\mathrm{null}})$
-between the two laws \citep{tsybakov2009nonparametric}, so covertness against
-\emph{every} verifier requires that total variation to be at most $\varepsilon$.
-
-Consider the concrete attack the frontier prices: i.i.d.\ fractional period
-jitter of scale $\sigma$, so iteration $i$ has period
-$1/\!\left(f_0(1+\xi_i)\right)$ with $\xi_i \sim \mathcal{N}(0,\sigma^2)$. Such
-jitter \emph{accumulates} --- the iteration-boundary phase performs a random walk
-with diffusion coefficient $D \approx (2\pi)^2\sigma^2 f_0$ --- so the spectral
-line broadens into a Lorentzian and the coherent power retained in one frequency
-bin of a record of length $T$ falls off as
-\begin{equation}
-	\frac{P_c(\sigma)}{P_c(0)} \;\approx\; \frac{1}{1+\kappa\sigma^2},
-	\qquad \kappa = \pi^2 f_0 T,
-	\label{eq:rolloff}
-\end{equation}
-a parameter-free prediction that the generator reproduces to within several
-percent (\cref{app:identifiability}). Now let $J(\sigma)$ be the advantage
-attained by a fixed-bin threshold test at the nominal cadence, which decreases in
-$\sigma$ through \cref{eq:rolloff}. Because $J \leq \mathrm{TV}$, any $\sigma$
-with $J(\sigma) > \varepsilon$ is not $\varepsilon$-covert, so
-$\varepsilon$-covertness requires a distortion at least
-$\sigma^{*}(\varepsilon)$, the solution of $J(\sigma^{*}) = \varepsilon$. It is
-strictly positive and grows as $\varepsilon$ falls; measured through the full
-generator and meter it is $\sigma^{*}(0.5) = 0.18$ and $\sigma^{*}(0.2) = 0.36$,
-which the anchors of \cref{sec:frontier} price at tens of percent of throughput
-and at order $100\%$ respectively.
-
-Running the argument through an \emph{explicit} verifier is essential, and it is
-worth saying why, because the familiar covert-communication route goes the other
-way. Pinsker's inequality $\mathrm{TV} \leq \sqrt{\mathrm{KL}/2}$
-\citep{tsybakov2009nonparametric,cover2006elements} bounds total variation from
-above, so forcing that bound below $\varepsilon$ would establish that some
-distortion \emph{suffices} for covertness, not that any is \emph{necessary}. Only
-a verifier that demonstrably attains advantage $J$ certifies that smaller
-distortions fail.
-
-Distortion is not yet cost, and the bridge is a physical property of the
-admissible family that we state as an \emph{assumption} rather than a result,
-because two steps in its justification are not closed. The
-\emph{cost-of-hiding assumption} is that within that family, and at fixed total
-useful work, reaching $\sigma^{*}(\varepsilon)$ costs throughput or learning
-efficiency and cannot be free in both. The reasoning is that period jitter then
-has only two realisations. Inserting idle time inflates the mean period and pays
-in throughput. Varying the real work per iteration avoids idling, but the
-down-phase duration does not scale with the accumulated work and that work is
-quantised, so a component at the exchange cadence survives; removing it requires
-either idling or desynchronising the exchange, and the latter changes the
-optimisation being performed.
-
-Three limits fix how far all of this travels, and they are the reason the
-assumption is labelled as one. First, the surviving exchange-cadence component is
-recovered by the order-tracking class, not by the fixed-bin verifier that supplies
-$\sigma^{*}$: under variable real work \cref{sec:frontier} measures the fixed
-tests below chance. Read strictly, the argument shows that a work-varying operator
-stays visible to a \emph{tracker}, not that it must pay to become
-$\varepsilon$-covert against the verifier whose $\sigma^{*}$ we computed. What the
-numbers do support is the comparative claim --- at matched total distortion, work
-variation is the more detectable of the two at every $\sigma \geq 0.05$, the two
-being indistinguishable within sampling error below that
-(\cref{fig:lower_bound}). Second, fixing total useful work is a real restriction:
-substituting useful non-training work, the additive-burial and dilution strategies
-above, modulates the period while idling nothing and degrading no optimisation.
-The disjunction is therefore asserted over timing attacks at fixed work. Third,
-$\sigma^{*}$ is read off one exhibited verifier and $J$ is measured between the
-two laws of our own generator. Because $J \leq \mathrm{TV}$, a $\sigma$ ruled out
-by the fixed-bin test is ruled out against any verifier class containing that
-test --- including the five-detector bank of \cref{sec:frontier}, order tracker
-and all --- but a stronger verifier attains a larger advantage at each $\sigma$
-and so yields a larger $\sigma^{*}$. Since our own experiments show the tracking
-class to be the stronger one, the threshold we report is a loose reading of the
-true requirement. And the claim throughout is that hiding \emph{to a stated
-$\varepsilon$} must be paid for, expressly not that de-periodicisation is
-inefficient in general, which \cref{sec:frontier} refutes by exhibiting a
-near-free attack that defeats every fixed test.
-
-\subsection{Derivations and numerical check}
-\label{subsec:proofs}
-
-\paragraph{Why no passive detector identifies semantics.}
 A passive verifier observes only $P_{\mathrm{obs}}$, so its decision is a
 measurable function $\phi$ of that trace and its rejection probability is
 $\mathbb{E}_{K_h(w)}[\phi]$. If $K_{h_0}(w_0) = K_{h_1}(w_1)$ the two
@@ -2175,256 +2032,6 @@ the trace, without retaining a model. The converse direction is equally open to
 the operator: genuine training can be run asynchronously, diluted among other
 loads, or actively power-shaped, so the equivalence classes are populated from
 both sides.
-
-\paragraph{Line attenuation under phase diffusion.}
-Boundary $i$ nominally carries phase $2\pi i$; fractional period jitter perturbs
-each boundary relative to its predecessor, so the \emph{residual} of the boundary
-phase against a uniform clock accumulates independent increments and performs a
-random walk with $\mathrm{Var}[\theta(t)] \approx D t$ and
-$D \approx (2\pi)^2\sigma^2 f_0$. For a Brownian phase the periodic component's
-autocorrelation decays as $\exp(-D|\tau|/2)$, so its spectrum is a Lorentzian
-rather than a line, with half-width at half-maximum
-$\gamma = D/4\pi = \pi\sigma^2 f_0$ in Hz. A record of length $T$ resolves
-frequency only to $1/T$, so the coherent power a fixed-bin verifier collects is
-the Lorentzian mass within a half-width $B = 1/2T$ of the centre,
-\begin{equation}
-	\frac{P_c(\sigma)}{P_c(0)}
-	\;=\; \frac{2}{\pi}\arctan\!\left(\frac{B}{\gamma}\right)
-	\;=\; \frac{2}{\pi}\arctan\!\left(\frac{1}{2\pi f_0 T \sigma^2}\right),
-	\label{eq:arctan}
-\end{equation}
-whose small-argument form is $1/(\pi^2 f_0 T\sigma^2)$. Matching that tail to
-$(1+\kappa\sigma^2)^{-1}$ gives
-\begin{equation}
-	\kappa \;=\; \pi^2 f_0 T,
-	\label{eq:kappa}
-\end{equation}
-a parameter-free prediction rather than a fitted scale --- the width and bandwidth
-conventions are fixed by the explicit calculation for the rectangular-bin, untapered
-estimator used below, so no $O(1)$ factor is left free. The
-Lorentzian of \cref{eq:rolloff} is not a pointwise approximation to
-\cref{eq:arctan}: the two differ by up to $22\%$ near $\sigma = 0.02$, where the
-arctan is still turning over, and agree to better than $1\%$ only for
-$\sigma \gtrsim 0.2$. What matters is that using the Lorentzian as the fit model
-does not bias the constant it returns --- fitting \cref{eq:rolloff} to
-\cref{eq:arctan} across the $\sigma$ grid swept below recovers $\kappa = 2955$,
-within $0.2\%$ of $\pi^2 f_0 T$.
-
-\paragraph{The distortion covertness requires.}
-Let $S$ be the fixed-bin statistic and consider the threshold tests
-$\{S \geq c\}$. The advantage of the best such test is
-$J = \sup_c \left(\Pr_{\mathrm{train}}[S \geq c] - \Pr_{\mathrm{null}}[S \geq
-c]\right)$, the \emph{one-sided} Kolmogorov--Smirnov distance of the score laws
-(one-sided because training traces score high, so only that direction is a
-detection advantage; one-sided $\leq$ two-sided $\leq \mathrm{TV}$, so the
-inequality we need still runs the right way). These are probabilities under the
-two laws, so $J$ is a population quantity, and each $\{S \geq c\}$ is a
-deterministic single-trace test that attains its own difference --- existence is
-all the definition of $\varepsilon$-covertness needs. Each such test is a measurable function of the trace,
-so by data processing
-$J \leq \mathrm{TV}(P_{\mathrm{train}},P_{\mathrm{null}})$. If
-$J(\sigma) > \varepsilon$ then total variation exceeds $\varepsilon$ and the
-attack is not $\varepsilon$-covert; equivalently,
-$\varepsilon$-covertness requires $J(\sigma) \leq \varepsilon$. Empirically $J$
-decreases in $\sigma$ over the swept range, so the requirement becomes a lower
-bound $\sigma \geq \sigma^*(\varepsilon)$; we do not prove that monotonicity,
-which would need a stochastic-ordering argument for the score laws rather than
-merely the decay of the coherent power that drives them. Fitting the functional
-form of \cref{eq:rolloff} to $J$, $J(\sigma) = J_0/(1+\kappa_J\sigma^2)$, and
-inverting gives
-\begin{equation}
-	\sigma^*(\varepsilon)
-	\;=\; \kappa_J^{-1/2}\,\sqrt{J_0/\varepsilon - 1},
-	\label{eq:sigmastar}
-\end{equation}
-which grows like $\varepsilon^{-1/2}$ for small $\varepsilon$. That asymptotic
-form is a property of the \emph{fitted} rolloff extrapolated beyond the swept
-range, not a derived law, which is why \cref{subsec:costbound} claims only that
-$\sigma^*$ is positive and increases as $\varepsilon$ falls. Enlarging the
-verifier class can only increase the attainable advantage at each $\sigma$, hence
-only raise the class-indexed $\sigma^*_{\mathcal{C}}(\varepsilon) =
-\inf\{\sigma : \sup_{\phi \in \mathcal{C}} J_\phi(\sigma) \leq \varepsilon\}$;
-$\sigma^*$ above is that quantity for the singleton fixed-bin class.
-
-Two points of bookkeeping. First, the rolloff constant $\kappa_J$ of the
-\emph{advantage} is not the $\kappa$ of the \emph{coherent power} in
-\cref{eq:rolloff}: the advantage saturates near one while any excess at $f_0$
-remains separable from a line-free null, so it decays far more slowly. The two are
-not interchangeable in either direction --- coherent power is not a detection
-advantage at all, so it can never be substituted into \cref{eq:sigmastar},
-whatever its rolloff. Second, $J$ is not interchangeable with the rank-based Gini
-index $2\,\mathrm{AUC}-1$: the latter can exceed $J$, so it is not the advantage
-of any single-trace test and cannot appear in \cref{eq:sigmastar}. Both are
-reported in the summary artefact; only $J$ carries the bound.
-
-\paragraph{The cost-of-hiding assumption, and why it is an assumption.}
-Hold the operator's total useful work fixed. Then a period is occupied either by
-training work or by idling, and period jitter has two realisations. Padding with
-idle time holds the real work per iteration fixed, so every period must be at
-least as long as the compute it contains and the mean period inflates with
-$\sigma$; throughput falls, and \cref{sec:frontier} measures the penalty at
-$15$--$1027\%$ over the swept range. Varying the real work per iteration avoids
-idling and is measured at essentially zero throughput cost, but within
-the admissible family it cannot make the schedule aperiodic: the accumulated work is
-an integer number of micro-steps, so the up-phase is quantised rather than
-continuously tunable, and the exchange down-phase keeps its duration whatever that
-count, leaving a component at the exchange cadence. Removing \emph{that} requires
-either inserting idle time, which returns to the first realisation and its
-throughput cost, or desynchronising the exchange, which alters the optimisation
-actually performed and is therefore paid for in learning efficiency.
-
-Two gaps stop this being a proof, and both matter.
-
-The first is that the surviving component is not one the fixed-bin verifier can
-use. \Cref{sec:frontier} measures the fixed tests under variable real work falling
-to detection rate $0.25$ with area under the curve $0.46$ --- below chance --- and
-the multitaper F-test at its floor. So the residual at the exchange cadence is
-recovered only by the order-tracking class, which is precisely the class
-the fixed-bin argument does \emph{not} instantiate. Read strictly, then, the
-argument shows that a work-varying operator remains detectable \emph{by a tracker}
-(up to level $0.5$; at $0.7$ the tracker detects about half of runs), not that it must pay to become $\varepsilon$-covert against the fixed-bin verifier
-whose $\sigma^*$ we computed. Closing that gap needs $\sigma^*$ for the tracking
-class, which we do not have.
-
-The second is that fixing total useful work is a real restriction. An operator free
-to substitute useful \emph{non-training} work --- the additive-burial and dilution
-strategies of \cref{subsec:adversary} --- can modulate the period while idling
-neither the device nor the training job, and pays in neither training throughput
-nor learning efficiency. Frequency scaling is a further route the two-realisation
-dichotomy does not cover. So the disjunction holds over timing attacks at fixed
-work, not over the adversary's full repertoire.
-
-What the numerical check does support is the weaker comparative claim: at matched
-total distortion, and for every $\sigma \geq 0.05$, the work-varying attack is
-\emph{more}
-detectable than idle-padded jitter, so substituting real-work variation does not
-buy covertness for free relative to the priced attack --- it trades throughput
-cost for detectability. That comparison is measured; the cost disjunction itself
-is assumed, and labelled accordingly.
-
-\paragraph{Numerical check.}
-\Cref{fig:lower_bound} tests every load-bearing step against the generator and
-meter of \cref{sec:scenario} rather than an idealised channel. Training and
-inference-null populations ($n=600$ per class, $f_0 = 1$~Hz, $T = 300$~s,
-$f_s = 20$~Hz, seeded) are pushed through the full observation map and scored with
-the fixed-bin statistic. The coherent power follows \cref{eq:rolloff} with
-$R^2 = 0.95$ and a fitted $\kappa = 3068$ against the parameter-free
-$\pi^2 f_0 T = 2961$ of \cref{eq:kappa}, with nothing fitted --- but that $4\%$
-should be read as an order-of-magnitude agreement rather than a two-figure one.
-The linearised fit weights each point by $\sigma^4$, so $81\%$ of its leverage
-sits on the largest $\sigma$ swept, and there the generator realises a cadence CV
-of $1.9$ against a nominal $0.5$: the mean period has drifted well off $f_0$ and
-the fixed bin is no longer measuring line broadening alone. Restricting the fit to
-the faithful regime $\sigma \leq 0.1$, where the realised CV tracks the nominal to
-within about $13\%$, gives $\kappa = 2812$, or $5\%$ below the prediction. The
-honest statement is agreement at the several-percent level from either end of the
-sweep, which still separates $\pi^2 f_0 T$ from $\pi f_0 T$ by the factor of
-$3.1$ that distinguishes them --- the strongest single confirmation of the physical
-picture here.
-
-The attained advantage requires more care, because it is estimated. Our plug-in
-$\hat J$ maximises over thresholds on the same sample it evaluates, so it is
-upward-biased; under $H_0$ at $n=600$ its fluctuation reaches $0.093$, and a
-measured $\hat J$ below that carries no evidence of separation. Because the fit
-linearises as $J_0/J-1$, which diverges as $J \to 0$, such points would otherwise
-dominate it --- at the $n=80$ sizing we first used, two washed-out points carried
-$97\%$ of the fit and $\kappa_J$ varied fourfold across seeds. We therefore
-exclude points below the $H_0$ floor and report intervals. On the surviving window
-$\sigma \in [0.05, 0.35]$ the advantage rolls off with $\kappa_J = 32$
-($95\%$ bootstrap interval $[24, 40]$, $R^2 = 0.90$, $J_0 = 1.0$), giving
-\begin{equation*}
-	\sigma^*(0.5) = 0.18\ [0.16, 0.20], \qquad
-	\sigma^*(0.2) = 0.36\ [0.32, 0.41],
-\end{equation*}
-and, by extrapolation beyond the swept range, $\sigma^*(0.1) = 0.53$ and
-$\sigma^*(0.05) = 0.78$.
-
-Two caveats bound how far these numbers travel. First, the generator realises the
-nominal distortion only up to $\sigma \approx 0.2$: beyond it the reciprocal
-Gaussian period draw and a clamp take over, and the measured cadence coefficient
-of variation runs high ($1.2$ at $\sigma = 0.35$, $1.9$ at $\sigma = 0.5$),
-as does $D$ against $(2\pi)^2\sigma^2 f_0$. Only $\sigma^*(0.5)$ falls inside that
-faithful region; $\sigma^*(0.2)$ and everything beyond it do not, and the artefact
-flags them. Second, the fit window reaches past $\sigma = 0.2$ by choice rather
-than necessity: the five points at $\sigma \leq 0.2$ are unsaturated and do support
-a fit, but the deep-rolloff point at $\sigma = 0.35$ carries most of the leverage
-on $\kappa_J$. Restricting the fit to the faithful
-region alone gives $\kappa_J = 22$ and hence larger thresholds, $\sigma^*(0.5) =
-0.22$ and $\sigma^*(0.2) = 0.43$. The thresholds are therefore good to about
-$20\%$, not to two significant figures, and the direction of that fit-window
-uncertainty is towards \emph{more} required distortion, not less. Finally, the
-work-varying series attains a higher advantage than period jitter at every
-$\sigma \geq 0.05$, the two being indistinguishable within sampling error below
-that, which is the comparison the cost-of-hiding assumption appeals to. Both arms set the
-period-jitter scale explicitly, so this is a comparison at matched total
-distortion.
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{lower_bound_spike}
-	\caption{Numerical check on the covertness cost bound, through the full
-	generator and meter ($n=600$ per class). \textbf{Left:} coherent power at the
-	nominal cadence against jitter scale. The fitted and the parameter-free
-	analytic rolloffs of \cref{eq:rolloff,eq:kappa} are indistinguishable at this
-	scale; the fitted constant agrees with the parameter-free prediction at the
-	ten-percent level (see the numerical check). \textbf{Right:} the advantage attained by the
-	fixed-bin threshold test, $J \leq \mathrm{TV}$, for idle-padded period jitter
-	and for the near-free work-varying attack; dotted lines mark
-	$\varepsilon \in \{0.1, 0.5\}$, whose crossings give
-	$\sigma^*(\varepsilon)$ (the $\varepsilon = 0.1$ crossing lies beyond the
-	swept range and is reached by extrapolation). The dash-dotted line is the
-	$H_0$ fluctuation of the estimator: the $\sigma = 0.5$ point falls below it
-	and is excluded from the advantage fit shown here (it is retained in the
-	coherent-power fit on the left, which has no sampling floor of its own). For
-	$\sigma \geq 0.05$ the work-varying attack is
-	the more detectable of the two at matched distortion, the comparison
-	the cost-of-hiding assumption appeals to; below that the two are indistinguishable within
-	sampling error. Both arms set the period-jitter scale explicitly, so the
-	distortion really is matched. The verifier
-	here is fixed at the known cadence, not the order tracker of
-	\cref{sec:methods}.}
-	\label{fig:lower_bound}
-\end{figure*}
-
-\paragraph{From distortion to a price.}
-The distortion thresholds can be read against the measured cost anchors of
-\cref{sec:frontier}, which price the idle-padded realisation on the same nominal
-$\sigma$ grid. Hiding from the fixed-bin verifier to $\varepsilon = 0.5$ needs
-$\sigma^* = 0.18$, which falls between the measured levels $\sigma = 0.1$ and
-$\sigma = 0.2$ and so between $32\%$ and $66\%$ throughput overhead; to
-$\varepsilon = 0.2$ it needs $\sigma^* = 0.36$, between $159\%$ and $375\%$.
-Given the roughly $20\%$ uncertainty on $\sigma^*$ established above, and the
-scope limits set out in \cref{subsec:costbound}, the robust
-form of the statement is the order of magnitude rather than the bracket: driving a
-fixed-bin verifier to $\varepsilon = 0.5$ costs \emph{tens of percent} of
-throughput, and to $\varepsilon = 0.2$ costs \emph{of order $100\%$ or more}. Both
-readings survive the fit-window sensitivity; the individual brackets do not, and
-the $\varepsilon = 0.5$ one in particular moves up a level under the
-faithful-region fit.
-
-This is the sense in which the bound has a price, and \cref{fig:st2_cost_pareto}
-is its empirical counterpart. Three things keep the two from being conflated. The
-thresholds come from a fixed-bin verifier at the known cadence on $600$ traces per
-class, whereas the frontier scores a five-detector bank on $200$. The pairing is
-by nominal $\sigma$, but the two campaigns realise the same nominal setting
-somewhat differently once past the faithful region --- cadence coefficient of
-variation $0.50$ here against $0.84$ there at $\sigma = 0.35$ --- so the mapping is
-exact only for $\sigma \lesssim 0.2$. And the frontier prices attacks against a
-detector bank that includes the tracker, whose $\sigma^*$ we never computed. They
-are read side by side, not on shared axes.
-
-\paragraph{What the bound does not cover.}
-The propositions above concern one adversarial strategy. Making the measured frontier a
-statement about hiding in general would need one of two further arguments: that
-the swept strategies span what a hiding adversary can do, or a bound of the kind
-above for each of them. We have the second for i.i.d.\ period jitter and make no
-claim of the first, so \cref{sec:frontier} should be read as a sample of the
-attack space rather than its boundary. The choice of distributional distance is
-also not settled. We use total variation, reached through an attained advantage;
-Kullback--Leibler and Hellinger distances tensorise more conveniently over the
-many-iteration product law and may give a tighter closed form, which we leave
-open.
-
 
 % ============================================================================
 \section{From passive evidence to active authentication (Rungs 3--4)}
