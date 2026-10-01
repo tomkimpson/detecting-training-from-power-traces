@@ -3,6 +3,24 @@
 Dated narrative of work sessions, newest at top. Append-only historical record
 (forward-looking state lives in `handoff.md`).
 
+## 2026-10-01 (later, OzSTAR) — work 0.7 priced on an A100: free in throughput; §6 rewritten
+
+**Goal.** Price the frontier cells with no measured cost, above all work 0.7, where the tracker bends.
+
+**What was tried.**
+- **Monorepo** (`analogue-sensors-for-ai-verification`, branch `feat/b2-offgrid-topup`, pushed): new B2 `offgrid` phase. It runs 8 traces at each of work jitter 0.7, pad jitter 0.7, and pad drift 0.1/0.4/0.8/1.5 Hz. Plans carry the existing `spoof`/`workjitter` phase names, so `plot_b2_spoof.py` absorbs them as extra levels, and a fresh rng offset (4) leaves every old plan untouched. Smoke job 17811393 and 7/7 GPU tests passed, then array 17811800 (tasks 21–23, about 95 min each) captured all 48 traces on A100-SXM4-80GB at 500 W, none throttled. Every pre-existing summary key reproduces exactly.
+- **This repo:** copied the anchors with a README provenance note, priced drift 0 at 0% by definition (`_HONEST_LEVELS` in `plot_st2_frontier.py`, with a new test), and added `--xscale symlog` / `--xmax` to `plot_money_pareto.py`. Rewrote §6 and the text that depends on it.
+
+**What was learned.**
+- **Work 0.7 costs −0.65% ± 0.19%, zero within noise.** The attack that drops the tracker to 0.46 (FAR 1e-2) is free in throughput. Both Pareto staircases are now flat from zero cost: hiding 0.55 vs the tracker, 0.88 vs the fixed tests. Every costly attack hides less from the tracker. The paper's line is now "weakened, not blinded; the only possible price is learning efficiency, which is unmeasured".
+- **Pad attacks are very expensive:** jitter 0.7 costs 1027%; drift 0.1/0.4/0.8/1.5 Hz cost 42/356/1155/2127%. The drift costs are heavy-tailed (mean up to 2× the median).
+- **Hardware vs synthetic at work 0.7:** on real A100 traces Viterbi still detects 8/8, although the hardware schedule is *more* irregular (cadence CV 1.80 vs 1.56 synthetic). That is the issue #54 side channel: the tracker locks onto the 0.31–0.45 Hz power-management limit cycle, which any time-varying load excites. It is not evidence against the synthetic result.
+
+**Decisions / dead ends.**
+- **The limit cycle stays framed as an instrument line** (a false-alarm source to bound), not as a signal to track and not as "not applicable". Reasons: it is firmware-specific, the operator can change it, and it says "time-varying load", not "training". A §7.1 sentence using the work-0.7 hardware result as a second example was proposed; Tom chose to leave it.
+
+**Open threads.** Which Pareto figure version to use; learning-efficiency experiment; merges in both repos.
+
 ## 2026-10-01 — §6 restructured, frontier moved to the aggregate at FAR 1e-2, cost-anchor gaps scoped
 
 **Goal.** Get §6 (now "Detection against a concealing operator") into the same shape as §5. That meant a flow pass, the standard opener, the §2 aggregate scenario as in §5, and FAR 1e-2 throughout.

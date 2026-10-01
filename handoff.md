@@ -1,3 +1,39 @@
+# Handoff — 2026-10-01 (later, from OzSTAR: off-grid cells priced, work 0.7 is free, §6 rewritten)
+
+## Goal
+Finish §6 now that the frontier's key cell is priced, then merge.
+
+## Status
+- **Priced.** Work 0.7 costs −0.65% (free), pad jitter 0.7 costs 1027%, drift 0.1/0.4/0.8/1.5 Hz cost 42/356/1155/2127%, and drift 0 is 0% by definition. 23 of 50 cells are priced.
+- **§6 and dependent text rewritten:** the abstract, §6.1–6.3, Fig. 7 caption, discussion, limitations, governance reading, claims table and App. D. The new story: both staircases are flat from zero cost; work 0.7 hides 0.55 from the tracker; every costly attack hides less; the free attack's only possible price is learning efficiency (unmeasured).
+- **Builds:** the paper is clean at 38 pp. **`main.pdf` was built with OzSTAR's TeX Live**, so rebuild on the laptop if byte continuity matters. Tests: 250 pass; the 5 known BLAS digest tests fail off the pinned venv.
+- **Branches:** this repo's `feat/frontier-aggregate` (at `438085d`, pushed) is not yet merged to `restructure`. The monorepo's `feat/b2-offgrid-topup` (`732479a`, `86b412a`, pushed) is not yet merged to its `main`.
+
+## Next steps
+1. **Pick the Fig. 7 version** and switch `paper/main.tex` to it if needed:
+   - `money_pareto_aggregate` (linear, current);
+   - `_symlog`: the legend overlaps one shape point, so nudge `bbox_to_anchor` if chosen;
+   - `_xmax`: drops drift 1.5, but the axis still runs to about 1200%.
+2. Read the §6.3 rewrite ("Where the tracker bends, and what it costs") and adjust the tone.
+3. `/check-PR`, then merge `feat/frontier-aggregate` → `restructure`. Merge the monorepo `feat/b2-offgrid-topup` → `main`.
+4. Optional: a learning-efficiency experiment. Train to a fixed loss at work σ = 0 vs 0.7 (GPU, OzSTAR `milan-gpu`). It now directly answers whether the one attack that weakens the tracker has a price.
+
+## Open questions
+- Figure 7 tidy-ups (carried): drop the meter cells from the strip? Rename it "no hardware cost measurement"? Explain shape fill 0 at 189%?
+- Phase slip, relocation and harmonic smoothing still have no hardware schedule. Dilution mapping is still undecided.
+- Tom's half-written §6 opener ("We construct the Pareto curve …") is untouched.
+- Carried from 2026-09-30: §5.2's "≳0.9 iff" claim vs the 0.8 Hz notch; the §5 intro overselling the background.
+
+## Non-obvious context
+- **The off-grid top-up phase:** `plan_phase("offgrid")` emits rows with `phase="spoof"`/`"workjitter"`, so the monorepo summaries just gain keys. Slurm array tasks 21–23.
+- **Drift 0** is priced via `_HONEST_LEVELS` in `scripts/plot_st2_frontier.py`, labelled "honest schedule (no attack): 0% by definition" in `frontier_summary.json`.
+- **The hardware 8/8 detection at work 0.7 is the issue #54 limit cycle**, not the iteration line. Don't cite it as robustness.
+- **Pad jitter 0.7:** the synthetic tracker detects 1.00 there, more than at 0.35 (0.76). It's non-monotone, but not touched by the text.
+
+---
+
+(Previous handoff follows.)
+
 # Handoff — 2026-10-01 (§6 on the aggregate at FAR 1e-2; moving to OzSTAR to price missing cost cells)
 
 ## Goal
