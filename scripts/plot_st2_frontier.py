@@ -14,8 +14,9 @@ Cost-anchor mapping (families without an entry are analytic/qualitative only):
                (idle-PAD realisation of timing jitter: the expensive way)
     drift   -> data/measured_cost_anchors/spoof_summary.json
                throughput_overhead["drift=L"]
-               (pad realisation; measured grid 0.2/0.5/1 Hz, so only shared
-               levels get an anchor)
+               (pad realisation; measured grid 0.1/0.2/0.4/0.5/0.8/1/1.5 Hz,
+               so only shared levels get an anchor. drift=0 is the honest
+               schedule, f0_drift_hz=0, so it is priced at exactly 0%)
     work    -> data/measured_cost_anchors/workjitter_summary.json
                throughput_overhead["jitter=L"]
                (REAL-WORK realisation of the same sigma grid: ~zero cost)
@@ -170,6 +171,11 @@ _ANCHOR_SOURCE = {
               "sigma=0.35 timing base -> upper bound on shaping-only cost)"),
 }
 
+# Family levels that ARE the honest schedule (the knob at its honest default),
+# so they cost nothing by definition rather than by measurement.
+_HONEST_LEVELS = {"drift": 0.0}
+_HONEST_SOURCE = "honest schedule (no attack): 0% by definition"
+
 
 def build_cells(summaries: dict[str, dict],
                 anchors: dict[str, dict[float, tuple]]) -> list[dict]:
@@ -181,6 +187,9 @@ def build_cells(summaries: dict[str, dict],
             level = pt["level"]
             anchor = (fam_anchor.get(float(level))
                       if not isinstance(level, str) else None)
+            honest = _HONEST_LEVELS.get(fam) == level
+            if honest:
+                anchor = (0.0, 0.0)
             cells.append({
                 "family": fam,
                 "level": level,
@@ -191,7 +200,8 @@ def build_cells(summaries: dict[str, dict],
                 "cost_overhead_pct": (100.0 * anchor[0] if anchor else None),
                 "cost_overhead_pct_std": (100.0 * anchor[1] if anchor
                                           else None),
-                "cost_anchor_source": (_ANCHOR_SOURCE[fam] if anchor
+                "cost_anchor_source": (_HONEST_SOURCE if honest
+                                       else _ANCHOR_SOURCE[fam] if anchor
                                        else "analytic/qualitative only"),
                 "learning_cost": None,   # reserved (Phase 2, user decision)
             })

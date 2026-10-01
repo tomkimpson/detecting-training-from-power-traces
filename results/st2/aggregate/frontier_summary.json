@@ -527,9 +527,9 @@
           "0.01": 1.0
         }
       },
-      "cost_overhead_pct": null,
-      "cost_overhead_pct_std": null,
-      "cost_anchor_source": "analytic/qualitative only",
+      "cost_overhead_pct": 0.0,
+      "cost_overhead_pct_std": 0.0,
+      "cost_anchor_source": "honest schedule (no attack): 0% by definition",
       "learning_cost": null
     },
     {

@@ -6,18 +6,25 @@ statistics; fixed = best of spectral matched filter and multitaper F). The paper
 is Viterbi-led, so this figure overlays the two Pareto staircases that carry
 its claim on one axis:
 
-    against the fixed tests, varying real work hides ~0.74 at ~zero cost;
-    against the Viterbi tracker, no cost-anchored attack hides more than 0.16.
+    varying real work per iteration costs ~zero throughput; it hides ~0.88
+    from the fixed tests and ~0.55 from the Viterbi tracker (work=0.7).
 
 Colour encodes the detector, marker shape the attack family. Cells with no
-measured hardware cost anchor are kept in a hatched strip (work=0.7, where the
-tracker bends, is among them), exactly as in plot_st2_pareto.py.
+measured hardware cost anchor are kept in a hatched strip, exactly as in
+plot_st2_pareto.py.
+
+The heaviest pad attacks cost >2000%, which squashes the 0-400% region on a
+linear axis. Two display options: --xscale symlog (log above 10%, linear
+through the ~0% cells) or --xmax PCT (drop anchored cells costing more than
+PCT; the dropped cells are printed and do not move either staircase as long as
+the cheaper cells already dominate them).
 
 READ-ONLY: a pure reader of the tracked results/st2/frontier_summary.json; it
 reuses the reductions of plot_st2_pareto.py so the two figures cannot disagree.
 
 Reproduce:
     python scripts/plot_money_pareto.py [--summary PATH] [--far 0.01] [--out STEM]
+        [--xscale {linear,symlog}] [--xmax PCT]
 Outputs:
     figures/money_pareto.{pdf,png}   (or figures/<STEM>.*)
 """
@@ -63,16 +70,32 @@ def series(summary: dict) -> dict[str, tuple[tuple[str, ...], str]]:
             for name, (dets, col) in _SERIES.items()}
 
 
+_SYMLOG_LINTHRESH = 10.0   # [%] linear below, log above (symlog axis)
+
+
+def drop_above(cells: list[dict], xmax: float | None) -> list[dict]:
+    """Cells with a measured cost <= xmax (unpriced cells always kept)."""
+    if xmax is None:
+        return cells
+    return [c for c in cells if c["cost_overhead_pct"] is None
+            or c["cost_overhead_pct"] <= xmax]
+
+
 def plot(summary: dict, far: str = _pp._FAR_KEY,
-         name: str = "money_pareto", frontier: str = "staircase") -> pathlib.Path:
+         name: str = "money_pareto", frontier: str = "staircase",
+         xscale: str = "linear", xmax: float | None = None) -> pathlib.Path:
     apply_house_style()
-    cells = summary["cells"]
+    cells = drop_above(summary["cells"], xmax)
     fig, ax = plt.subplots(figsize=(WIDTH_ICML_COL, 2.45))
 
     costs = [c["cost_overhead_pct"] for c in cells
              if c["cost_overhead_pct"] is not None]
     x_hi = max(costs)
-    strip_lo, strip_hi = x_hi * 1.06, x_hi * 1.24
+    if xscale == "symlog":
+        # equal widths on the log part of the axis
+        strip_lo, strip_hi = x_hi * 1.5, x_hi * 3.5
+    else:
+        strip_lo, strip_hi = x_hi * 1.06, x_hi * 1.24
 
     work_zero = None
     for k, (label, (dets, col)) in enumerate(series(summary).items()):
@@ -114,7 +137,11 @@ def plot(summary: dict, far: str = _pp._FAR_KEY,
                 color=C["orange"], ha="left", va="center",
                 arrowprops=dict(arrowstyle="-", lw=0.5, color=C["orange"]))
 
-    ax.set_xlim(-0.05 * x_hi, strip_hi + 0.02 * x_hi)
+    if xscale == "symlog":
+        ax.set_xscale("symlog", linthresh=_SYMLOG_LINTHRESH, linscale=0.6)
+        ax.set_xlim(-3.0, strip_hi * 1.1)
+    else:
+        ax.set_xlim(-0.05 * x_hi, strip_hi + 0.02 * x_hi)
     ax.set_ylim(-0.04, 1.04)
     ax.set_xlabel("measured throughput overhead [%]")
     ax.set_ylabel(f"hiding at FAR {far}")
@@ -143,9 +170,20 @@ def main() -> None:
                     default="staircase",
                     help="staircase = best single attack; hull = best mix of "
                          "attacks across runs (upper concave hull)")
+    ap.add_argument("--xscale", choices=("linear", "symlog"),
+                    default="linear",
+                    help="symlog = log above 10%%, linear through ~0%%")
+    ap.add_argument("--xmax", type=float, default=None,
+                    help="drop anchored cells costing more than this [%%]")
     args = ap.parse_args()
     summary = json.loads(args.summary.read_text())
     far = _pp.far_key(summary, args.far)
+    dropped = [c for c in summary["cells"] if c not in
+               drop_above(summary["cells"], args.xmax)]
+    if dropped:
+        print("dropped (cost > --xmax): " + ", ".join(
+            f"{c['family']}={c['level']} ({c['cost_overhead_pct']:.0f}%)"
+            for c in dropped))
     for name, (dets, _) in series(summary).items():
         anchored, unpriced = _pp.split_by_cost(summary["cells"], dets, far)
         env = _pp.pareto_envelope(anchored)
@@ -153,7 +191,7 @@ def main() -> None:
         print("  unpriced hiding > 0.3: " + ", ".join(
             f"{p['family']}={p['level']} ({p['hiding']:.2f})"
             for p in unpriced if p["hiding"] > 0.3))
-    out = plot(summary, far, args.out, args.frontier)
+    out = plot(summary, far, args.out, args.frontier, args.xscale, args.xmax)
     print(f"-> {out.with_suffix('')}.*")
 
 
