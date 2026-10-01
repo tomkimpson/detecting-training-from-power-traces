@@ -11,7 +11,7 @@ indexed by tokens, so all arms share it.
         --tokens 400e6 --data-dir /fred/oz022/tkimpson/e1_data
 
 Writes results/e1/<arm>_m<m>_s<seed>[_<tag>][_smoke]/{config.json,log.jsonl}. Log rows:
-    {"kind": "step",  "step", "tokens", "G", "lr", "loss"}
+    {"kind": "step",  "step", "tokens", "G", "lr", "loss", "gnorm" (pre-clip; E1b on)}
     {"kind": "eval",  "step", "tokens", "val_loss"}
     {"kind": "probe", "step", "tokens", "small_sq", "big_sq", "b_small", "b_big"}
     {"kind": "done",  ...throughput and G statistics}
@@ -38,8 +38,9 @@ SEQ_LEN = 512
 MODEL = dict(n_layer=6, n_head=6, n_embd=384, block_size=SEQ_LEN,
              vocab_size=50304, dropout=0.0, bias=False)
 WEIGHT_DECAY = 0.1
-BETAS = (0.9, 0.95)
-GRAD_CLIP = 1.0
+BETA1 = 0.9
+BETA2 = 0.95                      # default; --beta2 overrides (E1b)
+GRAD_CLIP = 1.0                   # default; --grad-clip overrides, 0 = off (E1b)
 WARMUP_FRAC = 0.02
 MIN_LR_FRAC = 0.1
 EVAL_BATCH = 64
@@ -145,6 +146,9 @@ def main() -> None:
     ap.add_argument("--val-tokens", type=float, default=2e6)
     ap.add_argument("--probe-every", type=float, default=0,
                     help="tokens between noise-scale probes (0 = off)")
+    ap.add_argument("--grad-clip", type=float, default=GRAD_CLIP,
+                    help="global grad-norm clip threshold (0 = off)")
+    ap.add_argument("--beta2", type=float, default=BETA2, help="AdamW beta2")
     ap.add_argument("--tag", default="", help="suffix for the run directory (e.g. bnoise)")
     ap.add_argument("--no-compile", action="store_true")
     ap.add_argument("--smoke", action="store_true",
@@ -174,14 +178,15 @@ def main() -> None:
 
     torch.manual_seed(a.seed)                 # same init for every arm of a seed
     model = GPT(GPTConfig(**MODEL)).to(device)
-    opt = model.configure_optimizers(WEIGHT_DECAY, a.lr, BETAS, device)
+    betas = (BETA1, a.beta2)
+    opt = model.configure_optimizers(WEIGHT_DECAY, a.lr, betas, device)
     fwd = model if a.no_compile or device != "cuda" else torch.compile(model)
     train_batches = MicroBatches(a.data_dir / "train.bin", a.micro_batch, a.seed, device)
     val = np.memmap(a.data_dir / "val.bin", dtype=np.uint16, mode="r")[: int(a.val_tokens) + 1]
 
     config = dict(vars(a), data_dir=str(a.data_dir), out=str(out), model=MODEL,
-                  seq_len=SEQ_LEN, weight_decay=WEIGHT_DECAY, betas=BETAS,
-                  grad_clip=GRAD_CLIP, warmup_frac=WARMUP_FRAC, min_lr_frac=MIN_LR_FRAC,
+                  seq_len=SEQ_LEN, weight_decay=WEIGHT_DECAY, betas=betas,
+                  warmup_frac=WARMUP_FRAC, min_lr_frac=MIN_LR_FRAC,
                   n_micro=n_micro, total_tokens=total_tokens, device=device,
                   gpu=torch.cuda.get_device_name() if device == "cuda" else None,
                   n_params=model.get_num_params(), torch=torch.__version__)
@@ -207,7 +212,8 @@ def main() -> None:
 
         t0 = time.perf_counter()
         loss, pr = accumulate(fwd, train_batches, G, _gpt_loss, probe=probe, ctx=ctx)
-        torch.nn.utils.clip_grad_norm_(model.parameters(), GRAD_CLIP)
+        gnorm = float(torch.nn.utils.clip_grad_norm_(
+            model.parameters(), a.grad_clip if a.grad_clip > 0 else float("inf")))
         opt.step()
         opt.zero_grad(set_to_none=True)
         if device == "cuda":
@@ -218,7 +224,7 @@ def main() -> None:
         tokens += G * tok_per_micro
         step += 1
         Gs.append(G)
-        emit(kind="step", step=step, tokens=tokens, G=G, lr=lr, loss=loss)
+        emit(kind="step", step=step, tokens=tokens, G=G, lr=lr, loss=loss, gnorm=gnorm)
         if pr is not None:
             emit(kind="probe", step=step, tokens=tokens, small_sq=pr[0], big_sq=pr[1],
                  b_small=a.micro_batch, b_big=G * a.micro_batch)
@@ -228,11 +234,12 @@ def main() -> None:
             train_tok += G * tok_per_micro
     emit(kind="eval", step=step, tokens=tokens, val_loss=evaluate(fwd, val, device, ctx))
     G_arr = np.asarray(Gs)
-    emit(kind="done", steps=step, tokens=tokens, tokens_per_s=train_tok / train_s,
+    tps = train_tok / train_s if train_s else None     # None for runs of <= 3 steps
+    emit(kind="done", steps=step, tokens=tokens, tokens_per_s=tps,
          mean_G=float(G_arr.mean()), median_G=float(np.median(G_arr)),
          frac_G_cap=float((G_arr >= schedules.CAP).mean()))
     log.close()
-    print(f"{tag}: {step} steps, {tokens:.3g} tokens, {train_tok / train_s:.3g} tok/s")
+    print(f"{tag}: {step} steps, {tokens:.3g} tokens, {tps} tok/s")
 
 
 if __name__ == "__main__":
