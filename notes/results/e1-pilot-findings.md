@@ -182,3 +182,77 @@ cd scripts/e1 && python analyse.py --micro-batch 16
 
 Slurm jobs: noise scans 17840633–17840635, arms array 17841545. Run logs are in
 `results/e1/<arm>_m16_s<seed>/log.jsonl` (tracked).
+
+---
+
+## E1b (2026-10-01): tuning both sides doesn't close the gap
+
+**Question.** The pilot's attacker used the honest recipe unchanged, so its 93% cost
+might be an artefact of an untuned recipe. Can a tuned attacker avoid the cost?
+
+**Design.**
+- **Arms:** honest and the lognormal s = 1.0 attacker (hiding 0.73) are given the
+  **same** recipe changes:
+  - peak learning rate 5e-4 or 2e-3 (the base is 1e-3);
+  - gradient clipping off;
+  - AdamW β₂ = 0.99 (the base is 0.95);
+  - clipping off together with β₂ = 0.99;
+  - learning rate 2e-3, clipping off and β₂ = 0.99 together.
+- **Seeds:** each recipe was screened on seed 0. The two best were replicated on
+  seeds 1 and 2.
+- **Setup:** otherwise as the pilot (m = 16, D = 400M tokens).
+- **Logging:** `train.py` now logs the pre-clip gradient norm every step.
+- **Analysis:** `scripts/e1/analyse_tuning.py` produces
+  `results/e1/tuning_summary.json`. Slurm jobs 17853418–17853422, 17854244–17854245
+  and 17855133.
+
+**Results.** "Same recipe" compares each attacker run with the honest run using the
+same recipe and seed. Costs are honest-equivalent, as in the pilot. Spreads are the
+standard deviation over 3 seeds where n = 3.
+
+| Recipe | Honest final loss | Attacker final loss | Loss gap, same recipe | Cost, same recipe | Cost vs the best honest recipe |
+|---|---|---|---|---|---|
+| base (the pilot) | 3.939, 3.938, 3.946 | 4.140, 4.131, 4.128 | 0.192 ± 0.010 | 93% ± 6 | 143% ± 6 |
+| learning rate 5e-4 | 4.068 | 4.235 | 0.167 | 85% | 214% |
+| learning rate 2e-3 | 3.893 | 4.100 | 0.208 | 92% | 123% |
+| no clipping | 3.935 | 4.129 | 0.194 | 95% | 139% |
+| β₂ = 0.99 | 3.899 | 4.084 | 0.184 | 89% | 113% |
+| no clipping + β₂ = 0.99 | 3.888, 3.881, 3.878 | 4.067, 4.077, 4.062 | 0.187 ± 0.008 | 90% ± 5 | 105% ± 2 |
+| **learning rate 2e-3 + no clipping + β₂ = 0.99** | **3.837, 3.844, 3.832** | **4.018, 4.021, 4.024** | **0.183 ± 0.008** | **81% ± 5** | **81% ± 5** |
+
+- **The tuned attacker still pays 81% ± 5.** Both sides do best under the same recipe
+  (learning rate 2e-3, no clipping, β₂ = 0.99). Against the best honest run, the best
+  attacker needs 81% ± 5 more compute to reach its loss. That's barely below the
+  pilot's 93%, and still 3.4 times the noise-scale model's 24%.
+- **The gap doesn't depend on the recipe.** Across all 7 recipes, which span a 4×
+  range of learning rate, the attacker trails honest-under-the-same-recipe by
+  0.17–0.21 nats, a cost of 79–95%. Tuning lifts both sides by the same amount.
+- **Neither candidate mechanism explains it:**
+  - **Clipping:** the pilot's base-recipe runs predate the gradient-norm logging, so
+    their clipping rate is unknown. In the E1b attacker runs that clip (learning rate
+    2e-3, and β₂ = 0.99), the norm passes 1.0 on ≤ 2% of steps in every range of G.
+    Only at learning rate 5e-4 does it reach 30%, for G = 1–4. Turning clipping off
+    under the base recipe changes the cost from 93% to 95%.
+  - **Adam's β₂:** raising it to 0.99 helps both sides about equally (same-recipe
+    cost 89%).
+  - **What remains:** the cost tracks batch-size spread itself. Under the best recipe
+    the median pre-clip gradient norm falls from 0.44 for G = 1–4 to 0.22 for
+    G = 41–160. The model's per-step progress depends strongly on G, by more than the
+    noise-scale model, with its tuned-every-step learning rate, assumes.
+
+**What this means for the rescue.** Within this tuning space, the cost of hiding 0.73
+can't be tuned away. It stays at about 80% extra compute to reach the same loss, in a
+setting where the work-variation attack is otherwise free.
+
+**Remaining caveats:**
+- **The search may not have reached the optimum.** The best learning rate is at the
+  edge of the grid (2e-3). The same-recipe gap is flat across the grid, though, so a
+  higher learning rate is unlikely to change the conclusion.
+- **Other best responses are untested:**
+  - G-aware optimisers;
+  - learning-rate rules other than √G (the √G rule was worse in the pilot);
+  - de-periodicising by varying sequence length instead of G;
+  - running several jobs interleaved (E4).
+- **Scale and cross-system caveats still apply** (caveats 3–5 above). This is still
+  not a proof that no attacker can do better. It shows that the standard levers
+  don't help.

@@ -1,4 +1,4 @@
-# Handoff — 2026-10-01 (latest, OzSTAR: the "free" attack is tested, E0 spike + E1 pilot)
+# Handoff — 2026-10-01 (latest, OzSTAR: the "free" attack costs ~80% learning efficiency; E0 + E1 + E1b)
 
 ## Goal
 Find out whether the work-variation attack, which is free in throughput and is §6's
@@ -9,11 +9,11 @@ main failure point, has a hidden cost in learning efficiency.
   - A mean-8 lognormal micro-step schedule hides **0.73** from the tracker (s = 1.0;
     0.61 at s = 0.8), more than the shipped σ_G = 0.7 attack (0.53).
   - **§6 therefore understates the threat.**
-- **E1 pilot (GPU, exploratory, outside `spec.md` scope by Tom's choice):**
+- **E1 pilot + E1b (GPU, exploratory, outside `spec.md` scope by Tom's choice):**
   `notes/results/e1-pilot-findings.md`, harness in `scripts/e1/`.
-  - Setup: a 30M-parameter GPT, 400M tokens of FineWeb-edu, 5 arms × 3 seeds.
-  - Measured extra compute to reach the same loss, against the noise-scale model's
-    prediction:
+  - Setup: a 30M-parameter GPT, 400M tokens of FineWeb-edu.
+  - **Pilot:** measured extra compute to reach the same loss, against the
+    noise-scale model's prediction:
 
     | Arm | Measured | Predicted |
     |---|---|---|
@@ -21,9 +21,14 @@ main failure point, has a hidden cost in learning efficiency.
     | lognormal s = 1.0 | 93% ± 6 | 24% |
     | shipped σ_G = 0.7 | 267% ± 33 | 163% |
 
-  - The √lr best response made it worse (116%).
-  - **Under a standard recipe the free attack is expensive.** The attacker isn't
-    tuned yet, so this is not a lower bound.
+  - **E1b:** the same recipe changes go to both sides (learning rate, clipping,
+    β₂). The best attacker (lognormal s = 1.0, hiding 0.73) still costs
+    **81% ± 5** against the best honest recipe.
+  - **Across 7 recipes the same-recipe gap is a flat 0.17–0.21 nats** (79–95%).
+    Neither clipping nor β₂ explains it.
+  - The rescue holds against the standard levers. It is not a proof against every
+    attacker: G-aware optimisers, sequence-length variation and interleaving (E4) are
+    untested.
 - **Branches:**
   - `feat/frontier-aggregate-explore` (notes and E0) has **PR #25** open into
     `feat/frontier-aggregate`.
@@ -32,16 +37,15 @@ main failure point, has a hidden cost in learning efficiency.
 - **The paper is unchanged.** §6 still quotes the shipped attack.
 
 ## Next steps
-1. **E1b: tune both sides** (about 15 minutes per run on `milan-gpu`):
-   - sweep the peak learning rate for honest and lognormal s = 1.0 (×0.5, ×1, ×2);
-   - try lognormal s = 1.0 with clipping off (or the threshold scaled with G), and
-     with β₂ = 0.99.
-
-   The attacker's best measured cost is the number that can rescue §6.
-2. **Mechanism:** log the clipping rate and update norms by G.
-3. **If E1b holds:** decide with Tom whether to amend `spec.md` and bring a
-   learning-cost column into §6. If it does, §6 must also adopt the stronger mean-8
-   attacker from E0.
+1. **Decide with Tom:**
+   - whether to amend `spec.md` and bring the learning cost into §6;
+   - if yes, §6 must adopt the stronger mean-8 attacker from E0, and the frontier
+     needs a learning-cost axis for work variation.
+2. **Optional robustness:**
+   - E4, interleaving fixed-batch jobs on the synthetic side: the most serious
+     loophole;
+   - a G-aware attacker optimiser;
+   - one scale step (GPT-2 124M) for the transfer argument.
 4. **Carried:** pick the Fig. 7 version, `/check-PR`, merge `feat/frontier-aggregate`
    → `restructure`.
 

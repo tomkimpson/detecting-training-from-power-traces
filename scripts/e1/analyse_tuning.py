@@ -8,6 +8,7 @@ For every attacker config this reports the honest-equivalent cost
 
     base honest   the pilot's honest recipe
     best honest   the honest recipe with the lowest seed-0 final loss
+    same recipe   the honest run with the attacker's own recipe and seed
 
 The attacker's tuned cost is the minimum over its configs, against the best
 honest recipe. Where gradient norms were logged it also reports, per range of G,
@@ -93,6 +94,9 @@ def main() -> None:
         costs.setdefault(c, {})[s] = dict(
             vs_base_honest=_equiv(ref("base", s), r),
             vs_best_honest=_equiv(ref(best_honest, s), r),
+            vs_same_recipe=_equiv(hon[(c, s)], r) if (c, s) in hon else None,
+            same_recipe_gap=(float(r["loss"][-1] - hon[(c, s)]["loss"][-1])
+                             if (c, s) in hon else None),
             final_loss=float(r["loss"][-1]))
 
     def mean_cost(c, key):
@@ -100,7 +104,9 @@ def main() -> None:
         return (float(np.mean(v)), float(np.std(v, ddof=1)) if len(v) > 1 else None, len(v))
 
     per_config = {c: dict(vs_base_honest=mean_cost(c, "vs_base_honest"),
-                          vs_best_honest=mean_cost(c, "vs_best_honest"))
+                          vs_best_honest=mean_cost(c, "vs_best_honest"),
+                          vs_same_recipe=mean_cost(c, "vs_same_recipe"),
+                          same_recipe_gap=mean_cost(c, "same_recipe_gap"))
                   for c in costs}
     best_attacker = min((c for c in costs if 0 in costs[c]),
                         key=lambda c: costs[c][0]["vs_best_honest"])
@@ -120,14 +126,18 @@ def main() -> None:
 
     print(f"best honest recipe: {best_honest}   best attacker recipe: {best_attacker}")
     print(f"{'config':16s} {'honest final':>22s} {'attacker final':>22s} "
-          f"{'cost vs base':>16s} {'cost vs best':>16s}")
+          f"{'cost vs base':>16s} {'cost vs best':>16s} {'same recipe':>16s} {'gap':>14s}")
     for c in sorted(set(hon_final) | set(att_final)):
         hf = ", ".join(f"{v:.3f}" for _, v in sorted(hon_final.get(c, {}).items()))
         af = ", ".join(f"{v:.3f}" for _, v in sorted(att_final.get(c, {}).items()))
         cb = per_config.get(c, {}).get("vs_base_honest")
         cs = per_config.get(c, {}).get("vs_best_honest")
+        cr = per_config.get(c, {}).get("vs_same_recipe")
+        gp = per_config.get(c, {}).get("same_recipe_gap")
         fmt = lambda x: "-" if not x else f"{100*x[0]:.0f}%" + (f"±{100*x[1]:.0f}" if x[1] else "") + f" (n={x[2]})"  # noqa: E731
-        print(f"{c:16s} {hf:>22s} {af:>22s} {fmt(cb):>16s} {fmt(cs):>16s}")
+        gtxt = "-" if not gp else f"{gp[0]:.3f}" + (f"±{gp[1]:.3f}" if gp[1] else "")
+        print(f"{c:16s} {hf:>22s} {af:>22s} {fmt(cb):>16s} {fmt(cs):>16s} "
+              f"{fmt(cr):>16s} {gtxt:>14s}")
     for k, v in summary["mechanism"].items():
         if v:
             print(k, {b: (round(x["median_gnorm"], 2), round(x["frac_clipped"], 2))
