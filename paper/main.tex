@@ -604,7 +604,7 @@ not know the realisation of $\eta$. %Kerckhoffs' principle
 %\paragraph{Three operators.} 
 We consider three types of facility operator. First a \emph{compliant} operator runs only its declared inference. A \emph{benign} operator trains without regard to being caught by the power meter.  A \emph{concealing} operator trains, knows the detector, and reshapes its workload to try to evade it. The concealing operator's objective is to train
 without the being detected by the verifier. They use different adversarial strategies to try to subvert the verifier's detection. \Cref{tab:attacks} lists the adversarial strategies considered in this work. They
-fall into five classes: disturbing the timing of iterations, relocating the
+fall into five categories: disturbing the timing of iterations, relocating the
 cadence, reshaping the power waveform within an iteration, mixing the run with
 other load, and degrading the channel. In principle the strategies may be composed, but we treat them individually. Adversarial strategies have a cost to the operator in terms of training throughput. Each strategy therefore trades concealment against cost. 
 
@@ -618,7 +618,7 @@ other load, and degrading the channel. In principle the strategies may be compos
 		\multicolumn{4}{@{}l}{\emph{Timing}} \\
 		Period jitter & i.i.d.\ period jitter $\sigma_\xi$ of \cref{eq:period}, by inserting idle time & $\sigma_\xi \in [0.05, 0.7]$ & measured \\
 		Cadence drift & OU excursion $\sigma_f$ of \cref{eq:ou} & $\sigma_f \in [0, 1.5]$\,Hz & measured \\
-		Work variation & micro-steps per iteration, $G_i$ about $G_0 = 8$; down-phase unchanged & fractional spread $\in [0.05, 0.7]$ & measured \\
+		Work variation & micro-steps per iteration $G_i$, drawn about $G_0 = 8$ with fractional spread $\sigma_G$; down-phase unchanged & $\sigma_G \in [0.05, 0.7]$ & measured \\
 		Phase slip & Brownian slip of iteration boundaries at fixed mean period & slip std $\in [0.01, 0.2]$ periods & --- \\
 		\midrule
 		\multicolumn{4}{@{}l}{\emph{Frequency}} \\
@@ -639,7 +639,8 @@ other load, and degrading the channel. In principle the strategies may be compos
 	implemented inside the generator of \cref{sec:scenario} and swept singly over
 	the stated budget range in \cref{sec:frontier}. ``Measured'' marks strategies
 	with a throughput-overhead anchor from the single-A100 campaign
-	(\cref{sec:reality}); the others enter the frontier unpriced. The meter strategy
+	(\cref{sec:reality}); the others have no hardware implementation and are
+	reported without a cost (\cref{sec:frontier}). The meter strategy
 	degrades the channel rather than the schedule and is read as a channel
 	requirement (\cref{subsec:meter_spec}), not priced.}
 	\label{tab:attacks}
@@ -929,26 +930,34 @@ cadence.
 % ============================================================================
 \Cref{sec:results} assumed a benign operator, who leaves the cadence for the tracker to find. A concealing
 operator can instead de-periodicise its schedule and smear the cadence away
-(\cref{subsec:adversary}). In principle this is always possible; the concealing operator can insert idle time at random between iterations, or varying the work done in each, to removes any freuency for the Viterbi detector to identify.The question is the cost in training throughput the operator must incur in order de-periodicise enough to hide from the Viterbi detector, and in particular whether any de-periodicisation strategy is both cheap and effective. 
+(\cref{subsec:adversary}). In principle this is always possible; the concealing operator can insert idle time at random between iterations, or varying the work done in each, to removes any frequency for the Viterbi detector to identify. The question is the cost in training throughput the operator must incur in order de-periodicise enough to hide from the Viterbi detector, and in particular whether any de-periodicisation strategy is both cheap and effective. 
 
 
-We sweep the eight schedule strategies of \cref{tab:attacks} on the aggregate
-of \cref{sec:results}. The operator applies each strategy to its dominant
-training run, and the background of small trainings and fine-tunings stays
-honest. Every cell is scored against the aggregate null of
-\cref{eq:aggregate_null}. For each strategy we
-step an attack level and, at every level, measure the physical
-de-periodicisation it induces (cadence coefficient of variation, phase
-diffusion) against the detection rate of the Viterbi tracker and of the fixed
-tests of \cref{subsec:comparators}, taking the better of the two fixed tests at
-each cell. All rates are at false-alarm rate $10^{-2}$ with $n=200$ traces
-per class. Four strategies --- period jitter, cadence drift, work variation and
-shape filling --- were also run on a single A100, which gives each a measured
-throughput overhead (\cref{sec:reality}); the other four enter the frontier
-unpriced. The cost axis is throughput only. A learning-efficiency penalty, in
-which an attack keeps tokens per second but worsens progress per token, cannot
-be measured in a synthetic model and remains open (\cref{subsec:scope}). The
-full sweep and its provenance are in \cref{app:sweep}.
+We study four strategies from \cref{tab:attacks}: three timing strategies
+(period jitter, work variation and cadence drift) and one waveform strategy
+(shape filling). 
+
+
+We measure the throughput overhead incurred by each strategy on a a single A100.
+
+The operator applies each strategy to its dominant training run on the aggregate
+of \cref{sec:results}, the background of small trainings and fine-tunings stays
+honest, and every cell is scored against the aggregate null of
+\cref{eq:aggregate_null}. 
+
+For each strategy we step its budget knob (\cref{tab:attacks}), which we
+call the attack level, over the stated range. At every level we measure the
+detection rate of the Viterbi tracker and of the fixed tests of
+\cref{subsec:comparators}, taking the better of the two fixed tests at each
+cell. All rates are at false-alarm rate $10^{-2}$ with
+$n=200$ traces per class. The cost axis is throughput only. A
+learning-efficiency penalty, in which an attack keeps tokens per second but
+worsens progress per token, cannot be measured in a synthetic model and remains
+open (\cref{subsec:scope}). The other four schedule strategies of
+\cref{tab:attacks} (phase slip, relocation, harmonic smoothing and dilution) have
+no hardware implementation and so no cost. The tracker detects every one of
+their cells. The full sweep, these four strategies included, and its
+provenance are in \cref{app:sweep}.
 
 
 We construct the Pareto curve 
@@ -973,44 +982,48 @@ cost, for one adversarial strategy.
 \subsection{The cost of hiding}
 \label{subsec:frontier_cost}
 
-\Cref{fig:money_pareto} plots hiding ($1-$ detection rate) against measured
-throughput overhead, with the Pareto staircase: the best hiding available at or
-below a given cost. Both staircases are flat. For each detector the best hiding
-is reached at zero cost, by varying the real work per iteration, and spending
-more does not improve on it. Against the fixed tests that attack hides $0.88$.
-Against the Viterbi tracker it hides $0.55$, but only at its strongest level,
-$0.7$; at every weaker level it hides at most $0.05$. Every attack that costs
-throughput does worse against the tracker than this free one. The best of them,
+\Cref{fig:attack_curves} plots hiding ($1-$ detection rate) against measured
+throughput overhead for each priced strategy, against the Viterbi tracker
+(top) and the fixed tests (bottom). Each line is one strategy's Pareto
+staircase: the best hiding that strategy buys at or below a given cost. Against the fixed tests
+every strategy hides a lot, but only varying the real work per iteration does so
+for free. It hides $0.88$ at zero cost, while jitter and drift need $159\%$ and
+$356\%$ overhead to reach $0.88$ and $0.71$. Against the tracker almost every
+strategy stays on the floor. Varying the real work is again the exception: at its
+strongest level, $0.7$, it hides $0.55$ at zero cost, although at every weaker
+level it hides at most $0.05$. Every attack that costs throughput does worse
+against the tracker than this free one. The best of them,
 idle-insertion jitter at $\sigma_\xi = 0.35$, hides $0.24$ for a $159\%$
 overhead. Throughput is therefore not what a concealing operator must pay to
 weaken the tracker. Whether the free attack has a price in learning efficiency
 instead is the open question of \cref{subsec:frontier_work}.
 
-$23$ of the $50$ swept cells have a measured cost, including the honest
-drift-free schedule, which costs nothing by definition. The rest appear in a
-separate unpriced strip rather than being dropped. The unpriced strategies do
-not trouble the tracker at the levels swept: against phase slip, relocation,
-harmonic smoothing, and dilution down to a $0.2$ training share, it holds
-detection rate $1.0$ in every cell, while the fixed tests fall as low as $0.33$
-under phase slip (\cref{app:sweep}). The unpriced cells where the tracker does
-fail are the meter cells, which are channel requirements rather than attacks
-(\cref{subsec:meter_spec}).
+The drift-free schedule is the honest one, so its cost is zero by
+definition.
 
-\begin{figure}[t]
+\begin{figure*}[t]
 	\centering
-	\includegraphics[width=\columnwidth]{money_pareto_aggregate}
-	\caption{Cost of hiding. Measured throughput overhead against hiding ($1-$
-	detection rate at false-alarm rate $10^{-2}$) for the four adversarial strategies with
-	a hardware cost anchor, with the Pareto staircase --- the best hiding
-	available at or below a given cost --- against the fixed tests (orange; the
-	better of the matched filter and multitaper F-test per cell) and the Viterbi
-	tracker (blue). Varying real work per iteration hides $0.88$ from the fixed
-	tests and, at its strongest level, $0.55$ from the tracker, both at no
-	measurable throughput cost; no costly attack does better against either.
-	Cells without a cost anchor are shown as ticks in the hatched strip.
-	Reproduced by \texttt{scripts/plot\_money\_pareto.py}.}
-	\label{fig:money_pareto}
-\end{figure}
+	\includegraphics[width=\linewidth]{attack_curves_aggregate}
+	\caption{Hiding against attack level for the eight schedule strategies of
+	\cref{tab:attacks}, in the order of that table. Hiding is $1-$ detection rate
+	at false-alarm rate $10^{-2}$ for the Viterbi tracker (solid) and the fixed
+	tests (dashed; the better of the matched filter and multitaper F-test per
+	cell). Each panel steps one strategy's budget knob, shown on the bottom axis;
+	the swept levels are evenly spaced, weakest on the left. Where the
+	single-A100 campaign measured a level's throughput overhead, it is given on
+	the top axis; panels with no top axis have no hardware cost measurement
+	(\cref{tab:attacks}). Costs below $1\%$ in magnitude, zero within noise, are
+	shown as $0$; the drift-free schedule is the honest one, so its cost is zero
+	by definition; the shape-filling costs were measured on a jittered base and
+	are upper bounds. The tracker detects almost every cell. The exception is work
+	variation at $\sigma_G = 0.7$, which hides $0.55$ from it at no measurable
+	throughput cost; idle-insertion jitter hides at most $0.24$, for $159\%$
+	overhead. The meter strategy degrades the channel rather than the schedule
+	and is treated in \cref{subsec:meter_spec}. Reproduced by
+	\texttt{scripts/plot\_attack\_curves.py}.
+	\textcolor{red}{[TODO: figure needs cleaning up before submission.]}}
+	\label{fig:attack_curves}
+\end{figure*}
 
 \subsection{The costly attacks are the wrong ones}
 \label{subsec:frontier_costly}
@@ -1081,7 +1094,7 @@ nominal cadence, $\varepsilon$-covertness requires $\sigma^{*}(0.5) = 0.18$ and
 $\sigma^{*}(0.2) = 0.36$, which the measured anchors price at tens of percent of
 throughput and at order $100\%$ respectively. Three limits apply. The bound is
 read off the weakest verifier, so it is loose against the tracker, which
-\cref{fig:money_pareto} shows to be stronger; it covers one adversarial strategy; and
+\cref{fig:attack_curves} shows to be stronger; it covers one adversarial strategy; and
 turning distortion into cost rests on an assumption --- that at fixed useful work,
 jitter costs throughput or learning efficiency --- rather than a result.
 
@@ -1783,8 +1796,8 @@ tracker.
 \section{Full attack sweep}
 \label{app:sweep}
 
-The main text reports the frontier as a single cost-of-hiding overlay
-(\cref{fig:money_pareto}). This appendix gives the full sweep: detection against
+The main text reports hiding against attack level for every schedule strategy,
+with measured costs where they exist (\cref{fig:attack_curves}). This appendix gives the full sweep: detection against
 physical de-periodicisation for every strategy of \cref{tab:attacks} and both
 detector classes (\cref{fig:frontier}), the per-detector response to variable real work
 (\cref{fig:st2_work}), and the cost-of-hiding view against each detector class
@@ -1794,7 +1807,11 @@ tracker and the two order-tracked Dandawat\'e--Giannakis statistics of
 the Viterbi tracker's alone.
 
 The sweep runs on the aggregate of \cref{sec:results}, with each strategy applied
-to the dominant training run only. It was frozen on the MATS compute cluster
+to the dominant training run only. At every attack level it also records the
+physical de-periodicisation the attack induces, from the generator's
+ground-truth iteration boundaries: the cadence coefficient of variation, which
+\cref{fig:frontier} plots detection against, and the phase-diffusion
+coefficient. It was frozen on the MATS compute cluster
 (slurm array 14354, assembled by job 14355): $n=200$ traces per class over $50$
 cells, seed $0$, all five detectors, written to
 \texttt{results/st2/aggregate/frontier\_summary.json}. Every rate is read at
@@ -1808,6 +1825,17 @@ later top-up on the same hardware model
 (\texttt{data/measured\_cost\_anchors/README.md}). The drift overheads are
 heavy-tailed: at $0.8$ and $1.5$~Hz the mean exceeds the median by a factor
 of $1.5$ and $2$.
+
+\paragraph{The four strategies without a cost.} Phase slip, relocation, harmonic
+smoothing and dilution were swept in the same way as the four priced strategies,
+but the hardware campaign never implemented them, so they have no measured
+cost and appear in \cref{fig:attack_curves} without a cost axis. They do not trouble the
+tracker at the levels swept: it detects every cell of all four at detection rate
+$1.0$, dilution down to a $0.2$ training share included, while the fixed tests
+fall as low as $0.33$ under phase slip (\cref{fig:frontier}). A price for them
+would therefore only add points at zero hiding from the tracker. For relocation
+and harmonic smoothing a throughput price would also mislead, because their cost
+falls mainly on the training dynamics or on energy rather than on throughput.
 
 \begin{figure*}[t]
 	\centering
@@ -1840,14 +1868,14 @@ of $1.5$ and $2$.
 	\centering
 	\includegraphics[width=\linewidth]{st2_cost_pareto_aggregate}
 	\caption{Cost of hiding: measured throughput overhead against hiding
-	($1-$ detection rate at false-alarm rate $10^{-2}$) for the four cost-anchored
-	adversarial strategies, with the Pareto staircase --- the best hiding available at or
+	($1-$ detection rate at false-alarm rate $10^{-2}$) for the four priced
+	strategies, with the Pareto staircase --- the best hiding available at or
 	below a given cost. Against both classes the staircase is flat from zero cost:
 	variable real work at level $0.7$ hides $0.55$ from the tracking class (left)
 	and $0.88$ from the fixed class (right), and no costly attack does better.
-	Cells whose attack level has no hardware cost anchor cannot be placed on the
-	cost axis and are shown in the hatched strip. Attack levels are labelled where they hide
-	something; the rest sit on the floor.}
+	The cost axis is linear within $\pm10\%$ and logarithmic beyond; the four
+	strategies without a hardware cost are not shown. Attack levels are labelled
+	where they hide something; the rest sit on the floor.}
 	\label{fig:st2_cost_pareto}
 \end{figure*}
 
@@ -2388,7 +2416,7 @@ are read side by side, not on shared axes.
 \paragraph{What the bound does not cover.}
 The propositions above concern one adversarial strategy. Making the measured frontier a
 statement about hiding in general would need one of two further arguments: that
-the swept families span what a hiding adversary can do, or a bound of the kind
+the swept strategies span what a hiding adversary can do, or a bound of the kind
 above for each of them. We have the second for i.i.d.\ period jitter and make no
 claim of the first, so \cref{sec:frontier} should be read as a sample of the
 attack space rather than its boundary. The choice of distributional distance is
@@ -2663,7 +2691,7 @@ schedule to evade it. Most of what is interesting lies in the gap between them.
 		of percent of throughput, rising above $100\%$ (i.i.d.\ period jitter) &
 		\cref{subsec:identifiability}, \cref{app:identifiability} & Read off a
 		fixed-bin verifier, so valid against any class containing it, but loose;
-		one attack family;
+		one adversarial strategy;
 		internal to the stated generator; the throughput-or-learning disjunction is
 		an assumption, not a result \\
 		3--4. Active authentication & A challenge-synchronous protocol and an
@@ -2684,7 +2712,7 @@ itself (\cref{subsec:meter_spec}). The results of this section are therefore
 necessary conditions and an upper bound on hideability rather than a proof of
 training: they bound what a prover can hide from a fixed detector cheaply. The
 complementary direction --- a lower bound on what hiding must cost, which no
-detection sweep can supply --- is available for one attack family against a fixed
+detection sweep can supply --- is available for one adversarial strategy against a fixed
 verifier (\cref{subsec:identifiability}) under the cost-of-hiding assumption,
 and the distortion it requires can be priced against the same anchors used here.
 The tracking class dominates the fixed class at every cell we measured, so that
