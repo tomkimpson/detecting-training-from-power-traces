@@ -74,3 +74,10 @@ notes/**/*.pdf
 # Stale smoke output from the closed HSMM renewal experiment (PR #19, Aug 2026).
 # Kept locally, never tracked — same convention as the other *_smoke_* artefacts.
 results/hsmm_smoke/
+
+# E1 learning-cost pilot (exploratory): smoke runs and slurm logs are never tracked;
+# the GPU venv is local.
+results/e1/*_smoke/
+results/e1/slurm/*
+!results/e1/slurm/.gitkeep
+.venv-gpu/

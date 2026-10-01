@@ -1,0 +1,13 @@
+# E1 learning-cost pilot only (exploratory; see scripts/e1/README.md). Not needed for
+# the paper-2 pipeline, which stays CPU-only (requirements.txt). Install into a venv
+# built on the OzSTAR conda base, which provides torch:
+#     /fred/oz022/tkimpson/miniconda3/bin/python -m venv --system-site-packages .venv-gpu
+#     .venv-gpu/bin/pip install -r requirements-gpu.txt
+torch==2.5.1
+numpy==2.2.6
+tiktoken==0.14.0
+datasets==5.0.1
+# used directly by scripts/e1 (pulled in by datasets / the conda base)
+pyarrow==25.0.1
+huggingface_hub==1.33.0
+matplotlib==3.10.5
