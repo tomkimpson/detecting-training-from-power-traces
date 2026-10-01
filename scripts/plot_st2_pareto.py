@@ -173,11 +173,18 @@ def pareto_hull(points: list[dict]) -> list[tuple[float, float]]:
 
 
 def plot(summary: dict, far: str = _FAR_KEY,
-         name: str = "st2_cost_pareto") -> pathlib.Path:
-    """Two panels: hiding vs measured cost, against each detector class."""
+         name: str = "st2_cost_pareto", unpriced_mode: str = "strip",
+         xscale: str = "linear") -> pathlib.Path:
+    """Two panels: hiding vs measured cost, against each detector class.
+
+    ``unpriced_mode="omit"`` drops the hatched strip and plots only the priced
+    families; ``xscale="symlog"`` is linear within +-10 % and log beyond.
+    """
     apply_house_style()
     classes = detector_classes(summary)
     cells = summary["cells"]
+    if unpriced_mode == "omit":
+        cells = [c for c in cells if c["cost_overhead_pct"] is not None]
 
     fig, axes = plt.subplots(1, 2, figsize=(WIDTH_WIDE, 2.7), sharey=True)
     titles = {"tracking": "vs the tracking class",
@@ -225,19 +232,28 @@ def plot(summary: dict, far: str = _FAR_KEY,
                             textcoords="offset points", xytext=(2.5, dy),
                             fontsize=4.5, color=col)
 
-        # the unpriced cells, in the hatched strip
-        ax.axvspan(strip_lo, strip_hi, facecolor="none", edgecolor=C["grey"],
-                   hatch="////", lw=0.4, alpha=0.6, zorder=0)
-        span = strip_hi - strip_lo
-        fams = sorted({p["family"] for p in unpriced})
-        for i, fam in enumerate(fams):
-            xs = strip_lo + span * (i + 0.5) / len(fams)
-            pts = [p for p in unpriced if p["family"] == fam]
-            ax.plot([xs] * len(pts), [p["hiding"] for p in pts], ls="none",
-                    marker="_", ms=3.5, color=_FAMILY_COLOR.get(fam, C["grey"]),
-                    alpha=0.8, zorder=2)
+        if unpriced_mode == "strip":
+            # the unpriced cells, in the hatched strip
+            ax.axvspan(strip_lo, strip_hi, facecolor="none",
+                       edgecolor=C["grey"], hatch="////", lw=0.4, alpha=0.6,
+                       zorder=0)
+            span = strip_hi - strip_lo
+            fams = sorted({p["family"] for p in unpriced})
+            for i, fam in enumerate(fams):
+                xs = strip_lo + span * (i + 0.5) / len(fams)
+                pts = [p for p in unpriced if p["family"] == fam]
+                ax.plot([xs] * len(pts), [p["hiding"] for p in pts], ls="none",
+                        marker="_", ms=3.5,
+                        color=_FAMILY_COLOR.get(fam, C["grey"]),
+                        alpha=0.8, zorder=2)
 
-        ax.set_xlim(-0.06 * x_hi, strip_hi + 0.03 * x_hi)
+        if xscale == "symlog":
+            ax.set_xscale("symlog", linthresh=10.0, linscale=0.6)
+            ax.set_xlim(-3.0, x_hi * 1.6 if unpriced_mode == "omit"
+                        else strip_hi * 1.1)
+        else:
+            ax.set_xlim(-0.06 * x_hi, (x_hi * 1.04 if unpriced_mode == "omit"
+                                       else strip_hi + 0.03 * x_hi))
         ax.set_ylim(-0.04, 1.04)
         ax.set_xlabel("measured throughput overhead [%]")
         ax.set_title(titles[key], fontsize=7)
@@ -246,9 +262,11 @@ def plot(summary: dict, far: str = _FAR_KEY,
     handles = [Line2D([], [], color=_FAMILY_COLOR[f], lw=1.0,
                       marker=_FAMILY_MARKER[f], ms=3, label=f)
                for f in _FAMILY_COLOR]
-    handles += [Line2D([], [], color=C["grey"], lw=1.0, label="Pareto staircase"),
-                Line2D([], [], color=C["grey"], lw=0, marker="_", ms=4,
-                       label=f"cost not measured ({n_unpriced} cells, hatched)")]
+    handles += [Line2D([], [], color=C["grey"], lw=1.0, label="Pareto staircase")]
+    if unpriced_mode == "strip":
+        handles += [Line2D([], [], color=C["grey"], lw=0, marker="_", ms=4,
+                           label=f"cost not measured ({n_unpriced} cells, "
+                                 "hatched)")]
     # the tracking panel is empty above hiding ~0.2, so the legend goes there
     axes[0].legend(handles=handles, frameon=False, fontsize=5, loc="upper left",
                    ncol=2)
@@ -264,6 +282,10 @@ def main() -> None:
                     help="path to the frozen frontier_summary.json (read only)")
     ap.add_argument("--far", type=float, default=_DEFAULT_FAR,
                     help="FAR the hiding axis is read at (must be stored)")
+    ap.add_argument("--unpriced", choices=("strip", "omit"), default="strip",
+                    help="strip = unpriced cells in a hatched strip; omit = "
+                         "plot only the priced families")
+    ap.add_argument("--xscale", choices=("linear", "symlog"), default="linear")
     ap.add_argument("--out", default="st2_cost_pareto",
                     help="figure stem under figures/")
     args = ap.parse_args()
@@ -287,7 +309,7 @@ def main() -> None:
               "measured cost anchor and are drawn in the hatched strip; those "
               f"hiding > 0.3 from this class: {notable or 'none'})")
 
-    out = plot(summary, far, args.out)
+    out = plot(summary, far, args.out, args.unpriced, args.xscale)
     print(f"-> {out.with_suffix('')}.*")
 
 

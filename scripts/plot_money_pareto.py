@@ -83,15 +83,21 @@ def drop_above(cells: list[dict], xmax: float | None) -> list[dict]:
 
 def plot(summary: dict, far: str = _pp._FAR_KEY,
          name: str = "money_pareto", frontier: str = "staircase",
-         xscale: str = "linear", xmax: float | None = None) -> pathlib.Path:
+         xscale: str = "linear", xmax: float | None = None,
+         unpriced_mode: str = "strip") -> pathlib.Path:
     apply_house_style()
     cells = drop_above(summary["cells"], xmax)
+    if unpriced_mode == "omit":
+        # only the priced families; the caption reports the rest (App. D)
+        cells = [c for c in cells if c["cost_overhead_pct"] is not None]
     fig, ax = plt.subplots(figsize=(WIDTH_ICML_COL, 2.45))
 
     costs = [c["cost_overhead_pct"] for c in cells
              if c["cost_overhead_pct"] is not None]
     x_hi = max(costs)
-    if xscale == "symlog":
+    if unpriced_mode == "omit":
+        strip_lo = strip_hi = x_hi
+    elif xscale == "symlog":
         # equal widths on the log part of the axis
         strip_lo, strip_hi = x_hi * 1.5, x_hi * 3.5
     else:
@@ -121,16 +127,19 @@ def plot(summary: dict, far: str = _pp._FAR_KEY,
             ax.plot(p["cost"], p["hiding"], ls="none",
                     marker=_pp._FAMILY_MARKER[p["family"]], ms=3.2,
                     mfc=col, mec="white", mew=0.3, alpha=0.9, zorder=3)
-        # unpriced cells: short ticks in the hatched strip, one column per series
-        xs_u = strip_lo + (strip_hi - strip_lo) * (0.3 + 0.4 * k)
-        ax.plot([xs_u] * len(unpriced), [p["hiding"] for p in unpriced],
-                ls="none", marker="_", ms=4, color=col, alpha=0.8, zorder=2)
+        if unpriced_mode == "strip":
+            # unpriced cells: short ticks in the hatched strip, one column per
+            # series
+            xs_u = strip_lo + (strip_hi - strip_lo) * (0.3 + 0.4 * k)
+            ax.plot([xs_u] * len(unpriced), [p["hiding"] for p in unpriced],
+                    ls="none", marker="_", ms=4, color=col, alpha=0.8, zorder=2)
 
-    ax.axvspan(strip_lo, strip_hi, facecolor="none", edgecolor=C["grey"],
-               hatch="////", lw=0.4, alpha=0.5, zorder=0)
-    ax.text((strip_lo + strip_hi) / 2, 1.05, "cost not\nmeasured",
-            ha="center", va="bottom", fontsize=4.5, color=C["grey"],
-            clip_on=False)
+    if unpriced_mode == "strip":
+        ax.axvspan(strip_lo, strip_hi, facecolor="none", edgecolor=C["grey"],
+                   hatch="////", lw=0.4, alpha=0.5, zorder=0)
+        ax.text((strip_lo + strip_hi) / 2, 1.05, "cost not\nmeasured",
+                ha="center", va="bottom", fontsize=4.5, color=C["grey"],
+                clip_on=False)
 
     ax.annotate("vary real work\nper iteration: ~0% cost",
                 xy=(0, work_zero), xytext=(40, 0.95), fontsize=5.5,
@@ -139,7 +148,7 @@ def plot(summary: dict, far: str = _pp._FAR_KEY,
 
     if xscale == "symlog":
         ax.set_xscale("symlog", linthresh=_SYMLOG_LINTHRESH, linscale=0.6)
-        ax.set_xlim(-3.0, strip_hi * 1.1)
+        ax.set_xlim(-3.0, strip_hi * (1.6 if unpriced_mode == "omit" else 1.1))
     else:
         ax.set_xlim(-0.05 * x_hi, strip_hi + 0.02 * x_hi)
     ax.set_ylim(-0.04, 1.04)
@@ -151,10 +160,17 @@ def plot(summary: dict, far: str = _pp._FAR_KEY,
     handles += [Line2D([], [], ls="none", marker=m, ms=3.2, mfc=C["grey"],
                        mec="white", mew=0.3, label=f)
                 for f, m in _pp._FAMILY_MARKER.items()]
-    # the region right of the drift point and between the staircases is empty
-    ax.legend(handles=handles, frameon=False, fontsize=5, loc="center left",
-              bbox_to_anchor=(0.37, 0.44), ncol=2, columnspacing=0.8,
-              handlelength=1.6)
+    if unpriced_mode == "omit":
+        # with the full cost range on the axis no interior region is free of
+        # points, so the legend sits above the axes
+        ax.legend(handles=handles, frameon=False, fontsize=5, loc="lower center",
+                  bbox_to_anchor=(0.5, 1.01), ncol=3, columnspacing=0.8,
+                  handlelength=1.6)
+    else:
+        # the region right of the drift point and between the staircases is empty
+        ax.legend(handles=handles, frameon=False, fontsize=5, loc="center left",
+                  bbox_to_anchor=(0.37, 0.44), ncol=2, columnspacing=0.8,
+                  handlelength=1.6)
     fig.tight_layout()
     return save(fig, name)
 
@@ -173,6 +189,9 @@ def main() -> None:
     ap.add_argument("--xscale", choices=("linear", "symlog"),
                     default="linear",
                     help="symlog = log above 10%%, linear through ~0%%")
+    ap.add_argument("--unpriced", choices=("strip", "omit"), default="strip",
+                    help="strip = unpriced cells as ticks in a hatched strip; "
+                         "omit = plot only the priced families")
     ap.add_argument("--xmax", type=float, default=None,
                     help="drop anchored cells costing more than this [%%]")
     args = ap.parse_args()
@@ -191,7 +210,8 @@ def main() -> None:
         print("  unpriced hiding > 0.3: " + ", ".join(
             f"{p['family']}={p['level']} ({p['hiding']:.2f})"
             for p in unpriced if p["hiding"] > 0.3))
-    out = plot(summary, far, args.out, args.frontier, args.xscale, args.xmax)
+    out = plot(summary, far, args.out, args.frontier, args.xscale, args.xmax,
+               args.unpriced)
     print(f"-> {out.with_suffix('')}.*")
 
 
