@@ -1,0 +1,23 @@
+{
+  "dataset": "HuggingFaceFW/fineweb-edu",
+  "revision": "87f09149ef4734204d70ed1d046ddc9ca3f2b8f9",
+  "shard": "sample/10BT/000_00000.parquet",
+  "tokenizer": "tiktoken gpt2",
+  "tiktoken": "0.14.0",
+  "document_prefix": "<|endoftext|>",
+  "dtype": "uint16",
+  "split_rule": "val = first whole documents of the shard, train = the following ones",
+  "tokens": {
+    "val": 5000415,
+    "train": 500000739
+  },
+  "documents": {
+    "val": 4792,
+    "train": 482867
+  },
+  "sha256": {
+    "val": "0a22cdc8bb8dae7da673bfb446807f0e27f376b152963e92e92a86e6d2e411ef",
+    "train": "ae72bd29af147449579ba2f389e3ba5f994b9ee5088b7eb73e5ec4fdf2d2b937"
+  },
+  "out_dir": "/fred/oz022/tkimpson/e1_data"
+}
