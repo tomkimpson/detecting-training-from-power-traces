@@ -137,6 +137,9 @@ def ko_make_aggregate_trace(
     f0_drift_hz: float = 0.0,
     f_max: float | None = None,
     meter: MeterParams | None = None,
+    f0: float | None = None,
+    dominant_params: KoWorkloadParams | None = None,
+    **train_kwargs,
 ) -> TypeTrace:
     """One labeled PDU-level aggregate power trace (B1-agg, task 4).
 
@@ -148,16 +151,24 @@ def ko_make_aggregate_trace(
     read from ``ko_p.aggregate_ratio`` -- sweep it via ``dataclasses.replace``.
     ``f_peak`` is the aggregate TOTAL, so the two classes are power-matched and
     the dominant line weakens as its share shrinks.
+
+    ``f0`` (default: drawn from the Ko band), ``dominant_params`` and
+    ``train_kwargs`` set the dominant training's cadence and ST2 attack knobs
+    (see :func:`aggregate_F`); they apply to "train" only.
     """
     f_max = DEFAULT.floor.F_max if f_max is None else f_max
     f_peak = glue.f_peak_frac * f_max
     t = make_time_grid(glue.duration_s, 1.0 / glue.fs)
 
     if label == "train":
-        f0 = float(rng.uniform(ko_p.f0_lo, ko_p.f0_hi))
+        if f0 is None:
+            f0 = float(rng.uniform(ko_p.f0_lo, ko_p.f0_hi))
         F = aggregate_F(t, ko_p, rng, f_peak=f_peak, f0=f0,
-                        eta_scale=glue.eta_scale, f0_drift_hz=f0_drift_hz)
+                        eta_scale=glue.eta_scale, f0_drift_hz=f0_drift_hz,
+                        dominant_params=dominant_params, **train_kwargs)
     elif label == "infer":
+        if f0 is not None or dominant_params is not None or train_kwargs:
+            raise ValueError("attack knobs apply to label 'train' only")
         f0 = float("nan")
         F = aggregate_null_F(t, ko_p, rng, f_peak=f_peak,
                              eta_scale=glue.eta_scale)

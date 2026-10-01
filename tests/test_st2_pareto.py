@@ -122,3 +122,10 @@ def test_frozen_summary_reproduces_the_headline_asymmetry():
     cheap = [p for p in fixed if abs(p["cost"]) < 1.0]
     assert max(p["hiding"] for p in cheap) > 0.7      # fixed tests fall for free
     assert max(p["hiding"] for p in track) < 0.2      # tracking holds everywhere
+
+
+def test_far_key_refuses_unstored_far():
+    summary = {"target_fars": [0.05, 0.01]}
+    assert pareto.far_key(summary, 0.01) == "0.01"
+    with pytest.raises(SystemExit):
+        pareto.far_key(summary, 0.1)

@@ -31,9 +31,9 @@ stated open empirical question; this figure plots the measured systems-cost axis
 only.
 
 Reproduce:
-    python scripts/plot_st2_pareto.py [--summary PATH]
+    python scripts/plot_st2_pareto.py [--summary PATH] [--far 0.01] [--out STEM]
 Outputs:
-    figures/st2_cost_pareto.{pdf,png}
+    figures/st2_cost_pareto.{pdf,png}   (or figures/<STEM>.*)
 """
 
 from __future__ import annotations
@@ -59,6 +59,15 @@ _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _SUMMARY = _ROOT / "results" / "st2" / "frontier_summary.json"
 
 _FAR_KEY = "0.05"     # the operational FAR the frontier's verdict is stated at
+_DEFAULT_FAR = 0.01   # the paper's operating point for the figures
+
+
+def far_key(summary: dict, far: float) -> str:
+    """``far`` as its tpr_at_far key, refusing a FAR the summary does not store."""
+    if far not in summary["target_fars"]:
+        raise SystemExit(f"FAR {far:g} not in summary target_fars "
+                         f"{summary['target_fars']}")
+    return f"{far:g}"
 
 # Only the cost-anchored families can appear on a cost axis; the marker map
 # enumerates them, and the colours come from the shared house map so this figure
@@ -136,7 +145,8 @@ def pareto_envelope(points: list[dict]) -> list[tuple[float, float]]:
     return out
 
 
-def plot(summary: dict) -> pathlib.Path:
+def plot(summary: dict, far: str = _FAR_KEY,
+         name: str = "st2_cost_pareto") -> pathlib.Path:
     """Two panels: hiding vs measured cost, against each detector class."""
     apply_house_style()
     classes = detector_classes(summary)
@@ -159,7 +169,7 @@ def plot(summary: dict) -> pathlib.Path:
 
     for ax, key in zip(axes, ("tracking", "fixed")):
         dets = classes[key]
-        anchored, unpriced = split_by_cost(cells, dets)
+        anchored, unpriced = split_by_cost(cells, dets, far)
 
         env = pareto_envelope(anchored)
         ax.step([p[0] for p in env], [p[1] for p in env], where="post",
@@ -205,7 +215,7 @@ def plot(summary: dict) -> pathlib.Path:
         ax.set_xlabel("measured throughput overhead [%]")
         ax.set_title(titles[key], fontsize=7)
 
-    axes[0].set_ylabel(f"hiding  $1-$ detection rate at FAR $= {_FAR_KEY}$")
+    axes[0].set_ylabel(f"hiding  $1-$ detection rate at FAR $= {far}$")
     handles = [Line2D([], [], color=_FAMILY_COLOR[f], lw=1.0,
                       marker=_FAMILY_MARKER[f], ms=3, label=f)
                for f in _FAMILY_COLOR]
@@ -218,13 +228,17 @@ def plot(summary: dict) -> pathlib.Path:
     fig.suptitle("Cost of hiding: what measured adversary cost buys against "
                  "each detector class", fontsize=7)
     fig.tight_layout(rect=(0, 0, 1, 0.93))
-    return save(fig, "st2_cost_pareto")
+    return save(fig, name)
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--summary", type=pathlib.Path, default=_SUMMARY,
                     help="path to the frozen frontier_summary.json (read only)")
+    ap.add_argument("--far", type=float, default=_DEFAULT_FAR,
+                    help="FAR the hiding axis is read at (must be stored)")
+    ap.add_argument("--out", default="st2_cost_pareto",
+                    help="figure stem under figures/")
     args = ap.parse_args()
 
     if not args.summary.exists():
@@ -232,9 +246,10 @@ def main() -> None:
                          "see README (ST2 frontier) to regenerate on slurm")
     summary = json.loads(args.summary.read_text())
     classes = detector_classes(summary)
+    far = far_key(summary, args.far)
 
     for key in ("tracking", "fixed"):
-        anchored, unpriced = split_by_cost(summary["cells"], classes[key])
+        anchored, unpriced = split_by_cost(summary["cells"], classes[key], far)
         print(f"{key} class (best of {'/'.join(classes[key])}):")
         for p in sorted(anchored, key=lambda q: q["cost"]):
             print(f"  {p['family']:7s} {p['level']:<5g} "
@@ -245,7 +260,7 @@ def main() -> None:
               "measured cost anchor and are drawn in the hatched strip; those "
               f"hiding > 0.3 from this class: {notable or 'none'})")
 
-    out = plot(summary)
+    out = plot(summary, far, args.out)
     print(f"-> {out.with_suffix('')}.*")
 
 

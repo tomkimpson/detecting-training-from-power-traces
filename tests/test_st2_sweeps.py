@@ -52,3 +52,16 @@ def test_summary_schema_smoke(tmp_path):
     # figure pair written alongside
     assert (tmp_path / "st2_work.pdf").exists()
     assert (tmp_path / "st2_work.png").exists()
+
+
+def test_aggregate_scenario_writes_disjoint_outputs(tmp_path):
+    results, figures, suffix = sweeps.out_dirs("aggregate", smoke=False)
+    assert results.name == "aggregate" and suffix == "_aggregate"
+    assert sweeps.out_dirs("single", smoke=False)[2] == ""
+    p = sweeps.smoke_params(dataclasses.replace(DEFAULT.st2, seed=5, n_each=4))
+    d = sweeps.run_and_write("jitter", p, results_dir=tmp_path, fig_dir=tmp_path,
+                             detectors="base", scenario="aggregate",
+                             suffix=suffix)
+    assert d["scenario"] == "aggregate"
+    assert "aggregate" in d["generator"]
+    assert (tmp_path / "st2_jitter_aggregate.pdf").exists()

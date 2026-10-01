@@ -43,8 +43,13 @@ as an array via scripts/slurm/st2_sweeps.sbatch, then this assembly step runs
 via scripts/slurm/st2_frontier.sbatch, chained afterok):
     python scripts/plot_st2_sweeps.py   # (inputs; on Slurm for the freeze)
     python scripts/plot_st2_frontier.py
+    python scripts/plot_st2_frontier.py --st2-dir results/st2/aggregate \
+        --fig-name st2_frontier_aggregate          # section-2 aggregate freeze
 Output:
-    results/st2/frontier_summary.json ; figures/st2_frontier.png/.pdf
+    <st2-dir>/frontier_summary.json ; figures/<fig-name>.png/.pdf
+
+The verdict is evaluated at its pre-registered FAR (0.05) whatever --far says;
+--far (default 0.01, the paper's operating point) sets only the figure.
 """
 
 from __future__ import annotations
@@ -303,8 +308,9 @@ def evaluate_verdict(cells: list[dict],
     }
 
 
-def plot_frontier(cells: list[dict]) -> pathlib.Path:
-    """Headline figure: TPR@0.05 vs cadence CV (left) and vs D (right)."""
+def plot_frontier(cells: list[dict], far: str = _FAR_KEY,
+                  name: str = "st2_frontier") -> pathlib.Path:
+    """Headline figure: TPR at ``far`` vs cadence CV (left) and vs D (right)."""
     apply_house_style()
     fig, (axL, axR) = plt.subplots(1, 2, figsize=(WIDTH_WIDE, 2.7),
                                    sharey=True)
@@ -315,7 +321,7 @@ def plot_frontier(cells: list[dict]) -> pathlib.Path:
     # curves show the class envelopes the verdict is stated over: best
     # tracking detector (solid) and best fixed test (dashed) per cell
     def _cls_tpr(cell, dets):
-        return max(cell["tpr_at_far"][d][_FAR_KEY] for d in dets)
+        return max(cell["tpr_at_far"][d][far] for d in dets)
 
     for fam, fam_cells in by_family.items():
         col = _FAMILY_COLOR[fam]
@@ -344,9 +350,11 @@ def plot_frontier(cells: list[dict]) -> pathlib.Path:
         ax.set_xscale("log")
         ax.set_ylim(0, 1.04)
         ax.set_xlabel(xlab)
-        ax.axhline(_TRACK_MIN, color=C["grey"], lw=0.6, ls=":", zorder=0)
-        ax.axhline(_FIXED_MAX, color=C["grey"], lw=0.6, ls=":", zorder=0)
-    axL.set_ylabel(f"Detection rate at FAR = {_FAR_KEY}")
+        # the verdict thresholds are stated at the pre-registered FAR only
+        if far == _FAR_KEY:
+            ax.axhline(_TRACK_MIN, color=C["grey"], lw=0.6, ls=":", zorder=0)
+            ax.axhline(_FIXED_MAX, color=C["grey"], lw=0.6, ls=":", zorder=0)
+    axL.set_ylabel(f"Detection rate at FAR = {far}")
 
     handles = [Line2D([], [], color=_FAMILY_COLOR[f], lw=1.2, label=f)
                for f in by_family]
@@ -362,7 +370,7 @@ def plot_frontier(cells: list[dict]) -> pathlib.Path:
     fig.suptitle("ST2 de-periodicisation frontier "
                  f"({tag}% = measured throughput overhead)", fontsize=7)
     fig.tight_layout(rect=(0, 0, 1, 0.94))
-    return save(fig, "st2_frontier")
+    return save(fig, name)
 
 
 def main() -> None:
@@ -371,6 +379,11 @@ def main() -> None:
                     help="directory of <family>_summary.json inputs")
     ap.add_argument("--b2-dir", default=str(_B2),
                     help="directory of measured b2 cost-anchor summaries")
+    ap.add_argument("--far", type=float, default=0.01,
+                    help="FAR the figure is drawn at (must be stored in the "
+                         "summaries); the verdict stays at its registered 0.05")
+    ap.add_argument("--fig-name", default="st2_frontier",
+                    help="figure stem under figures/")
     args = ap.parse_args()
 
     st2_dir, b2_dir = pathlib.Path(args.st2_dir), pathlib.Path(args.b2_dir)
@@ -382,8 +395,12 @@ def main() -> None:
     verdict["provisional"] = provisional
 
     any_s = next(iter(summaries.values()))
+    if args.far not in any_s["target_fars"]:
+        raise SystemExit(f"FAR {args.far:g} not in summary target_fars "
+                         f"{any_s['target_fars']}")
     frontier = {
         "provisional": provisional,
+        "scenario": any_s.get("scenario", "single"),
         "n_each": any_s["n_each"],
         "target_fars": any_s["target_fars"],
         "seed": any_s["seed"],
@@ -396,7 +413,7 @@ def main() -> None:
     (st2_dir / "frontier_summary.json").write_text(
         json.dumps(frontier, indent=2))
 
-    fig_pdf = plot_frontier(cells)
+    fig_pdf = plot_frontier(cells, f"{args.far:g}", args.fig_name)
     print(f"{verdict['verdict']} ({verdict['criterion_fired']})")
     print("supporting:", json.dumps(verdict["supporting_cells"]))
     print(f"-> {st2_dir / 'frontier_summary.json'} ; "

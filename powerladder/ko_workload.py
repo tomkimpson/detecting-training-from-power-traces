@@ -508,6 +508,8 @@ def aggregate_F(
     f0: float | None = None,
     eta_scale: float = 1.0,
     f0_drift_hz: float = 0.0,
+    dominant_params: KoWorkloadParams | None = None,
+    **train_kwargs,
 ) -> np.ndarray:
     """Superposed PDU-level FLOP rate (Ko eq 11): one dominant training workload +
     ``n_tr`` small trainings + ``n_ft`` fine-tunings, at the configured dominance
@@ -518,11 +520,18 @@ def aggregate_F(
     ``eta_scale`` rescales the sub-step noise of every component (same meter-
     averaging argument as :func:`training_F`). Defaults draw the same RNG stream
     as before these knobs existed, so seeded aggregates are unchanged.
+
+    ``dominant_params`` and ``train_kwargs`` (the ST2 attack knobs of
+    :func:`training_F`) also reach the dominant training only: a concealing
+    operator reshapes its own run, and the background stays honest and equal in
+    law to the null's background.
     """
     w_dom, _, _ = params.aggregate_ratio
     total = sum(params.aggregate_ratio)
-    F = training_F(t, params, rng, f_peak=f_peak * w_dom / total,
-                   f0=f0, eta_scale=eta_scale, f0_drift_hz=f0_drift_hz)
+    dom_p = params if dominant_params is None else dominant_params
+    F = training_F(t, dom_p, rng, f_peak=f_peak * w_dom / total,
+                   f0=f0, eta_scale=eta_scale, f0_drift_hz=f0_drift_hz,
+                   **train_kwargs)
     return F + _aggregate_background(t, params, rng, f_peak, n_tr, n_ft, eta_scale)
 
 

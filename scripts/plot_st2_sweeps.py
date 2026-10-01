@@ -14,8 +14,15 @@ Reproduce:
     python scripts/plot_st2_sweeps.py --smoke        # 2 levels x 8 traces
                                                      # (-> frontier_smoke/, never
                                                      #  the tracked full-res files)
+    python scripts/plot_st2_sweeps.py --scenario aggregate
+                                                     # section-2 aggregate: the
+                                                     # attacked run is the dominant
+                                                     # workload over an honest
+                                                     # background
 Output:
     results/st2/<family>_summary.json ; figures/st2_<family>.png/.pdf
+    (--scenario aggregate: results/st2/aggregate/<family>_summary.json ;
+     figures/st2_<family>_aggregate.png/.pdf)
 
 Canonical full-resolution numbers are frozen on Slurm (one family per array
 task, `scripts/slurm/st2_sweeps.sbatch`; the frontier is then assembled by
@@ -57,6 +64,26 @@ _FIGURES = _ROOT / "figures"
 # shares family names with the real grid). Mirrors st2_meter_boundary.py.
 _SMOKE_RESULTS = _RESULTS / "frontier_smoke"
 _SMOKE_FIGURES = _FIGURES / "frontier_smoke"
+
+# Workload source per scenario (recorded in each summary's "generator" field).
+# "single" keeps the frozen file names; "aggregate" writes to a subdirectory and
+# suffixes the figures, so the two freezes never overwrite each other.
+_GENERATOR = {
+    "single": "ko_workload training vs hard inference null",
+    "aggregate": "ko_workload eq-11 aggregate (attacked dominant training, honest "
+                 "background) vs inference-dominant aggregate null",
+}
+_DILUTE_GENERATOR = ("ko_workload eq-11 aggregate vs inference-dominant "
+                     "aggregate null")
+
+
+def out_dirs(scenario: str, smoke: bool) -> tuple[pathlib.Path, pathlib.Path, str]:
+    """(results dir, figures dir, figure-name suffix) for a scenario."""
+    results = _SMOKE_RESULTS if smoke else _RESULTS
+    figures = _SMOKE_FIGURES if smoke else _FIGURES
+    if scenario == "single":
+        return results, figures, ""
+    return results / scenario, figures, f"_{scenario}"
 
 # detector -> (colour, FAR-0.05 linestyle, label); the second FAR is drawn
 # dashed in the same colour.
@@ -111,15 +138,16 @@ def smoke_params(p: St2Params) -> St2Params:
     )
 
 
-def summarise(family: str, points, p: St2Params) -> dict:
+def summarise(family: str, points, p: St2Params,
+              scenario: str = "single") -> dict:
     """The per-family summary record (schema echoing results/b1/gate_summary)."""
     fam = attack_families(p)[family]
     detectors = sorted(points[0].auc)
     return {
         "family": family,
-        "generator": ("ko_workload eq-11 aggregate vs inference-dominant "
-                      "aggregate null" if family == "dilute" else
-                      "ko_workload training vs hard inference null"),
+        "scenario": scenario,
+        "generator": (_DILUTE_GENERATOR if family == "dilute"
+                      and scenario == "single" else _GENERATOR[scenario]),
         "budget_units": fam.budget_units,
         "cost_anchor": fam.cost_anchor,
         "n_each": p.n_each,
@@ -145,7 +173,7 @@ def summarise(family: str, points, p: St2Params) -> dict:
 
 
 def plot_family(family: str, points, p: St2Params,
-                fig_dir: pathlib.Path) -> pathlib.Path:
+                fig_dir: pathlib.Path, suffix: str = "") -> pathlib.Path:
     """TPR at both FARs vs attack level, one curve pair per detector."""
     apply_house_style()
     fig, ax = plt.subplots(figsize=(0.62 * WIDTH_WIDE, 2.5))
@@ -173,9 +201,9 @@ def plot_family(family: str, points, p: St2Params,
     fig.tight_layout()
 
     fig_dir.mkdir(parents=True, exist_ok=True)
-    pdf = fig_dir / f"st2_{family}.pdf"
+    pdf = fig_dir / f"st2_{family}{suffix}.pdf"
     fig.savefig(pdf)
-    fig.savefig(fig_dir / f"st2_{family}.png")
+    fig.savefig(fig_dir / f"st2_{family}{suffix}.png")
     plt.close(fig)
     return pdf
 
@@ -183,23 +211,26 @@ def plot_family(family: str, points, p: St2Params,
 def run_and_write(family: str, p: St2Params,
                   results_dir: pathlib.Path = _RESULTS,
                   fig_dir: pathlib.Path = _FIGURES,
-                  detectors: str = "full") -> dict:
+                  detectors: str = "full",
+                  scenario: str = "single", suffix: str = "") -> dict:
     """Sweep one family, write its summary JSON + figure; return the summary."""
     t0 = time.time()
     points = run_family(family, p, DEFAULT.ko, DEFAULT.ko_typeb,
-                        detectors=detector_set(detectors))
-    summary = summarise(family, points, p)
+                        detectors=detector_set(detectors),
+                        aggregate=scenario == "aggregate")
+    summary = summarise(family, points, p, scenario)
     results_dir.mkdir(parents=True, exist_ok=True)
     (results_dir / f"{family}_summary.json").write_text(
         json.dumps(summary, indent=2))
-    plot_family(family, points, p, fig_dir)
+    plot_family(family, points, p, fig_dir, suffix)
     print(f"  {family}: {len(points)} levels in {time.time() - t0:.1f}s")
     return summary
 
 
 def _worker(args_tuple):
-    family, p, detectors, results_dir, fig_dir = args_tuple
-    return run_and_write(family, p, results_dir, fig_dir, detectors=detectors)
+    family, p, detectors, results_dir, fig_dir, scenario, suffix = args_tuple
+    return run_and_write(family, p, results_dir, fig_dir, detectors=detectors,
+                         scenario=scenario, suffix=suffix)
 
 
 def main() -> None:
@@ -225,6 +256,8 @@ def main() -> None:
     ap.add_argument("--array-id", type=int, default=None,
                     help="sweep only family index N of FAMILY_ORDER (overrides "
                          "--families / SLURM_ARRAY_TASK_ID) — one family per task")
+    ap.add_argument("--scenario", choices=list(_GENERATOR), default="single",
+                    help="workload source: single workload or section-2 aggregate")
     args = ap.parse_args()
 
     if args.list:
@@ -236,8 +269,7 @@ def main() -> None:
     p = dataclasses.replace(DEFAULT.st2, n_each=args.n_each, seed=args.seed)
     if args.smoke:
         p = smoke_params(p)
-    results_dir = _SMOKE_RESULTS if args.smoke else _RESULTS
-    fig_dir = _SMOKE_FIGURES if args.smoke else _FIGURES
+    results_dir, fig_dir, suffix = out_dirs(args.scenario, args.smoke)
 
     # Array mode: run exactly one family selected by --array-id or the Slurm
     # env. Each family writes a disjoint <family>_summary.json, so concurrent
@@ -246,11 +278,13 @@ def main() -> None:
     if array_id is not None:
         family = FAMILY_ORDER[array_id]
         print(f"array family {array_id}/{len(FAMILY_ORDER)}: {family}")
-        run_and_write(family, p, results_dir, fig_dir, detectors=args.detectors)
+        run_and_write(family, p, results_dir, fig_dir, detectors=args.detectors,
+                      scenario=args.scenario, suffix=suffix)
         return
 
     t0 = time.time()
-    work = [(f, p, args.detectors, results_dir, fig_dir) for f in args.families]
+    work = [(f, p, args.detectors, results_dir, fig_dir, args.scenario, suffix)
+            for f in args.families]
     if args.jobs > 1:
         with multiprocessing.Pool(args.jobs) as pool:
             summaries = pool.map(_worker, work)
@@ -263,7 +297,8 @@ def main() -> None:
                  for d in s["detectors"]}
         print(f"{s['family']:<9} min TPR@{far0}: "
               + "  ".join(f"{d}={v:.2f}" for d, v in worst.items()))
-    print(f"total {time.time() - t0:.1f}s -> {results_dir} ; {fig_dir}/st2_*")
+    print(f"total {time.time() - t0:.1f}s -> {results_dir} ; "
+          f"{fig_dir}/st2_*{suffix}.*")
 
 
 if __name__ == "__main__":

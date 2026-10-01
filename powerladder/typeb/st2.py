@@ -129,6 +129,7 @@ def run_family(
     *,
     detectors: dict | None = None,
     seed: int | None = None,
+    aggregate: bool = False,
 ) -> list[St2Point]:
     """Sweep one attack family over its levels; one :class:`St2Point` each.
 
@@ -148,6 +149,10 @@ def run_family(
 
     Physical measures (CV, D) come from ``_N_META`` independent meta traces
     per level (see :func:`_measures`) — deliberately NOT the scored traces.
+
+    ``aggregate=True`` runs the section-2 aggregate scenario: the attacked run
+    is the dominant workload over an honest background, scored against the
+    inference-dominant aggregate null (see the population builders).
     """
     detectors = dict(DETECTORS) if detectors is None else detectors
     fam = attack_families(p)[family]
@@ -159,7 +164,7 @@ def run_family(
     def neg_scores_for(m: MeterParams | None) -> dict[str, np.ndarray]:
         rng = np.random.default_rng([base, fidx, _NEG_STREAM])
         negs = make_negative_population(family, p.n_each, ko_params, glue,
-                                        rng, meter=m)
+                                        rng, meter=m, aggregate=aggregate)
         return {name: score_population(negs, fn, glue)
                 for name, fn in detectors.items()}
 
@@ -174,7 +179,7 @@ def run_family(
         rng_pos = np.random.default_rng([base, fidx, _POS_STREAM + i])
         pos_traces = make_positive_population(family, level, p.n_each,
                                               ko_params, glue, rng_pos,
-                                              meter=m)
+                                              meter=m, aggregate=aggregate)
         rng_meta = np.random.default_rng([base, fidx, _META_STREAM + i])
         cv, d = _measures(family, level, ko_params, glue, rng_meta)
 

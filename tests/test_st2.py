@@ -150,3 +150,75 @@ def test_dilute_uses_aggregate_builders():
         assert tr.label == "train" and np.isfinite(tr.f0)
     for tr in neg:
         assert tr.label == "infer" and np.isnan(tr.f0)
+
+
+@pytest.mark.parametrize("family", [f for f in FAMILY_ORDER if f != "meter"])
+def test_aggregate_populations_well_formed(family):
+    """aggregate=True: every family builds aggregate traces against the
+    aggregate null, on the same time grid as the single-workload builders."""
+    level = attack_families(SMALL)[family].levels[0]
+    rng = np.random.default_rng(21)
+    pos = make_positive_population(family, level, 2, KO, GLUE, rng,
+                                   meter=None, aggregate=True)
+    neg = make_negative_population(family, 2, KO, GLUE, rng, meter=None,
+                                   aggregate=True)
+    single = make_positive_population(family, level, 1, KO, GLUE, rng,
+                                      meter=None)
+    for tr in pos:
+        assert tr.label == "train" and np.isfinite(tr.f0)
+        assert np.all(np.isfinite(tr.P_obs))
+        assert tr.t.shape == single[0].t.shape
+    for tr in neg:
+        assert tr.label == "infer" and np.isnan(tr.f0)
+    if family == "relocate":
+        assert all(tr.f0 == level for tr in pos)
+
+
+def test_aggregate_attack_reaches_dominant_run_only(monkeypatch):
+    """The attack knobs reach the dominant training_F call and nothing else:
+    the background trainings keep the honest params and no attack kwargs."""
+    from powerladder import ko_workload
+
+    calls = []
+    real = ko_workload.training_F
+
+    def spy(t, params, rng, **kw):
+        calls.append((params, kw))
+        return real(t, params, rng, **kw)
+
+    monkeypatch.setattr(ko_workload, "training_F", spy)
+    rng = np.random.default_rng(3)
+    make_positive_population("jitter", 0.5, 1, KO, GLUE, rng, meter=None,
+                             aggregate=True)
+    make_positive_population("work", 0.5, 1, KO, GLUE, rng, meter=None,
+                             aggregate=True)
+    # per trace: one dominant call + n_tr background trainings
+    n_per = len(calls) // 2
+    jit, work = calls[:n_per], calls[n_per:]
+    assert jit[0][0].sigma_jitter == 0.5
+    assert work[0][1].get("work_sigma") == 0.5
+    for params, kw in jit[1:] + work[1:]:
+        assert params == KO
+        assert "work_sigma" not in kw
+
+
+def test_aggregate_default_knobs_byte_identical():
+    """No attack knobs: the extended aggregate builder reproduces the seeded
+    pre-ST2 aggregate trace exactly (frozen §5 numbers depend on it)."""
+    from powerladder.typeb.ko_synth import ko_make_aggregate_trace
+
+    a = ko_make_aggregate_trace("train", KO, GLUE, np.random.default_rng(9))
+    b = make_positive_population("meter", "x", 1, KO, GLUE,
+                                 np.random.default_rng(9), meter=None,
+                                 aggregate=True)[0]
+    np.testing.assert_array_equal(a.P_obs, b.P_obs)
+    with pytest.raises(ValueError):
+        ko_make_aggregate_trace("infer", KO, GLUE, np.random.default_rng(9),
+                                work_sigma=0.3)
+
+
+def test_run_family_aggregate_smoke():
+    points = run_family("work", SMALL, KO, GLUE, seed=1, aggregate=True)
+    assert len(points) == len(SMALL.work_levels)
+    single = run_family("work", SMALL, KO, GLUE, seed=1)
+    assert [p.cadence_cv for p in points] == [p.cadence_cv for p in single]

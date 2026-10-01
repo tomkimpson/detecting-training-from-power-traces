@@ -9,6 +9,7 @@
 # results/st2/<family>_summary.json. Chain it on the array job id:
 #     sw=$(sbatch --parsable --array=0-8 scripts/slurm/st2_sweeps.sbatch)
 #     sbatch --dependency=afterok:${sw} scripts/slurm/st2_frontier.sbatch
+# For the section-2 aggregate, export SCENARIO=aggregate to BOTH jobs.
 #
 # NOTE: --b2-dir MUST point at data/measured_cost_anchors (the frontier default
 # results/b2 does not exist in this repo, and would silently yield no anchors).
@@ -36,4 +37,9 @@ mkdir -p results/st2/slurm
 source .venv/bin/activate
 
 echo "frontier assembly on $(hostname) at $(date)"
-python scripts/plot_st2_frontier.py --b2-dir data/measured_cost_anchors
+if [ "${SCENARIO:-single}" = "single" ]; then
+    python scripts/plot_st2_frontier.py --b2-dir data/measured_cost_anchors
+else
+    python scripts/plot_st2_frontier.py --b2-dir data/measured_cost_anchors \
+        --st2-dir "results/st2/${SCENARIO}" --fig-name "st2_frontier_${SCENARIO}"
+fi

@@ -14,6 +14,8 @@
 #     python scripts/plot_st2_sweeps.py --list        # -> "9 families"
 # then submit with the range 0..N-1 (override the #SBATCH default if it drifts):
 #     sbatch --array=0-8 scripts/slurm/st2_sweeps.sbatch
+# For the section-2 aggregate (-> results/st2/aggregate/<family>_summary.json):
+#     sbatch --export=ALL,SCENARIO=aggregate --array=0-8 scripts/slurm/st2_sweeps.sbatch
 #
 #SBATCH --job-name=st2sweep
 #SBATCH --partition=compute
@@ -42,4 +44,5 @@ source .venv/bin/activate
 echo "family ${SLURM_ARRAY_TASK_ID} on $(hostname) at $(date)"
 python scripts/plot_st2_sweeps.py \
     --detectors full \
-    --array-id "${SLURM_ARRAY_TASK_ID}"
+    --array-id "${SLURM_ARRAY_TASK_ID}" \
+    --scenario "${SCENARIO:-single}"

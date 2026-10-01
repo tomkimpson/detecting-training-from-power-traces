@@ -168,6 +168,7 @@ def make_positive_population(
     rng: np.random.Generator,
     *,
     meter: MeterParams | None,
+    aggregate: bool = False,
 ) -> list[TypeTrace]:
     """``n`` attacked-training traces of ``family`` at ``level``.
 
@@ -175,7 +176,30 @@ def make_positive_population(
     For the meter family the caller resolves the variant name (== ``level``)
     to its hostile MeterParams and passes it here; the workload itself is the
     NOMINAL honest training (the attack lives in the channel).
+
+    ``aggregate=True`` embeds the attacked run as the DOMINANT workload of the
+    eq-11 aggregate at Ko's nominal ratio; the background stays honest. The
+    dilute family is aggregate in both modes.
     """
+    if aggregate and family != "dilute":
+        def one() -> TypeTrace:
+            if family == "jitter":
+                return ko_make_aggregate_trace(
+                    "train", ko_params, glue, rng, meter=meter,
+                    dominant_params=dataclasses.replace(
+                        ko_params, sigma_jitter=float(level)))
+            if family in _TRAIN_KNOB:
+                return ko_make_aggregate_trace(
+                    "train", ko_params, glue, rng, meter=meter,
+                    **{_TRAIN_KNOB[family]: float(level)})
+            if family == "relocate":
+                return ko_make_aggregate_trace(
+                    "train", ko_params, glue, rng, meter=meter, f0=float(level))
+            if family == "meter":
+                return ko_make_aggregate_trace("train", ko_params, glue, rng,
+                                               meter=meter)
+            raise ValueError(f"unknown attack family {family!r}")
+        return [one() for _ in range(n)]
     if family == "jitter":
         kp = dataclasses.replace(ko_params, sigma_jitter=float(level))
         return [_train_trace(kp, glue, rng, meter=meter) for _ in range(n)]
@@ -205,6 +229,7 @@ def make_negative_population(
     rng: np.random.Generator,
     *,
     meter: MeterParams | None,
+    aggregate: bool = False,
 ) -> list[TypeTrace]:
     """``n`` inference-null traces through the SAME channel as the positives.
 
@@ -218,8 +243,10 @@ def make_negative_population(
     reused across levels). The meter family passes the hostile variant's
     MeterParams via ``meter`` so both classes share the observation channel —
     otherwise the gate measures the channel, not the workload.
+
+    ``aggregate=True`` scores every family against that aggregate null.
     """
-    if family == "dilute":
+    if aggregate or family == "dilute":
         return [ko_make_aggregate_trace("infer", ko_params, glue, rng,
                                         meter=meter) for _ in range(n)]
     return [ko_make_trace("infer", ko_params, glue, rng, meter=meter)

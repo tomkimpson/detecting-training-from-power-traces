@@ -17,9 +17,9 @@ READ-ONLY: a pure reader of the tracked results/st2/frontier_summary.json; it
 reuses the reductions of plot_st2_pareto.py so the two figures cannot disagree.
 
 Reproduce:
-    python scripts/plot_money_pareto.py [--summary PATH]
+    python scripts/plot_money_pareto.py [--summary PATH] [--far 0.01] [--out STEM]
 Outputs:
-    figures/money_pareto.{pdf,png}
+    figures/money_pareto.{pdf,png}   (or figures/<STEM>.*)
 """
 
 from __future__ import annotations
@@ -63,7 +63,8 @@ def series(summary: dict) -> dict[str, tuple[tuple[str, ...], str]]:
             for name, (dets, col) in _SERIES.items()}
 
 
-def plot(summary: dict) -> pathlib.Path:
+def plot(summary: dict, far: str = _pp._FAR_KEY,
+         name: str = "money_pareto") -> pathlib.Path:
     apply_house_style()
     cells = summary["cells"]
     fig, ax = plt.subplots(figsize=(WIDTH_ICML_COL, 2.45))
@@ -73,8 +74,14 @@ def plot(summary: dict) -> pathlib.Path:
     x_hi = max(costs)
     strip_lo, strip_hi = x_hi * 1.06, x_hi * 1.24
 
-    for k, (name, (dets, col)) in enumerate(series(summary).items()):
-        anchored, unpriced = _pp.split_by_cost(cells, dets)
+    work_zero = None
+    for k, (label, (dets, col)) in enumerate(series(summary).items()):
+        anchored, unpriced = _pp.split_by_cost(cells, dets, far)
+        if label == "fixed tests":
+            # the cheap attack's best hiding against the fixed tests, for the
+            # annotation: the most a ~zero-cost work-variation cell hides
+            work_zero = max(p["hiding"] for p in anchored
+                            if p["family"] == "work" and abs(p["cost"]) < 1.0)
         env = _pp.pareto_envelope(anchored)
         # extend the staircase to the edge of the measured range
         xs = [p[0] for p in env] + [x_hi]
@@ -96,17 +103,17 @@ def plot(summary: dict) -> pathlib.Path:
             clip_on=False)
 
     ax.annotate("vary real work\nper iteration: ~0% cost",
-                xy=(0, 0.74), xytext=(40, 0.95), fontsize=5.5,
+                xy=(0, work_zero), xytext=(40, 0.95), fontsize=5.5,
                 color=C["orange"], ha="left", va="center",
                 arrowprops=dict(arrowstyle="-", lw=0.5, color=C["orange"]))
 
     ax.set_xlim(-0.05 * x_hi, strip_hi + 0.02 * x_hi)
     ax.set_ylim(-0.04, 1.04)
     ax.set_xlabel("measured throughput overhead [%]")
-    ax.set_ylabel("hiding at FAR 0.05")
+    ax.set_ylabel(f"hiding at FAR {far}")
 
-    handles = [Line2D([], [], color=col, lw=1.4, label=name)
-               for name, (_, col) in series(summary).items()]
+    handles = [Line2D([], [], color=col, lw=1.4, label=label)
+               for label, (_, col) in series(summary).items()]
     handles += [Line2D([], [], ls="none", marker=m, ms=3.2, mfc=C["grey"],
                        mec="white", mew=0.3, label=f)
                 for f, m in _pp._FAMILY_MARKER.items()]
@@ -115,22 +122,27 @@ def plot(summary: dict) -> pathlib.Path:
               bbox_to_anchor=(0.37, 0.44), ncol=2, columnspacing=0.8,
               handlelength=1.6)
     fig.tight_layout()
-    return save(fig, "money_pareto")
+    return save(fig, name)
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--summary", type=pathlib.Path, default=_SUMMARY)
+    ap.add_argument("--far", type=float, default=_pp._DEFAULT_FAR,
+                    help="FAR the hiding axis is read at (must be stored)")
+    ap.add_argument("--out", default="money_pareto",
+                    help="figure stem under figures/")
     args = ap.parse_args()
     summary = json.loads(args.summary.read_text())
+    far = _pp.far_key(summary, args.far)
     for name, (dets, _) in series(summary).items():
-        anchored, unpriced = _pp.split_by_cost(summary["cells"], dets)
+        anchored, unpriced = _pp.split_by_cost(summary["cells"], dets, far)
         env = _pp.pareto_envelope(anchored)
         print(f"{name}: staircase {[(round(c, 1), round(h, 2)) for c, h in env]}")
         print("  unpriced hiding > 0.3: " + ", ".join(
             f"{p['family']}={p['level']} ({p['hiding']:.2f})"
             for p in unpriced if p["hiding"] > 0.3))
-    out = plot(summary)
+    out = plot(summary, far, args.out)
     print(f"-> {out.with_suffix('')}.*")
 
 
