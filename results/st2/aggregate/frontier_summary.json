@@ -254,9 +254,9 @@
           "0.01": 0.0
         }
       },
-      "cost_overhead_pct": null,
-      "cost_overhead_pct_std": null,
-      "cost_anchor_source": "analytic/qualitative only",
+      "cost_overhead_pct": 1027.338200094415,
+      "cost_overhead_pct_std": 152.02639131047343,
+      "cost_anchor_source": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
       "learning_cost": null
     },
     {
@@ -488,9 +488,9 @@
           "0.01": 0.075
         }
       },
-      "cost_overhead_pct": null,
-      "cost_overhead_pct_std": null,
-      "cost_anchor_source": "analytic/qualitative only",
+      "cost_overhead_pct": -0.6507552897207974,
+      "cost_overhead_pct_std": 0.17782007930588212,
+      "cost_anchor_source": "data/measured_cost_anchors/workjitter_summary.json (real-work realisation)",
       "learning_cost": null
     },
     {
@@ -566,9 +566,9 @@
           "0.01": 1.0
         }
       },
-      "cost_overhead_pct": null,
-      "cost_overhead_pct_std": null,
-      "cost_anchor_source": "analytic/qualitative only",
+      "cost_overhead_pct": 41.751315120441596,
+      "cost_overhead_pct_std": 21.235193747015117,
+      "cost_anchor_source": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
       "learning_cost": null
     },
     {
@@ -644,9 +644,9 @@
           "0.01": 0.515
         }
       },
-      "cost_overhead_pct": null,
-      "cost_overhead_pct_std": null,
-      "cost_anchor_source": "analytic/qualitative only",
+      "cost_overhead_pct": 355.8127641148718,
+      "cost_overhead_pct_std": 208.7435663732276,
+      "cost_anchor_source": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
       "learning_cost": null
     },
     {
@@ -683,9 +683,9 @@
           "0.01": 0.045
         }
       },
-      "cost_overhead_pct": null,
-      "cost_overhead_pct_std": null,
-      "cost_anchor_source": "analytic/qualitative only",
+      "cost_overhead_pct": 1155.3840207278665,
+      "cost_overhead_pct_std": 989.3328650642512,
+      "cost_anchor_source": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
       "learning_cost": null
     },
     {
@@ -722,9 +722,9 @@
           "0.01": 0.0
         }
       },
-      "cost_overhead_pct": null,
-      "cost_overhead_pct_std": null,
-      "cost_anchor_source": "analytic/qualitative only",
+      "cost_overhead_pct": 2126.8445406066066,
+      "cost_overhead_pct_std": 2484.2128677467645,
+      "cost_anchor_source": "data/measured_cost_anchors/spoof_summary.json (idle-pad realisation)",
       "learning_cost": null
     },
     {

@@ -23,3 +23,19 @@ python scripts/plot_st2_frontier.py --b2-dir data/measured_cost_anchors
 ```
 
 Families without an entry here are analytic/qualitative only on the frontier.
+
+## Provenance: off-grid top-up (2026-10-01)
+
+`spoof_summary.json` and `workjitter_summary.json` were extended with the frontier
+levels the July campaign never ran: work jitter 0.7, pad jitter 0.7, and pad drift
+0.1 / 0.4 / 0.8 / 1.5 Hz (8 traces each). These were captured on OzSTAR `milan-gpu`
+(A100-SXM4-80GB at 500 W, the same model as the original anchors; slurm job
+17811800), using the monorepo's `offgrid` phase (branch `feat/b2-offgrid-topup`,
+commits `732479a` and `86b412a`). None of the traces were throttled. Each trace's
+overhead is measured against its own honest baseline, so no new negatives were
+needed. Every pre-existing key is byte-identical to the July values; the new
+levels are only appended.
+
+The drift overheads are heavy-tailed (at 0.8 and 1.5 Hz the mean is well above the
+median), because a slow random wander occasionally parks a 300 s trace in long pads.
+The frontier quotes the mean, as for every other anchor.
