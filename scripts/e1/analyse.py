@@ -9,8 +9,8 @@ loss relative to honest training:
                    interpolation between evals); None if never reached
     cost           tokens_arm / tokens_honest - 1  (a lower bound if never reached)
 
-It also estimates the gradient noise scale B_simple from the honest runs' probes
-(and any *_bnoise runs) and puts it into the McCandlish penalty used in E0, to
+It also estimates the gradient noise scale B_simple from the second half of the
+honest runs' probes (or, if they did not probe, the honest *_bnoise scan at this m) and puts it into the McCandlish penalty used in E0, to
 compare predicted with measured cost.
 
     python scripts/e1/analyse.py --micro-batch 16
@@ -96,16 +96,24 @@ def main() -> None:
     if not seeds:
         raise SystemExit(f"no honest runs for micro-batch {m} in {a.results}")
 
-    # Noise scale: the second half of each honest run's probes (B_noise grows as
-    # loss falls; mid-to-late training is where the batch choice matters).
-    probes = []
-    for s in seeds:
-        p = runs[("honest", s)]["probes"]
-        probes += p[len(p) // 2:]
-    bnoise = {d.name: _b_simple(_read(d / "log.jsonl")["probes"])
-              for d in sorted(a.results.glob("honest_m*_s*_bnoise"))
-              if (d / "log.jsonl").exists()}
+    # Noise scale: the second half of the probes (B_noise grows as loss falls;
+    # mid-to-late training is where the batch choice matters), from the honest
+    # runs if they probed, else from the honest *_bnoise scan at this m. Probing
+    # does not change training, so the scan is the same honest configuration.
+    def second_half(p):
+        return p[len(p) // 2:]
+
+    bnoise_runs = {d.name: _read(d / "log.jsonl")["probes"]
+                   for d in sorted(a.results.glob("honest_m*_s*_bnoise"))
+                   if (d / "log.jsonl").exists()}
+    probes = [p for s in seeds for p in second_half(runs[("honest", s)]["probes"])]
+    b_source = "honest runs"
+    if not probes:
+        probes = [p for name, ps in bnoise_runs.items()
+                  if name.startswith(f"honest_m{m}_") for p in second_half(ps)]
+        b_source = f"honest_m{m}_*_bnoise"
     b_seq = _b_simple(probes)
+    bnoise = {name: _b_simple(second_half(ps)) for name, ps in bnoise_runs.items()}
 
     table = []
     for (arm, seed), r in sorted(runs.items()):
@@ -141,8 +149,8 @@ def main() -> None:
 
     summary = dict(
         micro_batch=m, target_frac=TARGET_FRAC, honest_batch_seq=schedules.BASE_ACCUM * m,
-        b_simple_seq=b_seq, b_simple_micro=(b_seq / m if b_seq else None),
-        b_simple_bnoise_runs=bnoise, per_arm=per_arm, runs=table,
+        b_simple_seq=b_seq, b_simple_source=b_source, b_simple_micro=(b_seq / m if b_seq else None),
+        b_simple_bnoise_runs_second_half=bnoise, per_arm=per_arm, runs=table,
     )
     out = a.results / "summary.json"
     out.write_text(json.dumps(summary, indent=2))
