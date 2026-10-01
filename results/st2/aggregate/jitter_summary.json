@@ -1,0 +1,235 @@
+{
+  "family": "jitter",
+  "scenario": "aggregate",
+  "generator": "ko_workload eq-11 aggregate (attacked dominant training, honest background) vs inference-dominant aggregate null",
+  "budget_units": "sigma_jitter (fractional i.i.d. period jitter)",
+  "cost_anchor": "data/measured_cost_anchors/spoof_summary.json",
+  "n_each": 200,
+  "target_fars": [
+    0.05,
+    0.01
+  ],
+  "seed": 0,
+  "meter": "off (exact no-op MeterParams)",
+  "detectors": [
+    "dg_order_full",
+    "dg_order_semicoh",
+    "mtf",
+    "spectral",
+    "viterbi"
+  ],
+  "levels": [
+    0.05,
+    0.1,
+    0.2,
+    0.35,
+    0.5,
+    0.7
+  ],
+  "points": [
+    {
+      "level": 0.05,
+      "cadence_cv": 0.05021571086565184,
+      "phase_diffusion_D": 0.10369606160284725,
+      "auc": {
+        "spectral": 1.0,
+        "viterbi": 1.0,
+        "mtf": 0.603525,
+        "dg_order_full": 0.959475,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.07,
+          "0.01": 0.02
+        },
+        "dg_order_full": {
+          "0.05": 0.905,
+          "0.01": 0.89
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      }
+    },
+    {
+      "level": 0.1,
+      "cadence_cv": 0.10562563444983904,
+      "phase_diffusion_D": 0.46809100591648656,
+      "auc": {
+        "spectral": 0.998175,
+        "viterbi": 1.0,
+        "mtf": 0.537025,
+        "dg_order_full": 0.888,
+        "dg_order_semicoh": 1.0
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.985,
+          "0.01": 0.975
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.025,
+          "0.01": 0.01
+        },
+        "dg_order_full": {
+          "0.05": 0.785,
+          "0.01": 0.77
+        },
+        "dg_order_semicoh": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        }
+      }
+    },
+    {
+      "level": 0.2,
+      "cadence_cv": 0.2470371077249112,
+      "phase_diffusion_D": 2.2564088562360993,
+      "auc": {
+        "spectral": 0.635175,
+        "viterbi": 1.0,
+        "mtf": 0.555025,
+        "dg_order_full": 0.69865,
+        "dg_order_semicoh": 0.977
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.435,
+          "0.01": 0.415
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.02,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.39,
+          "0.01": 0.345
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.89,
+          "0.01": 0.81
+        }
+      }
+    },
+    {
+      "level": 0.35,
+      "cadence_cv": 0.8410422599260274,
+      "phase_diffusion_D": 23.182570896831947,
+      "auc": {
+        "spectral": 0.29505,
+        "viterbi": 0.94955,
+        "mtf": 0.535625,
+        "dg_order_full": 0.510825,
+        "dg_order_semicoh": 0.63275
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.14,
+          "0.01": 0.125
+        },
+        "viterbi": {
+          "0.05": 0.82,
+          "0.01": 0.76
+        },
+        "mtf": {
+          "0.05": 0.02,
+          "0.01": 0.005
+        },
+        "dg_order_full": {
+          "0.05": 0.095,
+          "0.01": 0.07
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.15,
+          "0.01": 0.08
+        }
+      }
+    },
+    {
+      "level": 0.5,
+      "cadence_cv": 1.6932221582479174,
+      "phase_diffusion_D": 48.873308971844025,
+      "auc": {
+        "spectral": 0.37905,
+        "viterbi": 0.982025,
+        "mtf": 0.452475,
+        "dg_order_full": 0.3288,
+        "dg_order_semicoh": 0.37105
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.16,
+          "0.01": 0.14
+        },
+        "viterbi": {
+          "0.05": 0.92,
+          "0.01": 0.88
+        },
+        "mtf": {
+          "0.05": 0.02,
+          "0.01": 0.0
+        },
+        "dg_order_full": {
+          "0.05": 0.01,
+          "0.01": 0.0
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.01,
+          "0.01": 0.0
+        }
+      }
+    },
+    {
+      "level": 0.7,
+      "cadence_cv": 1.7113901599431336,
+      "phase_diffusion_D": 41.653124250093406,
+      "auc": {
+        "spectral": 0.40265,
+        "viterbi": 1.0,
+        "mtf": 0.48675,
+        "dg_order_full": 0.234675,
+        "dg_order_semicoh": 0.2014
+      },
+      "tpr_at_far": {
+        "spectral": {
+          "0.05": 0.17,
+          "0.01": 0.16
+        },
+        "viterbi": {
+          "0.05": 1.0,
+          "0.01": 1.0
+        },
+        "mtf": {
+          "0.05": 0.025,
+          "0.01": 0.015
+        },
+        "dg_order_full": {
+          "0.05": 0.0,
+          "0.01": 0.0
+        },
+        "dg_order_semicoh": {
+          "0.05": 0.005,
+          "0.01": 0.0
+        }
+      }
+    }
+  ]
+}

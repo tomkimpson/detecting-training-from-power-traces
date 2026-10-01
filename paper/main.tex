@@ -931,16 +931,16 @@ operator can instead de-periodicise its schedule and smear the cadence away
 (\cref{subsec:adversary}). In principle this is always possible; the concealing operator can insert idle time at random between iterations, or varying the work done in each, to removes any freuency for the Viterbi detector to identify.The question is the cost in training throughput the operator must incur in order de-periodicise enough to hide from the Viterbi detector, and in particular whether any de-periodicisation strategy is both cheap and effective. 
 
 
-We sweep the eight schedule strategies of \cref{tab:attacks}. Unlike
-\cref{sec:results}, the sweep scores a single training run against the inference
-null, without the background of \cref{eq:aggregate}. The exception is dilution,
-which by construction lowers training's share of the aggregate and is scored
-against the aggregate null of \cref{eq:aggregate_null}. For each strategy we
+We sweep the eight schedule strategies of \cref{tab:attacks} on the aggregate
+of \cref{sec:results}. The operator applies each strategy to its dominant
+training run, and the background of small trainings and fine-tunings stays
+honest. Every cell is scored against the aggregate null of
+\cref{eq:aggregate_null}. For each strategy we
 step an attack level and, at every level, measure the physical
 de-periodicisation it induces (cadence coefficient of variation, phase
 diffusion) against the detection rate of the Viterbi tracker and of the fixed
 tests of \cref{subsec:comparators}, taking the better of the two fixed tests at
-each cell. All rates are at nominal false-alarm rate $0.05$ with $n=200$ traces
+each cell. All rates are at false-alarm rate $10^{-2}$ with $n=200$ traces
 per class. Four strategies --- period jitter, cadence drift, work variation and
 shape filling --- were also run on a single A100, which gives each a measured
 throughput overhead (\cref{sec:reality}); the other four enter the frontier
@@ -975,11 +975,11 @@ cost, for one adversarial strategy.
 \Cref{fig:money_pareto} plots hiding ($1-$ detection rate) against measured
 throughput overhead, with the Pareto staircase: the best hiding available at or
 below a given cost. The two detectors separate sharply. Against the fixed tests
-the staircase reaches hiding $0.74$ at essentially zero overhead and climbs only
-to $0.79$ at $159\%$ and $0.82$ at $375\%$, however much the operator spends:
-the cheapest attack is within $0.08$ of the best one. Against the Viterbi
-tracker the staircase never leaves the floor. It rises only to $0.16$, and only
-at $159\%$ overhead, so no attack in the anchored set buys meaningful
+the staircase reaches hiding $0.79$ at essentially zero overhead and climbs only
+to $0.88$ at $159\%$, however much more the operator spends: the cheapest attack
+is within $0.09$ of the best one. Against the Viterbi tracker the staircase
+stays near the floor. It is at most $0.05$ up to $142\%$ overhead and rises to
+$0.24$ only at $159\%$, so no attack in the anchored set buys meaningful
 concealment from the tracker at any price we can measure. What the fixed tests
 lose for free, the tracker keeps at every measured cost.
 
@@ -987,21 +987,21 @@ Only $16$ of the $50$ swept cells have a measured cost. The rest appear in a
 separate unpriced strip rather than being dropped. The unpriced strategies do
 not trouble the tracker at the levels swept: against phase slip, relocation,
 harmonic smoothing, and dilution down to a $0.2$ training share, it holds
-detection rate $1.0$ in every cell, while the fixed tests fall as low as $0.40$
+detection rate $1.0$ in every cell, while the fixed tests fall as low as $0.33$
 under phase slip (\cref{app:sweep}). The one unpriced cell that matters is
 taken up in \cref{subsec:frontier_work}.
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=\columnwidth]{money_pareto}
+	\includegraphics[width=\columnwidth]{money_pareto_aggregate}
 	\caption{Cost of hiding. Measured throughput overhead against hiding ($1-$
-	detection rate at false-alarm rate $0.05$) for the four adversarial strategies with
+	detection rate at false-alarm rate $10^{-2}$) for the four adversarial strategies with
 	a hardware cost anchor, with the Pareto staircase --- the best hiding
 	available at or below a given cost --- against the fixed tests (orange; the
 	better of the matched filter and multitaper F-test per cell) and the Viterbi
-	tracker (blue). Varying real work per iteration hides ${\sim}0.74$ from the
+	tracker (blue). Varying real work per iteration hides ${\sim}0.79$ from the
 	fixed tests at no measurable cost; against the tracker no anchored attack
-	hides more than $0.16$. Cells without a cost anchor are shown as ticks in the
+	hides more than $0.24$. Cells without a cost anchor are shown as ticks in the
 	hatched strip, among them work-variation level $0.7$, where the tracker
 	begins to fail. Reproduced by \texttt{scripts/plot\_money\_pareto.py}.}
 	\label{fig:money_pareto}
@@ -1011,8 +1011,9 @@ taken up in \cref{subsec:frontier_work}.
 \label{subsec:frontier_costly}
 
 The de-periodicisations that degrade the line most are exactly the ones a
-rational operator would not pay for. Idle-insertion jitter buys no concealment:
-it costs $15$--$375\%$ throughput and leaves the tracked line detectable. Slowly
+rational operator would not pay for. Idle-insertion jitter buys little
+concealment: it costs $15$--$375\%$ throughput, and even at $159\%$ the tracker
+still detects $76\%$ of runs. Slowly
 drifting the cadence costs up to ${\sim}140\%$ and is precisely the regime the
 tracker was built to survive (\cref{subsec:power}). Power shaping costs
 $170$--$230\%$. Against every one of these the tracker holds while the operator
@@ -1029,9 +1030,9 @@ the synchronous exchange, which does not shrink with the compute phase,
 untouched. Its throughput cost is therefore essentially zero: at work-variation
 levels $0.35$ and $0.5$ the measured overhead is $-0.10\%$ and $-0.36\%$, zero
 within noise. At that price the fixed tests are gone. The spectral matched
-filter falls to detection rate $0.26$ and $0.27$ (its \textsc{auc} collapses to
-$0.44$ and $0.41$, below chance), and the multitaper F-test sits at its floor.
-Yet the Viterbi tracker holds detection rate $1.0$ at both levels. This is the
+filter falls to detection rate $0.25$ and $0.22$ (its \textsc{auc} collapses to
+$0.46$ and $0.43$, below chance), and the multitaper F-test sits at its floor.
+Yet the Viterbi tracker holds detection rate $1.0$ and $0.96$. This is the
 genuine scope boundary of the passive channel: an operator willing to vary real
 work evades every cheap, fixed detector at no measurable systems cost, and only
 a tracking detector still sees the schedule. Because the tracker sits near the
@@ -1040,7 +1041,7 @@ reflects information the fixed tests discard, not a well-tuned tracker.
 
 \paragraph{The tracker's own boundary is unmeasured.} The Viterbi tracker does
 eventually bend: at work-variation level $0.7$ its detection rate falls to
-$0.59$. We do not report that as a defeat, because we cannot price it; the
+$0.46$. We do not report that as a defeat, because we cannot price it; the
 throughput cost of driving work variation that hard is not in the measured
 anchors. The statement is therefore asymmetric. Within the regime whose cost we
 can measure (overhead within noise) the tracker wins outright. The far end of the
@@ -1079,7 +1080,7 @@ a facility's declared workload it is essentially Neyman--Pearson optimal across
 cadence wander (\cref{subsec:power}), provided the meter samples at ${\geq}2$~Hz
 with ${\leq}0.5$~s integration (\cref{subsec:meter_spec}). Varying real work per
 iteration evades every fixed-frequency test at no measurable throughput cost,
-but no cost-anchored attack buys the operator more than $0.16$ hiding from the
+but no cost-anchored attack buys the operator more than $0.24$ hiding from the
 tracker (\cref{sec:frontier}). This section says what such a detection
 certifies, where the synthetic evidence stops, and how the result reads for a
 regulator.
@@ -1761,27 +1762,30 @@ tracker.
 
 The main text reports the frontier as a single cost-of-hiding overlay
 (\cref{fig:money_pareto}). This appendix gives the full sweep: detection against
-physical de-periodicisation for all seven adversarial strategies and both detector
-classes (\cref{fig:frontier}), the per-detector response to variable real work
+physical de-periodicisation for every strategy of \cref{tab:attacks} and both
+detector classes (\cref{fig:frontier}), the per-detector response to variable real work
 (\cref{fig:st2_work}), and the cost-of-hiding view against each detector class
 (\cref{fig:st2_cost_pareto}). Here the tracking class is the best of the Viterbi
 tracker and the two order-tracked Dandawat\'e--Giannakis statistics of
 \cref{app:attribution}; on every cell with a measured cost its envelope equals
 the Viterbi tracker's alone.
 
-The sweep was frozen on the MATS compute cluster (slurm array 5635): $n=200$
-traces per class over $50$ cells, seed $0$, all five detectors, written to
-\texttt{results/st2/frontier\_summary.json}. The cost axis reads only the
+The sweep runs on the aggregate of \cref{sec:results}, with each strategy applied
+to the dominant training run only. It was frozen on the MATS compute cluster
+(slurm array 14354, assembled by job 14355): $n=200$ traces per class over $50$
+cells, seed $0$, all five detectors, written to
+\texttt{results/st2/aggregate/frontier\_summary.json}. Every rate is read at
+false-alarm rate $10^{-2}$. The cost axis reads only the
 throughput overhead of the single-A100 campaign. It does not use that campaign's
 measured line amplitudes, whose transfer to a facility meter \cref{sec:reality}
 questions, so the frontier does not depend on that caveat.
 
 \begin{figure*}[t]
 	\centering
-	\includegraphics[width=\linewidth]{st2_frontier}
+	\includegraphics[width=\linewidth]{st2_frontier_aggregate}
 	\caption{The de-periodicisation frontier: physical de-periodicisation
 	(cadence coefficient of variation) against best tracking and best fixed
-	detector power at nominal false-alarm rate $0.05$, over all adversarial strategies.
+	detection rate at false-alarm rate $10^{-2}$, over all adversarial strategies.
 	The near-vertical drop of the fixed class at the variable-real-work strategy,
 	at essentially zero throughput cost, while the tracking class holds, is the
 	scope boundary; costlier strategies (idle jitter, drift, shaping) sit at high
@@ -1791,25 +1795,26 @@ questions, so the frontier does not depend on that caveat.
 
 \begin{figure*}[t]
 	\centering
-	\includegraphics[width=\linewidth]{st2_work}
-	\caption{Detector power versus variable-real-work level for each detector.
-	The fixed matched filter and multitaper F-test cross below chance by level
-	$0.35$; the tracked order statistics degrade more slowly; the Viterbi
-	tracker holds full power until it finally bends at level $0.7$ (detection
-	rate $0.59$) --- a level whose throughput and learning cost we do not
-	measure.}
+	\includegraphics[width=\linewidth]{st2_work_aggregate}
+	\caption{Detection rate versus variable-real-work level for each detector, at
+	false-alarm rate $0.05$ (solid) and $10^{-2}$ (dashed). By level $0.35$ the
+	fixed matched filter has fallen below chance (\textsc{auc} $0.46$), and the
+	multitaper F-test stays at its floor throughout; the tracked order statistics
+	degrade more slowly. The Viterbi tracker holds detection rate ${\geq}0.95$ at
+	$10^{-2}$ until it bends at level $0.7$ (detection rate $0.46$) --- a level whose
+	throughput and learning cost we do not measure.}
 	\label{fig:st2_work}
 \end{figure*}
 
 \begin{figure*}[t]
 	\centering
-	\includegraphics[width=\linewidth]{st2_cost_pareto}
+	\includegraphics[width=\linewidth]{st2_cost_pareto_aggregate}
 	\caption{Cost of hiding: measured throughput overhead against hiding
-	($1-$ detection rate at false-alarm rate $0.05$) for the four cost-anchored
+	($1-$ detection rate at false-alarm rate $10^{-2}$) for the four cost-anchored
 	adversarial strategies, with the Pareto staircase --- the best hiding available at or
-	below a given cost. Against the tracking class (left) the staircase stays on
-	the floor across the whole measured cost axis; against the fixed class (right)
-	the variable-real-work strategy reaches hiding ${\sim}0.74$ at zero cost. Cells
+	below a given cost. Against the tracking class (left) the staircase stays near
+	the floor, reaching $0.24$ only at $159\%$ overhead; against the fixed class
+	(right) the variable-real-work strategy reaches hiding ${\sim}0.79$ at zero cost. Cells
 	whose attack level has no hardware cost anchor cannot be placed on the cost
 	axis and are shown in the hatched strip, among them the level at which the
 	tracker itself begins to fail. Attack levels are labelled where they hide
@@ -2215,7 +2220,7 @@ Two gaps stop this being a proof, and both matter.
 
 The first is that the surviving component is not one the fixed-bin verifier can
 use. \Cref{sec:frontier} measures the fixed tests under variable real work falling
-to detection rate $0.26$ with area under the curve $0.44$ --- below chance --- and
+to detection rate $0.25$ with area under the curve $0.46$ --- below chance --- and
 the multitaper F-test at its floor. So the residual at the exchange cadence is
 recovered only by the order-tracking class, which is precisely the class
 the fixed-bin argument does \emph{not} instantiate. Read strictly, then, the

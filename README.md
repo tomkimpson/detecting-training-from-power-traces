@@ -66,6 +66,19 @@ python scripts/plot_st2_pareto.py    # -> figures/st2_cost_pareto.*
 python scripts/plot_money_pareto.py  # -> figures/money_pareto.* (main-text Viterbi vs fixed overlay)
 ```
 
+**ST2 frontier on the section-2 aggregate (the paper's §6 and App. D).** Frozen on MATS
+(sweep array 14354, frontier job 14355); the single-workload freeze above is kept on disk
+but no longer cited. Same commands with `--scenario aggregate`, outputs in
+`results/st2/aggregate/` and `figures/*_aggregate.*`:
+```
+sbatch --export=ALL,SCENARIO=aggregate --array=0-8 scripts/slurm/st2_sweeps.sbatch
+sbatch --dependency=afterok:<id> --export=ALL,SCENARIO=aggregate scripts/slurm/st2_frontier.sbatch
+python scripts/plot_money_pareto.py --summary results/st2/aggregate/frontier_summary.json \
+    --far 0.01 --out money_pareto_aggregate
+python scripts/plot_st2_pareto.py --summary results/st2/aggregate/frontier_summary.json \
+    --far 0.01 --out st2_cost_pareto_aggregate
+```
+
 **Scenario models — example traces and observation-map sensitivity (local, CPU-only,
 ~5 s each):**
 ```
