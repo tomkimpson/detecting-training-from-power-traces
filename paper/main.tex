@@ -753,8 +753,7 @@ persistent, slowly wandering line is present, not what produced it. Accordingly,
 	follows across most of the band; it cuts the corner off the brief
 	excursion near $150$\,s, where following the line costs more in jumps than
 	it gains in contrast. Right: the inference null, where no path finds
-	sustained contrast and $V$ falls to $0.73$. Reproduced by
-	\texttt{scripts/plot\_viterbi\_track.py}.}
+	sustained contrast and $V$ falls to $0.73$.}
 	\label{fig:viterbi_track}
 \end{figure*}
 
@@ -1221,9 +1220,7 @@ knows no more about the drift than the tracker does. Each template fixes the
 dominant run's cadence over a random background, and the null spectrum is
 estimated from the null aggregate. The traces that build these spectra are drawn
 from a stream disjoint from the traces we score, and the ceiling is applied to
-exactly the populations of \cref{fig:drift_ceiling}.\footnote{Run on the MATS
-compute cluster (slurm job 14048);
-\texttt{results/st1/np\_ceiling\_aggregate\_summary.json}.}
+exactly the populations of \cref{fig:drift_ceiling}.
 
 The ceiling is a benchmark, not a usable detector. It knows the exact spectra of
 both classes, which a verifier monitoring a real facility does not. The tracker
@@ -1247,9 +1244,7 @@ already detects every trace, this changes nothing here.
 \paragraph{The background.} The same comparison on a single training run
 against inference alone, with no background load, gives tracker detection rates
 of $1.00$ up to $\sigma_f = 0.8$~Hz and $0.98$ at $1.5$~Hz, within $0.02$ of
-the aggregate at every drift.\footnote{\texttt{results/st1/bakeoff\_summary.json}
-against \texttt{bakeoff\_aggregate\_summary.json}, same seed and $n=200$ per
-class.} At the default shares the background neither helps nor hinders the
+the aggregate at every drift. At the default shares the background neither helps nor hinders the
 tracker.
 
 \section{Fixed-frequency baselines}
@@ -1289,11 +1284,7 @@ threshold both fixed tests empirically, as for the tracker
 
 This appendix gives two results behind the minimum meter specification of
 \cref{subsec:meter_spec}: the notch sweep, and a check that the specification
-does not depend on the background load.\footnote{Run on the MATS compute cluster
-(slurm array 14049), $48$ cells, $n=200$ per class, $300$~s traces;
-\texttt{results/st2/meter\_\allowbreak boundary\_\allowbreak aggregate\_\allowbreak summary.json}.
-The single-workload sweep is slurm array 5498,
-\texttt{results/st2/meter\_\allowbreak boundary\_\allowbreak summary.json}.}
+does not depend on the background load.
 
 \paragraph{The notch.} \Cref{fig:meter_boundary_notch} shows the tracker's
 detection rate as a delivery-path notch moves across the training cadence band
@@ -1312,8 +1303,7 @@ $0.45$--$0.63$. No notch in the sweep removes detection entirely.
 	rate $10^{-2}$ versus notch centre, one line per notch depth, at $20$~Hz
 	sampling with no integration window, the honest aggregate against the null
 	aggregate ($n=200$ per class). A deep notch near the band centre roughly
-	halves detection; none removes it. Reproduced by
-	\texttt{scripts/plot\_st2\_meter\_boundary.py -{}-scenario aggregate}.}
+	halves detection; none removes it.}
 	\label{fig:meter_boundary_notch}
 \end{figure}
 
@@ -1332,12 +1322,10 @@ throughput costs of \cref{fig:attack_curves} were measured. The sweep applies
 each strategy of \cref{tab:attacks} to the dominant training run of the
 aggregate and scores it against the null aggregate, with $n=200$ traces per
 class over $50$ cells, every rate read at false-alarm rate
-$10^{-2}$.\footnote{Run on the MATS compute cluster (slurm array 14354,
-assembled by job 14355), seed $0$;
-\texttt{results/st2/aggregate/frontier\_summary.json}.}
+$10^{-2}$.
 
 The throughput cost $c$ of \cref{eq:throughput_cost} comes from a campaign on a
-single A100 (\texttt{data/measured\_cost\_anchors/README.md}). We use only its
+single A100. We use only its
 throughput measurements. We do not use the size of the power line it measured,
 since a single card is a poor guide to what a facility meter sees
 (\cref{subsec:limitations}), so the costs do not depend on that caveat. Each
@@ -1355,9 +1343,7 @@ $|d| < 1\%$, so we report $d$ directly.
 
 \Cref{subsec:identifiability} notes that a load can carry a training-shaped
 power schedule without training. This appendix tests that with loads whose
-training status we know.\footnote{Run on the MATS compute cluster (slurm array
-5612), $n=200$ per class, $300$~s traces, band $0.3$--$1.7$~Hz;
-\texttt{results/rung2/rung2\_summary.json}.}
+training status we know, using $n=200$ traces of $300$~s per class.
 
 \paragraph{Setup.} We go beyond the single Viterbi score and give the verifier a
 classifier. Each trace is reduced to eight features computed from the trace
