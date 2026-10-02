@@ -72,24 +72,21 @@
 \printAffiliationsAndNotice{}
 
 \begin{abstract}
-Agreements to govern AI training will need a way to tell when training is
-happening on a monitored cluster, without trusting the operator. A power meter
-on the facility's supply needs no such trust, but it samples slowly, sees many
-workloads at once, and faces an operator who may try to hide its training. Here
-we develop a method to detect training in facility-level power, and measure what
-it costs an operator to hide from it. Synchronous training draws power in a
-cycle that repeats about once a second; because this cadence wanders, we follow
-it with a Viterbi line tracker borrowed from gravitational-wave searches. On
-simulated datacentre power, the tracker detects training hidden in a declared
-inference workload in nearly every five-minute window, within $0.04$ of an
-approximately optimal test, given a meter that samples at $2$\,Hz or faster. Of
-eight strategies an operator might use to hide, only extreme variation of the
-work per iteration evades the tracker, in at most $73\%$ of windows. This costs
-no throughput, but in small-scale training the operator needs $93$--$267\%$ more
-compute to reach the same loss, and over a day of observation at least $87\%$ of
-such runs are still caught. A modest passive meter is sufficient to make hidden training both detectable and expensive, which
+AI governance agreements that restrict large model training runs require methods to detect them on a monitored computing cluster, without trusting the operator. We develop a method to detect synchronous model training in facility-level power by Viterbi tracking of its wandering iteration cadence. On simulated datacentre power, when the operator makes no attempt to hide, the Viterbi tracker detects at least $96\%$ of training runs against a declared inference workload, at a $1\%$ false-alarm rate and within $0.04$ of the Neyman--Pearson optimum, given a meter that samples at $2$\,Hz or faster. Of eight strategies an operator might use to hide, only extreme variation of the work
+per iteration evades the tracker. It hides training in up to $73\%$ of five-minute
+observations, but over a day at least $87\%$ of such runs are still caught. This
+strategy costs no throughput, but in small-scale training the operator needs
+$93$--$267\%$ more compute to reach the same loss. A modest passive meter is sufficient to make hidden training both detectable and expensive, which
 makes power metering a promising part of compute verification that does not
 depend on trusting the operator.
+
+
+
+
+
+
+
+
 \end{abstract}
 
 % ============================================================================
