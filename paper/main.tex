@@ -1070,7 +1070,13 @@ limitations.
 Every detection rate in \cref{sec:frontier} refers to a single $300$\,s window.
 A training run lasts days to months, and the verifier observes all of it, so what
 matters to a concealing operator is the probability of being detected at some
-point during the run. We simulate this directly. Each run is one continuous
+point during the run. We simulate this for work variation, the one strategy
+that \cref{sec:frontier} found useful to a concealing operator: it is the only
+strategy that hides a large share of windows from the tracker without a throughput
+cost. Every other strategy is detected in at least three quarters of windows, and
+in most settings in nearly all of them, so a run is easily caught. We take two forms of
+work variation, the $\sigma_G = 0.7$ setting of \cref{tab:attacks} and the
+lognormal variant, which hides more per window. Each run is one continuous
 $24$-hour trace of the aggregate of \cref{eq:aggregate}, cut into consecutive
 $300$\,s windows and scored by the tracker. The run's cadence and background are
 held fixed for the whole day, so the windows of one run are not independent
