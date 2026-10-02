@@ -169,6 +169,9 @@ def analyse(scores: dict[str, np.ndarray], f0s: dict[str, np.ndarray],
             cross = [first_crossing(wealth_process(row, kappa=KAPPA), RUN_FAR)
                      for row in p]
         cross_win = np.array([np.inf if c is None else c + 1 for c in cross])
+        n_all = np.arange(1, s.shape[1] + 1)
+        counts = det.cumsum(axis=1)
+        k_all = np.array([count_threshold(n) for n in n_all])
         curve = {}
         for h in CHECK_HOURS:
             n = int(round(h * 3600 / WINDOW_S))
@@ -190,41 +193,59 @@ def analyse(scores: dict[str, np.ndarray], f0s: dict[str, np.ndarray],
             "per_run_window_rate": rate.round(4).tolist(),
             "f0": [None if np.isnan(f) else round(float(f), 4) for f in f0s[arm]],
             "p_detected_by_hours": curve,
+            "p_detected_by_window": {     # window n = 1..N (n * WINDOW_S seconds)
+                "eprocess": [round(float((cross_win <= n).mean()), 4) for n in n_all],
+                "count": (counts >= k_all).mean(axis=0).round(4).tolist(),
+            },
         }
     return out
 
 
 def plot(summary: dict, stem: str) -> pathlib.Path:
+    """a: per-run window detection rate vs cadence; b: P(run flagged) vs time.
+
+    Honest training is omitted from both panels (every window of every run is
+    detected); the null's run-level false-alarm rate is too small to show on a
+    linear axis and is reported in the summary and the caption.
+    """
     apply_house_style()
     fig, (a, b) = plt.subplots(1, 2, figsize=(WIDTH_WIDE, 2.3))
     arms = summary["arms"]
-    for arm in ARMS:
+    attacks = [arm for arm in ARMS if arm != "honest"]
+    for arm in attacks:
         f0 = np.array(arms[arm]["f0"], dtype=float)
-        a.scatter(f0, arms[arm]["per_run_window_rate"], s=4, color=_COLOR[arm],
-                  label=_LABEL[arm], alpha=0.7, lw=0)
+        a.scatter(f0, arms[arm]["per_run_window_rate"], s=5, color=_COLOR[arm],
+                  label=_LABEL[arm], alpha=0.8, lw=0)
     a.axhline(WINDOW_FAR, color=C["grey"], lw=0.8, ls=":")
+    a.text(0.5, WINDOW_FAR + 0.02, "null rate", color=C["grey"], fontsize=6,
+           ha="left", va="bottom")
     a.set_xlabel(r"run cadence $f_0$ [Hz]")
     a.set_ylabel("fraction of windows detected")
     a.set_ylim(-0.02, 1.02)
-    a.legend(loc="lower left", fontsize=6, frameon=False)
-    for arm in (*ARMS, NULL):
-        c = arms[arm]["p_detected_by_hours"]
-        hrs = [float(h) for h in c]
-        for rule, ls in (("count", "-"), ("eprocess", "--")):
-            b.plot(hrs, [c[h][rule] for h in c], ls=ls, marker="o", ms=2,
-                   color=_COLOR[arm], lw=1)
-    b.axhline(RUN_FAR, color=C["grey"], lw=0.8, ls=":")
-    b.set_xscale("log")
-    b.set_yscale("symlog", linthresh=1e-3)
-    b.set_xticks(CHECK_HOURS, [f"{h:g}" for h in CHECK_HOURS])
-    b.xaxis.set_minor_formatter(NullFormatter())
+    a.legend(loc="upper right", fontsize=6, frameon=False, handletextpad=0.2)
+
+    w_h = summary["params"]["window_s"] / 3600
+    for arm in attacks:
+        c = arms[arm]["p_detected_by_window"]
+        hrs = w_h * np.arange(1, len(c["eprocess"]) + 1)
+        b.step(hrs, c["eprocess"], where="post", color=_COLOR[arm], lw=1.2)
+        # the counting rule is a separate fixed-time test at each horizon, so
+        # it is drawn at the checkpoint times rather than as a curve
+        pts = arms[arm]["p_detected_by_hours"]
+        b.plot([float(h) for h in pts], [v["count"] for v in pts.values()],
+               ls="none", marker="o", ms=3, mfc="white", mew=0.9,
+               color=_COLOR[arm])
+    b.set_xlim(0, summary["params"]["run_hours"])
+    b.set_xticks(np.arange(0, summary["params"]["run_hours"] + 1, 6))
+    b.set_ylim(0, 1.02)
     b.set_xlabel("observation time [h]")
-    b.set_ylabel("P(run flagged)")
-    b.plot([], [], "k-", lw=1, label="count rule")
-    b.plot([], [], "k--", lw=1, label="e-process")
-    b.legend(loc="center right", fontsize=6, frameon=False)
+    b.set_ylabel("fraction of runs flagged")
+    b.plot([], [], color=C["black"], lw=1.2, label="anytime-valid test")
+    b.plot([], [], ls="none", marker="o", ms=3, mfc="white", mew=0.9,
+           color=C["black"], label="counting rule")
+    b.legend(loc="lower right", fontsize=6, frameon=False)
     for ax, lab in ((a, "a"), (b, "b")):
-        ax.text(-0.18, 1.02, lab, transform=ax.transAxes, fontweight="bold")
+        ax.text(-0.2, 1.02, lab, transform=ax.transAxes, fontweight="bold")
     fig.tight_layout()
     return save(fig, stem)
 
@@ -235,8 +256,20 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=os.cpu_count())
     ap.add_argument("--replot", action="store_true",
                     help="redraw the figure from the existing summary JSON")
+    ap.add_argument("--reanalyse", action="store_true",
+                    help="rebuild the summary and figure from the saved raw scores")
     args = ap.parse_args()
     tag = "_smoke" if args.smoke else ""
+    if args.reanalyse:
+        path = _RESULTS / f"run_level{tag}_summary.json"
+        summary = json.loads(path.read_text())
+        raw = np.load(_RESULTS / f"run_level{tag}_raw.npz")
+        names = (*ARMS, NULL)
+        summary["arms"] = analyse({k: raw[f"scores_{k}"] for k in names},
+                                  {k: raw[f"f0_{k}"] for k in names}, raw["cal"])
+        path.write_text(json.dumps(summary, indent=1))
+        print("wrote", plot(summary, f"run_level_detection{tag}"))
+        return
     if args.replot:
         summary = json.loads((_RESULTS / f"run_level{tag}_summary.json").read_text())
         print("wrote", plot(summary, f"run_level_detection{tag}"))
@@ -271,7 +304,7 @@ def main() -> None:
     (_RESULTS / f"run_level{tag}_summary.json").write_text(
         json.dumps(summary, indent=1))
     np.savez_compressed(_RESULTS / f"run_level{tag}_raw.npz", cal=cal,
-                        **{f"scores_{k}": v.astype(np.float32) for k, v in scores.items()},
+                        **{f"scores_{k}": v for k, v in scores.items()},
                         **{f"f0_{k}": v for k, v in f0s.items()})
     print("wrote", plot(summary, f"run_level_detection{tag}"))
     for arm, r in summary["arms"].items():

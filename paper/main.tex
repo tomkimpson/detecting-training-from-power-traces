@@ -1090,12 +1090,12 @@ facility's background fixed for a day does not make its false alarms cluster. A
 simpler rule, which counts detected windows over a fixed observation time,
 behaves the same way but detects fewer runs.
 
-Concealment that works for a window need not work for a run. The misses are not
-spread evenly across runs, but depend on the run's cadence. Under work variation
+Concealment that works for a window need not work for a run. The misses are not spread evenly across runs, but depend
+on the run's cadence (\cref{fig:run_level}a). Under work variation
 at $\sigma_G = 0.7$, runs with $f_0 \lesssim 0.8$\,Hz are detected in almost
 every window, and those above about $1.1$\,Hz in $8$--$20\%$. Even the hardest
 of these runs is detected at several times the null's $1\%$ rate, so the test
-catches it eventually. It flags $68\%$ of runs within an hour, $95\%$ within three
+catches it eventually (\cref{fig:run_level}b). It flags $68\%$ of runs within an hour, $95\%$ within three
 hours, and every run within six. The lognormal work variation of
 \cref{sec:frontier} hides more. Runs with $f_0$ between about $0.9$ and $1.3$\,Hz
 are detected in only $1$--$7\%$ of windows, and $15$ of $200$ runs fall to $2\%$
@@ -1105,6 +1105,22 @@ survive a day of observation, and the runs closest to the null's rate would
 survive much longer. A concealing operator can therefore hide a run, but only with
 the lognormal strategy, only at some cadences, and at the $93\%$ learning cost
 measured in \cref{sec:frontier}.
+
+\begin{figure*}[t]
+	\centering
+	\includegraphics[width=\linewidth]{run_level_detection}
+	\caption{From windows to runs. Each run is one continuous $24$-hour trace of
+	the aggregate, scored in $300$\,s windows; $200$ runs per strategy.
+	\textbf{a}, fraction of each run's windows detected at false-alarm rate
+	$10^{-2}$, against the run's cadence. The dotted line is the null's $1\%$
+	rate. \textbf{b}, fraction of runs flagged against observation time, at a
+	run-level false-alarm rate of $10^{-3}$. Lines are the anytime-valid test,
+	which may stop at any time; open circles are the counting rule, a separate
+	fixed-time test at each marked time. Honest training is flagged in its first
+	window and is not shown. Across $2000$ null runs the anytime-valid test raises
+	$3$ false alarms in a day.}
+	\label{fig:run_level}
+\end{figure*}
 
 \subsection{What a detection certifies}
 \label{subsec:identifiability}
