@@ -1070,27 +1070,41 @@ limitations.
 Every detection rate in \cref{sec:frontier} refers to a single $300$\,s window.
 A training run lasts days to months, and the verifier observes all of it, so what
 matters to a concealing operator is the probability of being detected at some
-point during the run. To stay hidden, the operator must evade every window, not
-just a typical one.
+point during the run. We simulate this directly. Each run is one continuous
+$24$-hour trace of the aggregate of \cref{eq:aggregate}, cut into consecutive
+$300$\,s windows and scored by the tracker. The run's cadence and background are
+held fixed for the whole day, so the windows of one run are not independent
+draws. A window counts as detected at false-alarm rate $10^{-2}$, as in
+\cref{sec:frontier}.
 
-The misses are not spread evenly across runs. Holding a run's cadence and
-background fixed and drawing many windows under work variation at
-$\sigma_G = 0.7$, runs with $f_0 \lesssim 0.8$\,Hz are detected in almost every
-window, while runs above about $1.1$\,Hz are detected in only $7$--$12\%$. Even
-these hardest runs are flagged at several times the null's $1\%$ rate. A verifier
-can exploit this with a run-level rule that raises an alarm when the number of
-detections over a run exceeds what the null would produce. At a run-level
-false-alarm rate of $10^{-3}$, an operator whose run is detected in $7\%$ of
-windows is caught with probability $0.88$ after $12$ hours of observation and
-$0.996$ after a day. Concealment that works for most windows therefore does not
-work for a run. To stay hidden over a run, the operator must push its per-window
-detection rate down to the null's, and no strategy we tested does so.
-\textcolor{red}{[TODO: exploratory scratch check (20 runs $\times$ 20 windows,
-then 200 windows for the 5 least-detected runs; Viterbi only, aggregate, FAR
-$10^{-2}$). Promote to a script with a committed results file, and repeat for the
-lognormal work variation of \cref{sec:frontier}, which hides more per window.
-The counting rule assumes windows are independent, under the null as well: a
-compliant facility whose false alarms cluster would weaken it.]}
+The verifier then needs a rule that turns a sequence of windows into a decision
+about the run. We use an anytime-valid test \citep{ramdas2023savi}. Each window's
+score becomes a p-value against the null \citep{vovk2005algorithmic}, each p-value
+becomes an e-value $e = 1/(2\sqrt{p})$, and the test raises an alarm when the
+running product of e-values first exceeds $1/\alpha$. By Ville's inequality
+\citep{ville1939etude}, the false-alarm rate stays below $\alpha$ however long the
+verifier watches and whenever it stops. We set $\alpha = 10^{-3}$. Across $2000$
+null runs the empirical false-alarm rate after a day is $1.5 \times 10^{-3}$
+($95\%$ interval $0.5$--$4.4 \times 10^{-3}$), consistent with $\alpha$: holding a
+facility's background fixed for a day does not make its false alarms cluster. A
+simpler rule, which counts detected windows over a fixed observation time,
+behaves the same way but detects fewer runs.
+
+Concealment that works for a window need not work for a run. The misses are not
+spread evenly across runs, but depend on the run's cadence. Under work variation
+at $\sigma_G = 0.7$, runs with $f_0 \lesssim 0.8$\,Hz are detected in almost
+every window, and those above about $1.1$\,Hz in $8$--$20\%$. Even the hardest
+of these runs is detected at several times the null's $1\%$ rate, so the test
+catches it eventually. It flags $68\%$ of runs within an hour, $95\%$ within three
+hours, and every run within six. The lognormal work variation of
+\cref{sec:frontier} hides more. Runs with $f_0$ between about $0.9$ and $1.3$\,Hz
+are detected in only $1$--$7\%$ of windows, and $15$ of $200$ runs fall to $2\%$
+or below, close to the null's rate. The test flags $44\%$ of these runs within an
+hour, $75\%$ within six hours, and $87\%$ after a day. The remaining $13\%$
+survive a day of observation, and the runs closest to the null's rate would
+survive much longer. A concealing operator can therefore hide a run, but only with
+the lognormal strategy, only at some cadences, and at the $93\%$ learning cost
+measured in \cref{sec:frontier}.
 
 \subsection{What a detection certifies}
 \label{subsec:identifiability}
@@ -1154,10 +1168,11 @@ linear time-invariant first approximation. The optimality ceiling of
 \cref{app:ceiling} is optimal only under the Whittle model, hence a lower bound on
 the true optimum. The tracker's thresholds are calibrated by Monte Carlo on the
 modelled null, not per trace, and the known-line veto of
-\cref{subsec:identifiability} is specified but not evaluated. The results are
-fixed-horizon. The run-level rule of \cref{subsec:runs} counts detections over a
-fixed number of windows and assumes they are independent, and we do not treat
-continuous monitoring with anytime-valid guarantees. We target synchronous,
+\cref{subsec:identifiability} is specified but not evaluated. The run-level
+results of \cref{subsec:runs} cover a single day of observation, and the
+anytime-valid guarantee there assumes the window p-values are independent under
+the null. The null runs support this for our modelled facility, but a real
+facility's false alarms could be more correlated. We target synchronous,
 iteration-structured training whose cadence lies in the searched band; a run that
 moves its cadence outside the band or abandons synchronous iteration is outside
 the population we test. The declared workload need not be pure inference either.
@@ -1190,8 +1205,9 @@ open empirical question.
 A passive power meter is a screen. Given a meter that meets the specification
 of \cref{subsec:meter_spec}, a Viterbi tracker detects the iteration cadence of
 synchronous training against a declared inference workload. Only varying the real
-work per iteration weakens it, and that attack, though free in throughput, still
-leaves a run exposed within a day and costs $93\%$ or more in learning
+work per iteration weakens it. Over a run, an anytime-valid test still catches
+most attacked runs within a day. The best attack we found leaves about one run in
+seven undetected after a day, but it costs the operator $93\%$ in learning
 efficiency. The screen cannot say what the computation is: a detection certifies
 a training-shaped schedule, not training. A positive detection should therefore
 trigger escalation to an active challenge protocol (\cref{app:active}) rather
