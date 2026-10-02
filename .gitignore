@@ -81,3 +81,8 @@ results/e1/*_smoke/
 results/e1/slurm/*
 !results/e1/slurm/.gitkeep
 .venv-gpu/
+
+# Run-level detection (Sec. 7.1): only run_level_summary.json + figure tracked.
+results/st2/run_level_raw.npz
+results/st2/run_level_smoke_*
+figures/run_level_detection_smoke.*
