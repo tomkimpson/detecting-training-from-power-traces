@@ -88,8 +88,10 @@ is the de-periodicisation frontier, which prices hiding against measured
 throughput anchors and is strongly asymmetric: varying real work per iteration
 hides from every fixed-frequency test at essentially zero cost, while the
 tracking class holds until that variation is extreme, where it still detects
-about half of runs. That extreme level is also free in throughput, so its price,
-if any, lies in learning efficiency, which we do not measure. Two limits are firmer than the detectors. The observation channel is
+about half of runs. That extreme level is free in throughput but not in
+learning: in small-scale training it costs the operator $267\%$ more compute
+to reach the same loss, and a better-designed variant that hides about
+three-quarters of runs still costs about $80\%$, even with a tuned recipe. Two limits are firmer than the detectors. The observation channel is
 itself a condition on every claim --- a one-second-integrating, one-hertz
 meter defeats all detectors on an honest workload --- and the meter certifies
 a physical schedule, not training semantics: five non-training loads,
@@ -637,7 +639,7 @@ other load, and degrading the channel. In principle the strategies may be compos
 	implemented inside the generator of \cref{sec:scenario} and swept singly over
 	the stated budget range in \cref{sec:frontier}. ``Measured'' marks strategies
 	with a throughput-overhead anchor from the single-A100 campaign
-	(\cref{sec:reality}); the others have no hardware implementation and are
+	(\cref{sec:reality}); the others were not run on hardware and are
 	reported without a cost (\cref{sec:frontier}). The meter strategy
 	degrades the channel rather than the schedule and is read as a channel
 	requirement (\cref{subsec:meter_spec}), not priced.}
@@ -926,12 +928,12 @@ cadence.
 \section{Detection against a concealing operator}
 \label{sec:frontier}
 % ============================================================================
-\Cref{sec:results} assumed a benign operator, who leaves the cadence for the tracker to find. A concealing
+\Cref{sec:results} assumed a benign operator, who leaves the training cadence for the tracker to find. A concealing
 operator can instead de-periodicise its schedule and smear the cadence away
-(\cref{subsec:adversary}). In principle this is always possible: the concealing operator can insert idle time at random between iterations, or vary the work done in each, to remove any frequency for the Viterbi detector to identify. The question is the cost in training throughput the operator must incur in order to de-periodicise enough to hide from the Viterbi detector, and in particular whether any de-periodicisation strategy is both cheap and effective.
+(\cref{subsec:adversary}). In principle this is always possible. The concealing operator can insert idle time at random between iterations, or vary the work done in each, to remove any frequency for the Viterbi detector to identify. The question is the cost in training throughput the operator must incur in order to de-periodicise enough to hide from the Viterbi detector, and in particular whether any de-periodicisation strategy is both cheap and effective.
 
 In this section we sweep all eight schedule strategies of \cref{tab:attacks}
-and measure how much each one hides from the detectors at each strength. The
+and measure how much each one hides from the detectors. The
 operator applies each strategy to its dominant training run, $P^{\mathrm{main}}$
 in the aggregate of \cref{eq:aggregate}. The background of small trainings and
 fine-tunings, $P^{\mathrm{tr}}_j$ and $P^{\mathrm{ft}}_k$, stays honest, and every cell is scored against the aggregate null of
@@ -941,60 +943,36 @@ fixed tests of \cref{subsec:comparators}, taking the better of the two fixed
 tests at each cell. All rates are at false-alarm rate $10^{-2}$ with $n=200$
 traces per class.
 
-\textcolor{red}{this para to complete once we get results back on other ways to measure cost}
-Four strategies --- period jitter, cadence drift, work variation and shape
-filling --- were also run on a single A100, which gives each of their knob settings a
-measured throughput cost (\cref{sec:reality}). We write the throughput cost of
-a setting as
+We measure the throughput cost incurred by four of the concealing strategies (period jitter, cadence drift, work variation and shape filling) on a single A100. We write the throughput cost as
 \begin{equation}
 	c \;=\; \frac{r_{\mathrm{honest}}}{r} - 1,
 	\label{eq:throughput_cost}
 \end{equation}
-the fractional increase in wall-clock time per trained token, where $r$ is the
-training throughput in tokens per second under the attack and
-$r_{\mathrm{honest}}$ that of the same run without it, and quote it in percent.
-For the strategies that only insert idle time, $c$ is the stretch of the
-iteration period over its busy time; for work variation, which never idles, it
-is read from the tokens-per-second deficit $1 - r/r_{\mathrm{honest}}$, which
-agrees with \cref{eq:throughput_cost} to first order and is zero within noise.
-The other four (phase slip,
-relocation, harmonic smoothing and dilution) have no hardware implementation,
-so they have no measured cost. Throughput is the only cost we measure. An attack
-might keep tokens per second but worsen progress per token; this
-learning-efficiency penalty cannot be measured in a synthetic model and remains
-open (\cref{subsec:scope}). The full sweep and its provenance are in
-\cref{app:sweep}.
+i.e. the fractional increase in wall-clock time per trained token, where $r$ is the
+training throughput in tokens per second under the concealing strategy and
+$r_{\mathrm{honest}}$ that of the same run without it.
+For the strategies that only insert idle time, every iteration trains the same
+number of tokens, so $c$ is the idle time added per iteration as a fraction of
+the busy time. Work variation changes the number of tokens per iteration, so
+there we measure $r$ directly in tokens per second.
+We did not run the other four concealing strategies (phase slip,
+relocation, harmonic smoothing and dilution) on hardware, so they have no
+measured cost. 
 
 
-
-This section is organised as follows. \Cref{subsec:frontier_cost} shows how
-much each strategy hides as its budget knob is turned up, against both
-detectors; it is the section's main result. \Cref{subsec:frontier_work}
-explains why varying the real work per iteration is the one strategy that
-hides for free, and why at its largest budget it also halves the tracker's
-detection rate.
-
-\subsection{How much each strategy hides}
-\label{subsec:frontier_cost}
 
 \Cref{fig:attack_curves} plots hiding ($1-$ detection rate) against the
-budget knob of every schedule strategy, with the measured throughput cost of
-each knob setting where one exists. 
-
-Against the fixed tests, seven of the eight strategies hide a large fraction of
+budget knob (and, where applicable, the measured throughput cost) of every concealing strategy Against the fixed baseline detection methods, seven of the eight strategies hide a large fraction of
 runs at their larger budgets; only harmonic smoothing hides nothing. Hiding
 mostly grows with the budget, up to $0.88$ under both jitter and work
 variation. Only work variation hides for free. It hides $0.88$ at $c \approx 0$,
 while jitter and drift need $c = 159\%$ and $356\%$ to reach $0.88$
-and $0.71$.
-
-Against the Viterbi tracker almost nothing hides. The tracker detects at least
+and $0.71$. Against the Viterbi tracker almost nothing hides. The tracker detects at least
 $95\%$ of runs in $43$ of the $46$ cells. It detects every run in every cell of
 phase slip, relocation, harmonic smoothing, shape filling and dilution, and at
 least $97\%$ under drift. The three exceptions are two jitter settings and the
 largest work variation. Jitter at $\sigma_\xi = 0.35$ hides $0.24$
-for $c = 159\%$, and at $0.5$ hides $0.12$ for $c = 375\%$; at $0.7$ it hides
-nothing. Work variation at $\sigma_G = 0.7$ hides $0.55$ at $c \approx 0$,
+for $c = 159\%$, and at $0.5$ hides $0.12$ for $c = 375\%$. Work variation at $\sigma_G = 0.7$ hides $0.55$ at $c \approx 0$,
 though at every smaller $\sigma_G$ it hides at most $0.05$.
 \begin{figure*}[t]
 	\centering
@@ -1011,62 +989,54 @@ though at every smaller $\sigma_G$ it hides at most $0.05$.
 	within noise, are shown as $0$, and drift-free scheduling costs zero by
 	definition. Shape-filling costs were measured on a jittered base and are
 	upper bounds ($\leq$).
-	\textbf{e--h}, the four strategies with no hardware implementation and so no
+	\textbf{e--h}, the four strategies we did not run on hardware, and so with no
 	measured cost. The tracker detects almost every cell. The exception, ringed in
 	\textbf{c}, is work variation at $\sigma_G = 0.7$, which hides $0.55$ from it
 	at $c \approx 0$; idle-insertion jitter hides at most $0.24$, for
 	$c = 159\%$. The meter strategy degrades the channel rather than the
-	schedule and is treated in \cref{subsec:meter_spec}. Reproduced by
-	\texttt{scripts/plot\_attack\_curves.py}.}
+	schedule and is treated in \cref{subsec:meter_spec}.}
 	\label{fig:attack_curves}
 \end{figure*}
 
 
-The major challenge for the verifier and the Viterbi tracker is work variation at $\sigma_G = 0.7$. 
-
-Here a few iterations accumulate very many micro-steps: about one in ten
-accumulates $64$ or more, against the honest $G_0 = 8$. These long, unbroken
-compute blocks carry the hiding; capping the micro-step count at $32$ restores
-the tracker's detection rate to $84\%$. Because every micro-step is real work
-and the device never idles, the throughput cost $c$ is zero within noise at every
-$\sigma_G$ (\cref{fig:attack_curves}).
-
-The attack is not free in learning efficiency, however. The same long blocks
-raise the mean micro-step count from $8$ to $25$, so the operator takes about a
-third as many optimiser steps per token as honest training. Larger batches
-make each step less efficient per token. \citet{mccandlish2018empirical} model
-an optimiser step on a batch of $B$ samples, with the learning rate tuned for
-that batch, as making a fraction
+While the Viterbi detector is robust to the majority of concealing strategies, work variation at $\sigma_G = 0.7$ is the main exception; the operator can hide 55\% of $300$\,s observation windows at zero throughput cost. However, the strategy does have a cost in terms of training efficiency. The work variation strategy involves a few iterations accumulating many micro steps, where about one in ten accumulates 64 microsteps or more. The long blocks raise the mean micro-step count from $8$ to $25$, so the operator takes about a third as many optimiser steps per token as honest training, and each step
+on a larger batch does less per token. \citet{mccandlish2018empirical} model an
+optimiser step on a batch of $B$ samples, with the learning rate tuned for that
+batch, as making a fraction
 \begin{equation}
 	h(B) \;=\; \frac{B}{B + B_{\mathrm{noise}}}
 	\label{eq:step_efficiency}
 \end{equation}
 of the progress of a full-gradient step, where the gradient noise scale
-$B_{\mathrm{noise}}$ sets the critical batch size. Progress per sample is then proportional to
-$h(B)/B = 1/(B + B_{\mathrm{noise}})$, which falls as the batch grows. For
-micro-step counts $G_i$ drawn independently, it is proportional to
+$B_{\mathrm{noise}}$ sets the critical batch size. For micro-step counts $G_i$
+drawn independently, progress per sample is proportional to
 $\mathbb{E}[h(G)]/\mathbb{E}[G]$, so the attack needs a fraction
 \begin{equation}
 	\Delta \;=\; \frac{h(G_0)/G_0}{\mathbb{E}[h(G)]/\mathbb{E}[G]} \;-\; 1
 	\label{eq:token_penalty}
 \end{equation}
 more samples than honest training to reach the same loss, with $B$ and
-$B_{\mathrm{noise}}$ counted in micro-batches. For
-$B_{\mathrm{noise}}$ between $8$ and $128$ micro-batches,
-\cref{eq:token_penalty} gives $\Delta = 53$--$184\%$ at $\sigma_G = 0.7$, the
-larger penalty at the smaller noise scale. The attack moves its cost from
-throughput into learning efficiency rather than avoiding it.
+$B_{\mathrm{noise}}$ counted in micro-batches; at $\sigma_G = 0.7$ it gives
+$\Delta = 53$--$184\%$ for $B_{\mathrm{noise}}$ between $8$ and $128$.
+
+We also measured the training efficiency penalty for the work variation strategy directly. We trained a $30$M-parameter GPT-style
+language model on $400$M tokens of FineWeb-Edu \citep{penedo2024fineweb} on a
+single A100, three seeds per schedule. The strategy uses the same micro-batches in
+the same order as honest training ($G_0 = 8$), changing only how many are
+accumulated into each step; the gradient noise scale we measured over these runs
+is about $14$ micro-batches. We define the learning cost as the extra tokens
+the strategy needs, i.e. the $400$M tokens the strategy trained on, divided by
+the tokens honest training needs to reach the same final loss, minus one. At $\sigma_G = 0.7$ it is
+$267 \pm 33\%$, c.f. the predicted $163\%$ at the measured noise scale from \cref{eq:token_penalty}. We also tried a strategy not in \cref{tab:attacks}: draw $G_i$ lognormally
+with spread $s$, with the mean held at the honest $8$. It takes as many
+optimiser steps per token as honest training and never idles, so it should cost
+no throughput. At $s = 1.0$ it hides $0.73$ from the tracker, more than the
+$0.55$ of work variation at $\sigma_G = 0.7$, but costs $93 \pm 6\%$ in
+training efficiency. 
 
 
-These learning costs are model predictions, not measurements. They assume a
-learning rate retuned at every step, and $B_{\mathrm{noise}}$ for a given
-training run is unknown. Measuring them requires training to a fixed loss under
-each schedule, which we leave open (\cref{subsec:scope}). A longer observation
-window may also recover more of the spread power for the tracker.
-\textcolor{red}{[TODO: the work-variation numbers in the last three paragraphs
-come from the exploratory E0 spike (the E0 findings note under notes/results
-on the frontier-aggregate-explore branch); promote it to a script with a
-committed results file before submission. Only the Viterbi tracker was run.]}
+
+
 
 % ============================================================================
 \section{Discussion and conclusion}
@@ -1082,9 +1052,10 @@ cadence wander (\cref{subsec:power}), provided the meter samples at ${\geq}2$~Hz
 with ${\leq}0.5$~s integration (\cref{subsec:meter_spec}). Varying real work per
 iteration evades every fixed-frequency test at no measurable throughput cost.
 The tracker survives it until the variation is extreme, where it still detects
-about half of runs; that extreme level is also free in throughput, and every
-attack that does cost throughput hides less from the tracker
-(\cref{sec:frontier}). This section says what such a detection
+about half of runs. That extreme level is free in throughput, and every
+attack that does cost throughput hides less from the tracker, but it costs
+learning efficiency: about $80\%$ more compute to reach the same loss even for
+the strongest variant we found (\cref{sec:frontier}). This section says what such a detection
 certifies, where the synthetic evidence stops, and how the result reads for a
 regulator.
 
@@ -1297,8 +1268,8 @@ assumptions, not a quantitative bound on unidentified compute.
 		2. Conditional classification & The trace is more training-like than the
 		stated inference population & A representative or explicitly modelled
 		inference null & Viterbi detects training at the Neyman--Pearson ceiling
-		across cadence wander (\cref{subsec:power}) and against zero-cost
-		variable real work (\cref{sec:frontier}), given a meter of ${\geq}2$~Hz
+		across cadence wander (\cref{subsec:power}) and against moderate
+		variable real work, which costs no throughput (\cref{sec:frontier}), given a meter of ${\geq}2$~Hz
 		and ${\leq}0.5$~s integration (\cref{subsec:meter_spec}); fitted rules
 		reach area under the curve $1.00$ under six domain shifts
 		(\cref{app:rung2}) & Domain shift; strong superposition, dilution or
@@ -1363,19 +1334,38 @@ may be installed for reasons unrelated to concealment. The verifier's remedy
 is placement: a meter between any storage and the accelerators sees the
 unsmoothed load. The tracker's thresholds are calibrated by Monte Carlo on
 the modelled null, not per trace, and the known-line veto that would handle
-instrument lines is specified but not evaluated. Finally, throughput is the only
-cost we measure. Learning efficiency is argued, not measured, and remains the
-central open empirical question. It matters directly: the one attack that
-weakens the tracker is free in throughput, so learning efficiency is the only
-place it could be paid for.
+instrument lines is specified but not evaluated. Finally, the one attack that
+weakens the tracker is free in throughput, so its price lies in learning
+efficiency. We measure that price only at small scale: a $30$M-parameter model,
+one dataset, and a limited search over attacker schedules and recipes
+(\cref{subsec:frontier_work}). Whether it holds at frontier scale, and against
+best responses we did not test, is the central open empirical question.
+
+\paragraph{From windows to runs.} Every detection rate in \cref{sec:frontier} refers to a single $300$\,s
+window, not to a training run. A run lasts days to months, and the verifier observes it for the
+whole time, so the operator must evade every window, not just a typical one.
+The misses are not spread evenly across runs, however. Holding a run's cadence
+and background fixed and drawing many windows under $\sigma_G = 0.7$, runs with
+$f_0 \lesssim 0.8$\,Hz are detected in almost every window, while runs above
+about $1.1$\,Hz are detected in only $7$--$12\%$. Even the hardest of these runs
+is flagged at several times the null's $1\%$ rate. A run-level rule that counts
+detections over many windows can therefore expose it: at a run-level false-alarm
+rate of $10^{-3}$, a run detected in $7\%$ of windows is caught with
+probability $0.88$ after $12$ hours of observation and $0.996$ after a day.
+\textcolor{red}{[TODO: exploratory scratch check (20 runs $\times$ 20 windows,
+then 200 windows for the 5 least-detected runs; Viterbi only, aggregate, FAR
+$10^{-2}$). Promote to a script with a committed results file. The counting rule
+assumes windows are independent, under the null as well: a compliant facility
+whose false alarms cluster would weaken it.]}
 
 \paragraph{Governance reading.} What a regulator can buy today is a screen. From
 an external meter alone, meeting the specification of \cref{subsec:meter_spec}, a
 Viterbi tracker detects the iteration cadence of synchronous training against a
 declared inference workload, robust to cadence wander, drift, and moderate
 variable-work evasion, which already defeats every fixed-frequency test. Extreme
-variable work halves its detection rate at no throughput cost; whether that
-attack costs learning efficiency is untested.
+variable work halves its per-window detection rate at no throughput cost, but a
+run observed for a day is still exposed, and in our small-scale training the
+attack costs the operator about $80\%$ or more in learning efficiency.
 It does not certify that the computation is training rather than a
 schedule-matched mimic, benign or deliberate, and it cannot by itself tell
 training from a periodic instrument line. Both are limits of the passive
@@ -1787,11 +1777,14 @@ level $0.7$, and drift at $0.1$, $0.4$, $0.8$ and $1.5$~Hz, were added in a
 later top-up on the same hardware model
 (\texttt{data/measured\_cost\_anchors/README.md}). The drift overheads are
 heavy-tailed: at $0.8$ and $1.5$~Hz the mean exceeds the median by a factor
-of $1.5$ and $2$.
+of $1.5$ and $2$. For work variation the campaign records the throughput
+deficit $d = 1 - r/r_{\mathrm{honest}}$ rather than $c$. The two are related by
+$c = d/(1-d)$ and differ by less than $0.01$ percentage points at the measured
+$|d| < 1\%$, so we plot $d$ directly.
 
 \paragraph{The four strategies without a cost.} Phase slip, relocation, harmonic
 smoothing and dilution were swept in the same way as the four priced strategies,
-but the hardware campaign never implemented them, so they have no measured
+but we did not run them in the hardware campaign, so they have no measured
 cost and appear in \cref{fig:attack_curves} without a cost axis. They do not trouble the
 tracker at the levels swept: it detects every cell of all four at detection rate
 $1.0$, dilution down to a $0.2$ training share included, while the fixed tests
@@ -1822,8 +1815,8 @@ falls mainly on the training dynamics or on energy rather than on throughput.
 	multitaper F-test stays at its floor throughout; the tracked order statistics
 	degrade more slowly. The Viterbi tracker holds detection rate ${\geq}0.95$ at
 	$10^{-2}$ until it bends at level $0.7$ (detection rate $0.46$) --- a level whose
-	measured throughput cost is zero within noise, and whose learning cost we do
-	not measure.}
+	measured throughput cost is zero within noise, but whose measured learning
+	cost is $267\%$ (\cref{subsec:frontier_work}).}
 	\label{fig:st2_work}
 \end{figure*}
 
@@ -1835,7 +1828,9 @@ falls mainly on the training dynamics or on energy rather than on throughput.
 	strategies, with the Pareto staircase --- the best hiding available at or
 	below a given cost. Against both classes the staircase is flat from zero cost:
 	variable real work at level $0.7$ hides $0.55$ from the tracking class (left)
-	and $0.88$ from the fixed class (right), and no costly attack does better.
+	and $0.88$ from the fixed class (right), and no attack with a throughput cost
+	does better. Its cost is paid in learning efficiency instead, which this axis
+	does not show (\cref{subsec:frontier_work}).
 	The cost axis is linear within $\pm10\%$ and logarithmic beyond; the four
 	strategies without a hardware cost are not shown. Knob settings are labelled
 	where they hide something; the rest sit on the floor.}
