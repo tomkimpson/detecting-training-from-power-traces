@@ -319,3 +319,21 @@ def test_work_G_distribution_matches_work_jitter_schedule():
     assert np.all(np.abs(np.percentile(G, [25, 50, 75])
                          - np.percentile(G_ref, [25, 50, 75])) <= 1.0)
     assert ks_2samp(G, G_ref).pvalue > 0.005
+
+
+def test_work_lognorm_matches_e1_schedule():
+    """work_lognorm_s realises the E1 "lognorm<s>" attacker: integer G_i with
+    the honest mean (so honest optimiser steps per token), same law as
+    scripts/e1/schedules.py."""
+    from scripts.e1.schedules import make_schedule
+
+    rho, accum = 0.7, KO.work_base_accum
+    _, starts = _train_meta(np.random.default_rng(6), duration=3000.0,
+                            rho=rho, sigma_jitter=0.0, work_lognorm_s=1.0)
+    up, _ = _phases(starts)
+    t_micro = rho / (1.0 * accum)
+    G = np.rint(up / t_micro).astype(np.int64)
+    assert np.allclose(G * t_micro, up)
+    G_ref = make_schedule("lognorm1.0", 20000, seed=0)
+    assert abs(G.mean() - accum) < 0.5
+    assert ks_2samp(G, G_ref).pvalue > 0.005

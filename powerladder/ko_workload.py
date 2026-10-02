@@ -77,6 +77,7 @@ def _periodic_F_meta(
     work_sigma: float = 0.0,
     work_drift_hz: float = 0.0,
     work_shift_hz: float | None = None,
+    work_lognorm_s: float = 0.0,
     work_base_accum: int = 8,
     phase_slip_sigma: float = 0.0,
     harmonic_smooth_s: float = 0.0,
@@ -120,7 +121,11 @@ def _periodic_F_meta(
     one deliberate deviation from work_jitter_schedule's shift formula: there
     the whole period is G*t_micro, here the fixed T_down is subtracted first
     (``g_real = (1/work_shift_hz - T_down)/t_micro``) so the retargeted TOTAL
-    cadence, not just the up phase, lands at work_shift_hz. All-defaults draws
+    cadence, not just the up phase, lands at work_shift_hz. ``work_lognorm_s``
+    instead draws a MEAN-PRESERVING lognormal target
+    ``work_base_accum * exp(s z - s^2/2)``, capped at
+    ``work_base_accum / _MIN_JITTER_FACTOR`` (the E1 "lognorm<s>" attacker,
+    which keeps the honest optimiser steps per token). All-defaults draws
     ZERO extra RNG (byte-identical guard in tests/test_ko_workload.py).
 
     De-periodicisation knobs (ST2 / task 20.4; all default no-op, zero RNG):
@@ -156,7 +161,8 @@ def _periodic_F_meta(
 
     # Work variation: OU drift factor of the micro-step target (mirrors
     # work_jitter_schedule's g; only touched when the knobs are on).
-    work = work_sigma > 0.0 or work_drift_hz > 0.0 or work_shift_hz is not None
+    work = (work_sigma > 0.0 or work_drift_hz > 0.0 or work_shift_hz is not None
+            or work_lognorm_s > 0.0)
     sigma_gw = _drift_sigma(work_drift_hz, f0, f0_drift_theta) \
         if work_drift_hz > 0.0 else 0.0
     g_w = 1.0
@@ -185,6 +191,14 @@ def _periodic_F_meta(
                 # retarget the MEAN total cadence to work_shift_hz: the fixed
                 # T_down is subtracted before quantising the up phase.
                 g_real = (1.0 / work_shift_hz - t_down) / t_micro
+            elif work_lognorm_s > 0.0:
+                # mean-preserving lognormal target, capped at the shipped
+                # form's ceiling (== scripts/e1/schedules.py "lognorm<s>")
+                s_w = work_lognorm_s
+                g_real = min(
+                    work_base_accum * np.exp(s_w * rng.standard_normal()
+                                             - 0.5 * s_w * s_w),
+                    work_base_accum / _MIN_JITTER_FACTOR)
             else:
                 xi_w = rng.normal(0.0, work_sigma) if work_sigma > 0.0 else 0.0
                 if work_drift_hz > 0.0:
@@ -257,6 +271,7 @@ def training_F_meta(
     work_sigma: float = 0.0,
     work_drift_hz: float = 0.0,
     work_shift_hz: float | None = None,
+    work_lognorm_s: float = 0.0,
     phase_slip_sigma: float = 0.0,
     harmonic_smooth_s: float = 0.0,
     shape_fill_frac: float = 0.0,
@@ -273,7 +288,8 @@ def training_F_meta(
     ``f0_drift_hz`` (B1 / task 3.2) adds a slow OU centre-frequency wander on top
     of Ko's i.i.d. jitter; 0.0 (default) is byte-identical to the Ko-faithful trace.
 
-    ``work_sigma`` / ``work_drift_hz`` / ``work_shift_hz`` (ST2 / task 20.3)
+    ``work_sigma`` / ``work_drift_hz`` / ``work_shift_hz`` / ``work_lognorm_s``
+    (ST2 / task 20.3; lognormal: E1)
     vary the REAL work per iteration -- an integer micro-step count around
     ``params.work_base_accum`` -- mirroring the measured
     :func:`code.b2.workloads.work_jitter_schedule` (see
@@ -292,7 +308,8 @@ def training_F_meta(
         f0=f0, eta_scale=eta_scale,
         f0_drift_hz=f0_drift_hz, f0_drift_theta=params.f0_drift_theta,
         work_sigma=work_sigma, work_drift_hz=work_drift_hz,
-        work_shift_hz=work_shift_hz, work_base_accum=params.work_base_accum,
+        work_shift_hz=work_shift_hz, work_lognorm_s=work_lognorm_s,
+        work_base_accum=params.work_base_accum,
         phase_slip_sigma=phase_slip_sigma,
         harmonic_smooth_s=harmonic_smooth_s,
         shape_fill_frac=shape_fill_frac,
@@ -311,6 +328,7 @@ def training_F(
     work_sigma: float = 0.0,
     work_drift_hz: float = 0.0,
     work_shift_hz: float | None = None,
+    work_lognorm_s: float = 0.0,
     phase_slip_sigma: float = 0.0,
     harmonic_smooth_s: float = 0.0,
     shape_fill_frac: float = 0.0,
@@ -325,7 +343,7 @@ def training_F(
         t, params, rng, f_peak=f_peak, f0=f0, eta_scale=eta_scale,
         f0_drift_hz=f0_drift_hz,
         work_sigma=work_sigma, work_drift_hz=work_drift_hz,
-        work_shift_hz=work_shift_hz,
+        work_shift_hz=work_shift_hz, work_lognorm_s=work_lognorm_s,
         phase_slip_sigma=phase_slip_sigma,
         harmonic_smooth_s=harmonic_smooth_s,
         shape_fill_frac=shape_fill_frac,
@@ -423,7 +441,10 @@ def _prefill_bursts(
         clock += float(rng.exponential(1.0 / rate_hz))
         if clock > t_total:
             break
-        out[(t >= clock) & (t < clock + dur_s)] += amp
+        # == out[(t >= clock) & (t < clock + dur_s)] += amp on the sorted grid,
+        # without a full-length mask per burst (long traces are O(n) not O(n^2))
+        lo, hi = np.searchsorted(t, (clock, clock + dur_s), side="left")
+        out[lo:hi] += amp
     return out
 
 
