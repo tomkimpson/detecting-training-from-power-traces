@@ -784,8 +784,8 @@ background, changes the tracker's detection rates by at most $0.02$
 This calibrates $V$ against the modelled inference null. A deployed verifier
 has to obtain the same threshold from data it holds: from background traces
 known to be free of training, as continuous-wave searches set their tracking
-thresholds from noise-only realisations \citep{suvorova2016hmm}, or from a
-per-trace surrogate, e.g. \cref{app:attribution}. 
+thresholds from noise-only realisations \citep{suvorova2016hmm}, or from
+surrogates generated from each observed trace.
 
 \subsection{Baseline method}
 \label{subsec:comparators}
@@ -954,7 +954,8 @@ $r_{\mathrm{honest}}$ that of the same run without it.
 For the strategies that only insert idle time, every iteration trains the same
 number of tokens, so $c$ is the idle time added per iteration as a fraction of
 the busy time. Work variation changes the number of tokens per iteration, so
-there we measure $r$ directly in tokens per second.
+there we measure $r$ directly in tokens per second. \Cref{app:sweep} gives
+the measurement details.
 We did not run the other four concealing strategies (phase slip,
 relocation, harmonic smoothing and dilution) on hardware, so they have no
 measured cost. 
@@ -1202,352 +1203,46 @@ seven after a day, but costs the operator $93\%$ of its learning efficiency.
 \Crefname{appendix}{Appendix}{Appendices}
 \onecolumn
 
-\section{Fixed-frequency baselines}
-\label{app:baselines}
-
-This appendix gives the two fixed-frequency comparators of \cref{sec:methods}
-in full.
-
-\label{subsec:benign}
-
-When the cadence is stationary, a repeated iteration structure appears as a
-line, or a harmonic comb, in the power spectrum, and the natural test is the
-Thomson multitaper harmonic F-test \citep{thomson1982multitaper,
-percival1993spectral}. Taper the mean-removed trace with $K$ discrete prolate
-spheroidal sequences $v_k[n]$ of time--bandwidth product $NW$, and let $y_k(f)$
-be the Fourier transform of $v_k[n]\,x[n]$ and $U_k = \sum_n v_k[n]$ the $k$-th
-taper's gain at zero frequency. The least-squares amplitude of a line at $f$
-and the harmonic F statistic are
-\begin{equation}
-	\hat\mu(f) \;=\; \frac{\sum_k U_k\, y_k(f)}{\sum_k U_k^2},
-	\qquad
-	F(f) \;=\; (K-1)\,
-	\frac{\lvert\hat\mu(f)\rvert^2 \sum_k U_k^2}
-	{\sum_k \bigl\lvert y_k(f) - \hat\mu(f)\,U_k \bigr\rvert^2},
-	\label{eq:thomson_f}
-\end{equation}
-the power in the fitted line over the power the tapers see around it. We use
-$K = 7$ and $NW = 4$, on a zero-padded frequency grid. At a fixed frequency
-$f$ the statistic $F(f)$ is distributed as $F(2, 2K-2)$ under a locally smooth Gaussian spectral null with
-$K$ tapers, so the test is \emph{approximately pivotal under a stationary,
-locally smooth spectral null}. It is not an exact false-alarm guarantee across
-arbitrary external power traces: coloured baselines, controller interference,
-and co-resident load all violate the local-smoothness premise. Because the
-operator's cadence is not known a priori, the test must search a band of
-candidate frequencies and harmonics, which requires a search correction.
-
-The analytic correction is itself unreliable. Sweeping the padded frequency
-grid and applying a Bonferroni correction over the Rayleigh-resolution cell
-count is \emph{anti-conservative by a factor of roughly $3.6$--$6\times$},
-uniformly across our null suite: the maximum of $F$ over the padded grid
-behaves like about five times more effective independent tests than the
-Rayleigh count, because the $F$ ratio fluctuates below the Rayleigh scale. The
-analytic multitaper tail is therefore usable only as a ranking statistic; its
-operative false-alarm calibration is the Monte-Carlo one supplied by the
-harness of \cref{subsec:st1}. A spectral matched filter (peak PSD at the
-searched cadence) serves as the simple comparator. Both are honest baselines
-for a stationary line, and both fail the moment the line wanders: as the
-comparison of \cref{subsec:power} shows, the fixed multitaper F-test retains
-essentially no usable detection power once the cadence drifts, which is exactly
-why the adaptive setting needs a different detector.
-
-\section{Order-tracked cyclostationary attribution and null validity}
-\label{app:attribution}
-
-The main text detects training with the Viterbi score alone. This appendix
-reports a longer pipeline that the main text does not rely on: the Viterbi path
-defines a de-warp of the trace, the de-warped trace is tested for
-cyclostationarity at the tracked order, and the result is calibrated per trace
-against a surrogate null. Its value is attribution. Phase-coherent cyclic
-structure at the tracked order partly separates training from a
-power-controller limit cycle, which the Viterbi score cannot
-(\cref{subsec:confound}), but only when thresholds are set against a controller
-population, and the controller still inflates its surrogate-calibrated
-false-alarm rate (\cref{subsec:st1}).
-
-\subsection{Tracked cyclostationary detection}
-\label{subsec:tracked}
-
-A concealing operator breaks the benign baselines cheaply by letting the cycle
-frequency wander, smearing the line across the searched band. We restore
-coherence by estimating the wander and undoing it before testing. The detector
-has three components, each with one job. First, the best
-path of the Viterbi tracker (\cref{eq:viterbi}), read as a function of time,
-estimates the instantaneous cycle frequency $\hat f_0(t)$; here the tracker is
-a nuisance-parameter estimator, \emph{not} the detector. Second, the
-phase estimate
-\begin{equation}
-	\hat\theta(t) \;=\; 2\pi \int_0^t \hat f_0(s)\,\mathrm{d}s
-	\label{eq:phase}
-\end{equation}
-defines a resampling of the trace at equal increments of $\hat\theta$
-(tacholess order tracking \citep{bonnardot2005tacholess}), so a wandering line
-becomes a constant-order line. Third, the de-warped signal is tested for
-cyclostationarity at candidate cycle frequency $\alpha$ with the
-Dandawat\'e--Giannakis statistic \citep{dandawate1994cyclostationarity}
-\begin{equation}
-	Q_\alpha \;=\; N\, \hat r_\alpha^{\mathsf{H}}\, \hat\Sigma_\alpha^{-1}\, \hat r_\alpha,
-	\label{eq:dg}
-\end{equation}
-where $\hat r_\alpha$ collects the estimated cyclic autocovariances at lags
-$\tau$ and $\hat\Sigma_\alpha$ is a consistent estimate of their long-run
-covariance. For a \emph{fixed} $\alpha$, $Q_\alpha$ is asymptotically
-$\chi^2_{2L}$ under the structural null, given weak dependence, consistent
-covariance estimation, and regularity.
-
-Those conditions do not automatically cover the complete adaptive pipeline. The
-tracker performs an effective search over frequency paths (a look-elsewhere
-effect); the time warp is estimated from the same record it tests; the
-covariance estimator $\hat\Sigma_\alpha$ must be chosen; and the asymptotic
-$\chi^2$ tail may be a poor guide at finite length. Whether the null survives
-these steps --- and in what form it can be claimed --- is the make-or-break
-question of \cref{subsec:st1}. We do not call the adaptive pipeline an analytic
-CFAR detector; \cref{subsec:st1} establishes what it is instead.
-
-
-\subsection{Surrogate calibration}
-\label{subsec:surrogate}
-
-Because the asymptotic tail cannot be relied on for the complete pipeline ---
-\cref{subsec:st1} shows why --- we calibrate each trace against a surrogate null
-generated from the trace itself. Given an observed record we form $S$ surrogates
-by taking its discrete Fourier transform, replacing each phase with an
-independent uniform draw while preserving the modulus, and inverting. The
-resulting series has the observed record's power spectrum and no phase
-structure, so the ensemble encodes the invariance ``linear and stationary with
-this spectrum''. The \emph{entire} pipeline --- tracker, resampling, and test ---
-is then rerun on each surrogate, and the reported $p$-value is the rank of the
-observed statistic in that ensemble. Running the full pipeline inside the
-surrogate loop is the point: it is what makes the tracker's path search and the
-estimated warp part of the null rather than unmodelled extra freedom.
-
-Two properties of this construction are worth stating in advance, because they
-determine what the resulting test can and cannot claim. It is exact only against
-the invariance it encodes, so a null that is genuinely nonlinear or genuinely
-cyclostationary is not covered --- and a controller limit cycle is exactly such a
-null. And it is expensive: each trace costs $S$ additional full pipeline
-evaluations, which is why the surrogate campaigns below are sized smaller than
-the analytic ones.
-
-\subsection{Null validity of the complete pipeline}
-\label{subsec:st1}
-
-The question is whether the adaptive pipeline has a null we can defend. We
-answer it with a staged design that isolates each adaptive ingredient in turn,
-crossed with a graded suite of nulls, and measured by the realised false-alarm
-rate at operationally small nominal levels --- not only $0.05$. The four stages
-add one adaptive step at a time: (1) a fixed cyclic frequency $\alpha$ with no
-resampling; (2) resampling under a \emph{known} independent time warp; (3) a
-warp \emph{estimated} on held-out blocks and scored only on the complement; and
-(4) the fully adaptive full-trace Viterbi tracker. The null suite grades from
-stationary Gaussian and coloured processes (white, AR(1), a resonant AR(2)),
-through stationary non-Gaussian processes (heavy-tailed, skewed, squared
-Gaussian), to locally stationary and controller-like processes (a
-Van~der~Pol--type power-management limit cycle mimicking the measured A100
-controller). Each cell draws $M=10^4$ null traces; realised rates carry
-Clopper--Pearson $95\%$ intervals. \Cref{fig:st1_far} shows the whole grid.
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{st1_calibration_far}
-	\caption{Realised versus nominal false-alarm rate for the adaptive
-	pipeline (Dandawat\'e--Giannakis with a Bartlett HAC covariance), one panel
-	per stage, every null in the suite, with Clopper--Pearson $95\%$ intervals;
-	nulls are coloured by stage group. No stationary null exceeds the nominal
-	rate at any stage: the two-sided miss is \emph{deflation}, never
-	inflation.}
-	\label{fig:st1_far}
-\end{figure*}
-
-\paragraph{Level safety holds everywhere.} Across the entire campaign no
-stationary Gaussian, coloured, or non-Gaussian null inflates the realised rate
-at any stage or level: the failure mode the gate was built to catch ---
-adaptivity silently raising the false-alarm rate --- does not occur. On the
-white null the fixed-$\alpha$ stage is near nominal ($0.056$, $0.012$, and
-$0.0013$ at nominal $0.05$, $10^{-2}$, and $10^{-3}$); on coloured and
-non-Gaussian nulls the same stage is strongly conservative (realised rate
-$\approx 0$). Tracing the three adaptive steps on the white null, where the
-fixed-$\alpha$ stage was near nominal, isolates what each one does:
-\begin{itemize}
-	\item \textbf{Resampling alone (stage 1$\to$2)} deflates the rate by about
-	$3.4\times$ ($0.056\to0.016$ at nominal $0.05$). Interpolating onto the
-	angle grid correlates adjacent samples, the Bartlett estimator reads that
-	as extra dependence and inflates $\hat\Sigma_\alpha$, and $Q_\alpha$
-	shrinks. Resampling \emph{colours} the series.
-	\item \textbf{Estimating the warp (stage 2$\to$3)} moves the null nowhere
-	($0.016\to0.016$): the held-out design does what it promises.
-	\item \textbf{Path selection (stage 3$\to$4)} adds no significant
-	inflation ($0.016\to0.018$; every interval pair overlaps). Even on the
-	resonant AR(2) null, which the Viterbi tracker provably locks onto, the
-	fully adaptive stage fires never in $10^4$ traces: locking onto a broad
-	noise resonance does not manufacture the phase-coherent cyclic structure
-	$Q_\alpha$ requires.
-\end{itemize}
-The adaptive pipeline is therefore level-safe end to end. What fails is strict
-two-sided coverage: after resampling the pipeline is uniformly conservative,
-and the null $p$-values are not uniform (Kolmogorov--Smirnov uniformity is
-rejected at every adaptive cell).
-
-\paragraph{No analytic calibration closes the deflation.} We swept the open
-choices --- record length, lag set, taper bandwidth, search band, interpolation
-scheme, and the covariance estimator --- selecting on null-calibration quality
-across the suite, never on power. Only the covariance estimator moves the
-deflation, and it cannot be closed for the whole ladder at once
-(\cref{fig:st1_cov}). Widening the Bartlett bandwidth to $b=54$ repairs the
-adaptive stage two-sided (AR(1) realised $0.050/0.012/0.0016$ across the three
-levels) --- confirming that the deflation is an under-bandwidth artefact of the
-oscillating autocovariance of the resampled series --- but the \emph{same}
-bandwidth breaks the fixed-$\alpha$ anchor, inflating white to $0.073$ at
-nominal $0.05$. No single covariance configuration in the swept family
-calibrates the ladder end to end, and Kolmogorov--Smirnov uniformity is
-rejected at every adaptive sweep point regardless. The asymptotic $\chi^2$ tail
-survives only as a level-safe, power-costing conservative bound; it is not a
-calibration, and we do not report the adaptive pipeline as an analytic CFAR
-detector.
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{st1_calibration_cov}
-	\caption{The covariance-estimator sweep is the fix-or-reframe axis:
-	realised rate at nominal $10^{-2}$ versus Bartlett bandwidth $b$ for each
-	shrinkage. The bandwidth that repairs the fully adaptive stage (stage 4)
-	inflates the fixed-$\alpha$ anchor (stage 1). No single configuration
-	calibrates both.}
-	\label{fig:st1_cov}
-\end{figure*}
-
-\paragraph{Surrogate calibration recovers the null.} Running the entire
-pipeline --- tracker, resampling, and test --- inside a Fourier-phase surrogate
-null (which preserves the power spectrum and randomises phases, encoding the
-linear-stationary invariance) recovers exact calibration where the asymptotic
-tail was $3$--$6\times$ conservative. On the stationary Gaussian nulls the
-realised rate covers nominal across all three pipeline stages --- fixed-$\alpha$,
-held-out-warp, and fully adaptive (at nominal $0.05/10^{-2}$: white
-$0.051/0.009$, AR(1) $0.050/0.013$ fixed-$\alpha$; white $0.052/0.013$, AR(1)
-$0.054/0.010$ fully adaptive; the resonant-AR(2) and held-out-warp cells likewise)
---- and Kolmogorov--Smirnov uniformity is not rejected, the property the analytic
-$p$-values never achieved.\footnote{Frozen on the MATS compute cluster over
-stages 1/3/4 $\times$ eight nulls at the surrogate sizing $M=2000$ null traces
-$\times$ $S=999$ surrogates (the level-safety and bake-off numbers above are at
-$M=10^4$; surrogate cells are capped lower because each carries $S$ inner
-resamples). This supersedes the earlier partial $M=1000$/$S=199$ grid. The
-heavy-tailed but \emph{linear} non-Gaussian nulls stay level-safe (conservative:
-$t$-innovation AR(1) $0.037/0.005$, log-normal $0.035/0.006$ fully adaptive); the
-one exception is the \emph{nonlinear} squared-Gaussian null, which the fully
-adaptive stage over-rejects mildly ($0.087/0.018$, ${\approx}1.7\times$, below the
-pre-registered $3\times$ threshold). Its cause is the same linear-stationarity
-assumption analysed next for the controller: a Fourier-phase surrogate cannot
-reproduce the quadratic phase structure of a squared process and so under-spreads
-the null. The level-safety claim is thus scoped to linear-stationary nulls.} This
-is what ``calibrated'' means throughout the paper: an effective score with
-per-trace surrogate calibration, not an analytic guarantee.
-
-\paragraph{The controller marks the attribution boundary.} The surrogate null
-encodes linear stationarity, so a genuine limit cycle --- which is itself
-cyclostationary --- must and does inflate it: on the measured-controller null
-the surrogate-calibrated rate rises to $0.17$--$0.30$ at nominal $0.05$. This is
-not a defect. The detector correctly reports coherent cyclic structure in a
-controller trace; calling that structure \emph{training} is the causal-attribution
-step that needs the nuisance model of \cref{sec:threat}. The controller is the
-periodic physical confound that Rung~1 alone cannot exclude, and its
-false-alarm behaviour is exactly the ceiling the claim ladder assigns to this
-rung.
-
-\subsection{Power against a periodic confound}
-\label{subsec:confound}
-
-The Viterbi score cannot tell a controller limit cycle from training, and the
-order-tracked statistic partly can. \Cref{tab:confound} shows this for a single
-training run with no background ($n=200$ per class, $300$~s traces). Positives
-are scored against two negative classes, each with its own empirical threshold
-at false-alarm rate $10^{-2}$: the modelled inference null, and a structural
-population of equal parts AR(1), heavy-tailed AR(1), and the measured
-controller. With $n=200$ negatives the $10^{-2}$ threshold rests on the
-second-highest negative score. Against the inference null the Viterbi score is
-the strongest detector. Against the structural population it has no power at
-any drift, because a limit cycle is itself a persistent wandering line and
-scores as highly as training. The order-tracked statistic keeps power against
-the structural population at low drift, because only phase coherence at the
-tracked order distinguishes the two. The sharpest case is controller-only
-negatives at $\sigma_f = 0.4$~Hz. There the held-out-warp and fully adaptive
-variants detect at $0.81$ and $0.91$ at $10^{-2}$, while the Viterbi score
-detects nothing.\footnote{\texttt{results/st1/bakeoff\_summary.json}, including
-the controller-only hard case.} The order-tracked power fades with drift and is
-gone by $\sigma_f = 0.8$~Hz. This is the separation Rung~1 can deliver against
-a periodic confound. It needs thresholds set against a controller population,
-and the scope is a single run: we did not rerun the structural negatives on the
-aggregate.
-
-\begin{table}[t]
-	\centering
-	\small
-	\caption{Detection rate at empirical false-alarm rate $10^{-2}$ by
-	cadence drift $\sigma_f$ (Hz), for a single training run with no
-	background ($n=200$ per class), against the inference null and against
-	the structural population (AR(1), heavy-tailed AR(1), and the measured
-	controller). The Viterbi score cannot separate training from a limit
-	cycle; the order-tracked statistic partly can at low drift.}
-	\label{tab:confound}
-	\begin{tabular}{@{}lcccccc@{}}
-		\toprule
-		Detector & $0$ & $0.1$ & $0.2$ & $0.4$ & $0.8$ & $1.5$ \\
-		\midrule
-		\multicolumn{7}{@{}l}{\emph{vs.\ inference null}}\\
-		Viterbi & 1.00 & 1.00 & 1.00 & 1.00 & 1.00 & 0.98 \\
-		DG order, held-out warp & 0.28 & 0.17 & 0.04 & 0.01 & 0.01 & 0.01 \\
-		DG order, fully adaptive & 0.73 & 0.62 & 0.55 & 0.23 & 0.06 & 0.01 \\
-		\midrule
-		\multicolumn{7}{@{}l}{\emph{vs.\ structural population}}\\
-		Viterbi & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 & 0.00 \\
-		DG order, held-out warp & 0.30 & 0.17 & 0.04 & 0.01 & 0.01 & 0.01 \\
-		DG order, fully adaptive & 0.80 & 0.70 & 0.61 & 0.31 & 0.10 & 0.01 \\
-		\bottomrule
-	\end{tabular}
-\end{table}
-
 \section{Optimality ceiling}
 \label{app:ceiling}
 
-Because we own the generators, we can benchmark the tracker against an
+Because we own the generators, we can compare the Viterbi tracker with an
 optimality ceiling: an approximation to the Neyman--Pearson optimal test between
 the training and null generators. The optimal test compares how likely a trace
 is under $\mathcal{H}_1$ and under $\mathcal{H}_0$. Our generators can simulate
 traces from either class but cannot give the probability of a given trace, so
 we approximate. We summarise each class by its average power spectrum in the
-cadence band, estimated from simulated traces, and ask which spectrum better
+search band, estimated from simulated traces, and ask which spectrum better
 explains the periodogram of the trace (a Whittle likelihood ratio). The training
 cadence is unknown, so the training spectrum is averaged over a bank of $61$
-per-$f_0$ templates, each estimated from $2000$ simulated traces with drift
-levels drawn from the whole $\sigma_f$ axis, so the ceiling knows no more about
-the drift than the tracker does. For the aggregate of \cref{subsec:power} the
-bank fixes the dominant run's cadence over a random background, and the null
-spectrum is estimated from the null aggregate. The simulated traces that build
-these spectra are drawn from a stream disjoint from the traces we score, and the
-ceiling is applied to exactly the evaluation populations of
-\cref{fig:drift_ceiling}.\footnote{Frozen on the MATS compute cluster (slurm job
-14048); \texttt{results/st1/np\_ceiling\_aggregate\_summary.json}.}
+templates, one per value of $f_0$, each estimated from $2000$ simulated traces
+with drift levels drawn from the whole $\sigma_f$ axis. The ceiling therefore
+knows no more about the drift than the tracker does. Each template fixes the
+dominant run's cadence over a random background, and the null spectrum is
+estimated from the null aggregate. The traces that build these spectra are drawn
+from a stream disjoint from the traces we score, and the ceiling is applied to
+exactly the populations of \cref{fig:drift_ceiling}.\footnote{Run on the MATS
+compute cluster (slurm job 14048);
+\texttt{results/st1/np\_ceiling\_aggregate\_summary.json}.}
 
-The ceiling is a benchmark, not a usable detector. It is fitted to our own
-generators, so it knows the exact spectra of both classes, which a verifier
-monitoring a real facility does not. The tracker assumes only a slowly
-wandering line, and the ceiling measures how much of the available power it
-recovers.
+The ceiling is a benchmark, not a usable detector. It knows the exact spectra of
+both classes, which a verifier monitoring a real facility does not. The tracker
+assumes only a slowly wandering line, and the ceiling measures how much of the
+available detection power it recovers.
 
-The ceiling detects perfectly: detection rate $1.0$ at every drift
-(\cref{fig:drift_ceiling}). The training line and the line-free null are
-therefore separable in principle from a $300$~s trace, and the tracker's
-shortfall of at most $0.04$, at $\sigma_f = 1.5$~Hz, is the detector's rather
-than the problem's. The natural candidate for closing it comes from the
-line-tracking literature. Under the hidden-Markov wander model the tracker
-already assumes, the Viterbi score is the best-single-path approximation, and
-the Neyman--Pearson statistic is the forward-algorithm marginal over \emph{all}
-frequency paths \citep{streit1990frequency}. Evaluating that statistic is
-future work.
+The ceiling detects every trace at every drift (\cref{fig:drift_ceiling}). The
+training line and the null are therefore separable in principle from a
+$300$~s trace, and the tracker's shortfall, at most $0.04$ at
+$\sigma_f = 1.5$~Hz, is a limit of the detector rather than of the problem. One
+way to close it is known. Under the hidden-Markov wander model the tracker
+already assumes, the Viterbi score follows the single best path, while the
+Neyman--Pearson statistic sums over all frequency paths with the forward
+algorithm \citep{streit1990frequency}. We leave that statistic to future work.
 
-The ceiling is optimal only under the Whittle model. That is a second-order,
-stationary-Gaussian statistic, which discards harmonic-phase coherence and
-non-Gaussian structure, so the true optimum can only exceed it. Since the
-ceiling is already perfect, this changes nothing here.
+The ceiling is optimal only under the Whittle model, which uses the power
+spectrum alone and so ignores the phase relations between harmonics and any
+non-Gaussian structure. The true optimum can only be higher. Since the ceiling
+already detects every trace, this changes nothing here.
 
 \paragraph{The background.} The same comparison on a single training run
 against inference alone, with no background load, gives tracker detection rates
@@ -1557,127 +1252,67 @@ against \texttt{bakeoff\_aggregate\_summary.json}, same seed and $n=200$ per
 class.} At the default shares the background neither helps nor hinders the
 tracker.
 
-\section{Full attack sweep}
-\label{app:sweep}
+\section{Fixed-frequency baselines}
+\label{app:baselines}
 
-The main text reports hiding against budget knob for every schedule strategy,
-with measured costs where they exist (\cref{fig:attack_curves}). This appendix gives the full sweep: detection against
-physical de-periodicisation for every strategy of \cref{tab:attacks} and both
-detector classes (\cref{fig:frontier}), the per-detector response to variable real work
-(\cref{fig:st2_work}), and the cost-of-hiding view against each detector class
-(\cref{fig:st2_cost_pareto}). Here the tracking class is the best of the Viterbi
-tracker and the two order-tracked Dandawat\'e--Giannakis statistics of
-\cref{app:attribution}; on every cell with a measured cost its envelope equals
-the Viterbi tracker's alone.
+This appendix defines the multitaper F-test of \cref{subsec:comparators}. Taper
+the mean-removed trace with $K$ discrete prolate spheroidal sequences $v_k[n]$
+of time--bandwidth product $NW$, let $y_k(f)$ be the Fourier transform of
+$v_k[n]\,x[n]$, and let $U_k = \sum_n v_k[n]$ be the $k$-th taper's gain at
+zero frequency. The least-squares amplitude of a line at $f$ and the harmonic F
+statistic are \citep{thomson1982multitaper, percival1993spectral}
+\begin{equation}
+	\hat\mu(f) \;=\; \frac{\sum_k U_k\, y_k(f)}{\sum_k U_k^2},
+	\qquad
+	F(f) \;=\; (K-1)\,
+	\frac{\lvert\hat\mu(f)\rvert^2 \sum_k U_k^2}
+	{\sum_k \bigl\lvert y_k(f) - \hat\mu(f)\,U_k \bigr\rvert^2},
+	\label{eq:thomson_f}
+\end{equation}
+the power in the fitted line over the power the tapers see around it. We use
+$K = 7$ and $NW = 4$, on a zero-padded frequency grid.
 
-The sweep runs on the aggregate of \cref{sec:results}, with each strategy applied
-to the dominant training run only. At every knob setting it also records the
-physical de-periodicisation the attack induces, from the generator's
-ground-truth iteration boundaries: the cadence coefficient of variation, which
-\cref{fig:frontier} plots detection against, and the phase-diffusion
-coefficient. It was frozen on the MATS compute cluster
-(slurm array 14354, assembled by job 14355): $n=200$ traces per class over $50$
-cells, seed $0$, all five detectors, written to
-\texttt{results/st2/aggregate/frontier\_summary.json}. Every rate is read at
-false-alarm rate $10^{-2}$. The cost axis reads only the
-throughput overhead of the single-A100 campaign. It does not use that campaign's
-measured line amplitudes, whose transfer to a facility meter \cref{subsec:limitations}
-questions, so the frontier does not depend on that caveat. Each overhead is
-the mean over eight A100 traces per level. Work variation and idle jitter at
-level $0.7$, and drift at $0.1$, $0.4$, $0.8$ and $1.5$~Hz, were added in a
-later top-up on the same hardware model
-(\texttt{data/measured\_cost\_anchors/README.md}). The drift overheads are
-heavy-tailed: at $0.8$ and $1.5$~Hz the mean exceeds the median by a factor
-of $1.5$ and $2$. For work variation the campaign records the throughput
-deficit $d = 1 - r/r_{\mathrm{honest}}$ rather than $c$. The two are related by
-$c = d/(1-d)$ and differ by less than $0.01$ percentage points at the measured
-$|d| < 1\%$, so we plot $d$ directly.
-
-\paragraph{The four strategies without a cost.} Phase slip, relocation, harmonic
-smoothing and dilution were swept in the same way as the four priced strategies,
-but we did not run them in the hardware campaign, so they have no measured
-cost and appear in \cref{fig:attack_curves} without a cost axis. They do not trouble the
-tracker at the levels swept: it detects every cell of all four at detection rate
-$1.0$, dilution down to a $0.2$ training share included, while the fixed tests
-fall as low as $0.33$ under phase slip (\cref{fig:frontier}). A price for them
-would therefore only add points at zero hiding from the tracker. For relocation
-and harmonic smoothing a throughput price would also mislead, because their cost
-falls mainly on the training dynamics or on energy rather than on throughput.
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{st2_frontier_aggregate}
-	\caption{The de-periodicisation frontier: physical de-periodicisation
-	(cadence coefficient of variation) against best tracking and best fixed
-	detection rate at false-alarm rate $10^{-2}$, over all adversarial strategies.
-	The near-vertical drop of the fixed class at the variable-real-work strategy,
-	at essentially zero throughput cost, while the tracking class holds, is the
-	scope boundary; costlier strategies (idle jitter, drift, shaping) sit at high
-	throughput overhead without erasing the tracked line.}
-	\label{fig:frontier}
-\end{figure*}
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{st2_work_aggregate}
-	\caption{Detection rate versus variable-real-work level for each detector, at
-	false-alarm rate $0.05$ (solid) and $10^{-2}$ (dashed). By level $0.35$ the
-	fixed matched filter has fallen below chance (\textsc{auc} $0.46$), and the
-	multitaper F-test stays at its floor throughout; the tracked order statistics
-	degrade more slowly. The Viterbi tracker holds detection rate ${\geq}0.95$ at
-	$10^{-2}$ until it bends at level $0.7$ (detection rate $0.46$) --- a level whose
-	measured throughput cost is zero within noise, but whose measured learning
-	cost is $267\%$ (\cref{sec:frontier}).}
-	\label{fig:st2_work}
-\end{figure*}
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{st2_cost_pareto_aggregate}
-	\caption{Cost of hiding: measured throughput overhead against hiding
-	($1-$ detection rate at false-alarm rate $10^{-2}$) for the four priced
-	strategies, with the Pareto staircase --- the best hiding available at or
-	below a given cost. Against both classes the staircase is flat from zero cost:
-	variable real work at level $0.7$ hides $0.55$ from the tracking class (left)
-	and $0.88$ from the fixed class (right), and no attack with a throughput cost
-	does better. Its cost is paid in learning efficiency instead, which this axis
-	does not show (\cref{sec:frontier}).
-	The cost axis is linear within $\pm10\%$ and logarithmic beyond; the four
-	strategies without a hardware cost are not shown. Knob settings are labelled
-	where they hide something; the rest sit on the floor.}
-	\label{fig:st2_cost_pareto}
-\end{figure*}
+At a single fixed frequency, and for a stationary null whose spectrum is smooth
+near $f$, $F(f)$ follows an $F(2, 2K-2)$ distribution. The test statistic of
+\cref{eq:ftest} is instead the maximum of $F$ over the search band, so its null
+distribution needs a correction for the number of frequencies searched. The
+analytic correction does not work. A Bonferroni correction over the number of
+independent frequency cells sets thresholds that are too low: the realised
+false-alarm rate exceeds the nominal one by a factor of about $3.6$--$6$ on every
+null we tried, because $F$ fluctuates on scales finer than a frequency cell.
+Real power traces would also break the smooth-spectrum assumption. We therefore
+threshold both fixed tests empirically, as for the tracker
+(\cref{subsec:threshold}).
 
 \section{Meter specification details}
 \label{app:meter}
 
-This appendix supports the minimum meter specification of
-\cref{subsec:meter_spec} with two results: the notch sub-sweep, and a check that
-the specification does not depend on the background load.\footnote{Frozen on
-the MATS compute cluster (slurm array 14049), $48$ cells, $n=200$ per class,
-$300$~s traces;
+This appendix gives two results behind the minimum meter specification of
+\cref{subsec:meter_spec}: the notch sweep, and a check that the specification
+does not depend on the background load.\footnote{Run on the MATS compute cluster
+(slurm array 14049), $48$ cells, $n=200$ per class, $300$~s traces;
 \texttt{results/st2/meter\_\allowbreak boundary\_\allowbreak aggregate\_\allowbreak summary.json}.
 The single-workload sweep is slurm array 5498,
 \texttt{results/st2/meter\_\allowbreak boundary\_\allowbreak summary.json}.}
 
 \paragraph{The notch.} \Cref{fig:meter_boundary_notch} shows the tracker's
-detection rate as a delivery-path notch moves across the cadence band of
-\cref{tab:params} ($0.5$--$1.5$~Hz), with the meter otherwise nominal. The
+detection rate as a delivery-path notch moves across the training cadence band
+of \cref{tab:params} ($0.5$--$1.5$~Hz), with the meter otherwise nominal. The
 notch has quality factor $Q = 1.5$ (\cref{tab:meter}), so it is broad: about
 $0.7$~Hz wide at $1$~Hz. A notch of $50\%$ depth costs nothing at any centre,
 and one at $0.6$~Hz, near the low edge of the band, costs at most $0.02$. Deeper
 notches nearer the band centre cost more. At $0.8$~Hz the tracker falls to
 $0.86$ ($90\%$ depth) and $0.80$ ($100\%$), and at $1.0$--$1.2$~Hz to
-$0.45$--$0.63$. No notch in the sweep erases detection.
+$0.45$--$0.63$. No notch in the sweep removes detection entirely.
 
-\begin{figure}[t]
+\begin{figure}[h!]
 	\centering
-	\includegraphics[width=\columnwidth]{st2_meter_boundary_aggregate_notch}
-	\caption{Notch sub-sweep: Viterbi detection rate at empirical false-alarm
+	\includegraphics[width=0.6\columnwidth]{st2_meter_boundary_aggregate_notch}
+	\caption{Notch sweep: Viterbi detection rate at empirical false-alarm
 	rate $10^{-2}$ versus notch centre, one line per notch depth, at $20$~Hz
 	sampling with no integration window, the honest aggregate against the null
 	aggregate ($n=200$ per class). A deep notch near the band centre roughly
-	halves detection; none erases it. Reproduced by
+	halves detection; none removes it. Reproduced by
 	\texttt{scripts/plot\_st2\_meter\_boundary.py -{}-scenario aggregate}.}
 	\label{fig:meter_boundary_notch}
 \end{figure}
@@ -1689,27 +1324,73 @@ by at most $0.09$ in any cell and leaves the region where detection holds
 (\cref{app:ceiling}), the background at the default shares does not move the
 result.
 
-\section{Conditional classification against the inference null}
+\section{Throughput-cost measurements}
+\label{app:sweep}
+
+This appendix records how the sweep of \cref{sec:frontier} was run and how the
+throughput costs of \cref{fig:attack_curves} were measured. The sweep applies
+each strategy of \cref{tab:attacks} to the dominant training run of the
+aggregate and scores it against the null aggregate, with $n=200$ traces per
+class over $50$ cells, every rate read at false-alarm rate
+$10^{-2}$.\footnote{Run on the MATS compute cluster (slurm array 14354,
+assembled by job 14355), seed $0$;
+\texttt{results/st2/aggregate/frontier\_summary.json}.}
+
+The throughput cost $c$ of \cref{eq:throughput_cost} comes from a campaign on a
+single A100 (\texttt{data/measured\_cost\_anchors/README.md}). We use only its
+throughput measurements. We do not use the size of the power line it measured,
+since a single card is a poor guide to what a facility meter sees
+(\cref{subsec:limitations}), so the costs do not depend on that caveat. Each
+cost is the mean over eight A100 traces at that setting. Work variation and
+jitter at level $0.7$, and drift at $0.1$, $0.4$, $0.8$ and $1.5$~Hz, were
+measured in a later run on the same hardware. The drift costs are
+heavy-tailed: at $0.8$ and $1.5$~Hz the mean exceeds the median by factors of
+$1.5$ and $2$. For work variation the campaign records the throughput deficit
+$d = 1 - r/r_{\mathrm{honest}}$ rather than $c$. The two are related by
+$c = d/(1-d)$ and differ by less than $0.01$ percentage points at the measured
+$|d| < 1\%$, so we report $d$ directly.
+
+\section{Non-training loads that score as training}
 \label{app:rung2}
 
-The main text detects training against the inference null with a single
-statistic. This appendix reports a fuller classification task built on the same
-detectors --- an eight-feature vector, three decision rules, six domain shifts,
-and seven semantic controls --- whose control outcomes are summarised in
-\cref{tab:rung2_controls}.
+\Cref{subsec:identifiability} notes that a load can carry a training-shaped
+power schedule without training. This appendix tests that with loads whose
+training status we know.\footnote{Run on the MATS compute cluster (slurm array
+5612), $n=200$ per class, $300$~s traces, band $0.3$--$1.7$~Hz;
+\texttt{results/rung2/rung2\_summary.json}.}
 
-\begin{table*}[t]
+\paragraph{Setup.} We go beyond the single Viterbi score and give the verifier a
+classifier. Each trace is reduced to eight features computed from the trace
+alone: six detector scores (multitaper F-test, harmonic comb, spectral matched
+filter, Viterbi score, and two cyclostationary statistics), plus the stability of
+the Viterbi path over time and how repeatable the power waveform is from one
+iteration to the next. Three decision rules read these features: a fixed linear
+score, a logistic regression, and a random forest. Each is trained to separate
+training from the inference null of \cref{subsec:null}. All three do so
+perfectly, with area under the ROC curve $1.00$, and keep that score when the
+population is shifted (device headroom, trace length, cadence band, an added
+controller line, heavy coloured meter noise).
+
+\paragraph{Controls.} We then score seven control loads at a false-positive rate
+of $0.05$ (\cref{tab:rung2_controls}). Five are not training: a non-ML kernel
+loop with a training-shaped cycle, a power-controller limit cycle, a periodic
+inference request generator, a computation of gradients alone, and a decoy that
+runs the full forward pass, backward pass and optimiser step and then discards
+the update. Every rule scores all five as training. Two are training: a run
+diluted by an unrelated co-resident load, which every rule catches, and an
+asynchronous run whose cadence drifts and slips, which the rules catch in
+$55$--$100\%$ of traces.
+
+\begin{table}[h!]
 	\centering
 	\small
-	\caption{Semantic-control outcomes: fraction of each load scored as training
-	at a false-positive rate of $0.05$, per decision rule. Five non-training
-	loads all score as training; the only control the tracked rules degrade on is
-	asynchronous (de-periodicised) genuine training, which they nonetheless
-	mostly catch.}
+	\caption{Fraction of each control load scored as training at a
+	false-positive rate of $0.05$, for each decision rule. All five non-training
+	loads score as training.}
 	\label{tab:rung2_controls}
 	\begin{tabular}{@{}lcccc@{}}
 		\toprule
-		Control load & Training? & Physics & Fitted & Learned \\
+		Control load & Training? & Linear & Logistic & Forest \\
 		\midrule
 		Discarded-update decoy & no & 1.00 & 1.00 & 1.00 \\
 		Gradient-only & no & 1.00 & 1.00 & 1.00 \\
@@ -1720,609 +1401,23 @@ and seven semantic controls --- whose control outcomes are summarised in
 		Asynchronous training & yes & 0.72 & 0.55 & 1.00 \\
 		\bottomrule
 	\end{tabular}
-\end{table*}
-
-\subsection{From detection to classification}
-\label{subsec:rules}
-
-Rung~2 sharpens the structural question into a decision: is a trace more
-training-like than a stated inference population? A decision needs a reference,
-and ours is the modelled continuous-batching null of \cref{eq:null}; every
-Rung-2 conclusion is conditional on it. We fix the task in advance --- the
-feature vector, the decision rules, and the reporting --- so that the result is
-not retrofitted to the answer.
-
-Each trace is reduced to an eight-dimensional physics feature vector estimated
-\emph{from the trace alone}, with no oracle knowledge of the cadence: the six
-Rung-1 detector scores (multitaper F, harmonic comb, spectral matched filter,
-Viterbi, fixed-$\alpha$ DG, and tracked-order DG), plus two stability features
-read off the estimated Viterbi path --- its frequency-path stability and its
-phase-folded waveform repeatability. On this fixed vector we compare three
-decision rules of increasing freedom: (i) a prespecified \emph{physics} score, a
-fixed linear combination with the fixed-cadence comparators pre-registered out;
-(ii) a logistic discriminant \emph{fitted} to the scenario generator and scored
-out-of-fold; and (iii) a random-forest \emph{learned} reference, included to
-expose how much separation comes from the chosen null rather than from the
-structural method. We report area under the ROC curve and the false-negative
-rate at a false-positive rate of $0.05$, kept separate throughout from the
-Rung-1 structural false alarms.
-
-The population the rules are evaluated on is fixed in advance too. They are
-fitted on the nominal setting and evaluated zero-shot on six domain shifts, each
-moving one factor: device headroom down to $0.70$ and up to $0.95$ of peak;
-observation duration halved to $150$\,s, which halves the frequency resolution;
-the cadence band shifted up to $0.8$--$1.8$\,Hz, so that its top now lies
-outside the $0.3$--$1.7$\,Hz search band; a meter carrying the controller limit
-cycle; and a meter with heavy coloured noise and baseline wander.
-
-\subsection{Classification against the inference null}
-\label{subsec:rung2}
-
-We now apply the three decision rules of \cref{subsec:rules} to the stated
-population, the six domain shifts, and a set of semantic controls whose training
-status we know.\footnote{Frozen on the MATS compute cluster (slurm array 5612),
-$n=200$ per class, $300$~s traces, band $0.3$--$1.7$~Hz, $14$ cells (the stated
-population, six transfer shifts, and seven semantic controls);
-\texttt{results/rung2/rung2\_summary.json}.}
-
-\paragraph{Stated population and transfer.} On the stated population all three
-rules separate training from the hard inference null perfectly: area under the
-curve $1.00$ with zero false negatives at a false-positive rate of $0.05$
-(\cref{fig:rung2_stated}). The separation is not brittle to the population:
-across all six domain shifts of \cref{subsec:rules}, evaluated zero-shot, the
-area under the curve stays $1.00$. The
-physical schedule of efficient training is far enough from the inference null that
-leaving the stated parameter box does not close the gap.
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{rung2_stated_transfer}
-	\caption{Rung-2 classification on the stated population (ROC / operating
-	points for the three decision rules) and across the transfer shifts. All
-	three rules reach area under the curve $1.00$ on the stated population and
-	hold it under every domain shift.}
-	\label{fig:rung2_stated}
-\end{figure*}
-
-\paragraph{The semantic controls set the ceiling.} The controls are the point of
-the rung. We built seven loads whose training status we know and asked what each
-rule scores (\cref{tab:rung2_controls}). Five non-training loads --- a
-training-shaped non-ML kernel loop, a controller limit cycle, a periodic inference
-request generator, a gradient-only computation, and a discarded-update decoy that
-runs the full forward/backward/optimizer step and throws the update away ---
-\emph{all} score as training, at fraction $1.00$ under every rule. A genuine
-training run diluted by an unrelated co-resident load is still caught ($1.00$).
-The reading is the one the claim ladder assigns to this rung: from power alone the
-verifier can certify a \emph{training-shaped periodic compute schedule}, not that
-the computation is gradient-descent training rather than a mimic. The first three
-loads are the practically binding ones, because they need no adversary: the
-controller cycle scoring as training is the same attribution boundary Rung~1 met
-in \cref{subsec:st1}, and calling structure training needs the nuisance model of
-\cref{sec:threat}. The decoy is the extremal member of the same class and the one
-that cannot be engineered away --- \cref{app:identifiability} rules out any
-passive detector that separates it --- which is why this ceiling motivates the active
-protocol of \cref{app:active} rather than a better classifier. The ceiling is a
-property of the observable rather than of the meter's bandwidth. A learned
-classifier reading a board-level probe at $10$~MHz separates training from
-inference by the spectral signature of the memory-bound optimizer-update phase
-\citep{gargiulo2026workload}; the discarded-update decoy runs exactly that phase
-and discards only its result, so the mechanism such a classifier keys on is
-present in a load that is not training. More bandwidth resolves the physical
-schedule more sharply, and it is the schedule, not the semantics, that a passive
-meter reads.
-
-\paragraph{Asynchronous training: a robustness result, not a miss.} One control,
-strongly de-periodicised genuine training, was pre-registered as an expected miss
---- the case scoped out of Rung 2. At $n=200$ it is not missed. The tracked
-physics rule catches it (area under the curve $0.89$, $72\%$ flagged) and the
-learned reference catches all of it ($100\%$); only the fitted linear discriminant
-is weak ($0.75$, $55\%$). This is consistent with the tracker-robustness story of
-Rungs 1 and 2: the asynchronous control de-periodicises by drifting the cadence
-centre and slipping the phase, which leaves a wandering but still coherent line
---- exactly the regime order tracking was built to survive. We therefore report it
-as a robustness result rather than the boundary. The genuine evasion is not slow
-wander but the ${\approx}$zero-cost variable-real-work attack of
-\cref{sec:frontier}, which moves the cadence \emph{without} leaving a coherent
-line, and which is where the tracker actually bends.
-
-\begin{figure*}[t]
-	\centering
-	\includegraphics[width=\linewidth]{rung2_controls}
-	\caption{Semantic controls: fraction scored as training per decision rule.
-	The non-training decoys are indistinguishable from training under every rule
-	(the semantic-decoy ceiling); only asynchronous genuine training separates
-	the rules, and the tracked physics rule still catches most of it.}
-	\label{fig:rung2_controls}
-\end{figure*}
-
-
-\section{Identifiability details}
-\label{app:identifiability}
-
-\Cref{subsec:identifiability} states that a detection certifies a schedule,
-not a computation. This appendix makes that precise.
-
-Write $w$ for a computational execution, $h$ for the hardware and
-power-delivery path, and $K_h(w)$ for the law of the observed trace that
-\cref{eq:meter} induces. Call two executions \emph{observationally
-equivalent} when $K_{h_0}(w_0) = K_{h_1}(w_1)$. A passive verifier sees only the
-trace, so its decision is some measurable function of it, and on an
-observationally equivalent pair every such function fires with the same
-probability under both. No passive scalar-power detector can therefore certify
-the semantic content of a computation against an unrestricted adversary. A
-non-vacuous guarantee has to put the equivalent pairs out of scope, and there are
-four ways to do that within the passive channel --- restricting the admissible
-non-training workload class, the adversary's freedom to add or restructure
-computation, the hardware and power-transfer family, or the physical property
-claimed --- alongside a fifth route that leaves the passive channel altogether by
-changing the protocol (\cref{app:active}). We do not claim the list is exhaustive.
-
-A passive verifier observes only $P_{\mathrm{obs}}$, so its decision is a
-measurable function $\phi$ of that trace and its rejection probability is
-$\mathbb{E}_{K_h(w)}[\phi]$. If $K_{h_0}(w_0) = K_{h_1}(w_1)$ the two
-expectations coincide for every $\phi$, so no test separates the pair, and no
-post-processing of the trace can (data processing cannot create distinguishability
-that the laws do not contain). The claim about restrictions follows by
-contraposition: a non-vacuous guarantee must exclude the equivalent pairs, and
-each listed lever excludes some of them. An amplitude degeneracy shows the pairs are not exotic. Write the power a
-workload draws as $r(t)F(t)$, where $F$ is its operation rate and $r$ the
-energy cost per operation. The meter constrains only the product, so a
-workload with a different operation rate and a
-compensating energy cost per operation is already observationally equivalent, and
-temporal structure --- not amplitude --- is what the trace identifies. The
-near-constructive same-hardware case is the discarded-update decoy: forward,
-backward, and optimiser kernels executed on the declared schedule with each
-updated state discarded reproduces the compute/communication alternation, hence
-the trace, without retaining a model. The converse direction is equally open to
-the operator: genuine training can be run asynchronously, diluted among other
-loads, or actively power-shaped, so the equivalence classes are populated from
-both sides.
-
-% ============================================================================
-\section{From passive evidence to active authentication (Rungs 3--4)}
-\label{app:active}
-% ============================================================================
-
-The results of this paper can be read as a \emph{claim ladder}
-(\cref{tab:ladder}): four claims of increasing governance relevance, each bought
-at a stated cost in verifier information, and each with a hard ceiling that
-motivates the next. Read as a procedure, it is screening followed by escalation.
-Rung~1 establishes that coherent periodic power structure is present. Rung~2
-converts that structure into training-likeness at the price of committing to an
-inference null; the detection results of this paper live here, and its ceiling
-is semantic non-identifiability (\cref{app:identifiability}). Rungs~3 and~4 leave
-the passive channel for an active protocol and a transcript primitive, and are
-specified but not run. The ladder is a ladder of claims and assumptions, not a
-quantitative bound on unidentified compute.
-
-\begin{table*}[t]
-	\centering
-	\footnotesize
-	\caption{The claim ladder. Each rung answers a strictly more
-	governance-relevant question at a stated cost in verifier information, and
-	each rung's hard ceiling motivates the next. The fourth column attaches this
-	paper's evidence.}
-	\label{tab:ladder}
-	\begin{tabular}{@{}p{2.1cm}p{2.8cm}p{2.3cm}p{4.5cm}p{3.4cm}@{}}
-		\toprule
-		Rung & Claim & Additional requirement & Evidence in this paper & Hard ceiling \\
-		\midrule
-		1. Structural evidence & Coherent periodic power variation exists under a
-		specified structural null & External time-resolved trace only &
-		Order-tracked cyclic structure is detected with surrogate-calibrated,
-		level-safe false-alarm control on linear-stationary nulls
-		(\cref{app:attribution}); the Viterbi score alone cannot exclude a
-		controller (\cref{subsec:confound}) & Periodic physical confounds;
-		structural-null misspecification; die-to-meter attenuation \\
-		2. Conditional classification & The trace is more training-like than the
-		stated inference population & A representative or explicitly modelled
-		inference null & Viterbi detects training at the Neyman--Pearson ceiling
-		across cadence wander (\cref{subsec:power}) and against moderate
-		variable real work, which costs no throughput (\cref{sec:frontier}), given a meter of ${\geq}2$~Hz
-		and ${\leq}0.5$~s integration (\cref{subsec:meter_spec}); fitted rules
-		reach area under the curve $1.00$ under six domain shifts
-		(\cref{app:rung2}) & Domain shift; strong superposition, dilution or
-		shaping; cadence moved outside the searched family; semantic
-		non-identifiability (\cref{tab:rung2_controls}) \\
-		3. Active physical authentication & A load behind the meter responded to
-		an unpredictable verifier challenge & Operator participation; a
-		challenge-bound schedule & Specified, not run (\cref{app:active}) & A
-		challenge-aware dummy load; no semantic binding by power alone \\
-		4. Work verification & The physical response is tied to declared training
-		state transitions & A sound, fresh transcript or proof and an explicit
-		binding assumption & Assumed as an ideal functionality
-		(\cref{app:active}) & The remote-proof / co-location gap, unless the
-		assumed primitive closes it \\
-		\bottomrule
-	\end{tabular}
-\end{table*}
-
-Rung 2 certifies the physical schedule, not training semantics. Its ceiling is
-semantic non-identifiability: loads that reproduce the compute--communication
-cadence of training without training score as training under every passive rule
-(\cref{subsec:rung2}), and no passive test separates them, because the meter
-sees only the schedule and the mimic copies the schedule. The discarded-update
-decoy is the sharpest instance --- \cref{app:identifiability} rules out any passive
-detector that separates it --- even though a concealing operator would never mount
-one (\cref{subsec:adversary}). The way past a passive ceiling is to stop watching
-and start asking: authenticate a physical device by its response to an
-unpredictable query, the premise of distance-bounding protocols
-\citep{brands1994distance}, physical unclonable functions \citep{pappu2002puf}
-and, in compute governance, of challenge--response telemetry
-\citep{monfared2026timing}. If the verifier perturbs the machine and the machine must react,
-a mimic that merely replays a recording cannot follow: it does not know what it
-was asked.
-
-Rung 3 makes this concrete with a challenge-synchronous protocol. The verifier
-emits an unpredictable balanced challenge sequence $c_k \in \{-1,+1\}$; the operator
-runs a committed, semantically-equivalent variation of its training schedule keyed
-to $c_k$ --- for instance a small pre-agreed shift in the boundary between two
-iterations that leaves the computation performed unchanged. The verifier
-correlates the external power trace against $c_k$ over a causal lag window, in the
-manner of a lock-in amplifier or a spread-spectrum receiver recovering a known
-code from noise. The null needs no corpus and no matched hardware: it comes from
-re-randomising the challenge and recomputing the statistic. A positive result
-authenticates a physical fact --- a load behind the meter responded to a signal it
-could not have predicted. This escapes the semantic decoy, whose passive schedule
-is by construction uncorrelated with the fresh challenge (\cref{subsec:adversary}).
-Its own ceiling is the challenge-aware dummy load: a device that receives the
-challenge and mimics the prescribed response without training. Unlike the passive
-decoy, this one is an attack an operator has reason to mount, because Rung~3 asks it
-to demonstrate training rather than to hide it.
-
-The correlation test is exact under the sharp null that the challenge has no
-effect on the measured process --- but only conditional on the randomisation
-design, and the guarantee is fragile to the usual abuses
-\citep{fisher1935design}. Any maximisation the verifier performs, over causal
-lags, candidate impulse responses, or preprocessing choices, must be repeated
-inside every re-randomised replicate, or the reported level is optimistic.
-Carryover between challenge periods, any adaptivity in the operator's schedule
-choices, and balance constraints on the challenge sequence all belong in the
-design that the re-randomisation samples from. We also flag the weaker reading a
-careless protocol invites: over a long enough record a correlation detector
-accrues the $\sqrt{N}$ processing gain of any matched receiver, so a positive
-result must be shown to certify the challenge binding and not merely that the
-verifier integrated for long enough.
-
-Rung 3 authenticates a physical response; it does not tie that response to
-training. Rung 4 adds that binding, and it is the rung this paper does not build.
-Rather than gesture at ``a proof of training,'' we state the missing piece as an
-ideal functionality \citep{canetti2001uc}: a sound, fresh, challenge-bound
-transcript or proof that ties each challenge bit to the prescribed
-semantically-equivalent variation of declared training state transitions. Such a
-primitive must provide commitment before the challenge is revealed,
-unpredictability at commitment time, sound binding of the response to valid
-declared state transitions, freshness against replay, and an explicit position on
-whether the responding load and the declared computation are co-located.
-Proof-of-learning constructions \citep{jia2021proofoflearning} are the closest
-existing candidate, but they assume access to the training trace rather than an
-external meter. Conditional on such a primitive, challenge-synchronous power
-supplies physical evidence for the declared response; without it, the semantic
-work binding remains an assumed, open layer.
-
-Two ceilings therefore remain. Rung 3's is the challenge-aware dummy load;
-Rung 4's is co-location: a genuine remote proof combined with a local
-challenge-correlated dummy still satisfies both the correlation test and the
-transcript unless the assumed primitive explicitly rules the separation out.
-Closing them empirically is future work, and it needs no cluster --- challenge
-modulation is legible on a single card. A full Rung-3 study would fix a concrete
-pair of semantically-equivalent schedules, run the complete search inside every
-re-randomised replicate, pit the detector against a challenge-aware dummy-load
-adversary, and trace detection against modulation depth, throughput overhead, and
-observation time. We leave it as the active-verification direction the passive
-results here motivate but cannot reach --- the response to the ceiling that
-\cref{subsec:identifiability} makes unavoidable for any passive detector
-(\cref{sec:discussion}).
-
-
-% ----------------------------------------------------------------------
-% Parked material; drop this \input before submission.
-\input{scratch}
-
-% ============================================================================
-\section{Scratch}
-\label{app:scratch-intro}
-% Temporary holding area for text cut from the introduction. Remove before submission.
-% ============================================================================
-
-% ---------- Parked 2026-09-23 restructure: text superseded by the Viterbi-led
-% ---------- rewrite. Not deleted; review and drop or re-home.
-
-\paragraph{[Parked] Old Detection-methods introduction.}
-The weakest question on the ladder is whether the trace carries order-coherent
-power variation that a stated structural null does not produce. Answering it
-establishes \emph{coherent repeated power structure}, not training: reading that
-structure as repeated multi-phase computation additionally requires the nuisance
-model of \cref{sec:threat} that excludes periodic physical confounds, of which
-the measured A100 power-controller oscillation (\cref{subsec:identifiability}) is the
-standing counterexample. This section develops the detectors and the calibration
-machinery; \cref{sec:results} reports what they do.
-
-Two prover settings drive the design. A benign prover's cadence is stationary,
-and a stationary line has a classical test. An adaptive prover lets the cadence
-wander, which breaks that test cheaply and forces a different construction. The
-benign case is easy and the paper is not about the benign case; the adaptive
-case is the methodological heart, and the burden here is to give its detector a
-defensible null.
-
-\paragraph{[Parked] Old main-text detector-power subsection.}
-\paragraph{[Old heading] Detector power and how far it sits below optimal}
-\label{subsec:power-old}
-
-Which detector to use is an \emph{outcome} here, not an assumption. Before
-scoring any signal we fixed the detector set, the conditions, and the metric, and
-ran a pre-registered comparison across a cadence-drift axis
-$\sigma_f \in \{0, \dots, 1.5\}$~Hz against two negative classes: the
-modelled inference null, and a mixed structural population of AR(1),
-heavy-tailed AR(1), and the measured controller. \Cref{subsec:confound} reports the
-full grid; three findings from it carry into everything below.
-
-Tracking is necessary. The fixed-$\alpha$ Dandawat\'e--Giannakis statistic,
-handed the \emph{true} $f_0$ as an oracle, collapses from detection rate $0.34$
-at zero drift to $\leq 0.1$ under any wander --- even the true frequency is
-useless to a coherent fixed-$\alpha$ test once the line moves --- and the fixed
-multitaper F-test has essentially no usable power against either negative class
-at empirical thresholds. Only the tracked order family separates the wandering
-line from structural confounds: against the mixed structural negatives the
-matched filter and the raw Viterbi score have detection rate zero at every drift,
-because the controller third of the mixture fires them harder than the signal
-does. Phase-coherent cyclic structure at the tracked order is the one signature
-the confuser cannot fake, and this is the attribution boundary of Rung~1 drawn
-with power rather than with false-alarm rate. The honest limit is fast wander:
-beyond drift $0.8$~Hz every calibratable detector fades, and a $300$~s record
-simply does not resolve fast cadence wander against an honest null.
-
-That ranks the detectors against each other but says nothing about how good the
-winner is. Because we own the generators we can also benchmark against an
-optimality ceiling. No closed-form likelihood exists --- both classes are
-black-box samplers --- so we use a Whittle spectral likelihood ratio on the
-in-band periodogram with a Monte-Carlo training template bank marginalised over
-cadence, fitted on a disjoint stream and applied to the exact evaluation
-populations. The ceiling is perfect: area under the curve and detection rate are
-$1.0$ in every column at every drift. The training comb and the line-free nulls
-are separable in principle from a $300$~s trace, so all the difficulty the
-comparison exposes lives in the detector, not in the problem.
-
-Read as a fraction of that ceiling, the picture sharpens in a way the frontier of
-\cref{sec:frontier} depends on. Against the inference null the Viterbi tracker is
-essentially Neyman--Pearson optimal, holding the ceiling's power across the whole
-wander axis, while the fixed matched filter's fraction of attainable power
-collapses from $1.0$ at zero drift through $0.78$ and $0.38$ to below zero by
-drift $0.4$~Hz. Against the structural confusers the tracker is \emph{not}
-enough: only the tracked order family approaches the ceiling, reaching $0.93$ of
-it at low drift and fading to $0.10$ at the fastest wander. The widening gap at
-high drift is honest headroom above today's detectors rather than a limit of the
-channel, and the one caveat runs in our favour --- the Whittle ceiling discards
-harmonic-phase coherence and non-Gaussian structure, so the true optimum can only
-exceed it.
-
-
-
-
-\paragraph{[Parked] Old Discussion opening, ladder lead-in, ladder tables, and
-governance readings.}
-We set out to ask what a passive power meter can certify about AI training, and
-organised the answer as a claim ladder in which each rung answers a more
-governance-relevant question at a higher cost in verifier information, and each
-rung's ceiling motivates the next. \Cref{tab:closeout-old} closes the ladder out with
-the paper's evidence attached to each rung.
-
-%%%%
-
-This section fixes what the verifier sees, who is trying to hide from it, and
-what can be argued about the channel before any detector is run. It also fixes
-the vocabulary for the claims a meter can support. We organise those claims as
-a \emph{claim ladder} (\cref{tab:ladder}): four claims of increasing governance
-relevance, each bought at a stated cost in verifier information, and each with
-a hard ceiling that motivates the next. Rung~1 establishes that order-coherent
-power structure is present, which is evidence rather than identification.
-Rung~2 converts that structure into training-likeness at the price of
-committing to an inference null; its ceiling is semantic non-identifiability.
-Rungs~3 and~4 leave the passive channel for an active protocol and a transcript
-primitive, and are specified but not run (\cref{app:active}). The ladder is a
-ladder of claims and assumptions, not a quantitative bound on unidentified
-compute. Within every rung we consider two provers: a \textbf{benign}
-(non-adaptive) prover who runs its workload without regard to the meter, and an
-\textbf{adaptive} (hiding) prover who knows the detector and reshapes its
-schedule to evade it. Most of what is interesting lies in the gap between them.
-
-%%%%
-
-\begin{table*}[t]
-	\centering
-	\small
-	\caption{The claim ladder. Each rung answers a
-	strictly more governance-relevant question at a stated cost in verifier
-	information; each rung's hard ceiling motivates the next. Within each rung
-	we consider a benign (non-adaptive) and an adaptive (hiding) prover.
-	\Cref{tab:closeout-old} closes each rung out against the evidence.}
-	\label{tab:ladder-old}
-	\begin{tabular}{@{}p{2.6cm}p{4.2cm}p{3.4cm}p{4.6cm}@{}}
-		\toprule
-		Rung & Claim & Additional requirement & Hard ceiling \\
-		\midrule
-		1. Structural evidence & Order-coherent power variation exists under a
-		specified structural null & External time-resolved trace only &
-		Periodic physical confounds; structural-null misspecification; strong
-		superposition or dilution; active power shaping; cadence moved outside
-		the searched family; die-to-meter attenuation \\
-		2. Conditional classification & The trace is more training-like than
-		the stated inference population & A representative or explicitly
-		modelled inference null & Domain shift; semantic non-identifiability
-		(training-shaped execution, benign or deliberate, without training) \\
-		3. Active physical authentication & A load behind the meter responded
-		to an unpredictable verifier challenge & Prover participation; a
-		challenge-bound schedule & A challenge-aware dummy load; no semantic
-		binding by power alone \\
-		4. Work verification & The physical response is tied to declared
-		training state transitions & A sound, fresh transcript/proof and an
-		explicit binding assumption & The remote-proof / co-location gap,
-		unless the assumed primitive closes it \\
-		\bottomrule
-	\end{tabular}
-\end{table*}
-
-%%%%
-
-\begin{table*}[t]
-	\centering
-	\small
-	\caption{The claim ladder closed out: what this paper establishes at each
-	rung, where, and the hard ceiling it hits. Mirrors \cref{tab:ladder-old}.}
-	\label{tab:closeout-old}
-	\begin{tabular}{@{}p{2.4cm}p{5.0cm}p{2.2cm}p{4.6cm}@{}}
-		\toprule
-		Rung & What the paper establishes & Evidence & Demonstrated ceiling \\
-		\midrule
-		1. Structural evidence & Order-tracked cyclic structure is detected
-		against stationary and controller-like nulls; the tracker is
-		Neyman--Pearson optimal against the inference null &
-		\cref{sec:results}, \cref{subsec:confound} & Fast cadence wander
-		(${>}0.8$~Hz on $300$~s); attributing structure to training needs the
-		nuisance model; the meter must meet \cref{subsec:meter_spec} \\
-		2. Conditional classification & The trace is more training-like than the
-		stated inference null (area under the curve $1.00$, stable across domain
-		shift) & \cref{subsec:rung2} & Semantic non-identifiability:
-		non-training loads with a training-shaped schedule score as training,
-		benign ones included; \cref{subsec:identifiability} shows no passive detector can
-		do better \\
-		Frontier & Fixed tests collapse under ${\approx}$zero-cost variable real
-		work while the tracker holds up to level $0.5$; costly de-periodicisations
-		buy no concealment & \cref{sec:frontier} & At level $0.7$ the tracker
-		detects about half of runs at no throughput cost; the learning cost is
-		unmeasured \\
-		Cost of hiding & Hiding to detectability $\varepsilon$ requires a
-		distortion $\sigma^*(\varepsilon)$ that the measured anchors price at tens
-		of percent of throughput, rising above $100\%$ (i.i.d.\ period jitter) &
-		\cref{subsec:identifiability}, \cref{app:identifiability} & Read off a
-		fixed-bin verifier, so valid against any class containing it, but loose;
-		one adversarial strategy;
-		internal to the stated generator; the throughput-or-learning disjunction is
-		an assumption, not a result \\
-		3--4. Active authentication & A challenge-synchronous protocol and an
-		assumed binding primitive, specified but not run & \cref{app:active} &
-		Challenge-aware dummy load; the co-location gap \\
-		\bottomrule
-	\end{tabular}
-\end{table*}
-
-%%%%
-
-\paragraph{Governance reading.} A passive meter certifies efficient
-iteration-structured training against cheap, fixed tests only within a bounded
-de-periodicisation budget; a prover free to vary real work escapes those tests
-for nothing. Defeating the order tracker on top of that requires either a systems
-and learning cost we could not measure or a degradation of the meter channel
-itself (\cref{subsec:meter_spec}). The results of this section are therefore
-necessary conditions and an upper bound on hideability rather than a proof of
-training: they bound what a prover can hide from a fixed detector cheaply. The
-complementary direction --- a lower bound on what hiding must cost, which no
-detection sweep can supply --- is available for one adversarial strategy against a fixed
-verifier (\cref{subsec:identifiability}) under the cost-of-hiding assumption,
-and the distortion it requires can be priced against the same anchors used here.
-The tracking class dominates the fixed class at every cell we measured, so that
-threshold is a valid --- but loose --- reading of what a tracker would require: it is
-read off the weaker detector, so it understates the true requirement. Establishing it
-against the tracking class directly, rather than inheriting it from the measured
-dominance, remains open.
-
-%%%%
-
-\paragraph{Governance reading.} What a regulator can buy today is graded. Rung~1
-buys physical evidence of an efficient iteration-structured compute schedule from
-an external meter alone, robust to a wander-and-drift adversary but not to a
-prover who varies real work or degrades the meter. Rung~2 buys the further claim
-that the schedule is more training-like than a stated inference baseline --- but
-not that the computation is training rather than a schedule-matched mimic, benign
-or deliberate, which is a limit of the passive channel, not of the method. That
-limit runs both ways: it caps what a positive detection proves as well as what a
-counterfeit could fake. Separating training from a
-mimic, and binding a physical response to declared work, both require moving off
-the passive channel to the active protocol of \cref{app:active} and the
-cryptographic primitive it assumes. The passive meter is thus a cheap, deployable
-front line that narrows the question and prices the cheap evasions, not a
-stand-alone proof of training.
-
-
-% ---------- [2b] LITERATURE: the signal-processing tools, and what each assumes ----------
-
-
-The problem of 
-
-The problem of X is well establihsed 
-
-Inferring which
-activities are running from one aggregate meter is the founding problem of
-non-intrusive load monitoring \citep{hart1992nilm,zoha2012nilm}, with a
-power-side-channel malware detector as its closest security-flavoured
-descendant \citep{clark2013wattsupdoc}. Deciding whether a source is active
-against a transmitter trying to stay below the detection floor is spectrum
-sensing, whose taxonomy of energy, matched-filter and cyclostationary detectors
-structures our own comparison \citep{yucek2009spectrum}. 
-
-Tracking a narrowbandline whose frequency wanders is passive sonar's lofargram problem
-\citep{streit1990frequency}, carried into continuous-gravitational-wave
-searches \citep{suvorova2016hmm,bayley2019soap}, and undoing that wander before
-testing is tacholess order tracking \citep{bonnardot2005tacholess}. 
-
-Each of these literatures assumes something the governance setting removes: 
-
-load monitoring assumes indifferent appliances with clean switching edges;
-
-side-channel analysis, from differential power analysis onward
-\citep{kocher1999dpa,chari2002template}, assumes a proximate high-bandwidth
-probe and a cooperative target; 
-
-the line trackers assume a stationary noise floor with no adversary behind it. 
-
-None of them supplies a calibrated test for a quasi-periodic, frequency-wandering signature observed through a low-rate
-filtered meter, and none prices what it costs the source to remove it.
-
-% ---------- [2c] LITERATURE: the adversarial half (covert comms / steganography) ----------
-The adversarial half does have an owner. Pricing concealment against
-detectability is the warden-versus-covert-transmitter game of covert
-communication \citep{bash2013covert} and the relative-entropy security measure
-of information-theoretic steganography \citep{cachin2004steganography}: both
-bound how detectable a hidden activity remains as a function of how constrained
-it is, and both do so for \emph{every} verifier at once rather than for one
-detector. Their results assume a transmitter free to shape its signal. A
-training schedule is not free: its communication phase has a physical duration
-that does not shrink when the compute phase does, and each distortion of the
-cadence costs throughput or learning efficiency. That constraint is what makes
-a cost-of-hiding bound possible here, and no existing bound covers it.
-
-% ---------- [3] THE GAP (one sentence) + why it matters ----------
-What is missing is a method that turns a low-rate external power trace into a
-calibrated test for iteration-structured training, prices its evasion against
-an adversary who knows the test, and states what the channel cannot certify at
-any price. Without one, ``power monitoring'' enters policy proposals as a
-binary capability: no one can write the meter specification a regulator would
-have to procure, budget the evasions a prover would actually attempt, or say
-which governance claims a positive detection does and does not support.
-
-
-
-and U.S.~Executive Order 14110 briefly operationalised one, requiring reports of
-runs above $10^{26}$\,FLOP \citep{whitehouse2023eo14110}. 
-
-
-
-Every such scheme
-presupposes that a regulator can tell when training is happening on monitored
-hardware. Three channels could tell it. Prover-owned telemetry is informative
-but conditional on tamper-resistant read paths that do not yet exist
-\citep{rahman2026telemetry,ogara2025hardware}; challenge--response protocols
-remove that trust anchor but require the prover's participation
-\citep{monfared2026timing}; and a verifier-owned probe on an accelerator's
-supply conductors requires neither, at the price of physical access to the
-board and continuous on-site presence \citep{gargiulo2026workload}. 
-
-
-
-Multi GPU synchronous AI training of the type that typifies frontier AI models alternates a compute phase, a forward backward pass with high power requirements, with a communication gradient all reduce phase where the GPUs all sync and power requirements drop. [what about async training? maybe we need to mention this somewhere? perhaps in limitations? ]
-
-
-In practice the problem is harder as the probe is at a higher level i.e. more remote a meter three to four orders of magnitude slower than the probe, behind a power-delivery path that low-passes and dilutes the
-signal, reading a prover who knows it is being read.
+\end{table}
+
+\paragraph{Why no detector can do better.} The meter sees only the power
+schedule. A verifier's decision is some function of the trace, so two loads that
+produce traces with the same distribution are flagged with the same
+probability, by any detector. The decoy reproduces the alternation of compute
+and communication that makes up the training schedule, so it produces the same
+trace as training without training a model. Amplitude does not help either: the
+power drawn is the rate of operations times the energy per operation, and the
+meter sees only the product. A higher sampling rate does not help. A classifier
+reading a $10$~MHz board-level probe separates training from inference by the
+power signature of the optimiser update \citep{gargiulo2026workload}, but the
+decoy runs that update and only discards its result. A detection therefore
+shows that a training-shaped schedule is running, not that a model is being
+trained. For the verifier the practical concern is the benign loads in
+\cref{tab:rung2_controls}, such as the controller cycle and the kernel loop,
+which could flag a compliant facility; a concealing operator has no reason to
+run a decoy (\cref{subsec:adversary}).
 
 \end{document}
