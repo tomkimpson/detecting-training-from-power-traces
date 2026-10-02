@@ -72,33 +72,24 @@
 \printAffiliationsAndNotice{}
 
 \begin{abstract}
-Compute-governance regimes that restrict large training runs presuppose that a
-regulator can tell when training happens on monitored hardware, and a power
-meter outside the operator's control is the one passive channel available
-against an operator who does not cooperate. We ask what such a meter can certify,
-and answer with a ladder of four claims, each with a stated information cost
-and a hard ceiling. Evidence comes from a literature-parameterized scenario
-model of datacentre AI workloads and an explicit off-chip observation model,
-against both a benign operator and a concealing one who knows the detector. The
-iteration cadence of synchronous training is recoverable by a tracked
-cyclostationary detector, but the complete pipeline admits no analytic
-calibration, so we report it as an effective score with per-trace surrogate
-calibration rather than a constant false-alarm-rate test. Our central result
-is the de-periodicisation frontier, which prices hiding against measured
-throughput anchors and is strongly asymmetric: varying real work per iteration
-hides from every fixed-frequency test at essentially zero cost, while the
-tracking class holds until that variation is extreme, where it still detects
-about half of runs. That extreme level is free in throughput but not in
-learning: in small-scale training it costs the operator $267\%$ more compute
-to reach the same loss, and a better-designed variant that hides about
-three-quarters of runs still costs about $80\%$, even with a tuned recipe. Two limits are firmer than the detectors. The observation channel is
-itself a condition on every claim --- a one-second-integrating, one-hertz
-meter defeats all detectors on an honest workload --- and the meter certifies
-a physical schedule, not training semantics: five non-training loads,
-including one computing gradients and discarding them, are classified as
-training by every rule we test. Escaping that ceiling means leaving the
-passive channel for an active challenge protocol, which we specify but do not
-run.
+Agreements to govern AI training will need a way to tell when training is
+happening on a monitored cluster, without trusting the operator. A power meter
+on the facility's supply needs no such trust, but it samples slowly, sees many
+workloads at once, and faces an operator who may try to hide its training. Here
+we develop a method to detect training in facility-level power, and measure what
+it costs an operator to hide from it. Synchronous training draws power in a
+cycle that repeats about once a second; because this cadence wanders, we follow
+it with a Viterbi line tracker borrowed from gravitational-wave searches. On
+simulated datacentre power, the tracker detects training hidden in a declared
+inference workload in nearly every five-minute window, within $0.04$ of an
+approximately optimal test, given a meter that samples at $2$\,Hz or faster. Of
+eight strategies an operator might use to hide, only extreme variation of the
+work per iteration evades the tracker, in at most $73\%$ of windows. This costs
+no throughput, but in small-scale training the operator needs $93$--$267\%$ more
+compute to reach the same loss, and over a day of observation at least $87\%$ of
+such runs are still caught. A modest passive meter is sufficient to make hidden training both detectable and expensive, which
+makes power metering a promising part of compute verification that does not
+depend on trusting the operator.
 \end{abstract}
 
 % ============================================================================
@@ -114,37 +105,48 @@ AI governance agreements will require regulating training runs \citep{shavit2023
 AI training has already been shown to leave a signature in the power drawn by the hardware that can serve as a diagnostic to identify and separate training from inference. A $10$\,MHz current probe clamped around the GPU's PCIe power supply cables can separate training from
 inference and from non-AI work at $97\%$ accuracy \citep{gargiulo2026workload}, a result robust against many but not all adversarial strategies. On-chip $1$\,Hz telemetry counters that measure power (among other telemetry: utilisation, memory, etc.) can classify training at $95\%$ accuracy, again a result robust against many but not all adversarial strategies \citep{rahman2026telemetry}. In practice, any realistic AI governance agreements that use off-chip sensors will rarely have such fine-grained access to the GPU hardware. Power meters that can be retrofitted to existing facilities and secured against tampering are likely to sit at the level of the rack or facility input, with sampling frequencies ${\sim}10$\,Hz (i.e. three to four orders of magnitude slower than the board probe) and behind a power-delivery path that low-passes and dilutes the signal. At this level training can be identified and it is large enough that datacentre and grid operators treat it as an engineering control problem to be dealt with~\citep{patel2023polca,ko2025widearea}. 
 
-% ---------- [4] THE AIM: what this paper does, as refutable claims with pointers ----------
-In this paper we develop a new method for detecting training signatures given noisy facility level power measurements, against an adversarial operator who is trying to hide their training. 
+% ---------- [3] THE GAP: why the facility meter is hard, and why hiding has a price ----------
+At the facility meter, the signature of training is its iteration cadence. Each
+iteration alternates a high-power compute phase with a low-power communication
+phase, about once a second, and this cycle puts a narrow line in the power
+spectrum. Detecting that line at a facility meter is harder than at the board,
+for two reasons. First, the cadence of a real run is not fixed. Stragglers, degraded
+hardware and temperature change the iteration time over seconds to hours
+(\cref{subsec:ko}), so the spectral line wanders, and a test that looks for a
+sharp peak at one frequency loses it. Second, an operator who wants to hide can
+make the line wander on purpose, or smear it away, by inserting idle time
+between iterations or by varying the work done in each. Hiding is not free,
+however. Unlike a covert transmitter, a training operator cannot reshape its
+signal freely: every distortion of the schedule costs throughput, learning
+efficiency, or both. The question is therefore not whether training can be
+hidden, but whether it can be hidden cheaply.
 
+% ---------- [4] THE AIM: what this paper does and what it finds ----------
+In this paper we develop a method to detect training in facility-level power
+measurements against an operator who is trying to hide it, and we measure what
+hiding costs. We model the power of a datacentre running training and inference
+(\cref{sec:scenario}) and pass it through a model of an off-chip meter
+(\cref{sec:threat}). To follow the wandering line we borrow a Viterbi line
+tracker from passive sonar and continuous-gravitational-wave searches
+(\cref{sec:methods}). Against an operator who does not hide, the tracker detects
+training in almost every five-minute window, within $0.04$ of an optimal
+ceiling, while fixed-frequency tests fail once the cadence drifts
+(\cref{sec:results}). It needs only a meter that samples at $2$\,Hz or faster
+and averages over no more than $0.5$\,s. We then test eight ways for an operator
+to hide (\cref{sec:frontier}). Fixed-frequency tests are defeated cheaply:
+varying the work per iteration hides $88\%$ of windows at no cost in throughput.
+The tracker is defeated only by extreme work variation, and that has a cost in
+learning instead: in small-scale training, the operator needs $93$--$267\%$ more
+compute to reach the same loss. Over a day of observation, the strongest
+strategy we found escapes detection in $13\%$ of runs (\cref{subsec:runs}).
 
-%to be done once the paper scrop/strucutre is better established
-We do:
-
-* specify anoff-chip observation model and a literature-parameterised generator of
-datacentre training and inference power, 
-
-* construct a detector  a detector for the cadence that tracks the wandering line, borrowing thehcniqus ffrom signal analysis and GW astrophysics
-
-* We construct the Pareto frontier and show the trade-off between how much of the cadence an concealing operator removes and
-what that removal costs in measured throughput (\cref{sec:frontier}). 
-
-*We derive a minimum meter specification, the sampling rate, integration time and in-band
-transfer i.e. the specs needed for a meter to work 
-
-
-
-* We restrict attention to synchronous, iteration-structured
-training observed through a time-resolved trace; the integrated-energy channel,
-asynchronous schedules and the calibration of the generator to distributed
-hardware are outside scope, and \cref{subsec:limitations} says what that
-costs.
-
-
-
- Unlike a covert transmitter, a training operator cannot freely reshape its signal: the communication phase has a fixed physical duration, and every distortion of the cadence costs throughput. It is this constraint that makes a cost-of-hiding bound possible.
-
-
+Our main conclusion is that a passive power meter outside the operator's control
+can detect synchronous training, and that hiding from it is expensive. Two
+limits apply. The meter detects a periodic schedule, not training itself, so
+non-training loads with a training-like cycle also trip it
+(\cref{subsec:identifiability}). And our evidence is synthetic: the traces come
+from a model, not from a measured multi-GPU facility
+(\cref{subsec:limitations}).
 
 % ---------- [5] ROADMAP ----------
 This paper is organised as follows. \Cref{sec:scenario} gives the model of
