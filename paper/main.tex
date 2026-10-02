@@ -154,9 +154,9 @@ what a concealing operator may do to hide from it. \Cref{sec:methods} develops t
 detector, a Viterbi line tracker; \cref{sec:results} reports its power against
 the inference null and the minimum meter it needs; and \cref{sec:frontier}
 prices what it costs a concealing operator to defeat it. \Cref{sec:discussion}
-asks how likely a concealing operator is to be detected over a run, states what
-a detection does and does not certify, and sets out the limitations, and
-\cref{sec:conclusion} concludes.
+asks how likely a concealing operator is to be detected over a run, covers the
+non-training loads that imitate training, and sets out the limitations.
+\Cref{sec:conclusion} concludes.
 
 
 \section{A model of datacentre training power}
@@ -433,7 +433,7 @@ control. The meter reads
 The meter filters the facility power, samples it at rate $f_s$, and adds
 interference and measurement noise $\eta[n]$ on its own sample grid. Round
 brackets denote continuous time and square brackets index the meter's
-samples.The filter is a linear time-invariant system with impulse response $h$, which has
+samples. The filter is a linear time-invariant system with impulse response $h$, which has
 two parts. The delivery path $h_{\mathrm{del}}$ is everything between the
 accelerators and the meter: power supplies, distribution, and any conversion
 or storage. The instrument $h_{\mathrm{ins}}$ is the meter's own filtering:
@@ -1052,71 +1052,52 @@ training efficiency.
 \label{sec:discussion}
 % ============================================================================
 
-In this section we ask what the results of \cref{sec:results,sec:frontier} mean
-for a verifier. A Viterbi tracker detects synchronous training against a declared
+
+\cref{sec:results,sec:frontier} show that a Viterbi tracker detects synchronous training against a declared
 inference workload, given a meter that samples at ${\geq}2$~Hz with ${\leq}0.5$~s
-integration. Only one kind of concealment weakens it: varying the real work per
-iteration, which is free in throughput but costs learning efficiency.
+integration. The method is robust against the majority of concealing strategies, while the minority of strategies that hamper detection pay a cost in either throughput or learning efficiency. In this section we discuss the implications of these results for a verifier who is monitoring a facility for signs of training. This section is organised as follows. \Cref{subsec:runs} extends the short, per-window
+detection rates of \cref{sec:results,sec:frontier} into the probability that a concealing operator is detected over a long training run. \Cref{subsec:identifiability} considers confounding, non-training workloads that imitate training and that the tracker also detects. \Cref{subsec:limitations} discusses limitations of the method and our analysis, and suggests avenues for future work.
 
-This section is organised as follows. \Cref{subsec:runs} turns the per-window
-detection rates into the probability that a concealing operator is detected over
-a run. \Cref{subsec:identifiability} states what a detection certifies, and how
-it can raise a false alarm, and \cref{subsec:limitations} sets out the
-limitations.
-
-\subsection{From windows to runs}
+\subsection{Detection probability for long runs}
 \label{subsec:runs}
 
-Every detection rate in \cref{sec:frontier} refers to a single $300$\,s window.
-A training run lasts days to months, and the verifier observes all of it, so what
-matters to a concealing operator is the probability of being detected at some
-point during the run. We simulate this for work variation, the one strategy
-that \cref{sec:frontier} found useful to a concealing operator: it is the only
-strategy that hides a large share of windows from the tracker without a throughput
-cost. Every other strategy is detected in at least three quarters of windows, and
-in most settings in nearly all of them, so a run is easily caught. We take two forms of
-work variation, the $\sigma_G = 0.7$ setting of \cref{tab:attacks} and the
-lognormal variant, which hides more per window. Each run is one continuous
-$24$-hour trace of the aggregate of \cref{eq:aggregate}, cut into consecutive
+Every detection rate in \cref{sec:frontier} refers to a single $300$\,s window. However, a frontier training run lasts days to months. The verifier observes the power meter over these longer timescales. The quantity that both the verifier and the concealing operator are interested in is the is the probability of being detected at some point during these longer runs. In this section we compute this detection probability.  
+
+
+
+For the majority of concealing strategies the Viterbi detector detects training in at at least three quarters of windows, and in most settings in nearly all of them, so a run is easily caught. We therefore consider exclusively the work variation strategy, which was the only strategy that could hide a large fraction of windows from the tracker. We take two forms of work variation, the $\sigma_G = 0.7$ setting of \cref{tab:attacks} and the
+lognormal variant introduced in \ref{sec:frontier}. We consider a training run to be a continuous $24$-hour trace of the aggregate of \cref{eq:aggregate}, cut into consecutive
 $300$\,s windows and scored by the tracker. The run's cadence and background are
 held fixed for the whole day, so the windows of one run are not independent
 draws. A window counts as detected at false-alarm rate $10^{-2}$, as in
-\cref{sec:frontier}.
-
-The verifier then needs a rule that turns a sequence of windows into a decision
-about the run. We use an anytime-valid test \citep{ramdas2023savi}. Each window's
-score becomes a p-value against the null \citep{vovk2005algorithmic}, each p-value
+\cref{sec:frontier}. We use an anytime-valid test \citep{ramdas2023savi} to convert a sequence of Viterbi results on a sequence of windows into a decision about the run. Each window's score becomes a p-value against the null \citep{vovk2005algorithmic}, each p-value
 becomes an e-value $e = 1/(2\sqrt{p})$, and the test raises an alarm when the
-running product of e-values first exceeds $1/\alpha$. By Ville's inequality
+running product of e-values first exceeds $1/\alpha$ \footnote{By Ville's inequality
 \citep{ville1939etude}, the false-alarm rate stays below $\alpha$ however long the
-verifier watches and whenever it stops. We set $\alpha = 10^{-3}$. Across $2000$
+verifier watches and whenever it stops.}. We set $\alpha = 10^{-3}$. Across $2000$
 null runs the empirical false-alarm rate after a day is $1.5 \times 10^{-3}$
-($95\%$ interval $0.5$--$4.4 \times 10^{-3}$), consistent with $\alpha$: holding a
-facility's background fixed for a day does not make its false alarms cluster. A
-simpler rule, which counts detected windows over a fixed observation time,
-behaves the same way but detects fewer runs.
+($95\%$ interval $0.5$--$4.4 \times 10^{-3}$), consistent with $\alpha$. We also tested a simpler counting rule, which flags a run when the number of
+windows detected by a fixed time would be improbable for a null facility. It also
+keeps its false-alarm rate (two false alarms in $2000$ null runs after a day), but
+the observation time must be fixed in advance, and it flags fewer runs
+(\cref{fig:run_level}b).
 
-Concealment that works for a window need not work for a run. The misses are not spread evenly across runs, but depend
-on the run's cadence (\cref{fig:run_level}a). Under work variation
-at $\sigma_G = 0.7$, runs with $f_0 \lesssim 0.8$\,Hz are detected in almost
-every window, and those above about $1.1$\,Hz in $8$--$20\%$. Even the hardest
-of these runs is detected at several times the null's $1\%$ rate, so the test
-catches it eventually (\cref{fig:run_level}b). It flags $68\%$ of runs within an hour, $95\%$ within three
-hours, and every run within six. The lognormal work variation of
-\cref{sec:frontier} hides more. Runs with $f_0$ between about $0.9$ and $1.3$\,Hz
-are detected in only $1$--$7\%$ of windows, and $15$ of $200$ runs fall to $2\%$
+
+Results are presented in \cref{fig:run_level}. Under the work variation strategy at $\sigma_G = 0.7$, runs with $f_0 \lesssim 0.8$\,Hz are detected in almost every window, and those above about $1.1$\,Hz in $8$--$20\%$. Even the most difficult of these runs is detected at several times the null's $1\%$ rate, so the test
+catches it eventually given sufficient observation time (\cref{fig:run_level}b). It flags $68\%$ of runs within an hour, $95\%$ within three hours, and every run within six. For the lognormal work variation of \cref{sec:frontier}, runs with $f_0$ between about $0.9$ and $1.3$\,Hz are detected in only $1$--$7\%$ of windows, and $15$ of $200$ runs fall to $2\%$
 or below, close to the null's rate. The test flags $44\%$ of these runs within an
 hour, $75\%$ within six hours, and $87\%$ after a day. The remaining $13\%$
 survive a day of observation, and the runs closest to the null's rate would
-survive much longer. A concealing operator can therefore hide a run, but only with
+survive much longer. We conclude that a concealing operator can therefore hide a run, but only with
 the lognormal strategy, only at some cadences, and at the $93\%$ learning cost
 measured in \cref{sec:frontier}.
 
 \begin{figure*}[t]
 	\centering
 	\includegraphics[width=\linewidth]{run_level_detection}
-	\caption{From windows to runs. Each run is one continuous $24$-hour trace of
-	the aggregate, scored in $300$\,s windows; $200$ runs per strategy.
+	\caption{Detection of $200$ runs under each of two work-variation strategies,
+	$\sigma_G = 0.7$ (blue) and lognormal (orange). Each run is one continuous
+	$24$-hour trace of the aggregate, scored in $300$\,s windows.
 	\textbf{a}, fraction of each run's windows detected at false-alarm rate
 	$10^{-2}$, against the run's cadence. The dotted line is the null's $1\%$
 	rate. \textbf{b}, fraction of runs flagged against observation time, at a
@@ -1128,112 +1109,84 @@ measured in \cref{sec:frontier}.
 	\label{fig:run_level}
 \end{figure*}
 
-\subsection{What a detection certifies}
+\subsection{Confounds}
 \label{subsec:identifiability}
 
-A detection establishes that the trace carries a persistent, training-shaped
-periodic schedule. It does not establish that the computation is training. Any
-load that reproduces the schedule produces the same trace, and no test on the
-trace can separate the two (\cref{app:identifiability}). Such loads arise in
-ordinary operation: a non-ML kernel loop with a training-shaped cycle, a periodic
-inference request generator, or a controller limit cycle. All of them score as
-training under every decision rule we fitted (\cref{app:rung2}). The limit cuts
-both ways. It caps what a positive detection proves, as well as what a mimic could
-fake. It is a property of the channel, not of the detector, so no better detector
-removes it.
-
-\paragraph{Instrument lines and false alarms.} The most likely such load in
-practice is the hardware itself. On measured single-A100 traces the spectrum
-contains a $0.31$--$0.45$\,Hz component, roughly ten times stronger than the
-training line, that appears whenever the load varies in time but not at idle or
-under constant load. It is the signature of the card's own power-management loop.
-This is an instrument line: a persistent, slowly wandering line that the Viterbi
-score cannot tell from training (\cref{subsec:confound}). It does not help an
-operator hide training, but it can flag a compliant inference facility. Three
-things bound it. First, a known-line veto. Continuous-wave searches meet the same
-problem in instrumental lines, and handle it by cataloguing lines from detector
-characterisation data and discarding candidates coincident with them.
-% TODO(cite): a LIGO known-lines / line-veto reference, e.g. Covas et al. 2018,
-% PRD 97, 082002 -- verify with /check-refs before adding to references.bib.
-The analogue here is to extract several candidate paths from the contrast map
-(\cref{eq:contrast}) and discard those that coincide with lines catalogued from
-the facility's own characterisation data. We have not evaluated it, and it
-carries a cost a gravitational-wave veto does not: the adversary knows the veto
-list, and can move its cadence into a vetoed band. Second, per-card controllers
-need not add coherently at a facility meter. $N$ independent controllers should
-grow roughly as $\sqrt{N}$, against $N$ for a synchronous training line, and so
-fall relative to the training line at cluster scale. Third, a positive detection
-is a trigger for escalation rather than a verdict (\cref{sec:conclusion}). The
-order-tracked cyclostationary statistic of \cref{app:attribution} partly
-separates the modelled controller from training by waveform shape, but only
-conditionally, and we do not rely on it.
+A detection by the Viterbi method establishes that the power trace carries a persistent, training-shaped
+periodic schedule. However it does not establish that the computation is actually training. Ordinary operations could lead to similar periodicities that trip the detector, e.g. a non-ML kernel loop with a training-shaped cycle, a periodic
+inference request generator, or a controller limit cycle, see \cref{app:rung2}. Instrumental lines that arise from the hardware itself are also possible. For example, on measured single-A100 traces the spectrum
+contains a $0.31$--$0.45$\,Hz component due to the card's own power-management loop, that appears whenever the load varies in time but not at idle or under constant load \footnote{This line need not grow in step with training at a facility meter. The
+controllers of $N$ independent cards should add incoherently, growing roughly as
+$\sqrt{N}$, while a synchronous training line grows as $N$, so the controller
+line should fall relative to training at cluster scale.} Instrumental lines don't help a concealing operator hide training, but it could lead to otherwise compliant operators running inference being erroneously flagged.
+Gravitational-wave searches face the same problem, and discard candidates that
+coincide with a catalogue of known instrumental lines \citep{covas2018lines}. A
+verifier could keep a similar list for each facility, with two differences.
+Building it needs access to characterise the facility's hardware, and an
+operator who knows the list can move its cadence into a listed band.
 
 \subsection{Limitations}
 \label{subsec:limitations}
 
-Every result in this paper is synthetic. The scenario model is
-literature-parameterised, not calibrated to measured hardware, so every
-quantitative result is a sensitivity analysis over a stated parameter family
-rather than a prediction. The one place we hold the model against hardware shows
-the gap. On a single saturated A100 the iteration cadence is present but shallow.
-With no communication phase, it modulates a ${\sim}370$\,W draw by only a few
-watts (${\sim}0.4\%$ of board power), about $75\times$ less than the scenario model
-assumes. This is expected. The deep compute--communication contrast that makes the
-cadence legible comes from synchronisation across many accelerators, so a single
-card is the case in which it is weakest. Testing the model where it applies needs
-multi-GPU training observed by an external meter alongside on-board telemetry. We
-plan that study, but it needs hardware and an experimental setup we do not yet
-have. Until then, claims about what reaches a facility meter are predictions.
+The primary limitation to this work is the use of synthetic data generated from a model of data centre power draw, Section \ref{sec:scenario}. The training part of the model, Section \ref{subsec:ko}, is grounded in data. \citet{ko2025widearea} take
+its parameters from published characterisations of datacentre and GPU power: an
+oscillation near $1$\,Hz, compute phases that fill $55$--$80\%$ of each iteration,
+and a ${\sim}30\%$ drop in draw during synchronisation. They report that the
+profiles it generates agree qualitatively with public power traces and with the
+experience of datacentre engineers. They could not test it quantitatively, because
+facility-scale measurements are proprietary. The inference part of the model, Section \ref{subsec:null}  has weaker
+support. \citet{ko2025widearea} give no inference model, so the one in
+\cref{subsec:null} is our own. It follows the published behaviour of serving
+systems, but we have not checked it against measured traces. The natural extension of this work is to replace the synthetic model with empirical multi-GPU training observed by an external meter. That study is planned but requires hardware and an experimental setup that are not currently available. Measurements from a single A100, read through NVML, are possible. However they are a poor stand-in for what a facility meter sees, for two reasons. First, one card has no communication phase. On a
+single saturated A100 the iteration cadence is present but shallow: it modulates
+a ${\sim}370$\,W draw by only a few watts (${\sim}0.4\%$ of board power); the deep
+compute--communication contrast that makes the cadence legible comes from
+synchronisation across many accelerators, so a single card is the case in which
+it is weakest. Second, NVML reports one card's power from its own sensors, while
+a facility meter sees the aggregate of many cards through the power-delivery
+path. For the quantity a facility meter sees, the scenario model of
+\citet{ko2025widearea} is therefore the better guide. We use the A100
+measurements only where a single card is a fair proxy, e.g. the throughput cost of
+the concealing strategies (\cref{sec:frontier}).
 
-The rest of the model carries narrower limitations. The observation map is a
-linear time-invariant first approximation. The optimality ceiling of
-\cref{app:ceiling} is optimal only under the Whittle model, hence a lower bound on
-the true optimum. The tracker's thresholds are calibrated by Monte Carlo on the
-modelled null, not per trace, and the known-line veto of
-\cref{subsec:identifiability} is specified but not evaluated. The run-level
-results of \cref{subsec:runs} cover a single day of observation, and the
+
+
+There are a series of additional limitations in our approach. (i) The observation map of \cref{eq:meter} is a
+linear time-invariant first approximation. (ii) The tracker's threshold is set from simulated traces of our modelled null, so its false-alarm rate is guaranteed only if a real facility's null resembles that
+model. A deployed verifier would instead calibrate on the facility's own
+training-free traces or on per-trace surrogates (\cref{subsec:threshold}). (iii) Our estimate of the learning efficiency cost in \cref{sec:frontier} was only measured at a small scale with a $30$M-parameter model, one dataset, and
+a limited search over concealing schedules . Whether
+it holds at frontier scale, and against strategies we did not test, is an open question. (iv) The run-level results of \cref{subsec:runs} cover a single day of observation, and the
 anytime-valid guarantee there assumes the window p-values are independent under
 the null. The null runs support this for our modelled facility, but a real
-facility's false alarms could be more correlated. We target synchronous,
-iteration-structured training whose cadence lies in the searched band; a run that
+facility's false alarms could be more correlated. (v) We target synchronous, iteration-structured training whose cadence lies in the searched band; a run that
 moves its cadence outside the band or abandons synchronous iteration is outside
-the population we test. The declared workload need not be pure inference either.
-A facility may be permitted fine-tuning or training below a threshold, whose
-lines our detector would also find, and telling which run a line belongs to and
-how large it is needs the integrated-energy channel we exclude.
-
-Every robustness claim is bounded by the concealing strategies and budgets we
-specified; a strategy we did not model is outside it. The most important such
-strategy is energy storage between the accelerators and the meter. A store sized
-to the cadence swing can discharge during each compute phase and recharge during
-each communication phase, so that the meter sees a flat load. This costs the
-operator no throughput, so our frontier cannot price it; its costs are converters
-rated for the full swing, wear from cycling at the cadence, and conversion losses.
+the population we test. (vi) The declared workload need not be pure inference; a facility may be permitted fine-tuning or training below a threshold, whose lines our detector would also find, and telling which run a line belongs to and how large it is needs the integrated-energy channel we exclude. (vii) Our claims on the robustness of the Viterbi method to concealing strategies and cost budgets is limited to those strategies we considered - there may be alternative strategies not considered here that the operator could employ. One important example  is energy storage between the accelerators and the meter. An energy store sized to the cadence swing could discharge during each compute phase and recharge during each communication phase, so that the meter sees a flat load. This costs the
+operator no throughput, but they would incur additional costs such as purchasing power electronics sized for the full swing, maintenance of a store that wears from charging and
+discharging once per iteration, and energy lost on every cycle.
 Power smoothing of this kind is a grid mitigation for training load in its own
 right \citep{ko2025widearea}, so it may be installed for reasons unrelated to
-concealment. The verifier's remedy is placement: a meter between any storage and
-the accelerators sees the unsmoothed load. Finally, the one strategy that weakens
-the tracker is free in throughput, so its price lies in learning efficiency. We
-measure that price only at small scale: a $30$M-parameter model, one dataset, and
-a limited search over concealing schedules (\cref{sec:frontier}). Whether
-it holds at frontier scale, and against strategies we did not test, is the central
-open empirical question.
+concealment. The verifier can respond by moving the meter, or adding a second one, between the
+store and the accelerators, where the load is not yet smoothed. A meter on the
+store itself also works: to flatten the load, the store must charge and discharge
+at the training cadence, so its own power flow carries the line. Both meters stay
+off-chip if the store sits at the facility or row level. If it sits inside the
+racks, the meter must move closer to the chips than we assume.
+
+
+
+
+
+
 
 % ============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 % ============================================================================
 
-A passive power meter is a screen. Given a meter that meets the specification
-of \cref{subsec:meter_spec}, a Viterbi tracker detects the iteration cadence of
-synchronous training against a declared inference workload. Only varying the real
-work per iteration weakens it. Over a run, an anytime-valid test still catches
-most attacked runs within a day. The best attack we found leaves about one run in
-seven undetected after a day, but it costs the operator $93\%$ in learning
-efficiency. The screen cannot say what the computation is: a detection certifies
-a training-shaped schedule, not training. A positive detection should therefore
-trigger escalation to an active challenge protocol (\cref{app:active}) rather
-than stand as proof.
+We have shown that a passive, off-chip power meter can detect synchronous training hidden in a declared inference workload. A Viterbi detector finds the iteration cadence of training, and is robust to many different concealing strategies. Only varying the real work per iteration weakens the detector. Over a long training run, an anytime-valid test catches most attacked runs within a day. Hiding training is
+expensive: the strongest attack we found evades detection in about one run in
+seven after a day, but costs the operator $93\%$ of its learning efficiency. 
 
 % ============================================================================
 
