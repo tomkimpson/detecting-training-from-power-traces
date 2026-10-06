@@ -83,7 +83,9 @@ python scripts/plot_st2_pareto.py --summary results/st2/aggregate/frontier_summa
 ```
 python scripts/plot_scenario_traces.py   # -> figures/scenario_traces.*
 python scripts/plot_scenario_meter.py    # -> figures/scenario_meter.*
+python scripts/plot_scenario_meter_v2.py # -> figures/scenario_meter_v2.* (paper Fig. 3; same sweep, stage-grouped layout)
 python scripts/plot_viterbi_track.py     # -> figures/viterbi_track.* (Sec. 4.1 tracker explainer)
+python scripts/plot_viterbi_track_v2.py  # -> figures/viterbi_track_v2.* (paper Fig. 4; same traces, restyled)
 ```
 Paper workload and tracker figures. All three generate their own data and write no results artefact,
 so they are safe to run locally. `plot_scenario_traces.py` renders the four workload
@@ -119,9 +121,16 @@ python scripts/st2_meter_boundary.py --list          # cell count for the array 
 sbatch --array=0-<N-1> scripts/slurm/st2_meter_boundary.sbatch   # compute partition
     # -> results/st2/meter_boundary_raw/*.json + meter_boundary_summary.json
 python scripts/plot_st2_meter_boundary.py            # -> figures/st2_meter_boundary*.pdf
+python scripts/plot_st2_meter_boundary_v2.py         # -> figures/st2_meter_boundary_aggregate_viterbi_v2.* (paper Fig. 6)
 ```
 Single-node fallback: `python scripts/st2_meter_boundary.py --jobs 8`. This is an
 expensive sweep — run it on slurm, not the dev node (see `scripts/slurm/`).
+
+**Run-level detection (paper Fig. 8):**
+```
+python scripts/run_level_detection.py     # ~20 min on 8 cores -> results/st2/run_level_summary.json
+python scripts/plot_run_level_v2.py       # -> figures/run_level_detection_v2.* (reads the summary)
+```
 
 **ST1 — adaptive detector bake-off & calibration:**
 ```

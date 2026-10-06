@@ -73,9 +73,9 @@
 \printAffiliationsAndNotice{}
 
 \begin{abstract}
-AI governance agreements that restrict large model training runs require methods to detect them on a monitored computing cluster, without trusting the operator. We develop a method to detect synchronous model training in facility-level power by Viterbi tracking of its wandering iteration cadence. On simulated datacentre power, when the operator makes no attempt to hide, the Viterbi tracker detects at least $96\%$ of training runs against a declared inference workload, at a $1\%$ false-alarm rate and within $0.04$ of the Neyman--Pearson optimum, given a meter that samples at $2$\,Hz or faster. Of eight strategies an operator might use to hide, only extreme variation of the work
+AI governance agreements require methods to detect large model training runs on a monitored computing cluster, without trusting the operator. We develop a method to detect synchronous model training in facility-level power by Viterbi tracking of the wandering iteration cadence. On simulated datacentre power, when the operator makes no attempt to hide, the Viterbi tracker detects at least $96\%$ of training runs against a declared inference workload, at a $1\%$ false-alarm rate and within $0.04$ of the Neyman--Pearson optimum, given a meter that samples at $2$\,Hz or faster. Of eight adversarial strategies an operator might use to hide, only extreme variation of the work
 per iteration evades the tracker. It hides training in up to $73\%$ of five-minute
-observations, but over a day at least $87\%$ of such runs are still caught. This
+observations, but over a day at least $87\%$ of such runs are still caught. This adversarial
 strategy costs no throughput, but in small-scale training the operator needs
 $93$--$267\%$ more compute to reach the same loss. A modest passive meter is sufficient to make hidden training both detectable and expensive, which
 makes power metering a promising part of compute verification that does not
@@ -96,7 +96,7 @@ depend on trusting the operator.
 % ============================================================================
 
 % ---------- [1] HOOK: the concrete governance problem and the one passive channel ----------
-AI governance agreements will require regulating training runs \citep{shavit2023chinchilla,sastry2024computing,baker2025verifying,heim2024thresholds}. This will require an external verifier to identify when training is occurring on a monitored cluster, against an operator who is trying to hide their training. There are multiple channels that could provide the verifier with diagnostic information to identify hidden training. These include on-chip mechanisms that log activities for later analysis, network taps that monitor data exchanged between chips, or human-centred approaches such as whistleblower programs or interviews of operator personnel. However each of these channels requires trusting either hardware that is under the control of the operator, or the operator personnel themselves. Conversely, off-chip sensors that take analog, physical measurements of the cluster (e.g. power or electromagnetic emissions) do not require trusting the operator. Such sensors could be retrofitted to existing datacentres (e.g. clamping a power meter on an input cable) and secured against tampering by the operator. 
+AI governance agreements will require regulating training runs \citep{shavit2023chinchilla,sastry2024computing,baker2025verifying,heim2024thresholds}. This necessitates an external verifier to identify when training is occurring on a monitored cluster, against an operator who is trying to hide their training. There are multiple channels that could provide the verifier with diagnostic information to identify hidden training. These include on-chip mechanisms that log activities for later analysis \citep{shavit2023chinchilla,ogara2025hardware}, network taps that monitor data exchanged between chips, or human-centred approaches such as whistleblower programs or interviews of operator personnel \citep{baker2025verifying}. However each of these channels requires trusting either hardware that is under the control of the operator, or the operator personnel themselves. Conversely, off-chip sensors that take analog, physical measurements of the cluster (e.g. power or electromagnetic emissions) do not require trusting the operator. Such sensors could be retrofitted to existing datacentres (e.g. clamping a power meter on an input cable) and secured against tampering by the operator. 
 
 
 % ---------- [2a] LITERATURE: what is established about the physical signature ----------
@@ -114,8 +114,8 @@ hardware and temperature change the iteration time over seconds to hours
 sharp peak at one frequency loses it. Second, an operator who wants to hide can
 make the line wander on purpose, or smear it away, by inserting idle time
 between iterations or by varying the work done in each. Hiding is not free,
-however. Unlike a covert transmitter, a training operator cannot reshape its
-signal freely: every distortion of the schedule costs throughput, learning
+however. A training operator cannot reshape its
+signal freely; every distortion of the schedule costs throughput, learning
 efficiency, or both. The question is therefore not whether training can be
 hidden, but whether it can be hidden cheaply.
 
@@ -174,7 +174,7 @@ every parameter value of the model.
 \subsection{Training}
 \label{subsec:ko}
 
-Multi GPU AI training of the kind that typifies frontier models is composed of a two-phase iterative cycle. First there is a power intensive, high compute ``up" phase where the forward/backward pass happens. Second there is a low power, low compute, communication ``down" phase where the gradient all reduce happens. 
+Multi-GPU AI training of the kind that typifies frontier models is composed of a two-phase iterative cycle. First there is a power intensive, high compute ``up" phase where the forward/backward pass happens. Second there is a low power, low compute, communication ``down" phase where the gradient all reduce happens. 
 
 Iteration $i$ has period
 \begin{equation}
@@ -270,7 +270,7 @@ are not spread evenly across the experts \citep{shazeer2017moe}, so the work per
 step varies with the mix of requests. We model this as a slow envelope on the
 decode power: a unit-variance Ornstein--Uhlenbeck process $u(t)$ with
 correlation time $\tau_u$, entering at depth $m$. Amplitude modulation spreads
-the decode energy into sidebands, which makes the null harder, not easier. Third, prompt processing (prefill). Each request begins with a prompt phase that
+the decode energy into sidebands, which makes inference harder to tell apart from training. Third, prompt processing (prefill). Each request begins with a prompt phase that
 is brief, compute-bound, and draws more power than token generation
 \citep{patel2024characterizing,patel2024splitwise}. We model these phases as box
 pulses $s(\cdot)$ of duration $d_p$ and height $a$, arriving at times $\tau_k$
@@ -404,8 +404,7 @@ a verifier would see them.
 \label{sec:threat}
 % ============================================================================
 
-This section specifies how the power drawn by the data centre reaches the verifier (i.e. the measurement model), and what the facility operator can control (i.e. the threat model). The verifier wants to know whether a monitored facility is running undeclared training. We frame this as a hypothesis test. Under the null hypothesis $\mathcal{H}_0$ the facility runs its declared workload, which for a monitored cluster is dominated by inference: the inference model of \cref{subsec:null}, alone or
-over the background of \cref{eq:aggregate_null}. Under the alternative hypothesis $\mathcal{H}_1$ a training run of \cref{subsec:ko} takes the place of that inference, alone or over the same background (\cref{eq:aggregate}). \Cref{subsec:channel} outlines the channel through which either hypothesis reaches the verifier. \Cref{subsec:adversary} outlines who controls the load, what they know, and what
+This section specifies how the power drawn by the data centre reaches the verifier (i.e. the measurement model), and what the facility operator can control (i.e. the threat model). The verifier wants to know whether a monitored facility is running undeclared training. We frame this as a hypothesis test. Under the null hypothesis $\mathcal{H}_0$, the facility runs its declared workload, i.e. \cref{eq:aggregate_null}. Under the alternative hypothesis $\mathcal{H}_1$, the facility replaces inference with a training run, i.e. \cref{eq:aggregate}. \Cref{subsec:channel} outlines the channel through which either hypothesis reaches the verifier. \Cref{subsec:adversary} outlines who controls the load, what they know, and what
 they may change. 
 
 \subsection{The measurement model}
@@ -434,22 +433,27 @@ The meter filters the facility power, samples it at rate $f_s$, and adds
 interference and measurement noise $\eta[n]$ on its own sample grid. Round
 brackets denote continuous time and square brackets index the meter's
 samples. The filter is a linear time-invariant system with impulse response $h$, which has
-two parts. The delivery path $h_{\mathrm{del}}$ is everything between the
-accelerators and the meter: power supplies, distribution, and any conversion
-or storage. The instrument $h_{\mathrm{ins}}$ is the meter's own filtering:
-its integration window and calibration gain.  \Cref{fig:power_chain} traces
-the power from the workloads to the verifier.
+two parts: the delivery path $h_{\mathrm{del}}$ and the instrument
+$h_{\mathrm{ins}}$. \Cref{fig:power_chain} traces the power from the workloads
+to the verifier, and \cref{tab:meter} lists every stage of the map, with its
+nominal setting and the range we sweep. The nominal channel, used throughout
+unless stated, passes the facility power through unchanged ($h = \delta$),
+samples it at $f_s = 20$\,Hz, and adds white meter noise of
+$\sigma_\eta = 4$\,W. Each trace lasts $T = 300$\,s, a frequency resolution of
+$1/T \approx 3$\,mHz. We take the three parts of \cref{eq:meter} in turn.
 \begin{figure*}[t]
 	\centering
-	\resizebox{\linewidth}{!}{\input{fig_power_chain}}
-	\caption{The measurement chain. The workloads of \cref{sec:scenario} and a
-	static overhead sum to the facility power $P_{\mathrm{fac}}$
-	(\cref{eq:fac}), which passes through the delivery path and the meter
-	before additive terms are added (\cref{eq:meter}). Sketches show one
-	training cadence as it is smoothed, sampled, and made noisy; they are
-	illustrative. Everything left of the dashed line is under the operator's
-	control (\cref{subsec:adversary}). Red labels mark where the adversarial
-	strategies of \cref{tab:attacks} act. $\eta$ lumps instrument noise with
+	\input{fig_power_chain_v2}
+	\caption{How the power drawn by the workloads reaches the verifier. The
+	workloads of \cref{sec:scenario} and a static overhead sum to the facility
+	power $P_{\mathrm{fac}}$, \cref{eq:fac}. This passes through the delivery
+	path and the meter, and then additive terms are added, \cref{eq:meter}. The
+	panels below show one training cadence at the four marked points as it is
+	smoothed, sampled, and made noisy; they are illustrative. The shaded regions
+	show which stages the operator and the verifier control
+	(\cref{subsec:adversary}). Badges mark where the adversarial strategies of
+	\cref{tab:attacks} act: schedule attacks and dilution (S) on the workload,
+	and the meter strategy (M) on the channel. $\eta$ lumps instrument noise with
 	interference that physically originates behind the meter, such as the
 	power-controller line. In the nominal channel the delivery path
 	passes the power through unchanged ($h_{\mathrm{del}} = \delta$) and the meter samples at $20$\,Hz with no integration
@@ -459,16 +463,20 @@ the power from the workloads to the verifier.
 
 
 
-Following \citet{ko2025widearea} we assume the delivery path passes the power
-through unchanged, such that $h_{\mathrm{del}}$ is a delta function and
+The delivery path $h_{\mathrm{del}}$ is everything between the accelerators
+and the meter: power supplies, distribution, and any conversion or storage.
+Following \citet{ko2025widearea} we assume it passes the power through
+unchanged, such that $h_{\mathrm{del}}$ is a delta function and
 $h_{\mathrm{del}} * P_{\mathrm{fac}} = P_{\mathrm{fac}}$. The low-pass and
-notch of \cref{tab:meter} relax this assumption in our sweeps. The notch
-stands for an anti-resonance of the delivery network that happens to sit near
-the cadence; it is the one stage that removes signal in-band while leaving the
-rest of the spectrum intact.
+notch filters of \cref{tab:meter} relax this assumption:
+\cref{fig:scenario_meter} shows how much each attenuates the cadence, and
+\cref{subsec:meter_spec} tests the notch filter against detection. The notch
+filter represents an anti-resonance, i.e. a narrow band of frequencies that the
+delivery network suppresses. If that band sits near the cadence, it removes the
+training signal while leaving the rest of the spectrum untouched.
 
-The instrument $h_{\mathrm{ins}}$ is the meter's own response
-(\cref{tab:meter}). We model it as a calibration gain $g$ followed by a
+The instrument $h_{\mathrm{ins}}$ is the meter's own filtering: its
+integration window and calibration gain. We model it as a calibration gain $g$ followed by a
 trailing boxcar, so that each reading is the mean power over the preceding
 window $\tau$: $h_{\mathrm{ins}}(t) = g/\tau$ for $0 \le t < \tau$ and zero
 otherwise. Its frequency response has magnitude
@@ -504,18 +512,14 @@ about $0.5\%$ of the mean reading, not a measured value. None of the three is
 critical. $P_0$ is constant, so it lies at zero frequency, outside the search
 band. What sets detectability is the training line against everything else in
 the band, and at the nominal setting that is dominated by the workloads
-themselves: in the search band the inference null's power spectral density
+themselves; in the search band the inference null's power spectral density
 exceeds that of the meter noise by about four orders of magnitude, and the
 training trace's own off-line floor exceeds it by about three. Meter noise
 binds only when it is raised far above $4$\,W, which
-\cref{fig:scenario_meter} does over two decades.
+\cref{fig:scenario_meter} does across two orders of magnitude.
 
 
-Each trace lasts $T = 300$\,s, a frequency resolution of
-$1/T \approx 3$\,mHz. In the nominal channel every stage of
-\cref{tab:meter} is off except the white meter noise. With the noise also
-off, the
-map returns $P_{\mathrm{fac}}$ unchanged and consumes no randomness. Two limits apply. The linear time-invariant form of $h$ is a first
+Two limits apply. The linear time-invariant form of $h$ is a first
 approximation; a real delivery path may be operating-point dependent. And the
 model quantises only in time, through the integration window and the sample
 grid; it has no amplitude quantisation. Until simultaneous on-device and
@@ -558,24 +562,28 @@ off-chip sensor are predictions (\cref{subsec:limitations}).
 line. For a fixed training workload we vary one axis of \cref{tab:meter} at a
 time and measure an effective signal-to-noise ratio at the cadence: the
 spectral power at $f_0$ over the in-band power the meter itself adds,
-relative to the nominal channel. Every axis lowers it, and two remove the line
-entirely within the range a real meter might occupy: a $1$\,s integration
-window, whose first zero falls at $1$\,Hz (\cref{eq:boxcar}), and a $1$\,Hz
-sample rate. This concerns the signal reaching the verifier, not any
-detector; what each detector does with what survives, and hence the minimum
-meter specification, is \cref{subsec:meter_spec}.
+relative to the nominal channel. Every axis lowers it. Within the range a real
+meter might occupy, a $1$\,s integration window, whose first zero falls at
+$1$\,Hz (\cref{eq:boxcar}), cuts it by about two orders of magnitude, and a
+$1$\,Hz sample rate removes the line entirely, because $f_0$ then lies above
+the Nyquist frequency. This figure measures the signal that reaches the verifier, not how well any
+detector uses the signal; \Cref{subsec:meter_spec} tests the detectors on the surviving signal and discusses the minimum meter specification.
 
 \begin{figure*}[t]
 	\centering
-	\includegraphics[width=\linewidth]{scenario_meter}
-	\caption{Sensitivity of the cadence signature to the observation map, one
-	axis at a time on a fixed honest training workload ($f_0 = 0.9$\,Hz, 20
-	realisations, median and interquartile range). The measure is spectral
-	power at the known $f_0$ over the in-band power the meter itself
-	contributes, normalised to the nominal channel, so that attenuating axes
-	act on the numerator and additive ones on the denominator and every panel
-	reads the same way: down is worse for the verifier. Crosses mark settings
-	where the cadence is not observable at all. Note $f_0$ is pinned away from
+	\includegraphics[width=\linewidth]{scenario_meter_v2}
+	\caption{Sensitivity of the cadence signature to the observation map, on a fixed honest training workload ($f_0 = 0.9$\,Hz, median
+	of 20 realisations; the interquartile range is narrower than the markers).
+	Columns follow the stages of \cref{fig:power_chain}: the delivery path
+	(a, d), the meter (b, e), and the additive terms (c, f). The measure is an
+	effective signal-to-noise ratio: spectral power at the known $f_0$ over the
+	in-band power the meter itself contributes, normalised to the nominal
+	channel (dashed line). Attenuating axes lower the signal and additive ones
+	raise the noise, so every panel reads the same way: down is worse for the
+	verifier.
+	Harsher channels lie to the right. Open circles mark sample rates at which
+	$f_0$ reaches the Nyquist frequency, so the cadence is not observable at
+	all. Note $f_0$ is pinned away from
 	$1.0$\,Hz, which would coincide with both the $2$\,Hz Nyquist frequency and
 	the first sinc null of a $1$\,s boxcar.}
 	\label{fig:scenario_meter}
@@ -602,7 +610,7 @@ detector, its parameters, its threshold, and the meter specification. It does
 not know the realisation of $\eta$. %Kerckhoffs' principle
 
 %\paragraph{Three operators.} 
-We consider three types of facility operator. First a \emph{compliant} operator runs only its declared inference. A \emph{benign} operator trains without regard to being caught by the power meter.  A \emph{concealing} operator trains, knows the detector, and reshapes its workload to try to evade it. The concealing operator's objective is to train
+We consider three types of facility operator. A \emph{compliant} operator runs only its declared inference. A \emph{benign} operator trains without regard to being caught by the power meter.  A \emph{concealing} operator trains, knows the detector, and reshapes its workload to try to evade it. The concealing operator's objective is to train
 without the being detected by the verifier. They use different adversarial strategies to try to subvert the verifier's detection. \Cref{tab:attacks} lists the adversarial strategies considered in this work. They
 fall into five categories: disturbing the timing of iterations, relocating the
 cadence, reshaping the power waveform within an iteration, mixing the run with
@@ -682,7 +690,7 @@ against.
 We follow the line with the hidden-Markov frequency tracking developed for
 passive sonar \citep{streit1990frequency} and carried into
 continuous-gravitational-wave searches
-\citep{suvorova2016hmm,bayley2019soap,djurovic2011viterbi}. The tracker has
+\citep{suvorova2016hmm,bayley2019soap,kimpson2024anc}. The tracker has
 three parts: a spectrogram of the trace, a contrast map built from it, and a
 search for the best slowly varying path through that map.
 
@@ -741,7 +749,7 @@ persistent, slowly wandering line is present, not what produced it. Accordingly,
 
 \begin{figure*}[t]
 	\centering
-	\includegraphics[width=\linewidth]{viterbi_track}
+	\includegraphics[width=\linewidth]{viterbi_track_v2}
 	\caption{The Viterbi tracker on three $300$\,s traces at the nominal channel.
 	Each panel is the contrast map $L_{kj}$ of \cref{eq:contrast} on the
 	tracker's own grid ($16$\,s frames at half overlap, $62.5$\,mHz bins over
@@ -752,8 +760,10 @@ persistent, slowly wandering line is present, not what produced it. Accordingly,
 	Centre: the same run with $0.4$\,Hz of cadence wander, which the path
 	follows across most of the band; it cuts the corner off the brief
 	excursion near $150$\,s, where following the line costs more in jumps than
-	it gains in contrast. Right: the inference null, where no path finds
-	sustained contrast and $V$ falls to $0.73$.}
+	it gains in contrast. Right: the inference null. The tracker still returns
+	a best path, as it does for any input, but here it only strings together
+	noise fluctuations and scores $V = 0.73$, below the threshold
+	$v_\alpha \approx 0.91$ at $\alpha = 10^{-2}$ (\cref{subsec:threshold}).}
 	\label{fig:viterbi_track}
 \end{figure*}
 
@@ -781,9 +791,8 @@ background, changes the tracker's detection rates by at most $0.02$
 (\cref{app:ceiling}).
 
 This calibrates $V$ against the modelled inference null. A deployed verifier
-has to obtain the same threshold from data it holds: from background traces
-known to be free of training, as continuous-wave searches set their tracking
-thresholds from noise-only realisations \citep{suvorova2016hmm}, or from
+has to obtain the same threshold from data it holds, either from background traces
+known to be free of training, or from
 surrogates generated from each observed trace.
 
 \subsection{Baseline method}
@@ -914,11 +923,11 @@ cadence.
 
 \begin{figure}[t]
 	\centering
-	\includegraphics[width=\columnwidth]{st2_meter_boundary_aggregate_viterbi}
+	\includegraphics[width=\columnwidth]{st2_meter_boundary_aggregate_viterbi_v2}
 	\caption{Minimum meter specification: Viterbi detection rate at empirical
 	false-alarm rate $10^{-2}$ over sample rate $f_s$ $\times$ integration window $\tau$, the
 	honest aggregate against the null aggregate ($n=200$ per class). The live region is
-	$f_s \ge 2$~Hz \emph{and} $\tau \le 0.5$~s.}
+	$f_s \ge 2$~Hz and $\tau \le 0.5$~s.}
 	\label{fig:meter_boundary_viterbi}
 \end{figure}
 
@@ -975,11 +984,12 @@ largest work variation. Jitter at $\sigma_\xi = 0.35$ hides $0.24$
 for $c = 159\%$, and at $0.5$ hides $0.12$ for $c = 375\%$. Work variation at $\sigma_G = 0.7$ hides $0.55$ at $c \approx 0$,
 though at every smaller $\sigma_G$ it hides at most $0.05$.
 
-Work on real hardware prices
-de-periodicisation the same way as our measured costs, through a different channel. Four
-evasion strategies run on a single H200 --- chunked optimizer updates, dilution
-with decoy inference, throttling, and diluted LoRA --- cost between $28$ and
-$69\%$ of throughput \citep{gargiulo2026workload}. Each inserts or substitutes
+Independent measurements on real hardware, made with a board-level side
+channel rather than a facility meter, show the same pattern of costs.
+\citet{gargiulo2026workload} measure four evasion strategies on a single H200
+--- chunked optimizer updates, dilution with decoy inference, throttling, and
+diluted LoRA --- and find that they cost between $28$ and $69\%$ of
+throughput. Each strategy inserts or substitutes
 work, which is what makes it expensive, and none varies the real computation per
 iteration, the one strategy we find cheap.
 
@@ -1065,7 +1075,7 @@ Every detection rate in \cref{sec:frontier} refers to a single $300$\,s window. 
 
 
 
-For the majority of concealing strategies the Viterbi detector detects training in at at least three quarters of windows, and in most settings in nearly all of them, so a run is easily caught. We therefore consider exclusively the work variation strategy, which was the only strategy that could hide a large fraction of windows from the tracker. We take two forms of work variation, the $\sigma_G = 0.7$ setting of \cref{tab:attacks} and the
+For the majority of concealing strategies the Viterbi detector detects training in at least three quarters of windows, and in most settings in nearly all of them, so a run is easily caught. We therefore consider exclusively the work variation strategy, which was the only strategy that could hide a large fraction of windows from the tracker. We take two forms of work variation, the $\sigma_G = 0.7$ setting of \cref{tab:attacks} and the
 lognormal variant introduced in \ref{sec:frontier}. We consider a training run to be a continuous $24$-hour trace of the aggregate of \cref{eq:aggregate}, cut into consecutive
 $300$\,s windows and scored by the tracker. The run's cadence and background are
 held fixed for the whole day, so the windows of one run are not independent
@@ -1079,8 +1089,7 @@ null runs the empirical false-alarm rate after a day is $1.5 \times 10^{-3}$
 ($95\%$ interval $0.5$--$4.4 \times 10^{-3}$), consistent with $\alpha$. We also tested a simpler counting rule, which flags a run when the number of
 windows detected by a fixed time would be improbable for a null facility. It also
 keeps its false-alarm rate (two false alarms in $2000$ null runs after a day), but
-the observation time must be fixed in advance, and it flags fewer runs
-(\cref{fig:run_level}b).
+the observation time must be fixed in advance, and it flags fewer runs.
 
 
 Results are presented in \cref{fig:run_level}. Under the work variation strategy at $\sigma_G = 0.7$, runs with $f_0 \lesssim 0.8$\,Hz are detected in almost every window, and those above about $1.1$\,Hz in $8$--$20\%$. Even the most difficult of these runs is detected at several times the null's $1\%$ rate, so the test
@@ -1094,7 +1103,7 @@ measured in \cref{sec:frontier}.
 
 \begin{figure*}[t]
 	\centering
-	\includegraphics[width=\linewidth]{run_level_detection}
+	\includegraphics[width=\linewidth]{run_level_detection_v2}
 	\caption{Detection of $200$ runs under each of two work-variation strategies,
 	$\sigma_G = 0.7$ (blue) and lognormal (orange). Each run is one continuous
 	$24$-hour trace of the aggregate, scored in $300$\,s windows.
@@ -1103,8 +1112,7 @@ measured in \cref{sec:frontier}.
 	rate. \textbf{b}, fraction of runs flagged against observation time, at a
 	run-level false-alarm rate of $10^{-3}$. Lines are the anytime-valid test,
 	which may stop at any time; open circles are the counting rule, a separate
-	fixed-time test at each marked time. Honest training is flagged in its first
-	window and is not shown. Across $2000$ null runs the anytime-valid test raises
+	fixed-time test at each marked time. Across $2000$ null runs the anytime-valid test raises
 	$3$ false alarms in a day.}
 	\label{fig:run_level}
 \end{figure*}
@@ -1128,13 +1136,16 @@ operator who knows the list can move its cadence into a listed band.
 \subsection{Limitations}
 \label{subsec:limitations}
 
-The primary limitation to this work is the use of synthetic data generated from a model of data centre power draw, Section \ref{sec:scenario}. The training part of the model, Section \ref{subsec:ko}, is grounded in data. \citet{ko2025widearea} take
+The primary limitation of this work is that it uses synthetic data, generated
+from a model of datacentre power draw (\cref{sec:scenario}). The training part
+of that model (\cref{subsec:ko}) is nevertheless anchored to published
+measurements. \citet{ko2025widearea} take
 its parameters from published characterisations of datacentre and GPU power: an
 oscillation near $1$\,Hz, compute phases that fill $55$--$80\%$ of each iteration,
 and a ${\sim}30\%$ drop in draw during synchronisation. They report that the
 profiles it generates agree qualitatively with public power traces and with the
 experience of datacentre engineers. They could not test it quantitatively, because
-facility-scale measurements are proprietary. The inference part of the model, Section \ref{subsec:null}  has weaker
+facility-scale measurements are proprietary. The inference part of the model (\cref{subsec:null}) has weaker
 support. \citet{ko2025widearea} give no inference model, so the one in
 \cref{subsec:null} is our own. It follows the published behaviour of serving
 systems, but we have not checked it against measured traces. The natural extension of this work is to replace the synthetic model with empirical multi-GPU training observed by an external meter. That study is planned but requires hardware and an experimental setup that are not currently available. Measurements from a single A100, read through NVML, are possible. However they are a poor stand-in for what a facility meter sees, for two reasons. First, one card has no communication phase. On a
@@ -1155,7 +1166,7 @@ There are a series of additional limitations in our approach. (i) The observatio
 linear time-invariant first approximation. (ii) The tracker's threshold is set from simulated traces of our modelled null, so its false-alarm rate is guaranteed only if a real facility's null resembles that
 model. A deployed verifier would instead calibrate on the facility's own
 training-free traces or on per-trace surrogates (\cref{subsec:threshold}). (iii) Our estimate of the learning efficiency cost in \cref{sec:frontier} was only measured at a small scale with a $30$M-parameter model, one dataset, and
-a limited search over concealing schedules . Whether
+a limited search over concealing schedules. Whether
 it holds at frontier scale, and against strategies we did not test, is an open question. (iv) The run-level results of \cref{subsec:runs} cover a single day of observation, and the
 anytime-valid guarantee there assumes the window p-values are independent under
 the null. The null runs support this for our modelled facility, but a real
@@ -1205,7 +1216,7 @@ seven after a day, but costs the operator $93\%$ of its learning efficiency.
 \section{Optimality ceiling}
 \label{app:ceiling}
 
-Because we own the generators, we can compare the Viterbi tracker with an
+We can compare the Viterbi tracker with an
 optimality ceiling: an approximation to the Neyman--Pearson optimal test between
 the training and null generators. The optimal test compares how likely a trace
 is under $\mathcal{H}_1$ and under $\mathcal{H}_0$. Our generators can simulate
@@ -1241,7 +1252,7 @@ spectrum alone and so ignores the phase relations between harmonics and any
 non-Gaussian structure. The true optimum can only be higher. Since the ceiling
 already detects every trace, this changes nothing here.
 
-\paragraph{The background.} The same comparison on a single training run
+The same comparison on a single training run
 against inference alone, with no background load, gives tracker detection rates
 of $1.00$ up to $\sigma_f = 0.8$~Hz and $0.98$ at $1.5$~Hz, within $0.02$ of
 the aggregate at every drift. At the default shares the background neither helps nor hinders the
@@ -1286,7 +1297,7 @@ This appendix gives two results behind the minimum meter specification of
 \cref{subsec:meter_spec}: the notch sweep, and a check that the specification
 does not depend on the background load.
 
-\paragraph{The notch.} \Cref{fig:meter_boundary_notch} shows the tracker's
+\Cref{fig:meter_boundary_notch} shows the tracker's
 detection rate as a delivery-path notch moves across the training cadence band
 of \cref{tab:params} ($0.5$--$1.5$~Hz), with the meter otherwise nominal. The
 notch has quality factor $Q = 1.5$ (\cref{tab:meter}), so it is broad: about
@@ -1307,7 +1318,7 @@ $0.45$--$0.63$. No notch in the sweep removes detection entirely.
 	\label{fig:meter_boundary_notch}
 \end{figure}
 
-\paragraph{The background.} The same sweep on a single training run against
+The same sweep on a single training run against
 inference alone, with no background load, changes the tracker's detection rate
 by at most $0.09$ in any cell and leaves the region where detection holds
 ($f_s \ge 2$~Hz and $\tau \le 0.5$~s) unchanged. As for the drift sweep
@@ -1345,7 +1356,7 @@ $|d| < 1\%$, so we report $d$ directly.
 power schedule without training. This appendix tests that with loads whose
 training status we know, using $n=200$ traces of $300$~s per class.
 
-\paragraph{Setup.} We go beyond the single Viterbi score and give the verifier a
+We go beyond the single Viterbi score and give the verifier a
 classifier. Each trace is reduced to eight features computed from the trace
 alone: six detector scores (multitaper F-test, harmonic comb, spectral matched
 filter, Viterbi score, and two cyclostationary statistics), plus the stability of
@@ -1357,7 +1368,7 @@ perfectly, with area under the ROC curve $1.00$, and keep that score when the
 population is shifted (device headroom, trace length, cadence band, an added
 controller line, heavy coloured meter noise).
 
-\paragraph{Controls.} We then score seven control loads at a false-positive rate
+We then score seven control loads at a false-positive rate
 of $0.05$ (\cref{tab:rung2_controls}). Five are not training: a non-ML kernel
 loop with a training-shaped cycle, a power-controller limit cycle, a periodic
 inference request generator, a computation of gradients alone, and a decoy that
@@ -1389,7 +1400,7 @@ $55$--$100\%$ of traces.
 	\end{tabular}
 \end{table}
 
-\paragraph{Why no detector can do better.} The meter sees only the power
+The meter sees only the power
 schedule. A verifier's decision is some function of the trace, so two loads that
 produce traces with the same distribution are flagged with the same
 probability, by any detector. The decoy reproduces the alternation of compute
