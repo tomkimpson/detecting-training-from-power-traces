@@ -1,0 +1,126 @@
+% Power-flow schematic for sec:threat (fig:power_chain), alternative layout.
+% \input by main.tex WITHOUT \resizebox: drawn at the true figure* width (~17 cm)
+% so text renders at its nominal size. Pure TikZ (arrows.meta only), no external
+% data; the waveform sketches are illustrative only.
+\begin{tikzpicture}[
+	font=\sffamily\scriptsize,
+	card/.style={draw=#1, fill=white, rounded corners=1.5pt, line width=0.55pt,
+		align=center, inner sep=2.5pt, minimum height=1.0cm},
+	sum/.style={draw=black!75, fill=white, circle, line width=0.55pt,
+		inner sep=0pt, minimum size=3.6mm},
+	sig/.style={-{Stealth[length=1.7mm, width=1.3mm]}, line width=0.6pt, black!75},
+	dsc/.style={text=black!60},
+	badge/.style={circle, fill=okverm, text=white, font=\sffamily\bfseries\tiny,
+		inner sep=0pt, minimum size=3.0mm},
+	hdr/.style={font=\sffamily\bfseries\tiny, anchor=west},
+	tap/.style={densely dotted, black!45, line width=0.45pt},
+	ax/.style={black!35, line width=0.4pt},
+	sk/.style={okblue, line width=0.7pt, line join=round},
+	scap/.style={font=\sffamily\scriptsize, text=black!75, anchor=north, align=center},
+]
+% --- trust domains ---------------------------------------------------------------
+\fill[okorange!9, rounded corners=3pt] (0, -1.35) rectangle (7.45, 2.4);
+\fill[okblue!8,   rounded corners=3pt] (7.6, -1.35) rectangle (17.1, 2.4);
+\node[hdr, text=okorange!60!black] at (0.12, 2.17) {OPERATOR CONTROLS};
+\node[hdr, text=okblue!70!black]   at (7.72, 2.17) {VERIFIER CONTROLS};
+
+% --- stages ------------------------------------------------------------------------
+\node[card=okorange, text width=1.95cm] (dom) at (1.17, 0.6)
+	{\textbf{Dominant run}\\ \textcolor{black!60}{training ($\mathcal{H}_1$) or}\\
+	 \textcolor{black!60}{inference ($\mathcal{H}_0$)}};
+\node[card=okorange, text width=1.95cm] (bg) at (1.17, -0.62)
+	{\textbf{Background}\\ \textcolor{black!60}{small trainings,}\\
+	 \textcolor{black!60}{fine-tunings}};
+\node[card=okorange, minimum height=0.5cm] (p0) at (2.85, 1.5)
+	{\textbf{Static overhead} $P_0$};
+\node[sum] (s1) at (2.62, 0) {};
+\node[card=okorange, text width=2.3cm] (hdel) at (5.1, 0)
+	{\textbf{Delivery path} $h_{\mathrm{del}}$\\ \textcolor{black!60}{PSU, PDU, storage}\\
+	 \textcolor{black!60}{low-pass, notch}};
+\node[card=okblue, text width=2.1cm] (hins) at (9.1, 0)
+	{\textbf{Meter} $h_{\mathrm{ins}}$, $f_s$\\ \textcolor{black!60}{integrate, calibrate,}\\
+	 \textcolor{black!60}{sample}};
+\node[sum] (s2) at (12.1, 0) {};
+\node[card=okblue, minimum height=0.5cm, text width=3.4cm] (eta) at (12.1, 1.5)
+	{\textbf{Additive terms} $\eta$\\
+	 \textcolor{black!60}{meter noise, baseline wander,}\\
+	 \textcolor{black!60}{controller line}};
+\node[card=okblue, text width=1.85cm] (ver) at (16.0, 0)
+	{\textbf{Verifier}\\ \textcolor{black!60}{detector}\\ \textcolor{black!60}{(\cref{sec:methods})}};
+% plus signs drawn by hand so they sit exactly centred in the junctions
+\foreach \s in {s1, s2} {
+	\draw[black!75, line width=0.55pt] ([xshift=-1mm]\s.center) -- ([xshift=1mm]\s.center);
+	\draw[black!75, line width=0.55pt] ([yshift=-1mm]\s.center) -- ([yshift=1mm]\s.center);
+}
+
+% --- signal path -----------------------------------------------------------------------
+\draw[sig] (dom.east) -- (s1);
+\draw[sig] (bg.east) -- (s1);
+\draw[sig] (p0.south -| s1) -- (s1);
+\draw[sig] (s1) -- node[above, pos=0.38] {$P_{\mathrm{fac}}$} (hdel);
+\draw[sig] (hdel) -- (hins);
+\draw[sig] (hins) -- (s2);
+\draw[sig] (eta) -- (s2);
+\draw[sig] (s2) -- node[above, pos=0.73] {$P_{\mathrm{meter}}$} (ver);
+
+% --- where the adversarial strategies act (tab:attacks) -----------------------------
+\node[badge] at (dom.north east)  {S};
+\node[badge] at (hdel.north east) {M};
+\node[badge] at (hins.north east) {M};
+\node[badge] at (eta.north east)  {M};
+
+% --- signal at four taps, shown in matching panels below ----------------------------
+% Panel i is 2.9 wide, centred under its tap; period = 0.675 (four cycles).
+\foreach \x in {3.3, 7.05, 10.8, 14.55} {
+	\fill[black!75] (\x, 0) circle (0.75pt);
+	\draw[tap] (\x, 0) -- (\x, -1.62);
+	\draw[ax] (\x-1.45, -1.72) -- (\x-1.45, -2.95) -- (\x+1.45, -2.95);
+}
+% (1) sharp two-phase cadence leaving the facility
+\begin{scope}[shift={(1.85, -2.95)}]
+	\draw[sk] (0.1, 0.95) \foreach \k in {0,1,2,3} {
+		-- ({0.1 + \k*0.675 + 0.405}, 0.95) -- ({0.1 + \k*0.675 + 0.405}, 0.3)
+		-- ({0.1 + (\k+1)*0.675}, 0.3) -- ({0.1 + (\k+1)*0.675}, 0.95) };
+\end{scope}
+% (2) smoothed and attenuated by the delivery path
+\begin{scope}[shift={(5.6, -2.95)}]
+	\draw[sk, domain=0.1:2.8, samples=90, smooth]
+		plot (\x, {0.62 + 0.2*sin(360*(\x-0.1)/0.675 + 60)});
+\end{scope}
+% (3) integrated and sampled by the meter: samples on the (faded) continuous signal
+\begin{scope}[shift={(9.35, -2.95)}]
+	\draw[okblue!30, line width=0.6pt, domain=0.1:2.8, samples=90, smooth]
+		plot (\x, {0.62 + 0.2*sin(360*(\x-0.1)/0.675 + 60)});
+	\foreach \k in {0,...,15} {
+		\pgfmathsetmacro{\xx}{0.1 + \k*0.17}
+		\pgfmathsetmacro{\yy}{0.62 + 0.2*sin(360*(\xx-0.1)/0.675 + 60)}
+		\draw[okblue!45, line width=0.35pt] (\xx, 0.08) -- (\xx, \yy);
+		\fill[okblue] (\xx, \yy) circle (1.05pt);
+	}
+\end{scope}
+% (4) with additive noise, as the verifier receives it
+\pgfmathsetseed{7}
+\begin{scope}[shift={(13.1, -2.95)}]
+	\draw[okblue!30, line width=0.6pt, domain=0.1:2.8, samples=90, smooth]
+		plot (\x, {0.62 + 0.2*sin(360*(\x-0.1)/0.675 + 60)});
+	\foreach \k in {0,...,15} {
+		\pgfmathsetmacro{\xx}{0.1 + \k*0.17}
+		\pgfmathsetmacro{\yy}{0.62 + 0.2*sin(360*(\xx-0.1)/0.675 + 60) + 0.09*rand}
+		\coordinate (n\k) at (\xx, \yy);
+	}
+	\draw[okblue!70, line width=0.4pt] (n0) \foreach \k in {1,...,15} { -- (n\k) };
+	\foreach \k in {0,...,15} { \fill[okblue] (n\k) circle (1.05pt); }
+\end{scope}
+\node[scap] at (3.3,   -3.05) {$P_{\mathrm{fac}}$: sharp training cadence};
+\node[scap] at (7.05,  -3.05) {after delivery: smoothed};
+\node[scap] at (10.8,  -3.05) {after meter: integrated, sampled};
+\node[scap] at (14.55, -3.05) {$P_{\mathrm{meter}}$: with noise $\eta$};
+\node[font=\sffamily\tiny, text=black!45, anchor=west] at (1.88, -2.82) {time $\rightarrow$};
+
+% --- legend for the adversary badges ------------------------------------------------
+\node[badge] at (5.55, -3.9) {S};
+\node[anchor=west, text=black!75] at (5.7, -3.9) {schedule attacks, dilution};
+\node[badge] at (9.15, -3.9) {M};
+\node[anchor=west, text=black!75] at (9.3, -3.9) {meter strategy};
+\node[anchor=east, text=black!75] at (5.35, -3.9) {Adversary acts at:};
+\end{tikzpicture}
