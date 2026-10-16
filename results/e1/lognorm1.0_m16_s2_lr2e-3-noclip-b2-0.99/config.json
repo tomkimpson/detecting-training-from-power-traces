@@ -1,0 +1,40 @@
+{
+  "arm": "lognorm1.0",
+  "seed": 2,
+  "micro_batch": 16,
+  "tokens": 400000000.0,
+  "lr": 0.002,
+  "data_dir": "/fred/oz022/tkimpson/e1_data",
+  "out": "/fred/oz022/tkimpson/detecting-training-from-power-traces/results/e1/lognorm1.0_m16_s2_lr2e-3-noclip-b2-0.99",
+  "eval_every": 5000000.0,
+  "val_tokens": 2000000.0,
+  "probe_every": 0,
+  "grad_clip": 0.0,
+  "beta2": 0.99,
+  "tag": "lr2e-3-noclip-b2-0.99",
+  "no_compile": false,
+  "smoke": false,
+  "model": {
+    "n_layer": 6,
+    "n_head": 6,
+    "n_embd": 384,
+    "block_size": 512,
+    "vocab_size": 50304,
+    "dropout": 0.0,
+    "bias": false
+  },
+  "seq_len": 512,
+  "weight_decay": 0.1,
+  "betas": [
+    0.9,
+    0.99
+  ],
+  "warmup_frac": 0.02,
+  "min_lr_frac": 0.1,
+  "n_micro": 48828,
+  "total_tokens": 399998976,
+  "device": "cuda",
+  "gpu": "NVIDIA A100-SXM4-80GB",
+  "n_params": 29938560,
+  "torch": "2.5.1+cu124"
+}
